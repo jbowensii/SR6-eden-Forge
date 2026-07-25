@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- Python 3.12+; dependencies limited to `jsonschema` (runtime) and `pytest` (dev).
+- Python 3.12+; dependencies limited to `jsonschema` + `referencing` (runtime) and `pytest` (dev).
 - JSON Schema dialect: Draft 2020-12.
 - Target system pinned: `shadowrun6-eden` 3.3.x on Foundry v13. The `system` block field list comes verbatim from Eden's `template.json` gear type (incl. `genesis`, `dice-pool`, `matrix-device` template mixins).
 - Gear `type` enum (23 values, from Eden `lang/en.json`): `ACCESSORY, AMMUNITION, ARMOR, ARMOR_ADDITION, BIOLOGY, BIOWARE, CHEMICALS, CYBERWARE, CODEMODS, DRONES, ELECTRONICS, GENETICS, MAGICAL, NANOWARE, SOFTWARE, SURVIVAL, TOOLS, VEHICLES, WEAPON_CLOSE_COMBAT, WEAPON_FIREARMS, WEAPON_RANGED, WEAPON_SPECIAL, IC`.
