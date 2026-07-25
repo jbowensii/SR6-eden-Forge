@@ -68,5 +68,10 @@ def test_path_mismatch(gear_file):
     assert rules(issues) == ["path-mismatch"]
 
 
+def test_path_domain_segment_mismatch(gear_file):
+    issues = check_gear([df(gear_file, "data/corebook/armor/weapons_firearms.json")])
+    assert rules(issues) == ["path-mismatch"]
+
+
 def test_path_not_in_convention_is_ignored(gear_file):
     assert check_gear([df(gear_file, "somefile.json")]) == []

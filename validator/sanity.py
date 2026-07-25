@@ -63,11 +63,9 @@ def _check_item(df: DataFile, item: dict) -> list[Issue]:
 def _check_path(df: DataFile) -> list[Issue]:
     parts = df.path.parts
     if len(parts) < 3:
-        return []
+        return []  # path too short to follow <book>/<domain>/<category>.json convention
     book_part, domain_part, file_part = parts[-3], parts[-2], parts[-1]
     expected = (df.book, df.domain, f"{df.category}.json")
-    if domain_part != df.domain:
-        return []  # path not following <book>/<domain>/<category>.json convention
     if (book_part, domain_part, file_part) != expected:
         return [
             _issue(
