@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sr6forge:gear",
+  "title": "SR6-eden-Forge gear data file",
+  "type": "object",
+  "required": ["book", "domain", "category", "items"],
+  "additionalProperties": false,
+  "properties": {
+    "book": { "$ref": "urn:sr6forge:common#/$defs/slug" },
+    "domain": { "const": "gear" },
+    "category": { "$ref": "urn:sr6forge:common#/$defs/slug" },
+    "items": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/gearItem" }
+    }
+  },
+  "$defs": {
+    "gearItem": {
+      "type": "object",
+      "required": ["id", "name", "system", "meta"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "urn:sr6forge:common#/$defs/slug" },
+        "name": { "type": "string", "minLength": 1 },
+        "system": { "$ref": "#/$defs/gearSystem" },
+        "meta": { "$ref": "urn:sr6forge:common#/$defs/meta" }
+      }
+    },
+    "gearSystem": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "ACCESSORY", "AMMUNITION", "ARMOR", "ARMOR_ADDITION", "BIOLOGY",
+            "BIOWARE", "CHEMICALS", "CYBERWARE", "CODEMODS", "DRONES",
+            "ELECTRONICS", "GENETICS", "MAGICAL", "NANOWARE", "SOFTWARE",
+            "SURVIVAL", "TOOLS", "VEHICLES", "WEAPON_CLOSE_COMBAT",
+            "WEAPON_FIREARMS", "WEAPON_RANGED", "WEAPON_SPECIAL", "IC"
+          ]
+        },
+        "subtype": { "type": "string" },
+        "count": { "type": "integer", "minimum": 0 },
+        "countable": { "type": "boolean" },
+        "availDef": { "type": "string" },
+        "avail": { "type": "integer", "minimum": 0 },
+        "ammocap": { "type": "integer", "minimum": 0 },
+        "ammocount": { "type": "integer", "minimum": 0 },
+        "ammoLoaded": { "type": "string" },
+        "priceDef": { "type": "string" },
+        "price": { "type": "number", "minimum": 0 },
+        "customName": { "type": "string" },
+        "usedForPool": { "type": "boolean" },
+        "notes": { "type": "string" },
+        "accessories": { "type": "string" },
+        "needsRating": { "type": "boolean" },
+        "rating": { "type": "integer", "minimum": 0 },
+        "skill": { "type": "string" },
+        "skillSpec": { "type": "string" },
+        "dmg": { "type": "integer", "minimum": 0 },
+        "stun": { "type": "boolean" },
+        "dmgDef": { "type": "string" },
+        "attackRating": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": { "type": "integer", "minimum": 0 }
+        },
+        "modes": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "BF": { "type": "boolean" },
+            "FA": { "type": "boolean" },
+            "SA": { "type": "boolean" },
+            "SS": { "type": "boolean" }
+          }
+        },
+        "defense": { "type": "integer" },
+        "social": { "type": "integer" },
+        "essence": { "type": "number", "minimum": 0 },
+        "capacity": { "type": "integer", "minimum": 0 },
+        "natural": { "type": "boolean" },
+        "a": { "type": "integer" },
+        "s": { "type": "integer" },
+        "d": { "type": "integer" },
+        "f": { "type": "integer" },
+        "progSlots": { "type": "integer", "minimum": 0 },
+        "handlOn": { "type": "integer" },
+        "handlOff": { "type": "integer" },
+        "accOn": { "type": "integer" },
+        "accOff": { "type": "integer" },
+        "spdiOn": { "type": "integer" },
+        "spdiOff": { "type": "integer" },
+        "tspd": { "type": "integer" },
+        "bod": { "type": "integer" },
+        "arm": { "type": "integer" },
+        "pil": { "type": "integer" },
+        "sen": { "type": "integer" },
+        "sea": { "type": "integer" },
+        "vtype": { "type": "string" },
+        "vehicle": { "type": "object" },
+        "strWeapon": { "type": "boolean" },
+        "dualHand": { "type": "boolean" },
+        "genesisID": { "type": "string" },
+        "description": { "type": "string" },
+        "product": { "type": "string" },
+        "page": { "type": "integer", "minimum": 0 },
+        "modifier": { "type": "integer" },
+        "wild": { "type": "boolean" },
+        "pool": { "type": "integer" },
+        "isElectronicMatrixDevice": { "type": "boolean" },
+        "matrix": { "type": "object" }
+      }
+    }
+  }
+}

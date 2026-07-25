@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- Python 3.12+; dependencies limited to `jsonschema` (runtime) and `pytest` (dev).
+- Python 3.12+; dependencies limited to `jsonschema` + `referencing` (runtime) and `pytest` (dev).
 - JSON Schema dialect: Draft 2020-12.
 - Target system pinned: `shadowrun6-eden` 3.3.x on Foundry v13. The `system` block field list comes verbatim from Eden's `template.json` gear type (incl. `genesis`, `dice-pool`, `matrix-device` template mixins).
 - Gear `type` enum (23 values, from Eden `lang/en.json`): `ACCESSORY, AMMUNITION, ARMOR, ARMOR_ADDITION, BIOLOGY, BIOWARE, CHEMICALS, CYBERWARE, CODEMODS, DRONES, ELECTRONICS, GENETICS, MAGICAL, NANOWARE, SOFTWARE, SURVIVAL, TOOLS, VEHICLES, WEAPON_CLOSE_COMBAT, WEAPON_FIREARMS, WEAPON_RANGED, WEAPON_SPECIAL, IC`.
@@ -587,7 +587,7 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
   - `damage-format` — `system.dmgDef`, when non-empty, must match `^\d{1,2}[PS](\([a-z]+\))?$` or be `"Special"`.
   - `weapon-fields` — items whose `system.type` starts with `WEAPON_` must have non-empty `system.skill` and non-empty `system.dmgDef`.
   - `plausibility` — `system.avail` ≤ 30 and `system.price` ≤ 10,000,000 when present; `meta.page` ≤ 1500.
-  - `path-mismatch` — when the file path ends in `<book>/<domain>/<category>.json`, those three parts must equal the envelope values.
+  - `path-mismatch` — when the file path has ≥3 segments, the last three must equal `<book>/<domain>/<category>.json` from the envelope; any disagreement (book, domain, or category) is a mismatch. Shorter paths are ignored.
 
 - [ ] **Step 1: Write the failing tests**
 
