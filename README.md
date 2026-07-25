@@ -53,7 +53,27 @@ in the same spirit as a character generator's user-supplied data directory.
 | Python (extractor)   | 3.12+    |
 | Node (site/export)   | 20+      |
 
+## Using the validator
+
+```bash
+pip install -r requirements-dev.txt
+python -m validator data/corebook     # validate your local data
+python -m validator examples          # validate the committed format examples
+pytest                                # run the test suite
+```
+
+Every data file must pass two layers: its domain JSON Schema
+(`schemas/<domain>.schema.json`) and the domain sanity rules
+(duplicate ids, damage-code format, weapon required fields,
+plausibility bounds, path/envelope agreement).
+
 ## Status
 
-Early scaffold. First slice in progress: Core Rulebook equipment (gear domain).
+- [x] Gear schema (`schemas/gear.schema.json`) + shared defs (`schemas/common.schema.json`)
+- [x] Validator CLI: `python -m validator <path>` — schema pass + sanity pass
+- [x] Format examples: `examples/corebook/gear/` (synthetic items only)
+- [ ] Extractor (Core Rulebook gear)
+- [ ] Review web app
+- [ ] Module export
+
 See [docs/design.md](docs/design.md) for the full architecture.

@@ -1,0 +1,57 @@
+{
+  "book": "corebook",
+  "domain": "gear",
+  "category": "weapons_firearms",
+  "items": [
+    {
+      "id": "example_autopistol",
+      "name": "Example Autopistol",
+      "system": {
+        "type": "WEAPON_FIREARMS",
+        "subtype": "PISTOLS_HEAVY",
+        "skill": "firearms",
+        "dmg": 3,
+        "stun": false,
+        "dmgDef": "3P",
+        "attackRating": [10, 10, 8, 0, 0],
+        "modes": { "SS": false, "SA": true, "BF": false, "FA": false },
+        "ammocap": 15,
+        "avail": 3,
+        "price": 750,
+        "description": "A fictional heavy pistol demonstrating the data format. Not from any book."
+      },
+      "meta": {
+        "book": "corebook",
+        "page": 1,
+        "extractedAt": "2026-07-25",
+        "extractorVersion": "0.1.0",
+        "qaStatus": "approved"
+      }
+    },
+    {
+      "id": "example_smg",
+      "name": "Example SMG",
+      "system": {
+        "type": "WEAPON_FIREARMS",
+        "subtype": "SUBMACHINE_GUNS",
+        "skill": "firearms",
+        "dmg": 4,
+        "stun": false,
+        "dmgDef": "4P",
+        "attackRating": [8, 9, 6, 0, 0],
+        "modes": { "SS": false, "SA": true, "BF": true, "FA": true },
+        "ammocap": 30,
+        "avail": 4,
+        "price": 1250,
+        "description": "A fictional submachine gun demonstrating fire modes. Not from any book."
+      },
+      "meta": {
+        "book": "corebook",
+        "page": 1,
+        "extractedAt": "2026-07-25",
+        "extractorVersion": "0.1.0",
+        "qaStatus": "approved"
+      }
+    }
+  ]
+}
