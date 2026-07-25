@@ -37,3 +37,13 @@ def test_non_object_root_reports_parse_issue(tmp_path):
 def test_empty_root_ok(tmp_path):
     files, issues = discover(tmp_path)
     assert files == [] and issues == []
+
+
+def test_non_utf8_file_reports_parse_issue(tmp_path):
+    p = tmp_path / "corebook" / "gear" / "bad_encoding.json"
+    p.parent.mkdir(parents=True)
+    p.write_bytes(b'{"x": "\xe9"}')
+    files, issues = discover(tmp_path)
+    assert files == []
+    assert len(issues) == 1
+    assert issues[0].rule == "parse"
