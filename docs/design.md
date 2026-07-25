@@ -78,6 +78,13 @@ python -m extractor --book corebook --domain gear --pages 244-290
 - Zero AI dependencies at runtime — plain Python, `requirements.txt`, README with
   exact commands. A future contributor extracts a new book by writing a parser
   profile, following documented existing profiles.
+- **Correction tables live with the data, not the code.** Profiles in the repo
+  contain only structure (page numbers, header regexes, column layouts).
+  RENAMES/OVERRIDES/EXCLUDE/MANUAL_ITEMS reference real item names and stats,
+  so they load from `data/_fixes/<book>_<domain>_fixes.py` — gitignored like
+  the rest of `data/`. Every hook key must fire during a full parse; stale
+  keys fail the run loudly, so the correction layer doubles as a regression
+  suite when the engine changes.
 - Every extraction run is a git-visible change to local data (reviewable diffs).
 
 ## 4. Validation — standalone tool
