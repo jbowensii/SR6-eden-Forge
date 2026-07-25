@@ -75,3 +75,9 @@ def test_path_domain_segment_mismatch(gear_file):
 
 def test_path_not_in_convention_is_ignored(gear_file):
     assert check_gear([df(gear_file, "somefile.json")]) == []
+
+
+def test_formula_and_launcher_damage_codes_ok(gear_file):
+    for code in ["(Rating/2)P", "Grenade", "Missile", "Force x 1P", "1P + special"]:
+        gear_file["items"][0]["system"]["dmgDef"] = code
+        assert check_gear([df(gear_file)]) == [], code

@@ -53,6 +53,26 @@ in the same spirit as a character generator's user-supplied data directory.
 | Python (extractor)   | 3.12+    |
 | Node (site/export)   | 20+      |
 
+## Using the extractor
+
+```bash
+# one-time: cache normalized page text from YOUR pdf (never committed)
+python -m extractor dump --pdf "path/to/corebook.pdf" --book corebook --pages 245-304
+
+# parse the cache into data/corebook/gear/*.json
+python -m extractor parse --book corebook --domain gear
+```
+
+No AI involved at runtime. Parser profiles live in `extractor/profiles/`
+(`corebook_gear.py` covers the Core Rulebook's 21 gear categories, 463 items).
+To extract a new book, write a profile module: a list of `TableSpec`s (page,
+header regex, column layout). Corrections for rows the PDF layout mangles
+(`RENAMES`/`EXCLUDE`/`OVERRIDES`/`MANUAL_ITEMS`) reference real book content,
+so they live in gitignored `data/_fixes/<book>_<domain>_fixes.py`; the parser
+loads them automatically and fails loudly on stale correction keys. See
+[docs/extraction-notes-corebook.md](docs/extraction-notes-corebook.md) for the
+quirks catalog.
+
 ## Using the validator
 
 ```bash
@@ -72,7 +92,8 @@ plausibility bounds, path/envelope agreement).
 - [x] Gear schema (`schemas/gear.schema.json`) + shared defs (`schemas/common.schema.json`)
 - [x] Validator CLI: `python -m validator <path>` — schema pass + sanity pass
 - [x] Format examples: `examples/corebook/gear/` (synthetic items only)
-- [ ] Extractor (Core Rulebook gear)
+- [x] Extractor CLI: `python -m extractor` (dump + parse), AI-free at runtime
+- [x] Core Rulebook gear dataset: 463 items / 21 categories (local only, never committed)
 - [ ] Review web app
 - [ ] Module export
 

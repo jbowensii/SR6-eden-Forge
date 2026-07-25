@@ -5,7 +5,8 @@ from collections import defaultdict
 
 from validator.model import DataFile, Issue
 
-DAMAGE_RE = re.compile(r"^\d{1,2}[PS](\([a-z]+\))?$")
+DAMAGE_RE = re.compile(r"^\d{1,2}[PS](\([a-z]+\))?( \+ special)?$")
+DAMAGE_FORMULA_RE = re.compile(r"^\(?(Rating|Force)\b[^A-Z]*[PS]\)?$")
 MAX_AVAIL = 30
 MAX_PRICE = 10_000_000
 MAX_PAGE = 1500
@@ -42,7 +43,9 @@ def _check_item(df: DataFile, item: dict) -> list[Issue]:
     meta = item.get("meta", {})
 
     dmg_def = system.get("dmgDef", "")
-    if dmg_def and dmg_def != "Special" and not DAMAGE_RE.match(dmg_def):
+    is_formula = bool(DAMAGE_FORMULA_RE.match(dmg_def))  # e.g. "(Rating/2)P", "Force x 1P"
+    is_special = dmg_def in ("Special", "Grenade", "Missile")
+    if dmg_def and not is_special and not is_formula and not DAMAGE_RE.match(dmg_def):
         issues.append(_issue(df, item, "damage-format", f"bad damage code {dmg_def!r}"))
 
     if str(system.get("type", "")).startswith("WEAPON_"):
