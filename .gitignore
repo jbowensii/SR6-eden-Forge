@@ -1,0 +1,22 @@
+# ── Copyrighted game content: NEVER committed ─────────────────
+data/**
+!data/README.md
+export/
+*.pdf
+
+# ── Python ─────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+
+# ── Node ───────────────────────────────────────────────────────
+node_modules/
+dist/
+*.log
+
+# ── Editor / OS ────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
