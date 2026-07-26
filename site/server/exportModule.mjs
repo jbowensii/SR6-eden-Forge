@@ -1,9 +1,18 @@
 import { createHash } from "node:crypto";
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { compilePack } from "@foundryvtt/foundryvtt-cli";
 import { toFoundryDoc } from "../shared/edenTransform.mjs";
+
+
+export function loadBooks(dataRoot) {
+  try {
+    return JSON.parse(readFileSync(join(dataRoot, "books.json"), "utf8"));
+  } catch {
+    return {};
+  }
+}
 
 const ALNUM = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -42,7 +51,10 @@ export async function exportModule(dataRoot, exportRoot, { book, domain, status 
     throw new Error(`no such domain ${book}/${domain} under ${dataRoot}`);
   }
 
+  const product = loadBooks(dataRoot)[book]?.title;
+  const moduleId = `sr6-forge-${book}`;
   const docs = [];
+  const icons = new Map(); // module-relative icon path -> absolute source path
   const seen = new Map();
   for (const file of files) {
     const payload = JSON.parse(readFileSync(join(domainDir, file), "utf8"));
@@ -53,21 +65,36 @@ export async function exportModule(dataRoot, exportRoot, { book, domain, status 
       }
       seen.set(item.id, file);
       const _id = docId(book, domain, item.id);
-      docs.push({
+      const doc = {
         _id,
         _key: `!items!${_id}`,
-        ...toFoundryDoc(item),
+        ...toFoundryDoc(item, { product }),
         folder: null,
         sort: 0,
         ownership: { default: 0 },
         _stats: { coreVersion: "13" },
-      });
+      };
+      // item.img relative to data/_assets/ gets bundled into the module;
+      // the full relative path is preserved so same-named files in different
+      // subfolders cannot collide
+      if (item.img && !/^(icons|systems|modules)\//.test(item.img)) {
+        const source = join(dataRoot, "_assets", item.img);
+        if (existsSync(source)) {
+          const rel = `icons/${item.img.replace(/\\/g, "/")}`;
+          icons.set(rel, source);
+          doc.img = `modules/${moduleId}/${rel}`;
+        } else {
+          console.warn(`missing asset for ${item.id}: ${source} — using default icon`);
+          doc.img = "icons/svg/item-bag.svg";
+        }
+      }
+      docs.push(doc);
     }
   }
   if (!docs.length) throw new Error(`no items match status "${status}" in ${book}/${domain}`);
 
-  const moduleDir = join(exportRoot, `sr6-forge-${book}`);
-  const stagingDir = join(exportRoot, `.staging-sr6-forge-${book}`);
+  const moduleDir = join(exportRoot, moduleId);
+  const stagingDir = join(exportRoot, `.staging-${moduleId}`);
   rmSync(stagingDir, { recursive: true, force: true });
 
   const packName = `${book}-${domain}`;
@@ -83,10 +110,16 @@ export async function exportModule(dataRoot, exportRoot, { book, domain, status 
       rmSync(srcDir, { recursive: true, force: true });
     }
 
+    for (const [rel, source] of icons) {
+      const dest = join(stagingDir, rel);
+      mkdirSync(dirname(dest), { recursive: true });
+      copyFileSync(source, dest);
+    }
+
     const manifest = buildManifest({
       book,
       version,
-      packs: [{ name: packName, label: `${book} ${domain}`, path: `packs/${domain}` }],
+      packs: [{ name: packName, label: `${product ?? book} ${domain}`, path: `packs/${domain}` }],
     });
     writeFileSync(join(stagingDir, "module.json"), JSON.stringify(manifest, null, 2) + "\n");
 

@@ -29,3 +29,22 @@ describe("toFoundryDoc", () => {
     expect(() => toFoundryDoc({ id: "x", name: "X", system: {} })).toThrow(TypeError);
   });
 });
+
+describe("toFoundryDoc references and images", () => {
+  it("maps book/page into system.product/system.page", () => {
+    const doc = toFoundryDoc(ITEM, { product: "Sixth World Core Rulebook" });
+    expect(doc.system.product).toBe("Sixth World Core Rulebook");
+    expect(doc.system.page).toBe(1);
+  });
+
+  it("falls back to the book slug without a product title", () => {
+    const doc = toFoundryDoc(ITEM);
+    expect(doc.system.product).toBe("corebook");
+  });
+
+  it("uses item.img when present", () => {
+    const doc = toFoundryDoc({ ...ITEM, img: "corebook/pistol.webp" });
+    expect(doc.img).toBe("corebook/pistol.webp");
+    expect(toFoundryDoc(ITEM).img).toBe("icons/svg/item-bag.svg");
+  });
+});

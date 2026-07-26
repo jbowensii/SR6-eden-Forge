@@ -40,3 +40,8 @@ def test_unknown_domain_reports_no_schema(gear_file):
     issues = check_file(df(gear_file))
     assert len(issues) == 1
     assert issues[0].rule == "no-schema"
+
+
+def test_item_img_field_allowed(gear_file):
+    gear_file["items"][0]["img"] = "corebook/example_autopistol.webp"
+    assert check_file(df(gear_file)) == []
