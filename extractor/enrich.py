@@ -1,22 +1,32 @@
 """Attribute per-item prose writeups from the column-ordered page cache to
 items in the local dataset (system.description). Runs entirely against the
-user's local page cache and local data files."""
+user's local page cache and local data files.
+
+Matching model: item names generate normalized heading keys (full name plus
+variants for parenthetical/slash/comma forms and plurals). A heading line on
+page P matches an item only when the item's own table page is within
+PAGE_WINDOW of P — that is what disambiguates identically-named gear in
+different chapters (e.g. an external device and its cyberware twin). Group
+headings ("Cyberjacks") attach to every family member via prefix matching.
+"""
 
 from __future__ import annotations
 
 import json
 import re
+from dataclasses import dataclass
 from pathlib import Path
 
 from extractor.cache import read_cols
 from extractor.textcols import COLUMN_BREAK
 
-MAX_SECTION_LINES = 18
+MAX_SECTION_LINES = 30
 MAX_DESC_CHARS = 1400
+PAGE_WINDOW = 8       # heading may sit several pages before the item's table
+PREFIX_MIN = 6        # min normalized-key length for group-prefix matching
 # lines that end a writeup section even if no new heading was seen
 _STOPPERS = re.compile(r"^[A-Z][A-Z /()&'’]{11,}$")  # table/column headers
 _JUNK = re.compile(r"¥|\d/\d.*\d/\d|^\d{1,3}$")  # stat rows, bare page numbers
-_SECTION = re.compile(r"^[a-z][a-z /&'’-]{2,40}$")  # lowercase table section titles
 
 
 def parse_col_lines(raw_lines):
@@ -40,6 +50,15 @@ def norm(s: str) -> str:
     return re.sub(r"[^a-z0-9]+", "", s.casefold())
 
 
+def _plural_forms(key: str) -> set[str]:
+    forms = {key}
+    if key.endswith("s"):
+        forms.add(key[:-1])
+    else:
+        forms.add(key + "s")
+    return forms
+
+
 def heading_keys(name: str) -> set[str]:
     """Normalized variants under which an item's writeup heading may appear."""
     keys = {norm(name)}
@@ -53,29 +72,99 @@ def heading_keys(name: str) -> set[str]:
         first, _, rest = base.partition(",")
         keys.add(norm(f"{rest} {first}"))
         keys.add(norm(first))
-    keys.discard("")
-    return keys
+    out: set[str] = set()
+    for k in keys:
+        if k:
+            out |= _plural_forms(k)
+    return out
 
 
-def build_index(payloads: dict[str, dict]) -> dict[str, list[tuple[str, str]]]:
-    """key -> [(category, item_id)]. Full-name keys may map to several items
-    (intentionally same-named across categories); looser variant keys that
-    collide across DIFFERENT items are ambiguous and dropped."""
-    index: dict[str, list[tuple[str, str]]] = {}
-    full_keys: dict[str, set[str]] = {}
-    variant_of: dict[str, set[str]] = {}
-    for category, payload in payloads.items():
-        for item in payload.get("items", []):
-            full = norm(item["name"])
-            full_keys.setdefault(full, set()).add(item["name"])
-            for key in heading_keys(item["name"]):
-                index.setdefault(key, []).append((category, item["id"]))
-                variant_of.setdefault(key, set()).add(item["name"])
-    for key in list(index):
-        names = variant_of[key]
-        if len(names) > 1 and key not in full_keys:
-            del index[key]  # generic variant shared by different items
-    return index
+@dataclass(frozen=True)
+class Target:
+    category: str
+    item_id: str
+    page: int
+    name: str
+
+
+class HeadingIndex:
+    def __init__(self, payloads: dict[str, dict]):
+        self.by_key: dict[str, list[Target]] = {}
+        self.full_keys: dict[str, list[Target]] = {}
+        self.subtype_keys: dict[str, list[Target]] = {}
+        for category, payload in payloads.items():
+            for item in payload.get("items", []):
+                target = Target(category, item["id"], item.get("meta", {}).get("page", 0), item["name"])
+                for key in _plural_forms(norm(item["name"])):
+                    self.full_keys.setdefault(key, []).append(target)
+                for key in heading_keys(item["name"]):
+                    self.by_key.setdefault(key, []).append(target)
+                subtype = str(item.get("system", {}).get("subtype", "")).replace("_", " ")
+                if subtype:
+                    for key in _plural_forms(norm(subtype)):
+                        self.subtype_keys.setdefault(key, []).append(target)
+        self._prefix_pool = sorted(
+            (key, targets) for key, targets in self.full_keys.items() if len(key) >= PREFIX_MIN
+        )
+
+    def match(self, line: str, page: int | None) -> list[Target]:
+        """Targets whose writeup heading this line plausibly is."""
+        if len(line.split()) > 6:
+            return []
+        key = norm(line)
+        if not key:
+            return []
+        candidates = list(self.by_key.get(key, []))
+        if not candidates:
+            words = line.split()
+            for k in (2, 1):
+                if len(words) > k:
+                    tail_key = norm(" ".join(words[-k:]))
+                    if tail_key in self.by_key:
+                        key = tail_key
+                        candidates = list(self.by_key[key])
+                        break
+        if len(key) >= PREFIX_MIN:
+            for full_key, targets in self._prefix_pool:
+                if full_key.startswith(key) and full_key != key:
+                    candidates.extend(targets)  # group heading: 'Cyberjacks' -> rating family
+        if not candidates:
+            group = self.subtype_keys.get(key, [])
+            if page is not None:
+                group = [t for t in group if t.page and abs(t.page - page) <= PAGE_WINDOW]
+            if group:
+                return _dedupe(group)
+            return []
+        if page is not None:
+            candidates = [t for t in candidates if t.page and abs(t.page - page) <= PAGE_WINDOW]
+        if not candidates:
+            return []
+        # a non-full-name key shared by several DIFFERENT item names is only
+        # trustworthy when it narrowed to one family of names
+        names = {t.name for t in candidates}
+        if len(names) > 1 and key not in self.full_keys and not _all_same_family(names):
+            return []
+        return _dedupe(candidates)
+
+
+def _dedupe(targets):
+    seen = set()
+    out = []
+    for t in targets:
+        if (t.category, t.item_id) not in seen:
+            seen.add((t.category, t.item_id))
+            out.append(t)
+    return out
+
+
+def _all_same_family(names: set[str]) -> bool:
+    """'Cyberjack (Rating 1..6)' / 'Wired Reflexes 1..4' style families
+    share the same base name once parens and trailing numbers drop."""
+    bases = set()
+    for n in names:
+        base = re.sub(r"\s*\(.*?\)$", "", n).strip().casefold()
+        bases.add(re.sub(r"\s+\d+$", "", base))
+    return len(bases) == 1
 
 
 def _dehyphenate(lines: list[str]) -> str:
@@ -92,11 +181,11 @@ def _dehyphenate(lines: list[str]) -> str:
     return re.sub(r"\s+\S*-$", "", text)  # drop a mid-word tail cut off at a section boundary
 
 
-def parse_sections(lines: list[str], index: dict[str, list[tuple[str, str]]]) -> dict[tuple[str, str], str]:
-    """Scan column-ordered lines; a line matching a known item name opens a
-    section captured until the next heading/stopper."""
+def parse_sections(lines, index) -> dict[tuple[str, str], str]:
+    """lines: iterable of str or (page|None, str). A line matching a known
+    item name opens a section captured until the next heading/stopper."""
     sections: dict[tuple[str, str], str] = {}
-    current: list[tuple[str, str]] | None = None
+    current: list[Target] | None = None
     buffer: list[str] = []
 
     def flush():
@@ -104,20 +193,21 @@ def parse_sections(lines: list[str], index: dict[str, list[tuple[str, str]]]) ->
         if current and buffer:
             text = _dehyphenate(buffer)[:MAX_DESC_CHARS]
             if len(text) > 40:  # ignore stray one-liners
-                for target in current:
-                    sections.setdefault(target, text)
+                for t in current:
+                    sections.setdefault((t.category, t.item_id), text)
         current, buffer = None, []
 
-    for raw in lines:
+    for entry in lines:
+        page, raw = entry if isinstance(entry, tuple) else (None, entry)
         line = raw.strip()
         if not line:
             continue
-        key = norm(line)
-        if key in index and len(line.split()) <= 6:
+        targets = index.match(line, page)
+        if targets:
             flush()
-            current = index[key]
+            current = targets
             continue
-        if _STOPPERS.match(line) or _SECTION.match(line):
+        if _STOPPERS.match(line):
             flush()
             continue
         if current is None:
@@ -131,6 +221,10 @@ def parse_sections(lines: list[str], index: dict[str, list[tuple[str, str]]]) ->
     return sections
 
 
+def build_index(payloads: dict[str, dict]) -> HeadingIndex:
+    return HeadingIndex(payloads)
+
+
 def enrich_descriptions(data_root: Path, book: str, domain: str, pages, force: bool = False) -> dict:
     domain_dir = data_root / book / domain
     payloads = {
@@ -139,9 +233,10 @@ def enrich_descriptions(data_root: Path, book: str, domain: str, pages, force: b
     }
     index = build_index(payloads)
 
-    lines: list[str] = []
+    lines: list[tuple[int, str]] = []
     for page in pages:
-        lines.extend(t for _, _, t in parse_col_lines(read_cols(data_root, book, page).splitlines()))
+        for _, _, text in parse_col_lines(read_cols(data_root, book, page).splitlines()):
+            lines.append((page, text))
     sections = parse_sections(lines, index)
 
     updated = 0
