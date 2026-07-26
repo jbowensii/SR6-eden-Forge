@@ -58,12 +58,23 @@ def heading_keys(name: str) -> set[str]:
 
 
 def build_index(payloads: dict[str, dict]) -> dict[str, list[tuple[str, str]]]:
-    """key -> [(category, item_id)] across all category payloads."""
+    """key -> [(category, item_id)]. Full-name keys may map to several items
+    (intentionally same-named across categories); looser variant keys that
+    collide across DIFFERENT items are ambiguous and dropped."""
     index: dict[str, list[tuple[str, str]]] = {}
+    full_keys: dict[str, set[str]] = {}
+    variant_of: dict[str, set[str]] = {}
     for category, payload in payloads.items():
         for item in payload.get("items", []):
+            full = norm(item["name"])
+            full_keys.setdefault(full, set()).add(item["name"])
             for key in heading_keys(item["name"]):
                 index.setdefault(key, []).append((category, item["id"]))
+                variant_of.setdefault(key, set()).add(item["name"])
+    for key in list(index):
+        names = variant_of[key]
+        if len(names) > 1 and key not in full_keys:
+            del index[key]  # generic variant shared by different items
     return index
 
 
@@ -77,7 +88,8 @@ def _dehyphenate(lines: list[str]) -> str:
             text = text[:-1] + line
         else:
             text = f"{text} {line}" if text else line
-    return re.sub(r"\s+", " ", text).strip()
+    text = re.sub(r"\s+", " ", text).strip()
+    return re.sub(r"\s+\S*-$", "", text)  # drop a mid-word tail cut off at a section boundary
 
 
 def parse_sections(lines: list[str], index: dict[str, list[tuple[str, str]]]) -> dict[tuple[str, str], str]:
@@ -127,11 +139,10 @@ def enrich_descriptions(data_root: Path, book: str, domain: str, pages, force: b
     }
     index = build_index(payloads)
 
-    sections: dict[tuple[str, str], str] = {}
+    lines: list[str] = []
     for page in pages:
-        lines = [t for _, _, t in parse_col_lines(read_cols(data_root, book, page).splitlines())]
-        for target, text in parse_sections(lines, index).items():
-            sections.setdefault(target, text)
+        lines.extend(t for _, _, t in parse_col_lines(read_cols(data_root, book, page).splitlines()))
+    sections = parse_sections(lines, index)
 
     updated = 0
     for category, payload in payloads.items():

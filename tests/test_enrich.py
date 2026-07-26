@@ -66,3 +66,43 @@ def test_section_title_ends_capture():
     ]
     sections = parse_sections(lines, make_index())
     assert "next table section" not in sections[("weapons_firearms", "zapgun_mk1")]
+
+
+def test_colliding_variant_keys_are_dropped():
+    payloads = {
+        "melee": {"items": [{"id": "combat_axe", "name": "Axe, Combat"}]},
+        "tools": {"items": [{"id": "fire_axe", "name": "Axe, Fire"}]},
+    }
+    index = build_index(payloads)
+    assert norm("Axe") not in index          # generic collision dropped
+    assert norm("Combat Axe") in index       # unambiguous swap variant kept
+    assert norm("Axe, Combat") in index      # full names always kept
+
+
+def test_same_full_name_keeps_both_targets():
+    payloads = {
+        "a": {"items": [{"id": "x", "name": "Zapgun Mk1"}]},
+        "b": {"items": [{"id": "y", "name": "Zapgun Mk1"}]},
+    }
+    index = build_index(payloads)
+    assert len(index[norm("Zapgun Mk1")]) == 2
+
+
+def test_writeup_spans_stream_chunks():
+    # enrich concatenates all pages before parsing, so a section that starts
+    # at the end of one page continues into the next without truncation
+    page1 = ["Zapgun Mk1", "The start of a fictional writeup that keeps go-"]
+    page2 = ["ing on the following page with more fictional detail to spare."]
+    sections = parse_sections(page1 + page2, make_index())
+    text = sections[("weapons_firearms", "zapgun_mk1")]
+    assert "keeps going on the following page" in text
+
+
+def test_junk_carveout_keeps_wireless_costs():
+    lines = [
+        "Zapgun Mk1",
+        "A fictional writeup long enough to be kept by the parser here.",
+        "Wireless bonus: recharges automatically, costing 50¥ per fictional week.",
+    ]
+    sections = parse_sections(lines, make_index())
+    assert "Wireless bonus" in sections[("weapons_firearms", "zapgun_mk1")]

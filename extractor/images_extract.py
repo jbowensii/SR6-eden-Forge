@@ -48,7 +48,7 @@ def extract_images(pdf_path: Path, data_root: Path, book: str, domain: str, page
 
     doc = fitz.open(str(pdf_path))
     seen_xrefs: set[int] = set()
-    saved = assigned = 0
+    saved = assigned = dup_skipped = 0
     changed_categories: set[str] = set()
 
     for page_no in pages:
@@ -57,7 +57,10 @@ def extract_images(pdf_path: Path, data_root: Path, book: str, domain: str, page
         candidates = []  # (y_fraction, column, xref, smask)
         for img in page.get_images(full=True):
             xref, smask, w, h = img[0], img[1], img[2], img[3]
-            if w < MIN_DIM or h < MIN_DIM or xref in seen_xrefs:
+            if w < MIN_DIM or h < MIN_DIM:
+                continue
+            if xref in seen_xrefs:
+                dup_skipped += 1
                 continue
             rects = page.get_image_rects(xref)
             if not rects:
@@ -101,6 +104,8 @@ def extract_images(pdf_path: Path, data_root: Path, book: str, domain: str, page
     for category in changed_categories:
         path = domain_dir / f"{category}.json"
         path.write_text(json.dumps(payloads[category], indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    if dup_skipped:
+        print(f"note: {dup_skipped} repeated image placement(s) skipped (same art reused)")
     return {"saved": saved, "assigned": assigned, "inbox": saved - assigned}
 
 
