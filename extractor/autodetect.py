@@ -126,7 +126,8 @@ _STAT_DEBRIS = re.compile(r"[¥|+]|^\d|(?:^|\s)[—-]?\d+/\d|\bx\d|[—-]\d")
 _CATEGORY_WORDS = {
     "blade", "blades", "club", "clubs", "exotic", "heavy", "light", "medium",
     "hold-out", "holdout", "unarmed", "thrown", "throwing", "bow", "standard",
-    "pistol", "rifle", "shotgun", "smg", "special", "grenade", "rocket", "missile",
+    "pistol", "rifle", "shotgun", "smg", "hmg", "lmg", "mmg", "special",
+    "grenade", "rocket", "missile", "melee", "ranged", "firearm", "firearms",
 }
 
 
@@ -134,6 +135,10 @@ def _valid_name(name: str) -> bool:
     name = name.strip()
     if len(name) < 3 or len(name.split()) > 8:
         return False
+    if not (name[0].isupper() or name[0].isdigit()):
+        return False  # prose fragments start lowercase
+    if "." in name or ":" in name:
+        return False  # sentence punctuation
     if _STAT_DEBRIS.search(name):
         return False
     if name.casefold() in _CATEGORY_WORDS:

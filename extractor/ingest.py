@@ -10,10 +10,8 @@ from datetime import date
 from pathlib import Path
 
 import extractor
-from extractor.autodetect import detect_book
-from extractor.cache import cols_path, read_cols
 from extractor.merge import merge_book
-from extractor.textcols import dump_columns
+from extractor.xtable import extract_book
 
 LIBRARY = "corebook"  # canonical merged-library namespace
 
@@ -27,12 +25,6 @@ def _page_count(pdf_path: str) -> int:
 
     with fitz.open(pdf_path) as doc:
         return doc.page_count
-
-
-def _ensure_columns(data_root: Path, book: str, pdf: str, npages: int) -> None:
-    if cols_path(data_root, book, 1).is_file():
-        return
-    dump_columns(Path(pdf), book, range(1, npages + 1), data_root)
 
 
 def load_library(data_root: Path, domain: str) -> tuple[dict, dict]:
@@ -71,12 +63,8 @@ def ingest_book(data_root: Path, book: str, domain: str = "gear", redump: bool =
     dates = {k: v.get("date", "") for k, v in reg.items()}
     reprint = bool(info.get("reprint_of"))
     npages = _page_count(pdf)
-    if redump:
-        dump_columns(Path(pdf), book, range(1, npages + 1), data_root)
-    else:
-        _ensure_columns(data_root, book, pdf, npages)
 
-    incoming = detect_book(lambda bk, n: read_cols(data_root, bk, n), book, range(1, npages + 1))
+    incoming = extract_book(Path(pdf), range(1, npages + 1))  # positional table reader
     library, envelopes = load_library(data_root, domain)
     _, stats = merge_book(
         library, incoming, book, dates, extractor.__version__, date.today().isoformat(), reprint=reprint
