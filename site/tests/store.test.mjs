@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, mkdirSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -57,5 +57,36 @@ describe("store", () => {
     const root = seed();
     expect(() => writeItem(root, "corebook", "gear", "weapons_firearms", "nope", { ...ITEM, id: "nope2" })).toThrow(StoreError);
     expect(() => writeItem(root, "corebook", "gear", "weapons_firearms", "nope", { ...ITEM, id: "nope" })).toThrow(/not-found/);
+  });
+
+  it("writeItem writes atomically, leaving no .tmp file behind", () => {
+    const root = seed();
+    const updated = { ...ITEM, name: "Example Autopistol MkII", meta: { ...ITEM.meta, qaStatus: "reviewed" } };
+    writeItem(root, "corebook", "gear", "weapons_firearms", "example_autopistol", updated);
+    const dir = join(root, "corebook", "gear");
+    const files = readdirSync(dir);
+    expect(files).not.toContain("weapons_firearms.json.tmp");
+    expect(files.some((f) => f.endsWith(".tmp"))).toBe(false);
+    const payload = JSON.parse(readFileSync(join(dir, "weapons_firearms.json"), "utf8"));
+    expect(payload.items[0].name).toBe("Example Autopistol MkII");
+    expect(payload.items[0].meta.qaStatus).toBe("reviewed");
+  });
+
+  it("tree marks unreadable files as errors but still lists good categories", () => {
+    const root = seed();
+    writeFileSync(join(root, "corebook", "gear", "broken.json"), "{bad");
+    const entries = tree(root);
+    expect(entries).toHaveLength(2);
+    const broken = entries.find((e) => e.category === "broken");
+    expect(broken).toMatchObject({
+      book: "corebook",
+      domain: "gear",
+      category: "broken",
+      items: 0,
+      qa: { extracted: 0, reviewed: 0, approved: 0 },
+      error: "unreadable",
+    });
+    const good = entries.find((e) => e.category === "weapons_firearms");
+    expect(good).toMatchObject({ book: "corebook", domain: "gear", category: "weapons_firearms", items: 1 });
   });
 });

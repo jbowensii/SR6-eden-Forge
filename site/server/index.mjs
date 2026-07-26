@@ -15,4 +15,4 @@ const app = buildApp(dataRoot, {
 app.use(express.static(join(here, "..", "dist")));
 
 const port = process.env.PORT ?? 8347;
-app.listen(port, () => console.log(`SR6-eden-Forge review app: http://localhost:${port}`));
+app.listen(port, "127.0.0.1", () => console.log(`SR6-eden-Forge review app: http://localhost:${port}`));

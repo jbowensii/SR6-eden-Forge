@@ -19,26 +19,38 @@ export default function App() {
   }, []);
 
   async function openCategory(entry) {
-    setSelected(entry);
-    setEditing(null);
-    setDoc(null);
-    setPayload(await getCategory(entry.book, entry.domain, entry.category));
+    try {
+      setSelected(entry);
+      setEditing(null);
+      setDoc(null);
+      setPayload(await getCategory(entry.book, entry.domain, entry.category));
+    } catch (e) {
+      setStatus(`error: ${e.message ?? e}`);
+    }
   }
 
   async function save(item) {
-    const res = await putItem(selected.book, selected.domain, selected.category, item);
-    setDoc(res.doc);
-    setStatus(res.docError ? `saved; preview error: ${res.docError}` : `saved ${item.id}`);
-    setPayload(await getCategory(selected.book, selected.domain, selected.category));
-    setTree(await getTree());
-    setEditing(res.item);
+    try {
+      const res = await putItem(selected.book, selected.domain, selected.category, item);
+      setDoc(res.doc);
+      setStatus(res.docError ? `saved; preview error: ${res.docError}` : `saved ${item.id}`);
+      setPayload(await getCategory(selected.book, selected.domain, selected.category));
+      setTree(await getTree());
+      setEditing(res.item);
+    } catch (e) {
+      setStatus(`error: ${e.message ?? e}`);
+    }
   }
 
   async function runValidate() {
     setStatus("validating…");
-    const res = await validate();
-    setIssues(res.issues);
-    setStatus(res.ok ? `validator: OK (${res.items} items)` : `validator: ${res.issues.length} issue(s)`);
+    try {
+      const res = await validate();
+      setIssues(res.issues);
+      setStatus(res.ok ? `validator: OK (${res.items} items)` : `validator: ${res.issues.length} issue(s)`);
+    } catch (e) {
+      setStatus(`error: ${e.message ?? e}`);
+    }
   }
 
   return (

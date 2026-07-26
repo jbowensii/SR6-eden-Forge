@@ -14,7 +14,7 @@ export function resolvePython(repoRoot) {
 export function runValidator(repoRoot, dataRoot) {
   const python = resolvePython(repoRoot);
   return new Promise((resolve, reject) => {
-    execFile(python, ["-m", "validator", dataRoot, "--json"], { cwd: repoRoot }, (error, stdout, stderr) => {
+    execFile(python, ["-m", "validator", dataRoot, "--json"], { cwd: repoRoot, maxBuffer: 10 * 1024 * 1024 }, (error, stdout, stderr) => {
       try {
         resolve(JSON.parse(stdout));
       } catch {

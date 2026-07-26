@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { readFileSync, readdirSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 export const SEGMENT = /^[a-z0-9_]+$/;
@@ -33,13 +33,25 @@ export function tree(dataRoot) {
       if (!statSync(domainDir).isDirectory()) continue;
       for (const file of readdirSync(domainDir)) {
         if (!file.endsWith(".json")) continue;
-        const payload = JSON.parse(readFileSync(join(domainDir, file), "utf8"));
-        const qa = { extracted: 0, reviewed: 0, approved: 0 };
-        for (const item of payload.items ?? []) {
-          const s = item.meta?.qaStatus;
-          if (s in qa) qa[s] += 1;
+        const category = file.replace(/\.json$/, "");
+        try {
+          const payload = JSON.parse(readFileSync(join(domainDir, file), "utf8"));
+          const qa = { extracted: 0, reviewed: 0, approved: 0 };
+          for (const item of payload.items ?? []) {
+            const s = item.meta?.qaStatus;
+            if (s in qa) qa[s] += 1;
+          }
+          out.push({ book, domain, category, items: (payload.items ?? []).length, qa });
+        } catch {
+          out.push({
+            book,
+            domain,
+            category,
+            items: 0,
+            qa: { extracted: 0, reviewed: 0, approved: 0 },
+            error: "unreadable",
+          });
         }
-        out.push({ book, domain, category: file.replace(/\.json$/, ""), items: (payload.items ?? []).length, qa });
       }
     }
   }
@@ -64,6 +76,8 @@ export function writeItem(dataRoot, book, domain, category, itemId, item) {
   if (index === -1) throw new StoreError("not-found", itemId);
   payload.items[index] = item;
   const path = categoryPath(dataRoot, book, domain, category);
-  writeFileSync(path, JSON.stringify(payload, null, 2) + "\n", "utf8");
+  const tmpPath = `${path}.tmp`;
+  writeFileSync(tmpPath, JSON.stringify(payload, null, 2) + "\n", "utf8");
+  renameSync(tmpPath, path);
   return item;
 }

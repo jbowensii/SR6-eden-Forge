@@ -75,6 +75,8 @@ quirks catalog.
 
 ## Using the review app
 
+Requires Node 20+.
+
 ```bash
 cd site
 npm install          # once

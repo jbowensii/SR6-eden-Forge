@@ -8,7 +8,7 @@ export function buildApp(dataRoot, { schemasDir, validate }) {
   const app = express();
   app.use(express.json({ limit: "2mb" }));
 
-  app.get("/api/tree", (req, res) => res.json(tree(dataRoot)));
+  app.get("/api/tree", (req, res) => handle(res, () => tree(dataRoot)));
 
   app.get("/api/schema/:domain", (req, res) => {
     if (!SEGMENT.test(req.params.domain)) return res.status(400).json({ error: "bad-segment" });
