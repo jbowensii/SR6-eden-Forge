@@ -76,7 +76,7 @@ def main(argv: list[str] | None = None) -> int:
         from extractor.icon_match import match_icons
 
         stats = match_icons(Path(args.library), Path(args.data), args.book, args.domain, args.min_score)
-        print(f"library files: {stats['library']} | icons matched: {stats['matched']} | still without art: {stats['still_missing']}")
+        print(f"library files: {stats['library']} | name-matched: {stats['matched']} | generic: {stats['generic']} | still without art: {stats['still_missing']}")
         return 0
     from extractor.run import parse_book
 

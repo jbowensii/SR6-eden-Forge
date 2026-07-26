@@ -39,3 +39,23 @@ def test_axe_matches_axe(tmp_path):
     item = {"name": "Battle Axe", "system": {"type": "WEAPON_CLOSE_COMBAT", "subtype": "BLADES"}}
     path, _ = best_match(item, lib)
     assert path.name == "battle_axe_iron.png"
+
+
+def test_pick_generic_prefers_terms(tmp_path):
+    from extractor.icon_match import pick_generic
+
+    extra = tmp_path / "fantasy" / "swords" / "steel_sword_plain.png"
+    extra.parent.mkdir(parents=True, exist_ok=True)
+    extra.write_bytes(b"fake")
+    from extractor.icon_match import index_library as idx
+
+    lib = idx(tmp_path)
+    pick = pick_generic("BLADES", lib)  # terms: sword/knife/blade
+    assert pick is not None and pick.name == "steel_sword_plain.png"
+
+
+def test_pick_generic_none_when_no_terms_hit(tmp_path):
+    from extractor.icon_match import pick_generic
+
+    lib = make_lib(tmp_path)  # no sword/knife/blade or crate/box/bag/gear tokens
+    assert pick_generic("BLADES", lib) is None
