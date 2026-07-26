@@ -57,7 +57,7 @@ describe("api", () => {
     expect(after.body.items[0].meta.qaStatus).toBe("approved");
   });
 
-  it("PUT rejects id mismatch and traversal", async () => {
+  it("PUT rejects id mismatch and malformed path segments", async () => {
     const app = makeApp();
     expect((await request(app).put("/api/item/corebook/gear/weapons_firearms/example_autopistol").send({ ...ITEM, id: "other" })).status).toBe(400);
     expect((await request(app).put("/api/item/corebook/gear/weapons_firearms/%2e%2e").send(ITEM)).status).toBe(400);
@@ -66,5 +66,30 @@ describe("api", () => {
   it("POST /api/validate returns injected result", async () => {
     const res = await request(makeApp()).post("/api/validate");
     expect(res.body.ok).toBe(true);
+  });
+
+  it("PUT returns docError when transform fails", async () => {
+    const app = makeApp();
+    const broken = { ...ITEM, system: {} };
+    const res = await request(app).put("/api/item/corebook/gear/weapons_firearms/example_autopistol").send(broken);
+    expect(res.status).toBe(200);
+    expect(res.body.doc).toBeNull();
+    expect(res.body.docError).toMatch(/system.type/);
+  });
+
+  it("malformed JSON body gets a JSON 400, not HTML", async () => {
+    const res = await request(makeApp())
+      .put("/api/item/corebook/gear/weapons_firearms/example_autopistol")
+      .set("Content-Type", "application/json")
+      .send("{bad json");
+    expect(res.status).toBe(400);
+    expect(res.headers["content-type"]).toMatch(/json/);
+    expect(res.body.error).toBe("bad-json");
+  });
+
+  it("GET on /api/item is 404 json, not 400", async () => {
+    const res = await request(makeApp()).get("/api/item/corebook/gear/weapons_firearms/example_autopistol");
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe("no-route");
   });
 });

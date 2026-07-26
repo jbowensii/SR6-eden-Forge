@@ -46,10 +46,28 @@ export function buildApp(dataRoot, { schemasDir, validate }) {
   });
 
   // Dot-segment path components (e.g. "..") get collapsed by URL normalization
-  // before routing sees them, so a malformed /api/item/... request never
-  // matches the PUT route above. Anything left unmatched under /api/item is
-  // a malformed request, not a missing resource.
-  app.use("/api/item", (req, res) => res.status(400).json({ error: "bad-request" }));
+  // before routing sees them, so a malformed /api/item/... PUT request never
+  // matches the PUT route above. Anything left unmatched under /api/item for
+  // a PUT is a malformed request; any other method under /api/item is simply
+  // an unrouted resource.
+  //
+  // Note: Express 4's `*name` named-wildcard syntax (Express 5 / path-to-regexp
+  // v6+ feature) registers without error here but silently fails to match at
+  // request time on this Express version, so the method check is done manually.
+  app.use("/api/item", (req, res) => {
+    if (req.method === "PUT") return res.status(400).json({ error: "bad-request" });
+    res.status(404).json({ error: "no-route" });
+  });
+
+  // Malformed JSON bodies throw a SyntaxError from express.json() before any
+  // route handler runs; without this handler Express's default error handler
+  // returns an HTML stack trace instead of JSON.
+  app.use((err, req, res, next) => {
+    if (err?.type === "entity.parse.failed" || (err instanceof SyntaxError && (err.status ?? err.statusCode) === 400)) {
+      return res.status(400).json({ error: "bad-json" });
+    }
+    next(err);
+  });
 
   return app;
 }
