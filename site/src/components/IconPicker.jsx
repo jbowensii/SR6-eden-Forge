@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
-export default function IconPicker({ item, subtype, onAssign, onClose }) {
+export default function IconPicker({ item, scopeLabel, onAssign, onClose }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -75,7 +75,7 @@ export default function IconPicker({ item, subtype, onAssign, onClose }) {
             Set for this item
           </button>
           <button className="ghost" disabled={!selected || busy} onClick={() => assign("generic")}>
-            Set as generic for {subtype || "category"}
+            Set for ALL of {scopeLabel || "this category"}
           </button>
         </div>
       </div>

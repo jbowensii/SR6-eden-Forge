@@ -128,6 +128,7 @@ export default function App() {
             key={editing.id}
             item={editing}
             bookTitle={bookInfo?.title ?? selected?.book}
+            categoryName={selected?.category?.replace(/_/g, " ")}
             pdfAvailable={Boolean(bookInfo?.pdf)}
             pdfHref={editing.meta ? `/api/pdf/${editing.meta.book}#page=${editing.meta.page}` : null}
             onSave={save}

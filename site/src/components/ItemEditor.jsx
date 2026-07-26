@@ -6,7 +6,7 @@ const MODES = ["SS", "SA", "BF", "FA"];
 // rendered by dedicated controls above the generic field list
 const HANDLED = new Set(["description"]);
 
-export default function ItemEditor({ item, bookTitle, pdfAvailable, pdfHref, onSave, onAssignIcon }) {
+export default function ItemEditor({ item, bookTitle, categoryName, pdfAvailable, pdfHref, onSave, onAssignIcon }) {
   const [draft, setDraft] = useState(() => structuredClone(item));
   const [picking, setPicking] = useState(false);
   const [renderExists, setRenderExists] = useState(true);
@@ -168,7 +168,7 @@ export default function ItemEditor({ item, bookTitle, pdfAvailable, pdfHref, onS
       {picking && (
         <IconPicker
           item={draft}
-          subtype={draft.system.subtype || draft.system.type}
+          scopeLabel={categoryName}
           onAssign={(hit, mode) => onAssignIcon(draft, hit, mode)}
           onClose={() => setPicking(false)}
         />
