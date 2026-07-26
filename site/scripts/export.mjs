@@ -13,6 +13,10 @@ const { values } = parseArgs({
     version: { type: "string", default: "0.1.0" },
   },
 });
+if (!["approved", "reviewed", "all"].includes(values.status)) {
+  console.error(`invalid --status "${values.status}" (approved|reviewed|all)`);
+  process.exit(2);
+}
 if (!values.book) {
   console.error("usage: node site/scripts/export.mjs --book corebook [--domain gear] [--status approved|reviewed|all] [--version x.y.z]");
   process.exit(2);
