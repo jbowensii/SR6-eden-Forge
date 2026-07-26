@@ -102,15 +102,13 @@ export function assignIcon(dataRoot, libraryRoot, { book, domain, category, item
     return { img, updated };
   }
 
-  // mode === "generic": replace the subtype's shared icon and re-point every
-  // subtype item that has no specific art (missing img or a _generic_ path)
-  const img = `${book}/lib/_generic_${subtype.toLowerCase()}${ext}`;
-  copyFileSync(source, join(destDir, `_generic_${subtype.toLowerCase()}${ext}`));
-  const genericPrefix = `${book}/lib/_generic_${subtype.toLowerCase()}`;
-  const updated = rewriteDomain(dataRoot, book, domain, (item) => {
-    const itemSubtype = String(item.system?.subtype || item.system?.type || "");
-    if (itemSubtype !== subtype) return false;
-    if (item.img && !item.img.startsWith(genericPrefix)) return false;
+  // mode === "generic": install the icon as the shared image for EVERY item
+  // in the category being viewed (book renders stay on disk and re-adoptable
+  // from the editor's render slot)
+  const img = `${book}/lib/_generic_${category}${ext}`;
+  copyFileSync(source, join(destDir, `_generic_${category}${ext}`));
+  const updated = rewriteDomain(dataRoot, book, domain, (item, cat) => {
+    if (cat !== category) return false;
     if (item.img === img) return false;
     item.img = img;
     return true;

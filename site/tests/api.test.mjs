@@ -227,19 +227,19 @@ describe("icon library", () => {
     expect(payload.items[2].img).toBe("corebook/lib/_generic_submachine_guns.svg");
   });
 
-  it("POST /api/icon/assign mode generic re-points generic-and-missing subtype items only", async () => {
+  it("POST /api/icon/assign mode generic sets EVERY item in the category", async () => {
     const { root, app } = makeIconApp();
     const res = await request(app).post("/api/icon/assign").send({
       book: "corebook", domain: "gear", category: "weapons_firearms",
       itemId: "example_smg", libraryPath: "cyberpunk/smg_worn.png", mode: "generic",
     });
     expect(res.status).toBe(200);
-    expect(res.body.img).toBe("corebook/lib/_generic_submachine_guns.png");
-    expect(res.body.updated).toBe(2); // missing-img smg + old-generic smg2; the heavy pistol untouched
+    expect(res.body.img).toBe("corebook/lib/_generic_weapons_firearms.png");
+    expect(res.body.updated).toBe(3); // every item in the viewed category
     const payload = JSON.parse(readFileSync(join(root, "corebook", "gear", "weapons_firearms.json"), "utf8"));
-    expect(payload.items[0].img).toBeUndefined();
-    expect(payload.items[1].img).toBe("corebook/lib/_generic_submachine_guns.png");
-    expect(payload.items[2].img).toBe("corebook/lib/_generic_submachine_guns.png");
+    for (const item of payload.items) {
+      expect(item.img).toBe("corebook/lib/_generic_weapons_firearms.png");
+    }
   });
 
   it("assign rejects traversal and bad mode", async () => {
