@@ -41,7 +41,10 @@ def test_parse_sections_basic():
     assert "Wireless bonus" in d1
     d2 = sections[("weapons_firearms", "zapgun_mk2")]
     assert "fictional warranty" in d2
-    assert "orphan trailing" not in d2  # stopped at the table header
+    # interleaved table headers are skipped, not terminators — the block
+    # continues to the next item heading
+    assert "WEAPON DV MODES" not in d2
+    assert "orphan trailing" in d2
 
 
 def test_parse_sections_skips_stat_junk_and_short():
