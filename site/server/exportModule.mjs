@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { basename, join } from "node:path";
+import { dirname, join } from "node:path";
 import { compilePack } from "@foundryvtt/foundryvtt-cli";
 import { toFoundryDoc } from "../shared/edenTransform.mjs";
 
@@ -74,11 +74,13 @@ export async function exportModule(dataRoot, exportRoot, { book, domain, status 
         ownership: { default: 0 },
         _stats: { coreVersion: "13" },
       };
-      // item.img relative to data/_assets/ gets bundled into the module
+      // item.img relative to data/_assets/ gets bundled into the module;
+      // the full relative path is preserved so same-named files in different
+      // subfolders cannot collide
       if (item.img && !/^(icons|systems|modules)\//.test(item.img)) {
         const source = join(dataRoot, "_assets", item.img);
         if (existsSync(source)) {
-          const rel = `icons/${basename(item.img)}`;
+          const rel = `icons/${item.img.replace(/\\/g, "/")}`;
           icons.set(rel, source);
           doc.img = `modules/${moduleId}/${rel}`;
         } else {
@@ -108,9 +110,10 @@ export async function exportModule(dataRoot, exportRoot, { book, domain, status 
       rmSync(srcDir, { recursive: true, force: true });
     }
 
-    if (icons.size) {
-      mkdirSync(join(stagingDir, "icons"), { recursive: true });
-      for (const [rel, source] of icons) copyFileSync(source, join(stagingDir, rel));
+    for (const [rel, source] of icons) {
+      const dest = join(stagingDir, rel);
+      mkdirSync(dirname(dest), { recursive: true });
+      copyFileSync(source, dest);
     }
 
     const manifest = buildManifest({

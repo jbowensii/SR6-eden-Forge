@@ -118,12 +118,12 @@ describe("export references and images", () => {
     const out = mkdtempSync(join(tmpdir(), "forge-img-"));
     const res = await exportModule(root, out, { book: "testbook", domain: "gear" });
     const { existsSync } = await import("node:fs");
-    expect(existsSync(join(res.moduleDir, "icons", "gun_a.png"))).toBe(true);
+    expect(existsSync(join(res.moduleDir, "icons", "testbook", "gun_a.png"))).toBe(true);
     const unpacked = mkdtempSync(join(tmpdir(), "forge-img-un-"));
     await extractPack(join(res.moduleDir, "packs", "gear"), unpacked);
     const files = readdirSync(unpacked);
     const doc = JSON.parse(readFileSync(join(unpacked, files[0]), "utf8"));
-    expect(doc.img).toBe("modules/sr6-forge-testbook/icons/gun_a.png");
+    expect(doc.img).toBe("modules/sr6-forge-testbook/icons/testbook/gun_a.png");
     expect(doc.system.product).toBe("Test Book");
     expect(doc.system.page).toBe(1);
   });
@@ -139,3 +139,17 @@ describe("export references and images", () => {
     expect(doc.img).toBe("icons/svg/item-bag.svg");
   });
 });
+
+  it("same basename in different subfolders does not collide", async () => {
+    const a = { ...item("gun_a", "approved"), img: "one/grip.png" };
+    const b = { ...item("gun_b", "approved"), img: "two/grip.png" };
+    const root = seed([a, b]);
+    mkdirSync(join(root, "_assets", "one"), { recursive: true });
+    mkdirSync(join(root, "_assets", "two"), { recursive: true });
+    writeFileSync(join(root, "_assets", "one", "grip.png"), "AAA");
+    writeFileSync(join(root, "_assets", "two", "grip.png"), "BBB");
+    const out = mkdtempSync(join(tmpdir(), "forge-col-"));
+    const res = await exportModule(root, out, { book: "testbook", domain: "gear" });
+    expect(readFileSync(join(res.moduleDir, "icons", "one", "grip.png"), "utf8")).toBe("AAA");
+    expect(readFileSync(join(res.moduleDir, "icons", "two", "grip.png"), "utf8")).toBe("BBB");
+  });
