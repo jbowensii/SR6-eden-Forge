@@ -55,6 +55,8 @@ export default function ItemEditor({ item, bookTitle, pdfAvailable, pdfHref, onS
   }
 
   const imgSrc = draft.img && !/^(icons|systems|modules)\//.test(draft.img) ? `/assets/${draft.img}` : null;
+  // an extracted book render may exist even when a library icon is assigned
+  const renderPath = `${draft.meta?.book}/${draft.id}.png`;
 
   return (
     <div className="editor">
@@ -110,7 +112,34 @@ export default function ItemEditor({ item, bookTitle, pdfAvailable, pdfHref, onS
           }}
         />
       </label>
-      {imgSrc && <img className="img-preview" src={imgSrc} alt="" onError={(e) => (e.target.style.display = "none")} />}
+      <div className="art-row">
+        {imgSrc && (
+          <figure>
+            <img className="img-preview" src={imgSrc} alt="" onError={(e) => (e.target.parentElement.style.display = "none")} />
+            <figcaption>assigned</figcaption>
+          </figure>
+        )}
+        {renderPath !== draft.img && (
+          <figure>
+            <img
+              className="img-preview"
+              src={`/assets/${renderPath}`}
+              alt=""
+              onError={(e) => (e.target.parentElement.style.display = "none")}
+            />
+            <figcaption>
+              book render{" "}
+              <button
+                className="mini"
+                onClick={() => setDraft((d) => ({ ...d, img: renderPath }))}
+                title="Use the extracted book render as this item's image"
+              >
+                use
+              </button>
+            </figcaption>
+          </figure>
+        )}
+      </div>
 
       <div className="field-grid">
         {Object.entries(draft.system)

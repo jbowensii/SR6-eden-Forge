@@ -20,8 +20,8 @@ from pathlib import Path
 from extractor.cache import read_cols
 from extractor.textcols import COLUMN_BREAK
 
-MAX_SECTION_LINES = 30
-MAX_DESC_CHARS = 1400
+MAX_SECTION_LINES = 80
+MAX_DESC_CHARS = 3500
 PAGE_WINDOW = 8       # heading may sit several pages before the item's table
 PREFIX_MIN = 6        # min normalized-key length for group-prefix matching
 # lines that end a writeup section even if no new heading was seen
@@ -207,10 +207,9 @@ def parse_sections(lines, index) -> dict[tuple[str, str], str]:
             flush()
             current = targets
             continue
-        if _STOPPERS.match(line):
-            flush()
-            continue
         if current is None:
+            continue
+        if _STOPPERS.match(line):
             continue
         if _JUNK.search(line) and "Wireless" not in line:
             continue

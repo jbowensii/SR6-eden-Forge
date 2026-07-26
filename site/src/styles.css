@@ -343,3 +343,16 @@ button:disabled, .button.disabled { opacity: 0.35; cursor: not-allowed; pointer-
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--line-bright); border: 2px solid var(--bg); }
 ::-webkit-scrollbar-thumb:hover { background: var(--magenta); }
+
+/* dual art preview */
+.art-row { display: flex; gap: 12px; margin: 6px 0; }
+.art-row figure { margin: 0; text-align: center; }
+.art-row figcaption {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-dim);
+  margin-top: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+button.mini { padding: 1px 8px 2px; font-size: 10px; margin-left: 4px; }
