@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import request from "supertest";
@@ -167,5 +167,92 @@ describe("books and pdf", () => {
     const res = await request(app).put("/api/item/corebook/gear/weapons_firearms/example_autopistol").send(ITEM);
     expect(res.body.doc.system.product).toBe("Core Book Title");
     expect(res.body.doc.system.page).toBe(1);
+  });
+});
+
+describe("icon library", () => {
+  function makeIconApp() {
+    const root = mkdtempSync(join(tmpdir(), "forge-iconlib-"));
+    mkdirSync(join(root, "corebook", "gear"), { recursive: true });
+    mkdirSync(join(root, "_assets", "corebook", "lib"), { recursive: true });
+    const items = [
+      { ...ITEM },
+      {
+        ...ITEM,
+        id: "example_smg",
+        name: "Example SMG",
+        system: { type: "WEAPON_FIREARMS", subtype: "SUBMACHINE_GUNS", price: 900 },
+        meta: { ...ITEM.meta },
+      },
+      {
+        ...ITEM,
+        id: "example_smg2",
+        name: "Example SMG2",
+        img: "corebook/lib/_generic_submachine_guns.svg",
+        system: { type: "WEAPON_FIREARMS", subtype: "SUBMACHINE_GUNS", price: 950 },
+        meta: { ...ITEM.meta },
+      },
+    ];
+    writeFileSync(
+      join(root, "corebook", "gear", "weapons_firearms.json"),
+      JSON.stringify({ book: "corebook", domain: "gear", category: "weapons_firearms", items }, null, 2) + "\n",
+    );
+    const lib = mkdtempSync(join(tmpdir(), "forge-lib-"));
+    mkdirSync(join(lib, "cyberpunk"), { recursive: true });
+    writeFileSync(join(lib, "cyberpunk", "smg_worn.png"), "PNGDATA");
+    writeFileSync(join(root, "settings.json"), JSON.stringify({ iconLibrary: lib }));
+    const schemasDir = mkdtempSync(join(tmpdir(), "forge-sch3-"));
+    writeFileSync(join(schemasDir, "gear.schema.json"), "{}");
+    return { root, app: buildApp(root, { schemasDir, validate: async () => ({}) }) };
+  }
+
+  it("GET /api/icons searches the configured library", async () => {
+    const { app } = makeIconApp();
+    const res = await request(app).get("/api/icons?q=smg");
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(["cyberpunk/smg_worn.png"]);
+    expect((await request(app).get("/api/icons?q=nothingmatches")).body).toEqual([]);
+  });
+
+  it("POST /api/icon/assign mode item sets one item's img", async () => {
+    const { root, app } = makeIconApp();
+    const res = await request(app).post("/api/icon/assign").send({
+      book: "corebook", domain: "gear", category: "weapons_firearms",
+      itemId: "example_smg", libraryPath: "cyberpunk/smg_worn.png", mode: "item",
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.img).toBe("corebook/lib/example_smg.png");
+    const payload = JSON.parse(readFileSync(join(root, "corebook", "gear", "weapons_firearms.json"), "utf8"));
+    expect(payload.items[1].img).toBe("corebook/lib/example_smg.png");
+    expect(payload.items[2].img).toBe("corebook/lib/_generic_submachine_guns.svg");
+  });
+
+  it("POST /api/icon/assign mode generic re-points generic-and-missing subtype items only", async () => {
+    const { root, app } = makeIconApp();
+    const res = await request(app).post("/api/icon/assign").send({
+      book: "corebook", domain: "gear", category: "weapons_firearms",
+      itemId: "example_smg", libraryPath: "cyberpunk/smg_worn.png", mode: "generic",
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.img).toBe("corebook/lib/_generic_submachine_guns.png");
+    expect(res.body.updated).toBe(2); // missing-img smg + old-generic smg2; the heavy pistol untouched
+    const payload = JSON.parse(readFileSync(join(root, "corebook", "gear", "weapons_firearms.json"), "utf8"));
+    expect(payload.items[0].img).toBeUndefined();
+    expect(payload.items[1].img).toBe("corebook/lib/_generic_submachine_guns.png");
+    expect(payload.items[2].img).toBe("corebook/lib/_generic_submachine_guns.png");
+  });
+
+  it("assign rejects traversal and bad mode", async () => {
+    const { app } = makeIconApp();
+    const bad = await request(app).post("/api/icon/assign").send({
+      book: "corebook", domain: "gear", category: "weapons_firearms",
+      itemId: "example_smg", libraryPath: "../outside.png", mode: "item",
+    });
+    expect(bad.status).toBe(400);
+    const badMode = await request(app).post("/api/icon/assign").send({
+      book: "corebook", domain: "gear", category: "weapons_firearms",
+      itemId: "example_smg", libraryPath: "cyberpunk/smg_worn.png", mode: "both",
+    });
+    expect(badMode.status).toBe(400);
   });
 });

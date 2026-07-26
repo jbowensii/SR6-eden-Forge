@@ -1,12 +1,14 @@
 import React, { useState } from "react";
+import IconPicker from "./IconPicker.jsx";
 
 const QA = ["extracted", "reviewed", "approved"];
 const MODES = ["SS", "SA", "BF", "FA"];
 // rendered by dedicated controls above the generic field list
 const HANDLED = new Set(["description"]);
 
-export default function ItemEditor({ item, bookTitle, pdfAvailable, pdfHref, onSave }) {
+export default function ItemEditor({ item, bookTitle, pdfAvailable, pdfHref, onSave, onAssignIcon }) {
   const [draft, setDraft] = useState(() => structuredClone(item));
+  const [picking, setPicking] = useState(false);
 
   const setSystem = (field, value) => setDraft((d) => ({ ...d, system: { ...d.system, [field]: value } }));
 
@@ -113,11 +115,20 @@ export default function ItemEditor({ item, bookTitle, pdfAvailable, pdfHref, onS
         />
       </label>
       <div className="art-row">
-        {imgSrc && (
+        {imgSrc ? (
           <figure>
-            <img className="img-preview" src={imgSrc} alt="" onError={(e) => (e.target.parentElement.style.display = "none")} />
+            <img
+              className="img-preview clickable"
+              src={imgSrc}
+              alt=""
+              title="Click to choose a different icon"
+              onClick={() => setPicking(true)}
+              onError={(e) => (e.target.parentElement.style.display = "none")}
+            />
             <figcaption>assigned</figcaption>
           </figure>
+        ) : (
+          <button className="ghost" onClick={() => setPicking(true)}>Choose icon…</button>
         )}
         {renderPath !== draft.img && (
           <figure>
@@ -150,6 +161,15 @@ export default function ItemEditor({ item, bookTitle, pdfAvailable, pdfHref, onS
             </label>
           ))}
       </div>
+
+      {picking && (
+        <IconPicker
+          item={draft}
+          subtype={draft.system.subtype || draft.system.type}
+          onAssign={(libraryPath, mode) => onAssignIcon(draft, libraryPath, mode)}
+          onClose={() => setPicking(false)}
+        />
+      )}
 
       <div className="editor-actions">
         <button className="primary" onClick={() => onSave(draft)}>Save</button>

@@ -3,7 +3,7 @@ import CategoryTable from "./components/CategoryTable.jsx";
 import ItemEditor from "./components/ItemEditor.jsx";
 import Preview from "./components/Preview.jsx";
 import Tree from "./components/Tree.jsx";
-import { exportModule, getBooks, getCategory, getTree, putItem, validate } from "./api.js";
+import { assignIcon, exportModule, getBooks, getCategory, getTree, putItem, validate } from "./api.js";
 
 export default function App() {
   const [tree, setTree] = useState([]);
@@ -54,6 +54,21 @@ export default function App() {
     } catch (e) {
       setStatus(`error: ${e.message ?? e}`);
     }
+  }
+
+  async function handleAssignIcon(item, libraryPath, mode) {
+    const res = await assignIcon({
+      book: selected.book,
+      domain: selected.domain,
+      category: selected.category,
+      itemId: item.id,
+      libraryPath,
+      mode,
+    });
+    setStatus(mode === "generic" ? `generic icon updated (${res.updated} item(s))` : `icon set for ${item.id}`);
+    setPayload(await getCategory(selected.book, selected.domain, selected.category));
+    const fresh = (await getCategory(selected.book, selected.domain, selected.category)).items.find((i) => i.id === item.id);
+    if (fresh) setEditing(fresh);
   }
 
   async function runExport() {
@@ -115,6 +130,7 @@ export default function App() {
             pdfAvailable={Boolean(bookInfo?.pdf)}
             pdfHref={editing.meta ? `/api/pdf/${editing.meta.book}#page=${editing.meta.page}` : null}
             onSave={save}
+            onAssignIcon={handleAssignIcon}
           />
         )}
         {doc && <Preview doc={doc} />}
