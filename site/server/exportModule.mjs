@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { compilePack } from "@foundryvtt/foundryvtt-cli";
@@ -35,11 +35,23 @@ export function buildManifest({ book, version, packs }) {
 
 export async function exportModule(dataRoot, exportRoot, { book, domain, status = "approved", version = "0.1.0" }) {
   const domainDir = join(dataRoot, book, domain);
+  let files;
+  try {
+    files = readdirSync(domainDir).filter((f) => f.endsWith(".json")).sort();
+  } catch {
+    throw new Error(`no such domain ${book}/${domain} under ${dataRoot}`);
+  }
+
   const docs = [];
-  for (const file of readdirSync(domainDir).filter((f) => f.endsWith(".json")).sort()) {
+  const seen = new Map();
+  for (const file of files) {
     const payload = JSON.parse(readFileSync(join(domainDir, file), "utf8"));
     for (const item of payload.items ?? []) {
       if (!statusAllows(status, item.meta?.qaStatus)) continue;
+      if (seen.has(item.id)) {
+        throw new Error(`duplicate item id "${item.id}" in ${file} (also in ${seen.get(item.id)})`);
+      }
+      seen.set(item.id, file);
       const _id = docId(book, domain, item.id);
       docs.push({
         _id,
@@ -55,23 +67,35 @@ export async function exportModule(dataRoot, exportRoot, { book, domain, status 
   if (!docs.length) throw new Error(`no items match status "${status}" in ${book}/${domain}`);
 
   const moduleDir = join(exportRoot, `sr6-forge-${book}`);
-  const packDir = join(moduleDir, "packs", domain);
-  mkdirSync(packDir, { recursive: true });
-
-  const srcDir = mkdtempSync(join(tmpdir(), "forge-packsrc-"));
-  try {
-    for (const doc of docs) writeFileSync(join(srcDir, `${doc._id}.json`), JSON.stringify(doc, null, 2));
-    await compilePack(srcDir, packDir, { log: false });
-  } finally {
-    rmSync(srcDir, { recursive: true, force: true });
-  }
+  const stagingDir = join(exportRoot, `.staging-sr6-forge-${book}`);
+  rmSync(stagingDir, { recursive: true, force: true });
 
   const packName = `${book}-${domain}`;
-  const manifest = buildManifest({
-    book,
-    version,
-    packs: [{ name: packName, label: `${book} ${domain}`, path: `packs/${domain}` }],
-  });
-  writeFileSync(join(moduleDir, "module.json"), JSON.stringify(manifest, null, 2) + "\n");
+  try {
+    const packDir = join(stagingDir, "packs", domain);
+    mkdirSync(packDir, { recursive: true });
+
+    const srcDir = mkdtempSync(join(tmpdir(), "forge-packsrc-"));
+    try {
+      for (const doc of docs) writeFileSync(join(srcDir, `${doc._id}.json`), JSON.stringify(doc, null, 2));
+      await compilePack(srcDir, packDir, { log: false });
+    } finally {
+      rmSync(srcDir, { recursive: true, force: true });
+    }
+
+    const manifest = buildManifest({
+      book,
+      version,
+      packs: [{ name: packName, label: `${book} ${domain}`, path: `packs/${domain}` }],
+    });
+    writeFileSync(join(stagingDir, "module.json"), JSON.stringify(manifest, null, 2) + "\n");
+
+    rmSync(moduleDir, { recursive: true, force: true });
+    renameSync(stagingDir, moduleDir);
+  } catch (err) {
+    rmSync(stagingDir, { recursive: true, force: true });
+    throw err;
+  }
+
   return { moduleDir, count: docs.length, packName };
 }

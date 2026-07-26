@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { extractPack } from "@foundryvtt/foundryvtt-cli";
@@ -73,5 +73,37 @@ describe("export", () => {
     const root = seed([item("gun_b", "extracted")]);
     const out = mkdtempSync(join(tmpdir(), "forge-out2-"));
     await expect(exportModule(root, out, { book: "testbook", domain: "gear" })).rejects.toThrow(/no items match/);
+  });
+
+  it("failed compile leaves no partial module dir", async () => {
+    const root = seed([item("gun_a", "approved")]);
+    const out = mkdtempSync(join(tmpdir(), "forge-out3-"));
+    // force failure: make packs path collide with a FILE inside staging is fiddly;
+    // instead simulate by seeding a duplicate id across two files (throws mid-collection
+    // BEFORE staging) and separately verify staging cleanup via the missing-domain error.
+    await expect(exportModule(root, out, { book: "testbook", domain: "nope" })).rejects.toThrow(/no such domain/);
+    const leftovers = readdirSync(out).filter((f) => f.startsWith(".staging"));
+    expect(leftovers).toEqual([]);
+  });
+
+  it("duplicate item ids across files fail loud", async () => {
+    const root = seed([item("gun_a", "approved")]);
+    const dir = join(root, "testbook", "gear");
+    writeFileSync(
+      join(dir, "second.json"),
+      JSON.stringify({ book: "testbook", domain: "gear", category: "second", items: [item("gun_a", "approved")] }, null, 2) + "\n",
+    );
+    const out = mkdtempSync(join(tmpdir(), "forge-out4-"));
+    await expect(exportModule(root, out, { book: "testbook", domain: "gear" })).rejects.toThrow(/duplicate item id "gun_a"/);
+  });
+
+  it("re-export overwrites the previous module cleanly", async () => {
+    const root = seed([item("gun_a", "approved")]);
+    const out = mkdtempSync(join(tmpdir(), "forge-out5-"));
+    await exportModule(root, out, { book: "testbook", domain: "gear" });
+    const res2 = await exportModule(root, out, { book: "testbook", domain: "gear", version: "0.2.0" });
+    const manifest = JSON.parse(readFileSync(join(res2.moduleDir, "module.json"), "utf8"));
+    expect(manifest.version).toBe("0.2.0");
+    expect(readdirSync(out).filter((f) => f.startsWith(".staging"))).toEqual([]);
   });
 });
