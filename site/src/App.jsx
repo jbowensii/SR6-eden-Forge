@@ -3,10 +3,11 @@ import CategoryTable from "./components/CategoryTable.jsx";
 import ItemEditor from "./components/ItemEditor.jsx";
 import Preview from "./components/Preview.jsx";
 import Tree from "./components/Tree.jsx";
-import { exportModule, getCategory, getTree, putItem, validate } from "./api.js";
+import { exportModule, getBooks, getCategory, getTree, putItem, validate } from "./api.js";
 
 export default function App() {
   const [tree, setTree] = useState([]);
+  const [books, setBooks] = useState({});
   const [selected, setSelected] = useState(null); // {book, domain, category}
   const [exporting, setExporting] = useState(false);
   const [payload, setPayload] = useState(null);
@@ -17,6 +18,7 @@ export default function App() {
 
   useEffect(() => {
     getTree().then(setTree).catch((e) => setStatus(String(e)));
+    getBooks().then(setBooks).catch(() => {});
   }, []);
 
   async function openCategory(entry) {
@@ -70,17 +72,25 @@ export default function App() {
     }
   }
 
+  const bookInfo = selected ? books[selected.book] : null;
+
   return (
     <div className="layout">
       <aside>
-        <h1>SR6 Forge</h1>
-        <button onClick={runValidate}>Validate all</button>
-        <button onClick={runExport} disabled={!selected || exporting}>Export</button>
+        <header className="brand">
+          <span className="brand-sr6">SR6</span>
+          <span className="brand-slash">//</span>
+          <span className="brand-forge">FORGE</span>
+        </header>
+        <div className="actions">
+          <button onClick={runValidate}>Validate</button>
+          <button onClick={runExport} disabled={!selected || exporting}>Export</button>
+        </div>
         <Tree entries={tree} selected={selected} onSelect={openCategory} />
       </aside>
       <main>
-        <div className="status">{status}</div>
-        {payload && (
+        <div className="status" data-live={Boolean(status)}>{status || "ready"}</div>
+        {payload ? (
           <CategoryTable
             payload={payload}
             issues={issues}
@@ -89,10 +99,24 @@ export default function App() {
               setDoc(null);
             }}
           />
+        ) : (
+          <div className="empty-slate">
+            <div className="empty-glyph">⬡</div>
+            <p>Select a category to start the run.</p>
+          </div>
         )}
       </main>
       <section className="right">
-        {editing && <ItemEditor key={editing.id} item={editing} onSave={save} />}
+        {editing && (
+          <ItemEditor
+            key={editing.id}
+            item={editing}
+            bookTitle={bookInfo?.title ?? selected?.book}
+            pdfAvailable={Boolean(bookInfo?.pdf)}
+            pdfHref={editing.meta ? `/api/pdf/${editing.meta.book}#page=${editing.meta.page}` : null}
+            onSave={save}
+          />
+        )}
         {doc && <Preview doc={doc} />}
       </section>
     </div>

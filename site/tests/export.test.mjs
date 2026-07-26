@@ -107,3 +107,35 @@ describe("export", () => {
     expect(readdirSync(out).filter((f) => f.startsWith(".staging"))).toEqual([]);
   });
 });
+
+describe("export references and images", () => {
+  it("bundles data/_assets images into the module and rewrites img", async () => {
+    const withImg = { ...item("gun_a", "approved"), img: "testbook/gun_a.png" };
+    const root = seed([withImg]);
+    mkdirSync(join(root, "_assets", "testbook"), { recursive: true });
+    writeFileSync(join(root, "_assets", "testbook", "gun_a.png"), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+    writeFileSync(join(root, "books.json"), JSON.stringify({ testbook: { title: "Test Book" } }));
+    const out = mkdtempSync(join(tmpdir(), "forge-img-"));
+    const res = await exportModule(root, out, { book: "testbook", domain: "gear" });
+    const { existsSync } = await import("node:fs");
+    expect(existsSync(join(res.moduleDir, "icons", "gun_a.png"))).toBe(true);
+    const unpacked = mkdtempSync(join(tmpdir(), "forge-img-un-"));
+    await extractPack(join(res.moduleDir, "packs", "gear"), unpacked);
+    const files = readdirSync(unpacked);
+    const doc = JSON.parse(readFileSync(join(unpacked, files[0]), "utf8"));
+    expect(doc.img).toBe("modules/sr6-forge-testbook/icons/gun_a.png");
+    expect(doc.system.product).toBe("Test Book");
+    expect(doc.system.page).toBe(1);
+  });
+
+  it("missing asset falls back to the default icon", async () => {
+    const withImg = { ...item("gun_a", "approved"), img: "testbook/nope.png" };
+    const root = seed([withImg]);
+    const out = mkdtempSync(join(tmpdir(), "forge-img2-"));
+    const res = await exportModule(root, out, { book: "testbook", domain: "gear" });
+    const unpacked = mkdtempSync(join(tmpdir(), "forge-img2-un-"));
+    await extractPack(join(res.moduleDir, "packs", "gear"), unpacked);
+    const doc = JSON.parse(readFileSync(join(unpacked, readdirSync(unpacked)[0]), "utf8"));
+    expect(doc.img).toBe("icons/svg/item-bag.svg");
+  });
+});

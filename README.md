@@ -84,11 +84,26 @@ npm run build        # build the UI
 npm run serve        # http://localhost:8347
 ```
 
-Browse categories in the sidebar, click a row to edit (fields, QA status),
-Save writes the JSON file and shows the exact Foundry document the item will
-export as. "Validate all" runs the Python validator (`FORGE_PYTHON` overrides
-the interpreter; defaults to the repo `.venv`, then `python3`). For UI
-development: `npm run dev` (Vite on :5173, proxying `/api` to :8347).
+Browse categories in the sidebar, click a row to edit (fields, QA status,
+description, image), Save writes the JSON file and shows the exact Foundry
+document the item will export as. "Validate all" runs the Python validator
+(`FORGE_PYTHON` overrides the interpreter; defaults to the repo `.venv`, then
+`python3`). For UI development: `npm run dev` (Vite on :5173, proxying `/api`).
+
+**Source references**: every item carries its book + printed page (`meta`),
+shown in the table and exported into the Foundry document (`system.product`,
+`system.page`). Create `data/books.json` (local-only) to name your books and
+wire up "Open PDF" jumps to the item's page:
+
+```json
+{ "corebook": { "title": "Sixth World Core Rulebook", "pdf": "C:/path/to/your.pdf" } }
+```
+
+**Item images**: drop files under `data/_assets/<book>/…` and set an item's
+Image field to the relative path (e.g. `corebook/predator.webp`). The editor
+previews it and the export bundles it into the module's `icons/` folder.
+Paths starting `icons/`, `systems/`, or `modules/` pass through to Foundry
+core/system art unchanged.
 
 ## Exporting a module
 

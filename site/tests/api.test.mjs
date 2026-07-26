@@ -128,3 +128,44 @@ describe("api", () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe("books and pdf", () => {
+  function makeAppWithBooks(books) {
+    const root = mkdtempSync(join(tmpdir(), "forge-books-"));
+    mkdirSync(join(root, "corebook", "gear"), { recursive: true });
+    writeFileSync(
+      join(root, "corebook", "gear", "weapons_firearms.json"),
+      JSON.stringify({ book: "corebook", domain: "gear", category: "weapons_firearms", items: [ITEM] }, null, 2) + "\n",
+    );
+    if (books) writeFileSync(join(root, "books.json"), JSON.stringify(books));
+    const schemasDir = mkdtempSync(join(tmpdir(), "forge-sch2-"));
+    writeFileSync(join(schemasDir, "gear.schema.json"), "{}");
+    return { root, app: buildApp(root, { schemasDir, validate: async () => ({}) }) };
+  }
+
+  it("GET /api/books reports titles and pdf availability", async () => {
+    const pdf = join(mkdtempSync(join(tmpdir(), "forge-pdf-")), "book.pdf");
+    writeFileSync(pdf, "%PDF-1.4 fake");
+    const { app } = makeAppWithBooks({ corebook: { title: "Core", pdf } });
+    const res = await request(app).get("/api/books");
+    expect(res.body.corebook).toEqual({ title: "Core", pdf: true });
+  });
+
+  it("GET /api/pdf/:book streams when configured, 404 otherwise", async () => {
+    const pdf = join(mkdtempSync(join(tmpdir(), "forge-pdf2-")), "book.pdf");
+    writeFileSync(pdf, "%PDF-1.4 fake");
+    const { app } = makeAppWithBooks({ corebook: { title: "Core", pdf } });
+    const ok = await request(app).get("/api/pdf/corebook");
+    expect(ok.status).toBe(200);
+    expect(ok.headers["content-type"]).toMatch(/pdf/);
+    const missing = await request(app).get("/api/pdf/nosuch");
+    expect(missing.status).toBe(404);
+  });
+
+  it("PUT preview carries product from books.json", async () => {
+    const { app } = makeAppWithBooks({ corebook: { title: "Core Book Title" } });
+    const res = await request(app).put("/api/item/corebook/gear/weapons_firearms/example_autopistol").send(ITEM);
+    expect(res.body.doc.system.product).toBe("Core Book Title");
+    expect(res.body.doc.system.page).toBe(1);
+  });
+});

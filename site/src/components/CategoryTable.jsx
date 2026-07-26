@@ -9,18 +9,22 @@ export default function CategoryTable({ payload, issues, onEdit }) {
     <table>
       <thead>
         <tr>
-          <th>Name</th><th>Subtype</th><th>Price</th><th>Avail</th><th>QA</th><th>Issues</th>
+          <th>Name</th><th>Subtype</th><th>Price</th><th>Avail</th><th>Ref</th><th>QA</th><th>Issues</th>
         </tr>
       </thead>
       <tbody>
         {payload.items.map((item) => (
           <tr key={item.id} onClick={() => onEdit(item)}>
-            <td>{item.name}</td>
-            <td>{item.system.subtype ?? ""}</td>
-            <td>{item.system.priceDef ?? item.system.price}</td>
-            <td>{item.system.availDef ?? item.system.avail}</td>
-            <td className={`qa qa-${item.meta.qaStatus}`}>{item.meta.qaStatus}</td>
-            <td>{(issueMap.get(item.id) ?? []).map((i) => i.rule).join(", ")}</td>
+            <td className="cell-name">
+              {item.img && <span className="has-img" title={item.img}>◈</span>}
+              {item.name}
+            </td>
+            <td className="cell-subtype">{item.system.subtype ?? ""}</td>
+            <td className="cell-num">{item.system.priceDef ?? item.system.price}</td>
+            <td className="cell-num">{item.system.availDef ?? item.system.avail}</td>
+            <td className="cell-ref">p. {item.meta.page}</td>
+            <td><span className={`qa-chip qa-${item.meta.qaStatus}`}>{item.meta.qaStatus}</span></td>
+            <td className="cell-issues">{(issueMap.get(item.id) ?? []).map((i) => i.rule).join(", ")}</td>
           </tr>
         ))}
       </tbody>

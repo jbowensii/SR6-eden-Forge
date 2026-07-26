@@ -2,8 +2,10 @@ import React, { useState } from "react";
 
 const QA = ["extracted", "reviewed", "approved"];
 const MODES = ["SS", "SA", "BF", "FA"];
+// rendered by dedicated controls above the generic field list
+const HANDLED = new Set(["description"]);
 
-export default function ItemEditor({ item, onSave }) {
+export default function ItemEditor({ item, bookTitle, pdfAvailable, pdfHref, onSave }) {
   const [draft, setDraft] = useState(() => structuredClone(item));
 
   const setSystem = (field, value) => setDraft((d) => ({ ...d, system: { ...d.system, [field]: value } }));
@@ -11,7 +13,7 @@ export default function ItemEditor({ item, onSave }) {
   function renderField(field, value) {
     if (field === "modes" && value && typeof value === "object") {
       return (
-        <span>
+        <span className="mode-row">
           {MODES.map((m) => (
             <label key={m} className="inline">
               <input type="checkbox" checked={!!value[m]} onChange={(e) => setSystem("modes", { ...value, [m]: e.target.checked })} />
@@ -23,7 +25,7 @@ export default function ItemEditor({ item, onSave }) {
     }
     if (field === "attackRating" && Array.isArray(value)) {
       return (
-        <span>
+        <span className="ar-row">
           {value.map((v, i) => (
             <input
               key={i}
@@ -52,15 +54,26 @@ export default function ItemEditor({ item, onSave }) {
     return <code>{JSON.stringify(value)}</code>;
   }
 
+  const imgSrc = draft.img && !/^(icons|systems|modules)\//.test(draft.img) ? `/assets/${draft.img}` : null;
+
   return (
     <div className="editor">
-      <h2>{draft.id}</h2>
+      <div className="editor-head">
+        <h2>{draft.name}</h2>
+        <div className="ref-line">
+          <span className="ref-book">{bookTitle} — p. {draft.meta?.page}</span>
+          <span className="ref-id">{draft.id}</span>
+        </div>
+      </div>
+
       <label>
         Name <input type="text" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
       </label>
+
       <label>
         QA status
         <select
+          className={`qa-select qa-${draft.meta.qaStatus}`}
           value={draft.meta.qaStatus}
           onChange={(e) => setDraft({ ...draft, meta: { ...draft.meta, qaStatus: e.target.value } })}
         >
@@ -69,12 +82,60 @@ export default function ItemEditor({ item, onSave }) {
           ))}
         </select>
       </label>
-      {Object.entries(draft.system).map(([field, value]) => (
-        <label key={field}>
-          {field} {renderField(field, value)}
-        </label>
-      ))}
-      <button onClick={() => onSave(draft)}>Save</button>
+
+      <label className="block">
+        Description
+        <textarea
+          rows={4}
+          value={draft.system.description ?? ""}
+          placeholder="Flavor text / rules summary for the Foundry sheet…"
+          onChange={(e) => setSystem("description", e.target.value)}
+        />
+      </label>
+
+      <label className="block">
+        Image
+        <input
+          type="text"
+          value={draft.img ?? ""}
+          placeholder="corebook/example.webp (in data/_assets/) or icons/svg/…"
+          onChange={(e) => {
+            const img = e.target.value;
+            setDraft((d) => {
+              const next = { ...d };
+              if (img) next.img = img;
+              else delete next.img;
+              return next;
+            });
+          }}
+        />
+      </label>
+      {imgSrc && <img className="img-preview" src={imgSrc} alt="" onError={(e) => (e.target.style.display = "none")} />}
+
+      <div className="field-grid">
+        {Object.entries(draft.system)
+          .filter(([field]) => !HANDLED.has(field))
+          .map(([field, value]) => (
+            <label key={field}>
+              <span className="field-name">{field}</span> {renderField(field, value)}
+            </label>
+          ))}
+      </div>
+
+      <div className="editor-actions">
+        <button className="primary" onClick={() => onSave(draft)}>Save</button>
+        {pdfHref && (
+          <a
+            className={`button ghost ${pdfAvailable ? "" : "disabled"}`}
+            href={pdfAvailable ? pdfHref : undefined}
+            target="_blank"
+            rel="noreferrer"
+            title={pdfAvailable ? `Open ${bookTitle} at page ${draft.meta?.page}` : "Add the PDF path to data/books.json"}
+          >
+            Open PDF · p. {draft.meta?.page}
+          </a>
+        )}
+      </div>
     </div>
   );
 }

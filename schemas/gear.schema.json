@@ -22,6 +22,7 @@
       "properties": {
         "id": { "$ref": "urn:sr6forge:common#/$defs/slug" },
         "name": { "type": "string", "minLength": 1 },
+        "img": { "type": "string", "minLength": 1 },
         "system": { "$ref": "#/$defs/gearSystem" },
         "meta": { "$ref": "urn:sr6forge:common#/$defs/meta" }
       }

@@ -1,7 +1,8 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import express from "express";
 import { toFoundryDoc } from "../shared/edenTransform.mjs";
+import { loadBooks } from "./exportModule.mjs";
 import { SEGMENT, StoreError, readCategory, tree, writeItem } from "./store.mjs";
 
 const EXPORT_STATUSES = new Set(["approved", "reviewed", "all"]);
@@ -11,6 +12,27 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
   app.use(express.json({ limit: "2mb" }));
 
   app.get("/api/tree", (req, res) => handle(res, () => tree(dataRoot)));
+
+  // book metadata (titles + whether a PDF is wired up) from data/books.json
+  app.get("/api/books", (req, res) => {
+    handle(res, () => {
+      const books = loadBooks(dataRoot);
+      return Object.fromEntries(
+        Object.entries(books).map(([slug, b]) => [slug, { title: b.title ?? slug, pdf: Boolean(b.pdf && existsSync(b.pdf)) }]),
+      );
+    });
+  });
+
+  // stream the source PDF so the browser viewer can jump to #page=N
+  app.get("/api/pdf/:book", (req, res) => {
+    if (!SEGMENT.test(req.params.book)) return res.status(400).json({ error: "bad-segment" });
+    const pdf = loadBooks(dataRoot)[req.params.book]?.pdf;
+    if (!pdf || !existsSync(pdf)) return res.status(404).json({ error: "no-pdf", detail: "add it to data/books.json" });
+    res.sendFile(pdf);
+  });
+
+  // item images live in data/_assets/<book>/...; served read-only for previews
+  app.use("/assets", express.static(join(dataRoot, "_assets")));
 
   app.get("/api/schema/:domain", (req, res) => {
     if (!SEGMENT.test(req.params.domain)) return res.status(400).json({ error: "bad-segment" });
@@ -31,7 +53,7 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
       let doc = null;
       let docError = null;
       try {
-        doc = toFoundryDoc(item);
+        doc = toFoundryDoc(item, { product: loadBooks(dataRoot)[req.params.book]?.title });
       } catch (err) {
         docError = String(err.message ?? err);
       }
