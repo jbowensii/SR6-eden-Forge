@@ -305,8 +305,8 @@ button.primary, .button.primary {
   text-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
 }
 button.primary:hover { background: var(--magenta-soft); }
-.button.ghost { color: var(--cyan); border-color: var(--cyan); }
-.button.ghost:hover { background: rgba(33, 208, 214, 0.12); color: #fff; }
+button.ghost, .button.ghost { color: var(--cyan); border-color: var(--cyan); }
+button.ghost:hover:not(:disabled), .button.ghost:hover { background: rgba(33, 208, 214, 0.12); color: #fff; }
 button:disabled, .button.disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
 
 /* ── preview readout ───────────────────────────────────────── */

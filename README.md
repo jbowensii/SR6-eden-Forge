@@ -63,6 +63,22 @@ python -m extractor dump --pdf "path/to/corebook.pdf" --book corebook --pages 24
 python -m extractor parse --book corebook --domain gear
 ```
 
+**Enrichment** (writeups + artwork, all output stays in gitignored `data/`):
+
+```bash
+# add --columns to dump: caches column-ordered text for the passes below
+python -m extractor dump --pdf "…" --book corebook --pages 245-304 --columns
+
+# attribute per-item prose writeups into system.description (skips items
+# that already have one; --force overwrites)
+python -m extractor enrich --book corebook --domain gear --pages 245-304
+
+# extract item artwork as alpha PNGs; confident matches are named
+# data/_assets/<book>/<item_id>.png and wired to the item; ambiguous ones
+# land in data/_assets/<book>/_inbox/ for manual assignment in the app
+python -m extractor images --pdf "…" --book corebook --domain gear --pages 245-304
+```
+
 No AI involved at runtime. Parser profiles live in `extractor/profiles/`
 (`corebook_gear.py` covers the Core Rulebook's 21 gear categories, 463 items).
 To extract a new book, write a profile module: a list of `TableSpec`s (page,
