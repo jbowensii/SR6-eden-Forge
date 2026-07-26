@@ -210,7 +210,7 @@ describe("icon library", () => {
     const { app } = makeIconApp();
     const res = await request(app).get("/api/icons?q=smg");
     expect(res.status).toBe(200);
-    expect(res.body).toEqual(["cyberpunk/smg_worn.png"]);
+    expect(res.body).toEqual([{ r: 0, p: "cyberpunk/smg_worn.png" }]);
     expect((await request(app).get("/api/icons?q=nothingmatches")).body).toEqual([]);
   });
 

@@ -51,16 +51,19 @@ export default function IconPicker({ item, subtype, onAssign, onClose }) {
           onChange={(e) => setQuery(e.target.value)}
         />
         <div className="icon-grid">
-          {results.map((rel) => (
-            <img
-              key={rel}
-              src={`/icon-lib/${rel}`}
-              title={rel}
-              className={selected === rel ? "selected" : ""}
-              onClick={() => setSelected(rel)}
-              loading="lazy"
-            />
-          ))}
+          {results.map((hit) => {
+            const key = `${hit.r}/${hit.p}`;
+            return (
+              <img
+                key={key}
+                src={`/icon-lib/${hit.r}/${hit.p}`}
+                title={hit.p}
+                className={selected && selected.r === hit.r && selected.p === hit.p ? "selected" : ""}
+                onClick={() => setSelected(hit)}
+                loading="lazy"
+              />
+            );
+          })}
           {query && !results.length && <div className="icon-empty">no matches</div>}
         </div>
         {error && <div className="modal-error">{error}</div>}

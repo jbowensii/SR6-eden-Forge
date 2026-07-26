@@ -12,6 +12,17 @@ export function loadSettings(dataRoot) {
   }
 }
 
+/** Search roots: settings.iconLibrary (string or array) plus the repo-local
+ * data/_assets/iconsets tree. Order is stable — assign() references roots by
+ * index. */
+export function libraryRoots(dataRoot) {
+  const configured = loadSettings(dataRoot).iconLibrary;
+  const roots = (Array.isArray(configured) ? configured : configured ? [configured] : []).filter((p) => existsSync(p));
+  const iconsets = join(dataRoot, "_assets", "iconsets");
+  if (existsSync(iconsets)) roots.push(iconsets);
+  return roots;
+}
+
 const indexCache = new Map(); // libraryRoot -> [{rel, tokens}]
 
 export function libraryIndex(libraryRoot) {
@@ -24,7 +35,7 @@ export function libraryIndex(libraryRoot) {
         if (stat.isDirectory()) walk(full);
         else if (EXTS.has(extname(name).toLowerCase())) {
           const rel = relative(libraryRoot, full).split(sep).join("/");
-          entries.push({ rel, haystack: rel.toLowerCase() });
+          entries.push({ rel, tokens: rel.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean) });
         }
       }
     };
@@ -34,14 +45,17 @@ export function libraryIndex(libraryRoot) {
   return indexCache.get(libraryRoot);
 }
 
-export function searchIcons(libraryRoot, query, limit = 60) {
+export function searchIcons(roots, query, limit = 60) {
+  const rootList = Array.isArray(roots) ? roots : [roots];
   const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
   if (!terms.length) return [];
   const out = [];
-  for (const entry of libraryIndex(libraryRoot)) {
-    if (terms.every((t) => entry.haystack.includes(t))) {
-      out.push(entry.rel);
-      if (out.length >= limit) break;
+  for (let r = 0; r < rootList.length; r++) {
+    for (const entry of libraryIndex(rootList[r])) {
+      if (terms.every((t) => entry.tokens.some((tok) => tok.startsWith(t)))) {
+        out.push({ r, p: entry.rel });
+        if (out.length >= limit) return out;
+      }
     }
   }
   return out;

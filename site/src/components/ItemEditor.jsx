@@ -9,6 +9,7 @@ const HANDLED = new Set(["description"]);
 export default function ItemEditor({ item, bookTitle, pdfAvailable, pdfHref, onSave, onAssignIcon }) {
   const [draft, setDraft] = useState(() => structuredClone(item));
   const [picking, setPicking] = useState(false);
+  const [renderExists, setRenderExists] = useState(true);
 
   const setSystem = (field, value) => setDraft((d) => ({ ...d, system: { ...d.system, [field]: value } }));
 
@@ -115,41 +116,43 @@ export default function ItemEditor({ item, bookTitle, pdfAvailable, pdfHref, onS
         />
       </label>
       <div className="art-row">
-        {imgSrc ? (
-          <figure>
+        <figure>
+          {imgSrc && draft.img !== renderPath ? (
             <img
               className="img-preview clickable"
               src={imgSrc}
               alt=""
               title="Click to choose a different icon"
               onClick={() => setPicking(true)}
-              onError={(e) => (e.target.parentElement.style.display = "none")}
+              onError={(e) => {
+                e.target.replaceWith(Object.assign(document.createElement("div"), { className: "img-empty", textContent: "—" }));
+              }}
             />
-            <figcaption>assigned</figcaption>
-          </figure>
-        ) : (
-          <button className="ghost" onClick={() => setPicking(true)}>Choose icon…</button>
-        )}
-        {renderPath !== draft.img && (
-          <figure>
+          ) : (
+            <div className="img-empty clickable" title="Click to choose an icon" onClick={() => setPicking(true)}>
+              {draft.img === renderPath ? "—" : "none"}
+            </div>
+          )}
+          <figcaption>icon</figcaption>
+        </figure>
+        <figure>
+          {renderExists ? (
             <img
-              className="img-preview"
+              className={`img-preview ${draft.img === renderPath ? "" : "clickable"}`}
               src={`/assets/${renderPath}`}
               alt=""
-              onError={(e) => (e.target.parentElement.style.display = "none")}
+              title={draft.img === renderPath ? "Assigned" : "Click to use the book render"}
+              onClick={() => draft.img !== renderPath && setDraft((d) => ({ ...d, img: renderPath }))}
+              onError={() => setRenderExists(false)}
             />
-            <figcaption>
-              book render{" "}
-              <button
-                className="mini"
-                onClick={() => setDraft((d) => ({ ...d, img: renderPath }))}
-                title="Use the extracted book render as this item's image"
-              >
-                use
-              </button>
-            </figcaption>
-          </figure>
-        )}
+          ) : (
+            <div className="img-empty">none</div>
+          )}
+          <figcaption>
+            book render{draft.img === renderPath ? " (assigned)" : ""}
+          </figcaption>
+        </figure>
+        <button className="ghost" onClick={() => setPicking(true)}>Choose icon…</button>
       </div>
 
       <div className="field-grid">
@@ -166,7 +169,7 @@ export default function ItemEditor({ item, bookTitle, pdfAvailable, pdfHref, onS
         <IconPicker
           item={draft}
           subtype={draft.system.subtype || draft.system.type}
-          onAssign={(libraryPath, mode) => onAssignIcon(draft, libraryPath, mode)}
+          onAssign={(hit, mode) => onAssignIcon(draft, hit, mode)}
           onClose={() => setPicking(false)}
         />
       )}

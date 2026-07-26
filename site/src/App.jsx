@@ -56,13 +56,14 @@ export default function App() {
     }
   }
 
-  async function handleAssignIcon(item, libraryPath, mode) {
+  async function handleAssignIcon(item, hit, mode) {
     const res = await assignIcon({
       book: selected.book,
       domain: selected.domain,
       category: selected.category,
       itemId: item.id,
-      libraryPath,
+      root: hit.r,
+      libraryPath: hit.p,
       mode,
     });
     setStatus(mode === "generic" ? `generic icon updated (${res.updated} item(s))` : `icon set for ${item.id}`);

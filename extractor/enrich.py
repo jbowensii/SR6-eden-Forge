@@ -20,7 +20,7 @@ from pathlib import Path
 from extractor.cache import read_cols
 from extractor.textcols import COLUMN_BREAK
 
-MAX_SECTION_LINES = 80
+MAX_SECTION_LINES = 120
 MAX_DESC_CHARS = 3500
 PAGE_WINDOW = 8       # heading may sit several pages before the item's table
 PREFIX_MIN = 6        # min normalized-key length for group-prefix matching
@@ -181,6 +181,16 @@ def _dehyphenate(lines: list[str]) -> str:
     return re.sub(r"\s+\S*-$", "", text)  # drop a mid-word tail cut off at a section boundary
 
 
+def _stat_like(line: str) -> bool:
+    """True for table-row debris (mostly numeric/symbol tokens); False for a
+    prose sentence that happens to mention a price."""
+    tokens = line.split()
+    if not tokens:
+        return True
+    numeric = sum(1 for t in tokens if re.search(r"[\d¥]", t) or t == "—")
+    return numeric / len(tokens) > 0.4 or len(tokens) <= 3
+
+
 def parse_sections(lines, index) -> dict[tuple[str, str], str]:
     """lines: iterable of str or (page|None, str). A line matching a known
     item name opens a section captured until the next heading/stopper."""
@@ -194,7 +204,9 @@ def parse_sections(lines, index) -> dict[tuple[str, str], str]:
             text = _dehyphenate(buffer)[:MAX_DESC_CHARS]
             if len(text) > 40:  # ignore stray one-liners
                 for t in current:
-                    sections.setdefault((t.category, t.item_id), text)
+                    key = (t.category, t.item_id)
+                    if len(text) > len(sections.get(key, "")):
+                        sections[key] = text
         current, buffer = None, []
 
     for entry in lines:
@@ -211,7 +223,7 @@ def parse_sections(lines, index) -> dict[tuple[str, str], str]:
             continue
         if _STOPPERS.match(line):
             continue
-        if _JUNK.search(line) and "Wireless" not in line:
+        if _JUNK.search(line) and "Wireless" not in line and _stat_like(line):
             continue
         buffer.append(line)
         if len(buffer) >= MAX_SECTION_LINES:

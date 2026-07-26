@@ -392,3 +392,14 @@ button.mini { padding: 1px 8px 2px; font-size: 10px; margin-left: 4px; }
 .modal-actions { display: flex; gap: 10px; }
 .img-preview.clickable { cursor: pointer; }
 .img-preview.clickable:hover { border-color: var(--magenta); }
+
+.img-empty {
+  width: 88px; height: 88px; display: grid; place-content: center;
+  border: 1px dashed var(--line-bright); color: var(--ink-dim);
+  font-family: var(--font-mono); font-size: 11px;
+  clip-path: var(--chamfer-sm);
+}
+.img-empty.clickable { cursor: pointer; }
+.img-empty.clickable:hover { border-color: var(--magenta); color: var(--ink); }
+.art-row { align-items: flex-start; }
+.art-row > button { align-self: center; }

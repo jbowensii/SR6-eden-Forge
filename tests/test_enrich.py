@@ -183,3 +183,27 @@ def test_numbered_family_heading():
     )
     assert ("cyberware", "zap_reflexes_1") in sections
     assert ("cyberware", "zap_reflexes_2") in sections
+
+
+def test_longest_writeup_wins_over_caption_fragment():
+    lines = [
+        "Zapgun Mk1",  # art caption opens a short premature section
+        "A short caption-adjacent fragment of fictional text here.",
+        "Zapgun Mk2",
+        "filler writeup for the other fictional gun, long enough to keep.",
+        "Zapgun Mk1",  # the real writeup, longer
+        "The real fictional writeup which is much longer and should win the",
+        "assignment because it contains the full description of the zapgun",
+        "including all of its fictional features and quirks in detail.",
+    ]
+    sections = parse_sections(lines, make_index())
+    assert "real fictional writeup" in sections[("weapons_firearms", "zapgun_mk1")]
+
+
+def test_prose_prices_survive_junk_filter():
+    lines = [
+        "Zapgun Mk1",
+        "This fictional gun sells on fictional streets for around 750¥ despite the ban.",
+    ]
+    sections = parse_sections(lines, make_index())
+    assert "750¥ despite the ban" in sections[("weapons_firearms", "zapgun_mk1")]
