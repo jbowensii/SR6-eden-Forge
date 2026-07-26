@@ -19,3 +19,10 @@ export const exportModule = (book, domain, status) =>
     body: JSON.stringify({ book, domain, status }),
   }).then(json);
 export const getBooks = () => fetch("/api/books").then(json);
+export const searchIcons = (q) => fetch(`/api/icons?q=${encodeURIComponent(q)}`).then(json);
+export const assignIcon = (payload) =>
+  fetch("/api/icon/assign", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  }).then(json);

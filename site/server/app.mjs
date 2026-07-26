@@ -3,6 +3,7 @@ import { join } from "node:path";
 import express from "express";
 import { toFoundryDoc } from "../shared/edenTransform.mjs";
 import { loadBooks } from "./exportModule.mjs";
+import { assignIcon, loadSettings, searchIcons } from "./iconLibrary.mjs";
 import { SEGMENT, StoreError, readCategory, tree, writeItem } from "./store.mjs";
 
 const EXPORT_STATUSES = new Set(["approved", "reviewed", "all"]);
@@ -33,6 +34,29 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
 
   // item images live in data/_assets/<book>/...; served read-only for previews
   app.use("/assets", express.static(join(dataRoot, "_assets")));
+
+  // icon library (data/settings.json iconLibrary): search + serve + assign
+  const libraryRoot = () => loadSettings(dataRoot).iconLibrary;
+
+  app.get("/api/icons", (req, res) => {
+    const root = libraryRoot();
+    if (!root || !existsSync(root)) return res.status(404).json({ error: "no-library", detail: "set iconLibrary in data/settings.json" });
+    handle(res, () => searchIcons(root, String(req.query.q ?? ""), Number(req.query.limit ?? 60)));
+  });
+
+  app.use("/icon-lib", (req, res, next) => {
+    const root = libraryRoot();
+    if (!root || !existsSync(root)) return res.status(404).end();
+    express.static(root)(req, res, next);
+  });
+
+  app.post("/api/icon/assign", (req, res) => {
+    const root = libraryRoot();
+    if (!root || !existsSync(root)) return res.status(404).json({ error: "no-library" });
+    const { book, domain, category, itemId, libraryPath, mode } = req.body ?? {};
+    if (mode !== "item" && mode !== "generic") return res.status(400).json({ error: "bad-mode" });
+    handle(res, () => assignIcon(dataRoot, root, { book, domain, category, itemId, libraryPath, mode }));
+  });
 
   app.get("/api/schema/:domain", (req, res) => {
     if (!SEGMENT.test(req.params.domain)) return res.status(400).json({ error: "bad-segment" });

@@ -81,3 +81,28 @@ export function writeItem(dataRoot, book, domain, category, itemId, item) {
   renameSync(tmpPath, path);
   return item;
 }
+
+export function rewriteDomain(dataRoot, book, domain, mutate) {
+  /** Apply mutate(item, category) across every category file of a domain;
+   * files with changes are rewritten atomically. Returns changed-item count. */
+  checkSegments(book, domain);
+  const domainDir = join(dataRoot, book, domain);
+  let updated = 0;
+  for (const file of readdirSync(domainDir).filter((f) => f.endsWith(".json")).sort()) {
+    const path = join(domainDir, file);
+    const payload = JSON.parse(readFileSync(path, "utf8"));
+    let changed = false;
+    for (const item of payload.items ?? []) {
+      if (mutate(item, file.replace(/\.json$/, ""))) {
+        changed = true;
+        updated += 1;
+      }
+    }
+    if (changed) {
+      const tmpPath = `${path}.tmp`;
+      writeFileSync(tmpPath, JSON.stringify(payload, null, 2) + "\n", "utf8");
+      renameSync(tmpPath, path);
+    }
+  }
+  return updated;
+}

@@ -356,3 +356,39 @@ button:disabled, .button.disabled { opacity: 0.35; cursor: not-allowed; pointer-
   letter-spacing: 0.1em;
 }
 button.mini { padding: 1px 8px 2px; font-size: 10px; margin-left: 4px; }
+
+/* icon picker modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(6, 8, 12, 0.75);
+  display: grid; place-items: center; z-index: 100;
+  backdrop-filter: blur(2px);
+}
+.modal {
+  width: min(720px, 92vw); max-height: 84vh; overflow-y: auto;
+  background: var(--bg-panel); border: 1px solid var(--magenta);
+  clip-path: var(--chamfer); padding: 16px;
+  box-shadow: 0 0 40px rgba(229, 23, 123, 0.25);
+}
+.modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.modal-head h3 { margin: 0; font-family: var(--font-display); font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--magenta-soft); }
+.modal input[type="text"] {
+  width: 100%; background: var(--bg); border: 1px solid var(--line);
+  color: var(--ink); font: 13px var(--font-mono); padding: 7px 10px; outline: none;
+}
+.modal input[type="text"]:focus { border-color: var(--cyan); }
+.icon-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 8px; margin: 12px 0; min-height: 90px;
+}
+.icon-grid img {
+  width: 100%; aspect-ratio: 1; object-fit: contain;
+  background: var(--bg); border: 1px solid var(--line);
+  cursor: pointer; padding: 4px;
+}
+.icon-grid img:hover { border-color: var(--cyan); }
+.icon-grid img.selected { border-color: var(--magenta); box-shadow: 0 0 0 1px var(--magenta), 0 0 14px rgba(229, 23, 123, 0.4); }
+.icon-empty { grid-column: 1 / -1; color: var(--ink-dim); text-align: center; align-self: center; }
+.modal-error { color: var(--amber); font-family: var(--font-mono); font-size: 12px; margin-bottom: 8px; }
+.modal-actions { display: flex; gap: 10px; }
+.img-preview.clickable { cursor: pointer; }
+.img-preview.clickable:hover { border-color: var(--magenta); }
