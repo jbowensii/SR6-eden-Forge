@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { extname, join, relative, resolve, sep } from "node:path";
 import { SEGMENT, StoreError, rewriteDomain } from "./store.mjs";
 
@@ -80,14 +80,16 @@ export function assignIcon(dataRoot, libraryRoot, { book, domain, category, item
   const ext = extname(source).toLowerCase();
   const destDir = join(dataRoot, "_assets", book, "lib");
 
+  let itemType = null;
   let subtype = null;
   rewriteDomain(dataRoot, book, domain, (item, cat) => {
     if (cat === category && item.id === itemId) {
-      subtype = String(item.system?.subtype || item.system?.type || "");
+      itemType = String(item.system?.type ?? "");
+      subtype = String(item.system?.subtype ?? "");
     }
     return false;
   });
-  if (subtype === null) throw new StoreError("not-found", itemId);
+  if (itemType === null) throw new StoreError("not-found", itemId);
 
   if (mode === "item") {
     const img = `${book}/lib/${itemId}${ext}`;
@@ -102,16 +104,29 @@ export function assignIcon(dataRoot, libraryRoot, { book, domain, category, item
     return { img, updated };
   }
 
-  // mode === "generic": install the icon as the shared image for EVERY item
-  // in the category being viewed (book renders stay on disk and re-adoptable
-  // from the editor's render slot)
-  const img = `${book}/lib/_generic_${category}${ext}`;
-  copyFileSync(source, join(destDir, `_generic_${category}${ext}`));
-  const updated = rewriteDomain(dataRoot, book, domain, (item, cat) => {
-    if (cat !== category) return false;
+  // mode === "generic": install the icon as the shared image for every item
+  // of this TYPE+SUBTYPE across the domain, and remember the choice in
+  // data/_assets/generic/defaults.json so future imports reuse it
+  const slug = `${itemType}_${subtype}`.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  const genericDir = join(dataRoot, "_assets", "generic");
+  mkdirSync(genericDir, { recursive: true });
+  const img = `generic/${slug}${ext}`;
+  copyFileSync(source, join(genericDir, `${slug}${ext}`));
+
+  const defaultsPath = join(genericDir, "defaults.json");
+  let defaults = {};
+  try {
+    defaults = JSON.parse(readFileSync(defaultsPath, "utf8"));
+  } catch {}
+  defaults[`${itemType}/${subtype}`] = img;
+  writeFileSync(defaultsPath, JSON.stringify(defaults, null, 2) + "\n", "utf8");
+
+  const updated = rewriteDomain(dataRoot, book, domain, (item) => {
+    if (String(item.system?.type ?? "") !== itemType) return false;
+    if (String(item.system?.subtype ?? "") !== subtype) return false;
     if (item.img === img) return false;
     item.img = img;
     return true;
   });
-  return { img, updated };
+  return { img, updated, scope: `${itemType}/${subtype}` };
 }

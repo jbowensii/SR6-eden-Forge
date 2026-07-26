@@ -168,7 +168,7 @@ export default function ItemEditor({ item, bookTitle, categoryName, pdfAvailable
       {picking && (
         <IconPicker
           item={draft}
-          scopeLabel={categoryName}
+          scopeLabel={`${draft.system.type ?? ""}${draft.system.subtype ? " · " + draft.system.subtype : ""}`}
           onAssign={(hit, mode) => onAssignIcon(draft, hit, mode)}
           onClose={() => setPicking(false)}
         />

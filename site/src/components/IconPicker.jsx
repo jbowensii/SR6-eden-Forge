@@ -75,7 +75,7 @@ export default function IconPicker({ item, scopeLabel, onAssign, onClose }) {
             Set for this item
           </button>
           <button className="ghost" disabled={!selected || busy} onClick={() => assign("generic")}>
-            Set for ALL of {scopeLabel || "this category"}
+            Set as generic for {scopeLabel || "this type"}
           </button>
         </div>
       </div>
