@@ -125,15 +125,14 @@ export default function ItemEditor({ item, bookTitle, pdfAvailable, pdfHref, onS
       <div className="editor-actions">
         <button className="primary" onClick={() => onSave(draft)}>Save</button>
         {pdfHref && (
-          <a
-            className={`button ghost ${pdfAvailable ? "" : "disabled"}`}
-            href={pdfAvailable ? pdfHref : undefined}
-            target="_blank"
-            rel="noreferrer"
+          <button
+            className="ghost"
+            disabled={!pdfAvailable}
             title={pdfAvailable ? `Open ${bookTitle} at page ${draft.meta?.page}` : "Add the PDF path to data/books.json"}
+            onClick={() => window.open(pdfHref, "sr6pdf", "width=980,height=1200,left=120,top=40")}
           >
             Open PDF · p. {draft.meta?.page}
-          </a>
+          </button>
         )}
       </div>
     </div>
