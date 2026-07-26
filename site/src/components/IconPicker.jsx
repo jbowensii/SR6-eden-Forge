@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 export default function IconPicker({ item, subtype, onAssign, onClose }) {
   const [query, setQuery] = useState("");
@@ -36,7 +37,9 @@ export default function IconPicker({ item, subtype, onAssign, onClose }) {
     }
   }
 
-  return (
+  // the editor panel's clip-path creates a containing block that would trap
+  // and clip a position:fixed overlay — render at document.body instead
+  return createPortal(
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-head">
@@ -76,6 +79,7 @@ export default function IconPicker({ item, subtype, onAssign, onClose }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
