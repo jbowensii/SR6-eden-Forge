@@ -12,7 +12,7 @@ import re
 from pathlib import Path
 
 from extractor.cache import read_cols
-from extractor.enrich import build_index, norm, parse_col_lines
+from extractor.enrich import build_index, parse_col_lines
 
 MIN_DIM = 60          # ignore decorations
 BG_AREA_RATIO = 0.6   # placements covering this much of the page are backgrounds
@@ -28,13 +28,26 @@ def _page_headings(data_root: Path, book: str, page: int, index) -> list[tuple[f
     out = []
     for frac, col, text in parse_col_lines(read_cols(data_root, book, page).splitlines()):
         line = text.strip()
-        key = norm(line)
-        if key in index and len(line.split()) <= 6 and frac is not None:
-            out.append((frac, col, index[key][0]))
+        if frac is None:
+            continue
+        targets = index.match(line, page)
+        if len(targets) == 1:  # captions name exactly one item
+            t = targets[0]
+            out.append((frac, col, (t.category, t.item_id)))
     return out
 
 
-def extract_images(pdf_path: Path, data_root: Path, book: str, domain: str, pages) -> dict:
+def _remove_background(png_bytes: bytes):
+    """Local, offline background removal (rembg / U2-Net). Returns RGBA PNG
+    bytes, or None when rembg isn't installed."""
+    try:
+        from rembg import remove
+    except ImportError:
+        return None
+    return remove(png_bytes)
+
+
+def extract_images(pdf_path: Path, data_root: Path, book: str, domain: str, pages, rembg: bool = False) -> dict:
     import fitz  # PyMuPDF; lazy so parse/enrich don't require it
 
     domain_dir = data_root / book / domain
@@ -92,7 +105,15 @@ def extract_images(pdf_path: Path, data_root: Path, book: str, domain: str, page
             if target:
                 category, item_id = target
                 rel = f"{book}/{item_id}.png"
-                pix.save(str(assets / f"{item_id}.png"))
+                out_path = assets / f"{item_id}.png"
+                if rembg and not pix.alpha:
+                    cut = _remove_background(pix.tobytes("png"))
+                    if cut is not None:
+                        out_path.write_bytes(cut)
+                    else:
+                        pix.save(str(out_path))
+                else:
+                    pix.save(str(out_path))
                 item = items_by_key[(category, item_id)]
                 item["img"] = rel
                 changed_categories.add(category)
@@ -100,6 +121,7 @@ def extract_images(pdf_path: Path, data_root: Path, book: str, domain: str, page
             else:
                 pix.save(str(inbox / f"p{page_no}_{xref}.png"))
             saved += 1
+            del pix
 
     for category in changed_categories:
         path = domain_dir / f"{category}.json"

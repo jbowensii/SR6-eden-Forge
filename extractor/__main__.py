@@ -40,6 +40,14 @@ def main(argv: list[str] | None = None) -> int:
     i.add_argument("--domain", required=True)
     i.add_argument("--pages", required=True)
     i.add_argument("--data", default="data")
+    i.add_argument("--rembg", action="store_true", help="offline background removal for opaque assigned art")
+
+    ic = sub.add_parser("icons", help="match items lacking art against a local icon library")
+    ic.add_argument("--library", required=True)
+    ic.add_argument("--book", required=True)
+    ic.add_argument("--domain", required=True)
+    ic.add_argument("--data", default="data")
+    ic.add_argument("--min-score", type=int, default=3)
 
     args = parser.parse_args(argv)
     if args.cmd == "dump":
@@ -61,8 +69,14 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "images":
         from extractor.images_extract import extract_images
 
-        stats = extract_images(Path(args.pdf), Path(args.data), args.book, args.domain, _pages(args.pages))
+        stats = extract_images(Path(args.pdf), Path(args.data), args.book, args.domain, _pages(args.pages), rembg=args.rembg)
         print(f"images saved: {stats['saved']} | auto-assigned: {stats['assigned']} | left in _inbox: {stats['inbox']}")
+        return 0
+    if args.cmd == "icons":
+        from extractor.icon_match import match_icons
+
+        stats = match_icons(Path(args.library), Path(args.data), args.book, args.domain, args.min_score)
+        print(f"library files: {stats['library']} | icons matched: {stats['matched']} | still without art: {stats['still_missing']}")
         return 0
     from extractor.run import parse_book
 
