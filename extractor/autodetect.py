@@ -96,9 +96,11 @@ def classify(cols: list[str], label: list[str]):
         return ("BIOWARE", "bioware", "")
     if "defense" in s:
         return ("ARMOR", "armor", "")
-    # generic gear only when the header label clearly says so (avoids matching
-    # skill / cost / rules tables that merely have AVAIL/RATING + COST)
-    if ("avail" in s or "ratingspan" in s) and (set(label) & GEAR_LABELS):
+    # generic gear: any priced table with an availability/rating column. The
+    # row-validity gate (real name + price) filters out non-gear tables, and
+    # the positional reader routes unmapped columns to notes rather than
+    # misaligning stats.
+    if "avail" in s or "ratingspan" in s:
         return ("ELECTRONICS", "electronics", "")
     return None
 
@@ -122,6 +124,8 @@ SUBTYPE_HINTS = {
 }
 _SECTION_RE = re.compile(r"^[a-z][a-z '&/-]{2,38}$")
 _STAT_DEBRIS = re.compile(r"[¥|+]|^\d|(?:^|\s)[—-]?\d+/\d|\bx\d|[—-]\d")
+# rating-span rows ("Rating 3") and index/label fragments are not item names
+_FRAGMENT_RE = re.compile(r"^(rating|force|level|index)\b", re.I)
 # bare weapon-category / tier words that are TYPE-column values, not item names
 _CATEGORY_WORDS = {
     "blade", "blades", "club", "clubs", "exotic", "heavy", "light", "medium",
@@ -129,6 +133,27 @@ _CATEGORY_WORDS = {
     "pistol", "rifle", "shotgun", "smg", "hmg", "lmg", "mmg", "special",
     "grenade", "rocket", "missile", "melee", "ranged", "firearm", "firearms",
 }
+
+
+_NAME_PARTICLES = {"of", "the", "and", "or", "a", "x", "de", "la", "von", "van", "el"}
+
+
+def _looks_mangled(name: str) -> bool:
+    """Detect broken-font word splits: some SR6 books encode no space glyphs, so
+    pdfplumber breaks words at the wrong places -> 'ProstheticCy berlimb,Cr ude',
+    'Cleanm etabolism'. The signatures are an interior lowercase->UPPER camelCase
+    boundary and a non-leading word fragment that starts lowercase. Genuine
+    product names ('Ares Predator', 'Clean Metabolism') never do this."""
+    for tok in name.split():
+        core = tok.strip(",.()/-")
+        if not core:
+            continue
+        if core[0].islower() and core.casefold() not in _NAME_PARTICLES:
+            return True  # 'etabolism', 'berlimb' — a fragment, not a word
+        for a, b in zip(core, core[1:]):
+            if a.islower() and b.isupper():
+                return True  # 'ProstheticCy', 'Wristshie' style camelCase split
+    return False
 
 
 def _valid_name(name: str) -> bool:
@@ -139,9 +164,23 @@ def _valid_name(name: str) -> bool:
         return False  # prose fragments start lowercase
     if "." in name or ":" in name:
         return False  # sentence punctuation
+    if name.endswith(",") or "//" in name:
+        return False  # dangling column fragment / index divider
+    if name.count("(") != name.count(")"):
+        return False  # 'Grooming(1' — a split cell, not a name
+    if name.isupper() and len(name.split()) >= 4:
+        return False  # an all-caps column header leaked as a row
+    if name.casefold() in _NAME_PARTICLES:
+        return False  # bare 'The'/'A'/'of'
     if _STAT_DEBRIS.search(name):
         return False
+    if any(re.fullmatch(r"\d{1,2}[PS]", tok) for tok in name.split()):
+        return False  # a bare damage code ('2S') is table debris, not a name
+    if _FRAGMENT_RE.match(name):
+        return False  # 'Rating 3', 'Force 2' — a span row, not a product
     if name.casefold() in _CATEGORY_WORDS:
+        return False
+    if _looks_mangled(name):
         return False
     return sum(c.isalpha() for c in name) >= 3
 

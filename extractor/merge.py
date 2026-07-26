@@ -20,14 +20,17 @@ import re
 
 from extractor.emit import slugify
 
-# system fields that define item identity for variant detection. Economic
-# fields are compared through _price/_avail so formula pricing (price=0 +
-# priceDef) is captured; formatting-only *Def strings are otherwise ignored.
+# Mechanically-defining stats compared for variant detection. `type` is
+# deliberately excluded: the curated corebook uses specific types
+# (COMMLINK/TOOLS/…) while the generic classifier tags re-listed gear as
+# ELECTRONICS, so including type would make every cross-book duplicate look
+# different. Economic identity is price (formula pricing captured via priceDef).
 KEY_FIELDS = [
-    "type", "dmgDef", "stun", "attackRating", "modes", "ammocap",
+    "dmgDef", "stun", "attackRating", "modes", "ammocap",
     "essence", "defense", "rating", "capacity", "a", "s", "d", "f",
     "handlOn", "handlOff", "accOn", "spdiOn", "tspd", "bod", "arm", "pil", "sen", "sea",
 ]
+_EMPTY = (None, 0, [], "", {})
 
 
 def norm_base(name: str) -> str:
@@ -38,14 +41,23 @@ def norm_base(name: str) -> str:
 
 
 def _key_view(system: dict) -> dict:
-    view = {f: system.get(f) for f in KEY_FIELDS if f in system}
+    """Defining stats that carry a real value (empties dropped so an extraction
+    that missed a field doesn't read as a difference)."""
+    view = {f: system.get(f) for f in KEY_FIELDS if system.get(f) not in _EMPTY}
     view["_price"] = system.get("price") or system.get("priceDef")
-    view["_avail"] = system.get("avail") or system.get("availDef")
     return view
 
 
 def same_stats(a: dict, b: dict) -> bool:
-    return _key_view(a) == _key_view(b)
+    """Two same-named items are the same product when their prices match and
+    every defining stat present on BOTH sides agrees. Stats present on only one
+    side are extraction gaps, not differences — this keeps reprints and
+    cross-book duplicates from spawning false variants, while genuine stat
+    changes (price, damage, rating) still split into a (Variant)."""
+    va, vb = _key_view(a), _key_view(b)
+    if va["_price"] != vb["_price"]:
+        return False
+    return all(va[k] == vb[k] for k in (set(va) & set(vb)) - {"_price"})
 
 
 def _seed_sources(item: dict) -> list:
@@ -108,7 +120,12 @@ def merge_book(library, incoming, book, dates, version, extracted_at, reprint=Fa
         for inc in items:
             page = inc["page"]
             base = norm_base(inc["name"])
-            matches = [i for i in lib if norm_base(i["name"]) == base]
+            # dedup across the WHOLE library, not just the detected category: the
+            # generic classifier files re-listed gear under 'electronics' even
+            # when the corebook curated it under software/tools/drones/etc., so a
+            # same-category-only search would miss the original and duplicate it.
+            matches = [i for cat in library.values() for i in cat
+                       if norm_base(i["name"]) == base]
             same = next((i for i in matches if same_stats(i["system"], inc["system"])), None)
 
             if same is not None:
@@ -124,6 +141,13 @@ def merge_book(library, incoming, book, dates, version, extracted_at, reprint=Fa
                 stats["referenced"] += 1
                 continue
 
+            if matches and reprint:
+                # a city-edition reprint reprints corebook's gear verbatim; a
+                # stat "difference" here is an extraction artifact (mis-read
+                # column), never genuinely new gear, so dedup rather than fork.
+                stats["skipped"] += 1
+                continue
+
             if matches:  # same name, different stats -> variant
                 name = f"{inc['name']} (Variant)"
                 new_id = _unique_id(slugify(name), all_ids)
@@ -134,6 +158,12 @@ def merge_book(library, incoming, book, dates, version, extracted_at, reprint=Fa
                 stats["variants"] += 1
                 if inc.get("img"):
                     stats["images"] += 1
+                continue
+
+            if reprint:
+                # nothing in a reprint that isn't already in the base library is
+                # real new gear — it's an extraction fragment. Drop it.
+                stats["skipped"] += 1
                 continue
 
             new_id = _unique_id(slugify(inc["name"]), all_ids)  # brand new

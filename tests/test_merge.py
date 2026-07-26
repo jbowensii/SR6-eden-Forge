@@ -119,11 +119,25 @@ def test_reprint_skips_identical():
     assert all(s["book"] != "corebook_berlin" for s in lib["weapons_firearms"][0]["meta"].get("sources", []))
 
 
-def test_reprint_still_variants_on_difference():
+def test_reprint_dedups_noisy_difference():
+    # a reprint's stat "difference" is extraction noise, not new gear: dedup it
+    # rather than spawning a false variant.
     lib = {"weapons_firearms": [item("ares_predator_vi", "Ares Predator VI", PISTOL)]}
     _, stats = merge_book(lib, {"weapons_firearms": [incoming("Ares Predator VI", {**PISTOL, "price": 999})]},
                           "corebook_berlin", DATES, "0.2.0", "2026-07-26", reprint=True)
-    assert stats["variants"] == 1
+    assert stats["variants"] == 0
+    assert stats["skipped"] == 1
+    assert len(lib["weapons_firearms"]) == 1
+
+
+def test_reprint_drops_unmatched_fragments():
+    # an item a reprint "adds" that the base library lacks is an extraction
+    # fragment (a reprint introduces no new gear) -> dropped, not added.
+    lib = {"weapons_firearms": [item("ares_predator_vi", "Ares Predator VI", PISTOL)]}
+    _, stats = merge_book(lib, {"weapons_firearms": [incoming("Rating 3", {"type": "CYBERWARE", "price": 100})]},
+                          "corebook_berlin", DATES, "0.2.0", "2026-07-26", reprint=True)
+    assert stats["new"] == 0 and stats["skipped"] == 1
+    assert len(lib["weapons_firearms"]) == 1
 
 
 def test_merge_attaches_image_when_missing():

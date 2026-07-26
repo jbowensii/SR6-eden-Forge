@@ -59,10 +59,13 @@ def test_detect_page_cols_extracts_rows_with_subtype():
     assert items[1]["system"]["price"] == 1100
 
 
-def test_generic_gear_needs_gear_label():
-    # AVAIL+COST alone is not enough; needs a gear-ish label
-    assert classify(["avail", "cost"], ["skill"]) is None
-    assert classify(["avail", "cost"], ["gear"])[1] == "electronics"
+def test_generic_gear_from_avail_or_rating():
+    # any priced table with an availability/rating column classifies as generic
+    # gear; the row-validity gate (real name + price) filters non-gear tables.
+    assert classify(["avail", "cost"], [])[1] == "electronics"
+    assert classify(["ratingspan", "cost"], [])[1] == "electronics"
+    # a bare cost column with no avail/rating signature is not gear
+    assert classify(["cost"], []) is None
 
 
 def test_stat_debris_names_rejected():

@@ -144,6 +144,10 @@ def build_item(assigned: dict, wtype: str, skill: str, subtype: str, page: int, 
     keystat = KEY_STAT.get(wtype)
     if keystat and keystat not in system:
         return None
+    # plausibility gate: an out-of-range avail/price means a column bled into the
+    # wrong band (e.g. a price string parsed as avail) -> drop the misaligned row
+    if system.get("avail", 0) > 30 or system.get("price", 0) > 10_000_000:
+        return None
     if notes:
         system["notes"] = "; ".join(notes)
     return {"name": name, "system": system, "page": page}
