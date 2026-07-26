@@ -3,11 +3,12 @@ import CategoryTable from "./components/CategoryTable.jsx";
 import ItemEditor from "./components/ItemEditor.jsx";
 import Preview from "./components/Preview.jsx";
 import Tree from "./components/Tree.jsx";
-import { getCategory, getTree, putItem, validate } from "./api.js";
+import { exportModule, getCategory, getTree, putItem, validate } from "./api.js";
 
 export default function App() {
   const [tree, setTree] = useState([]);
   const [selected, setSelected] = useState(null); // {book, domain, category}
+  const [exporting, setExporting] = useState(false);
   const [payload, setPayload] = useState(null);
   const [editing, setEditing] = useState(null); // item
   const [doc, setDoc] = useState(null);
@@ -53,11 +54,28 @@ export default function App() {
     }
   }
 
+  async function runExport() {
+    if (exporting) return;
+    // "all" while QA is in progress; switch to "approved" for release exports
+    const exportStatus = "all";
+    setExporting(true);
+    setStatus(`exporting (status: ${exportStatus})…`);
+    try {
+      const res = await exportModule(selected.book, selected.domain, exportStatus);
+      setStatus(`exported ${res.count} item(s) (status: ${exportStatus}) -> ${res.moduleDir}`);
+    } catch (e) {
+      setStatus(`error: ${e.message ?? e}`);
+    } finally {
+      setExporting(false);
+    }
+  }
+
   return (
     <div className="layout">
       <aside>
         <h1>SR6 Forge</h1>
         <button onClick={runValidate}>Validate all</button>
+        <button onClick={runExport} disabled={!selected || exporting}>Export</button>
         <Tree entries={tree} selected={selected} onSelect={openCategory} />
       </aside>
       <main>

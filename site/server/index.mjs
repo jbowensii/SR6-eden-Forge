@@ -2,6 +2,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import express from "express";
 import { buildApp } from "./app.mjs";
+import { exportModule } from "./exportModule.mjs";
 import { runValidator } from "./pythonBridge.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -11,6 +12,7 @@ const dataRoot = join(repoRoot, "data");
 const app = buildApp(dataRoot, {
   schemasDir: join(repoRoot, "schemas"),
   validate: (root) => runValidator(repoRoot, root),
+  exporter: (opts) => exportModule(join(repoRoot, "data"), join(repoRoot, "export"), opts),
 });
 app.use(express.static(join(here, "..", "dist")));
 

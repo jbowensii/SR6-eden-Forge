@@ -123,11 +123,12 @@ python -m validator data/corebook/
 - Export script (Node; also a button in the web app): takes all `approved` items
   in scope, strips `meta`, wraps each in a Foundry document envelope, and invokes
   `@foundryvtt/foundryvtt-cli` to compile LevelDB compendium packs.
-- Output: `export/sr6-gear-corebook/` with `module.json` (version, Eden system
-  dependency) plus a zip. Deploy by copying into the Foundry server's
-  `Data/modules`.
-- Module version bumps each export; changelog generated from git log.
-  **Never distributed publicly.**
+- Output: `export/sr6-forge-<book>/` with `module.json` (version, Eden system
+  dependency) and a LevelDB pack. Deploy by copying the folder into the
+  Foundry server's `Data/modules` (no zip step).
+- Version is passed explicitly (`--version x.y.z`); exports are staged and
+  swapped in atomically; document ids are deterministic so re-exports keep
+  stable UUIDs. **Never distributed publicly.**
 - Future domains export the same way — e.g. NPCs become an Actor-type compendium;
   the export layer owns the domain → document-type mapping.
 
