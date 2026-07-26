@@ -202,16 +202,24 @@ def extract_page(words: list[dict], page: int) -> list[dict]:
     return items
 
 
-def extract_book(pdf_path, pages) -> dict:
+def _pdf_words(page):
+    words = page.extract_words(use_text_flow=False, keep_blank_chars=False, extra_attrs=["upright"])
+    return [w for w in words if w.get("upright", True)]  # drop rotated margin banners
+
+
+def extract_page_words(words: list[dict], page_no: int) -> list[dict]:
+    return extract_page(words, page_no)
+
+
+def extract_book(pdf_path, pages, word_source=None) -> dict:
+    """word_source(page) -> [{text,x0,x1,top}]; defaults to pdfplumber words.
+    Broken-glyph books pass OCR words instead."""
     import pdfplumber
 
+    src = word_source or _pdf_words
     out: dict[str, list[dict]] = {}
     with pdfplumber.open(str(pdf_path)) as pdf:
         for page_no in pages:
-            page = pdf.pages[page_no - 1]
-            words = page.extract_words(use_text_flow=False, keep_blank_chars=False,
-                                       extra_attrs=["upright"])
-            words = [w for w in words if w.get("upright", True)]  # drop rotated margin banners
-            for it in extract_page(words, page_no):
+            for it in extract_page(src(pdf.pages[page_no - 1]), page_no):
                 out.setdefault(it.pop("_category"), []).append(it)
     return out
