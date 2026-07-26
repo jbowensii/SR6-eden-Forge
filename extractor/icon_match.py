@@ -53,11 +53,26 @@ def best_match(item: dict, library: list[tuple[Path, set[str]]], min_score: int 
     return (best, best_score) if best else (None, 0)
 
 
+def load_defaults(data_root: Path) -> dict:
+    path = data_root / "_assets" / "generic" / "defaults.json"
+    if path.is_file():
+        return json.loads(path.read_text(encoding="utf-8"))
+    return {}
+
+
+def save_defaults(data_root: Path, defaults: dict) -> None:
+    path = data_root / "_assets" / "generic" / "defaults.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(defaults, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
 def match_icons(lib_root: Path, data_root: Path, book: str, domain: str, min_score: int = MIN_SCORE) -> dict:
     domain_dir = data_root / book / domain
     lib = index_library(lib_root)
     dest_dir = data_root / "_assets" / book / "lib"
     dest_dir.mkdir(parents=True, exist_ok=True)
+    defaults = load_defaults(data_root)
+    defaults_changed = False
 
     matched = generic = missing = 0
     generic_cache: dict[str, str | None] = {}
@@ -76,25 +91,39 @@ def match_icons(lib_root: Path, data_root: Path, book: str, domain: str, min_sco
                 matched += 1
                 changed = True
                 continue
-            # no name match -> one shared generic icon per subtype
-            subtype = str(item["system"].get("subtype", "")) or str(item["system"].get("type", ""))
-            if subtype not in generic_cache:
-                pick = pick_generic(subtype, lib)
+            # no name match -> the remembered TYPE/SUBTYPE default, else a
+            # freshly-picked generic (which is then remembered)
+            itype = str(item["system"].get("type", ""))
+            subtype = str(item["system"].get("subtype", ""))
+            key = f"{itype}/{subtype}"
+            if key in defaults and (data_root / "_assets" / defaults[key]).is_file():
+                item["img"] = defaults[key]
+                generic += 1
+                changed = True
+                continue
+            if key not in generic_cache:
+                pick = pick_generic(subtype or itype, lib)
                 if pick is None:
-                    generic_cache[subtype] = None
+                    generic_cache[key] = None
                 else:
-                    gdest = dest_dir / f"_generic_{subtype.lower()}{pick.suffix.lower()}"
+                    slug = re.sub(r"[^a-z0-9]+", "_", f"{itype}_{subtype}".lower()).strip("_")
+                    gdest = data_root / "_assets" / "generic" / f"{slug}{pick.suffix.lower()}"
+                    gdest.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copyfile(pick, gdest)
-                    generic_cache[subtype] = f"{book}/lib/{gdest.name}"
-                    print(f"  [generic {subtype}] <- {pick.name}")
-            if generic_cache[subtype]:
-                item["img"] = generic_cache[subtype]
+                    generic_cache[key] = f"generic/{gdest.name}"
+                    defaults[key] = generic_cache[key]
+                    defaults_changed = True
+                    print(f"  [generic {key}] <- {pick.name}")
+            if generic_cache[key]:
+                item["img"] = generic_cache[key]
                 generic += 1
                 changed = True
             else:
                 missing += 1
         if changed:
             payload_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    if defaults_changed:
+        save_defaults(data_root, defaults)
     return {"matched": matched, "generic": generic, "still_missing": missing, "library": len(lib)}
 
 # subtype -> generic search tokens, tried in order when no name match exists.

@@ -59,3 +59,33 @@ def test_pick_generic_none_when_no_terms_hit(tmp_path):
 
     lib = make_lib(tmp_path)  # no sword/knife/blade or crate/box/bag/gear tokens
     assert pick_generic("BLADES", lib) is None
+
+
+def test_match_icons_honors_remembered_default(tmp_path):
+    import json
+
+    from extractor.icon_match import match_icons
+
+    lib = tmp_path / "lib"
+    (lib / "cyberpunk").mkdir(parents=True)
+    (lib / "cyberpunk" / "nothing_relevant.png").write_bytes(b"x")
+    data = tmp_path / "data"
+    (data / "testbook" / "gear").mkdir(parents=True)
+    (data / "_assets" / "generic").mkdir(parents=True)
+    (data / "_assets" / "generic" / "weapon_firearms_zapguns.png").write_bytes(b"icon")
+    (data / "_assets" / "generic" / "defaults.json").write_text(
+        json.dumps({"WEAPON_FIREARMS/ZAPGUNS": "generic/weapon_firearms_zapguns.png"}), encoding="utf-8"
+    )
+    (data / "testbook" / "gear" / "weapons.json").write_text(
+        json.dumps({
+            "book": "testbook", "domain": "gear", "category": "weapons",
+            "items": [{
+                "id": "zapgun_x", "name": "Unmatchable Zapgun X",
+                "system": {"type": "WEAPON_FIREARMS", "subtype": "ZAPGUNS"},
+                "meta": {"book": "testbook", "page": 1, "extractedAt": "2026-07-26", "extractorVersion": "0.1.0", "qaStatus": "extracted"},
+            }],
+        }), encoding="utf-8")
+    stats = match_icons(lib, data, "testbook", "gear")
+    payload = json.loads((data / "testbook" / "gear" / "weapons.json").read_text(encoding="utf-8"))
+    assert payload["items"][0]["img"] == "generic/weapon_firearms_zapguns.png"
+    assert stats["generic"] == 1
