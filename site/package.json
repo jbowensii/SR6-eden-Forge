@@ -9,6 +9,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@foundryvtt/foundryvtt-cli": "^3.0.4",
     "express": "^4.19.0"
   },
   "devDependencies": {
