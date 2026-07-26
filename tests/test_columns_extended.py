@@ -113,3 +113,9 @@ def test_capacity_rating_word_and_bracket_int():
     assert arr["needsRating"] is True
     _, single = one(["Fictional Sensor [1] 2 Capacity x 100¥"], spec)
     assert single["capacity"] == 1 and single["priceDef"] == "Capacity x 100¥"
+
+
+def test_attack_rating_capped_at_five():
+    from extractor.columns import resolve
+    assert resolve("ar").convert("8/10/6/0/0/0")["attackRating"] == [8, 10, 6, 0, 0]
+    assert resolve("ar").convert("9")["attackRating"] == [9, 0, 0, 0, 0]

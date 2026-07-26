@@ -28,6 +28,7 @@ def _ar(v: str) -> dict:
     for tok in v.split("/"):
         tok = tok.replace("*", "")
         slots.append(0 if tok in ("", "—") else int(tok))
+    slots = (slots + [0, 0, 0, 0, 0])[:5]  # SR6 attack ratings are exactly 5 bands
     return {"attackRating": slots}
 
 

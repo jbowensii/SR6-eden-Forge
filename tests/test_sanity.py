@@ -81,3 +81,9 @@ def test_formula_and_launcher_damage_codes_ok(gear_file):
     for code in ["(Rating/2)P", "Grenade", "Missile", "Force x 1P", "1P + special"]:
         gear_file["items"][0]["system"]["dmgDef"] = code
         assert check_gear([df(gear_file)]) == [], code
+
+
+def test_dual_damage_codes_ok(gear_file):
+    for code in ["3P/S", "4S/4P", "5P/5S"]:
+        gear_file["items"][0]["system"]["dmgDef"] = code
+        assert check_gear([df(gear_file)]) == [], code
