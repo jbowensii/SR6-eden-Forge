@@ -7,6 +7,15 @@
       "type": "string",
       "pattern": "^[a-z0-9][a-z0-9_]*$"
     },
+    "reference": {
+      "type": "object",
+      "required": ["book", "page"],
+      "additionalProperties": false,
+      "properties": {
+        "book": { "$ref": "#/$defs/slug" },
+        "page": { "type": "integer", "minimum": 1 }
+      }
+    },
     "meta": {
       "type": "object",
       "required": ["book", "page", "extractedAt", "extractorVersion", "qaStatus"],
@@ -14,6 +23,13 @@
       "properties": {
         "book": { "$ref": "#/$defs/slug" },
         "page": { "type": "integer", "minimum": 1 },
+        "sources": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/reference" },
+          "minItems": 1
+        },
+        "descriptionFrom": { "$ref": "#/$defs/slug" },
+        "variantOf": { "$ref": "#/$defs/slug" },
         "extractedAt": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
         "extractorVersion": { "type": "string", "minLength": 1 },
         "qaStatus": { "enum": ["extracted", "reviewed", "approved"] },

@@ -49,6 +49,12 @@ def main(argv: list[str] | None = None) -> int:
     ic.add_argument("--data", default="data")
     ic.add_argument("--min-score", type=int, default=3)
 
+    ig = sub.add_parser("ingest", help="detect + merge a whole book into the gear library")
+    ig.add_argument("--book", required=True)
+    ig.add_argument("--domain", default="gear")
+    ig.add_argument("--data", default="data")
+    ig.add_argument("--redump", action="store_true")
+
     args = parser.parse_args(argv)
     if args.cmd == "dump":
         from extractor.dump import dump_book
@@ -77,6 +83,14 @@ def main(argv: list[str] | None = None) -> int:
 
         stats = match_icons(Path(args.library), Path(args.data), args.book, args.domain, args.min_score)
         print(f"library files: {stats['library']} | name-matched: {stats['matched']} | generic: {stats['generic']} | still without art: {stats['still_missing']}")
+        return 0
+    if args.cmd == "ingest":
+        from extractor.ingest import ingest_book
+
+        stats = ingest_book(Path(args.data), args.book, args.domain, redump=args.redump)
+        print(f"{args.book}: detected {stats['detected']} | new {stats['new']} | "
+              f"referenced {stats['referenced']} | variants {stats['variants']} | skipped {stats['skipped']}"
+              + (" (reprint)" if stats['reprint'] else ""))
         return 0
     from extractor.run import parse_book
 
