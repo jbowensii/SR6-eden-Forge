@@ -90,6 +90,21 @@ export as. "Validate all" runs the Python validator (`FORGE_PYTHON` overrides
 the interpreter; defaults to the repo `.venv`, then `python3`). For UI
 development: `npm run dev` (Vite on :5173, proxying `/api` to :8347).
 
+## Exporting a module
+
+```bash
+node site/scripts/export.mjs --book corebook --status approved
+# or --status reviewed|all while QA is in progress; --version x.y.z to bump
+```
+
+(Or the "Export" button in the review app — exports the selected category's
+book/domain.) Output: `export/sr6-forge-<book>/` with `module.json` and a
+LevelDB compendium pack. **Install**: copy that folder into your Foundry
+server's `Data/modules/`, restart/refresh, enable the module in your
+shadowrun6-eden world, and the items appear under the Compendium tab.
+Re-exports overwrite in place with stable document ids. The built module
+contains game data — **never distribute it**; `export/` is gitignored.
+
 ## Using the validator
 
 ```bash
@@ -112,6 +127,10 @@ plausibility bounds, path/envelope agreement).
 - [x] Extractor CLI: `python -m extractor` (dump + parse), AI-free at runtime
 - [x] Core Rulebook gear dataset: 463 items / 21 categories (local only, never committed)
 - [x] Review web app: `site/` — browse/edit/QA + live Foundry-doc preview + validate
-- [ ] Module export
+- [x] Module export: CLI + app button → `export/sr6-forge-<book>/` (LevelDB pack, module.json)
+
+**The first slice is complete**: Core Rulebook gear flows PDF → extract →
+validate → review → installable shadowrun6-eden module. Next up: more books
+(Firing Squad, Body Shop, Double Clutch, …) and new domains (npcs, spells).
 
 See [docs/design.md](docs/design.md) for the full architecture.
