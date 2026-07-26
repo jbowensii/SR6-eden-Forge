@@ -4,7 +4,9 @@ import express from "express";
 import { toFoundryDoc } from "../shared/edenTransform.mjs";
 import { SEGMENT, StoreError, readCategory, tree, writeItem } from "./store.mjs";
 
-export function buildApp(dataRoot, { schemasDir, validate }) {
+const EXPORT_STATUSES = new Set(["approved", "reviewed", "all"]);
+
+export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
   const app = express();
   app.use(express.json({ limit: "2mb" }));
 
@@ -42,6 +44,24 @@ export function buildApp(dataRoot, { schemasDir, validate }) {
       res.json(await validate(dataRoot));
     } catch (err) {
       res.status(500).json({ error: String(err.message ?? err) });
+    }
+  });
+
+  app.post("/api/export", async (req, res) => {
+    const { book, domain, version } = req.body ?? {};
+    const status = req.body?.status ?? "approved";
+    if (!SEGMENT.test(book ?? "") || !SEGMENT.test(domain ?? "")) {
+      return res.status(400).json({ error: "bad-segment" });
+    }
+    if (!EXPORT_STATUSES.has(status)) {
+      return res.status(400).json({ error: "bad-status" });
+    }
+    try {
+      res.json(await exporter({ book, domain, status, version }));
+    } catch (err) {
+      const message = String(err.message ?? err);
+      const statusCode = message.startsWith("no items match") ? 409 : 500;
+      res.status(statusCode).json({ error: message });
     }
   });
 

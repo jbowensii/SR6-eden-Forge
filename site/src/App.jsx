@@ -3,7 +3,7 @@ import CategoryTable from "./components/CategoryTable.jsx";
 import ItemEditor from "./components/ItemEditor.jsx";
 import Preview from "./components/Preview.jsx";
 import Tree from "./components/Tree.jsx";
-import { getCategory, getTree, putItem, validate } from "./api.js";
+import { exportModule, getCategory, getTree, putItem, validate } from "./api.js";
 
 export default function App() {
   const [tree, setTree] = useState([]);
@@ -53,11 +53,22 @@ export default function App() {
     }
   }
 
+  async function runExport() {
+    setStatus("exporting…");
+    try {
+      const res = await exportModule(selected.book, selected.domain, "all");
+      setStatus(`exported ${res.count} item(s) -> ${res.moduleDir}`);
+    } catch (e) {
+      setStatus(`error: ${e.message ?? e}`);
+    }
+  }
+
   return (
     <div className="layout">
       <aside>
         <h1>SR6 Forge</h1>
         <button onClick={runValidate}>Validate all</button>
+        <button onClick={runExport} disabled={!selected}>Export…</button>
         <Tree entries={tree} selected={selected} onSelect={openCategory} />
       </aside>
       <main>

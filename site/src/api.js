@@ -12,3 +12,9 @@ export const putItem = (b, d, c, item) =>
     body: JSON.stringify(item),
   }).then(json);
 export const validate = () => fetch("/api/validate", { method: "POST" }).then(json);
+export const exportModule = (book, domain, status) =>
+  fetch("/api/export", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ book, domain, status }),
+  }).then(json);

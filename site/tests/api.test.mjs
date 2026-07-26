@@ -26,6 +26,20 @@ function makeApp() {
   return buildApp(root, { schemasDir, validate });
 }
 
+function makeAppWithExporter(exporter) {
+  const root = mkdtempSync(join(tmpdir(), "forge-api-"));
+  const dir = join(root, "corebook", "gear");
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(
+    join(dir, "weapons_firearms.json"),
+    JSON.stringify({ book: "corebook", domain: "gear", category: "weapons_firearms", items: [ITEM] }, null, 2) + "\n",
+  );
+  const schemasDir = mkdtempSync(join(tmpdir(), "forge-schemas-"));
+  writeFileSync(join(schemasDir, "gear.schema.json"), JSON.stringify({ title: "gear stub" }));
+  const validate = async () => ({ ok: true, files: 1, items: 1, issues: [] });
+  return buildApp(root, { schemasDir, validate, exporter });
+}
+
 describe("api", () => {
   it("GET /api/tree", async () => {
     const res = await request(makeApp()).get("/api/tree");
@@ -91,5 +105,26 @@ describe("api", () => {
     const res = await request(makeApp()).get("/api/item/corebook/gear/weapons_firearms/example_autopistol");
     expect(res.status).toBe(404);
     expect(res.body.error).toBe("no-route");
+  });
+
+  it("POST /api/export happy path", async () => {
+    const app = makeAppWithExporter(async () => ({ moduleDir: "X", count: 3, packName: "corebook-gear" }));
+    const res = await request(app).post("/api/export").send({ book: "corebook", domain: "gear", status: "all" });
+    expect(res.status).toBe(200);
+    expect(res.body.count).toBe(3);
+  });
+
+  it("POST /api/export empty -> 409", async () => {
+    const app = makeAppWithExporter(async () => {
+      throw new Error("no items match status \"approved\" in corebook/gear");
+    });
+    const res = await request(app).post("/api/export").send({ book: "corebook", domain: "gear" });
+    expect(res.status).toBe(409);
+  });
+
+  it("POST /api/export bad status -> 400", async () => {
+    const app = makeAppWithExporter(async () => ({}));
+    const res = await request(app).post("/api/export").send({ book: "corebook", domain: "gear", status: "everything" });
+    expect(res.status).toBe(400);
   });
 });
