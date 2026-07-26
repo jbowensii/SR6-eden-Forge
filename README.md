@@ -73,6 +73,23 @@ loads them automatically and fails loudly on stale correction keys. See
 [docs/extraction-notes-corebook.md](docs/extraction-notes-corebook.md) for the
 quirks catalog.
 
+## Using the review app
+
+Requires Node 20+.
+
+```bash
+cd site
+npm install          # once
+npm run build        # build the UI
+npm run serve        # http://localhost:8347
+```
+
+Browse categories in the sidebar, click a row to edit (fields, QA status),
+Save writes the JSON file and shows the exact Foundry document the item will
+export as. "Validate all" runs the Python validator (`FORGE_PYTHON` overrides
+the interpreter; defaults to the repo `.venv`, then `python3`). For UI
+development: `npm run dev` (Vite on :5173, proxying `/api` to :8347).
+
 ## Using the validator
 
 ```bash
@@ -94,7 +111,7 @@ plausibility bounds, path/envelope agreement).
 - [x] Format examples: `examples/corebook/gear/` (synthetic items only)
 - [x] Extractor CLI: `python -m extractor` (dump + parse), AI-free at runtime
 - [x] Core Rulebook gear dataset: 463 items / 21 categories (local only, never committed)
-- [ ] Review web app
+- [x] Review web app: `site/` — browse/edit/QA + live Foundry-doc preview + validate
 - [ ] Module export
 
 See [docs/design.md](docs/design.md) for the full architecture.

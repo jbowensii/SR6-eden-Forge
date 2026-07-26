@@ -15,6 +15,7 @@ SANITY_CHECKS = {"gear": check_gear}
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="validator", description="Validate SR6-eden-Forge data files")
     parser.add_argument("path", help="data directory to validate (e.g. data/ or data/corebook)")
+    parser.add_argument("--json", action="store_true", help="output results as JSON")
     args = parser.parse_args(argv)
 
     root = Path(args.path)
@@ -39,8 +40,21 @@ def main(argv: list[str] | None = None) -> int:
         if checker:
             issues.extend(checker(domain_files))
 
-    _report(issues)
     item_count = sum(len(df.payload.get("items", [])) for df in files)
+
+    if args.json:
+        import json as jsonlib
+        from dataclasses import asdict
+
+        print(jsonlib.dumps({
+            "ok": not issues,
+            "files": len(files),
+            "items": item_count,
+            "issues": [asdict(i) for i in issues],
+        }))
+        return 1 if issues else 0
+
+    _report(issues)
     if issues:
         print(f"FAILED: {len(issues)} issue(s) in {len({i.file for i in issues})} file(s)")
         return 1

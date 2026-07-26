@@ -41,3 +41,25 @@ def test_schema_invalid_file_skips_sanity(tmp_path, gear_file, capsys):
     main([str(tmp_path)])
     out = capsys.readouterr().out
     assert "schema" in out and "damage-format" not in out
+
+
+def test_json_output_clean(tmp_path, gear_file, capsys):
+    import json as jsonlib
+
+    write(tmp_path / "corebook" / "gear" / "weapons_firearms.json", gear_file)
+    assert main([str(tmp_path), "--json"]) == 0
+    out = jsonlib.loads(capsys.readouterr().out)
+    assert out["ok"] is True and out["files"] == 1 and out["items"] == 1
+    assert out["issues"] == []
+
+
+def test_json_output_with_issues(tmp_path, gear_file, capsys):
+    import json as jsonlib
+
+    gear_file["items"][0]["system"]["dmgDef"] = "3X"
+    write(tmp_path / "corebook" / "gear" / "weapons_firearms.json", gear_file)
+    assert main([str(tmp_path), "--json"]) == 1
+    out = jsonlib.loads(capsys.readouterr().out)
+    assert out["ok"] is False
+    assert out["issues"][0]["rule"] == "damage-format"
+    assert out["issues"][0]["item_id"] == "example_autopistol"
