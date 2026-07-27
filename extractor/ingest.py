@@ -51,6 +51,29 @@ _WEAPON_SKILL = {
     "WEAPON_FIREARMS": "firearms", "WEAPON_CLOSE_COMBAT": "close_combat",
     "WEAPON_RANGED": "exotic", "WEAPON_SPECIAL": "exotic",
 }
+# last-resort subtype from the item name, used only when the heading hierarchy
+# gave nothing. Conservative on purpose: high-signal keywords only, so it fills
+# gaps without the mislabels the section-marker path is careful to avoid.
+_BLADE_KW = ("axe", "sword", "blade", "knife", "gladius", "claymore", "labrys",
+             "katar", "chakram", "macuahuitl", "dagger", "glaive", "naginata",
+             "chainsaw", "tomahawk", "bear axe", "war fan")
+_CLUB_KW = ("club", "chain", "tonfa", "staff", "mace", "hammer", "baton",
+            "shillelagh", "warclub", "nunchaku", "taiaha", "shockglove", "knuckle")
+
+
+def _fallback_subtype(name: str, itype: str) -> str | None:
+    n = name.lower()
+    if itype == "BIOWARE":
+        return "BIOWARE_STANDARD"  # bioware default; reviewer re-tags the cultured few
+    if itype == "WEAPON_CLOSE_COMBAT":
+        if any(k in n for k in _BLADE_KW):
+            return "BLADES"
+        if any(k in n for k in _CLUB_KW):
+            return "CLUBS"
+    if itype == "CYBERWARE":
+        if "cyberlimb" in n or "exoframe" in n:
+            return "CYBER_LIMBS" if "cyberlimb" in n else "CYBER_BODYWARE"
+    return None
 
 
 def load_registry(data_root: Path) -> dict:
@@ -141,6 +164,9 @@ def _apply_subtypes(library: dict, book: str, hier: dict, markers: list) -> tupl
                 cand = subtype_for_page(markers, page)
                 if cand and subtype_compatible(cand, itype):
                     sub, correcting = cand, False
+            if not sub:  # last resort: high-signal name keyword
+                sub = _fallback_subtype(item["name"], itype)
+                correcting = False
             if sub:
                 cur = item["system"].get("subtype")
                 if not cur:

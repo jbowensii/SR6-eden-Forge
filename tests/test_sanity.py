@@ -47,8 +47,18 @@ def test_special_damage_ok(gear_file):
 
 
 def test_weapon_missing_skill(gear_file):
+    # completeness is enforced once an item is reviewed, not while extracted
+    gear_file["items"][0]["meta"]["qaStatus"] = "reviewed"
     gear_file["items"][0]["system"]["skill"] = ""
     assert rules(check_gear([df(gear_file)])) == ["weapon-fields"]
+
+
+def test_extracted_weapon_incomplete_ok(gear_file):
+    # a raw extracted weapon may still be missing skill/damage (reviewer fills)
+    gear_file["items"][0]["meta"]["qaStatus"] = "extracted"
+    gear_file["items"][0]["system"]["skill"] = ""
+    gear_file["items"][0]["system"]["dmgDef"] = ""
+    assert "weapon-fields" not in rules(check_gear([df(gear_file)]))
 
 
 def test_nonweapon_needs_no_skill(gear_file):

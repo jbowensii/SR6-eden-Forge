@@ -51,12 +51,12 @@ def _check_item(df: DataFile, item: dict) -> list[Issue]:
     if dmg_def and not is_special and not is_formula and not is_valid:
         issues.append(_issue(df, item, "damage-format", f"bad damage code {dmg_def!r}"))
 
-    # a prose-only stub (described in the book but with no stat table) carries
-    # no economic/combat stats yet; it's flagged qaStatus=extracted for the
-    # reviewer to complete, so don't demand weapon fields it can't have.
-    is_stub = not (system.get("price") or system.get("priceDef") or system.get("dmgDef")
-                   or system.get("avail") or system.get("availDef"))
-    if str(system.get("type", "")).startswith("WEAPON_") and not is_stub:
+    # completeness (a weapon needs a skill + damage code) is required once an
+    # item has been REVIEWED; raw qaStatus=extracted rows may still be missing
+    # fields the reviewer will fill, so they aren't failed for it. Format checks
+    # (damage-format, plausibility) above still apply to everything.
+    reviewed = meta.get("qaStatus") in ("reviewed", "approved")
+    if reviewed and str(system.get("type", "")).startswith("WEAPON_"):
         if not system.get("skill"):
             issues.append(_issue(df, item, "weapon-fields", "weapon has no skill"))
         if not system.get("dmgDef"):
