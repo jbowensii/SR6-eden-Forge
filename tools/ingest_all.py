@@ -1,39 +1,39 @@
-"""Ingest every gear-bearing book into the live library in publication-date
-order (earliest first so it becomes the variant base), city editions last as
-reprints. corebook and firing_squad are already merged; skipped here."""
+"""Rebuild the whole library with the unified one-pass ingest. corebook (the
+curated seed) is processed first for its hierarchy pass; every other gear book
+is then read in publication-date order by the single ingest_book pipeline
+(extraction + de-mangle + special readers + subtypes + descriptions +
+prose-only), city editions last as reprints."""
 
 import sys
 from pathlib import Path as _P
 sys.path.insert(0, str(_P(__file__).resolve().parent.parent))
-from pathlib import Path
+
 from extractor.ingest import ingest_book, load_registry
 
-DATA = Path("data")
+DATA = _P("data")
 reg = load_registry(DATA)
+ZERO = {"companion", "street_wyrd", "gun_rack", "rides"}  # measured 0 gear
 
-# already merged into the live library
-ALREADY = {"corebook", "firing_squad"}
-# zero-yield or non-gear (measured); skip to save time but list for the report
-ZERO = {"companion", "street_wyrd", "gun_rack", "rides"}
+order = [(k, v.get("date", ""), bool(v.get("reprint_of")))
+         for k, v in reg.items() if k not in ZERO]
+order.sort(key=lambda t: (t[0] != "corebook", t[2], t[1]))  # corebook, then date, reprints last
 
-books = [(k, v.get("date", ""), bool(v.get("reprint_of")))
-         for k, v in reg.items() if k not in ALREADY and k not in ZERO]
-# non-reprints first (date asc), then reprints (date asc)
-books.sort(key=lambda t: (t[2], t[1]))
-
-print(f"{'book':22} {'new':>4} {'ref':>4} {'var':>4} {'skip':>5} {'detected':>8}")
-totals = {"new": 0, "referenced": 0, "variants": 0, "skipped": 0}
-for book, date, reprint in books:
+print(f"{'book':22} {'new':>4} {'ref':>4} {'var':>4} {'sub+':>5} {'sub~':>5} {'desc':>5} {'prose':>6}")
+tot = {"new": 0, "referenced": 0, "variants": 0, "subtypes_filled": 0,
+       "subtypes_corrected": 0, "descriptions": 0, "prose_only": 0}
+for book, _date, reprint in order:
     try:
         st = ingest_book(DATA, book)
     except SystemExit as e:
         print(f"{book:22} SKIP: {e}")
         continue
-    for k in totals:
-        totals[k] += st.get(k, 0)
+    for k in tot:
+        tot[k] += st.get(k, 0)
     tag = "(reprint)" if reprint else ""
     print(f"{book:22} {st['new']:>4} {st['referenced']:>4} {st['variants']:>4} "
-          f"{st['skipped']:>5} {st['detected']:>8}  {tag}")
+          f"{st['subtypes_filled']:>5} {st['subtypes_corrected']:>5} {st['descriptions']:>5} "
+          f"{st['prose_only']:>6}  {tag}")
 
-print(f"\nTOTALS  new={totals['new']} referenced={totals['referenced']} "
-      f"variants={totals['variants']} skipped={totals['skipped']}")
+print(f"\nTOTALS new={tot['new']} ref={tot['referenced']} var={tot['variants']} "
+      f"subtypes(filled={tot['subtypes_filled']} corrected={tot['subtypes_corrected']}) "
+      f"descriptions={tot['descriptions']} prose-only={tot['prose_only']}")

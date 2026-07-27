@@ -157,14 +157,14 @@ def subtype_for_page(markers, page: int) -> str | None:
     return best
 
 
-def read_hierarchy(pdf_path, pages, sample=None) -> dict[str, tuple[str, str]]:
-    """`{norm(name): (section, description)}` for every item heading."""
-    out: dict[str, tuple[str, str]] = {}
+def read_hierarchy(pdf_path, pages, sample=None) -> dict[str, tuple[str, str, str, int]]:
+    """`{norm(name): (name, section, description, page)}` for every item heading."""
+    out: dict[str, tuple[str, str, str, int]] = {}
     pg_words = sample if sample is not None else extract_sample(pdf_path, pages)
     _body, item_size = _heading_sizes([w for _, w in pg_words])
     if not item_size:
         return out
-    for _page_no, words in pg_words:
+    for page_no, words in pg_words:
         mid = max((w["x1"] for w in words), default=0) / 2
         cols = [[w for w in words if (w["x0"] + w["x1"]) / 2 < mid],
                 [w for w in words if (w["x0"] + w["x1"]) / 2 >= mid]]
@@ -178,8 +178,8 @@ def read_hierarchy(pdf_path, pages, sample=None) -> dict[str, tuple[str, str]]:
                 if cur_name and section:
                     desc = _dehyphenate(buf)
                     key = norm_base(cur_name)
-                    if key and (key not in out or len(desc) > len(out[key][1])):
-                        out[key] = (section, desc)
+                    if key and (key not in out or len(desc) > len(out[key][2])):
+                        out[key] = (cur_name, section, desc, page_no)
                 cur_name, buf = None, []
 
             for ln in _lines(col):
