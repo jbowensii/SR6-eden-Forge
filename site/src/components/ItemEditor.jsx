@@ -1,15 +1,26 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import IconPicker from "./IconPicker.jsx";
+import BookImages from "./BookImages.jsx";
+import { prettyType } from "../labels.js";
 
 const QA = ["extracted", "reviewed", "approved"];
 const MODES = ["SS", "SA", "BF", "FA"];
 // rendered by dedicated controls above the generic field list
 const HANDLED = new Set(["description"]);
 
-export default function ItemEditor({ item, bookTitle, books = {}, categoryName, pdfAvailable, pdfHref, onSave, onAssignIcon }) {
+export default function ItemEditor({ item, bookTitle, books = {}, categoryName, pdfAvailable, pdfHref, onSave, onDelete, onAssignIcon, onAssignRender }) {
   const [draft, setDraft] = useState(() => structuredClone(item));
   const [picking, setPicking] = useState(false);
+  const [browsing, setBrowsing] = useState(false);
   const [renderExists, setRenderExists] = useState(true);
+
+  // an icon assignment persists a new img for the SAME item id; React reuses
+  // this component (key unchanged), so pull the fresh img/render into the draft
+  // when the item prop changes, or the newly-set art wouldn't appear.
+  useEffect(() => {
+    setDraft((d) => ({ ...d, img: item.img }));
+    setRenderExists(true);
+  }, [item.img, item.id]);
 
   const setSystem = (field, value) => setDraft((d) => ({ ...d, system: { ...d.system, [field]: value } }));
 
@@ -165,7 +176,10 @@ export default function ItemEditor({ item, bookTitle, books = {}, categoryName, 
             book render{draft.img === renderPath ? " (assigned)" : ""}
           </figcaption>
         </figure>
-        <button className="ghost" onClick={() => setPicking(true)}>Choose icon…</button>
+        <div className="art-actions">
+          <button className="ghost" onClick={() => setPicking(true)}>Choose icon…</button>
+          <button className="ghost" onClick={() => setBrowsing(true)}>Book graphics…</button>
+        </div>
       </div>
 
       <div className="field-grid">
@@ -187,8 +201,25 @@ export default function ItemEditor({ item, bookTitle, books = {}, categoryName, 
         />
       )}
 
+      {browsing && (
+        <BookImages
+          book={draft.meta?.book}
+          onPick={(path) => { onAssignRender(draft, path); setBrowsing(false); }}
+          onClose={() => setBrowsing(false)}
+        />
+      )}
+
       <div className="editor-actions">
         <button className="primary" onClick={() => onSave(draft)}>Save</button>
+        <button
+          className="ghost danger"
+          title="Delete this item from the library"
+          onClick={() => {
+            if (window.confirm(`Delete "${draft.name}"? This removes it from the library.`)) onDelete(draft);
+          }}
+        >
+          Delete
+        </button>
         {pdfHref && (
           <button
             className="ghost"

@@ -1,5 +1,5 @@
-import { readFileSync, readdirSync, renameSync, statSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { copyFileSync, existsSync, readFileSync, readdirSync, renameSync, statSync, writeFileSync } from "node:fs";
+import { extname, join } from "node:path";
 
 export const SEGMENT = /^[a-z0-9_]+$/;
 
@@ -174,6 +174,61 @@ export function writeItem(dataRoot, book, domain, category, itemId, item) {
   writeFileSync(tmpPath, JSON.stringify(payload, null, 2) + "\n", "utf8");
   renameSync(tmpPath, path);
   return item;
+}
+
+const _IMG = /\.(png|jpe?g|webp)$/i;
+
+export function listBookImages(dataRoot, book) {
+  /** Every graphic extracted from a book — top-level renders and the unpaired
+   * _inbox pile — as paths relative to _assets (served at /assets/<path>). */
+  if (!SEGMENT.test(book)) throw new StoreError("bad-segment", book);
+  const base = join(dataRoot, "_assets", book);
+  const out = [];
+  const scan = (dir, prefix) => {
+    let names = [];
+    try { names = readdirSync(dir); } catch { return; }
+    for (const n of names.sort()) {
+      if (_IMG.test(n)) out.push(`${prefix}${n}`);
+    }
+  };
+  scan(base, `${book}/`);
+  scan(join(base, "_inbox"), `${book}/_inbox/`);
+  return out;
+}
+
+export function assignRender(dataRoot, book, domain, category, itemId, imagePath) {
+  /** Copy an extracted book image to <sourceBook>/<itemId>.<ext> (the render
+   * slot) and point the item's img at it. */
+  const payload = readCategory(dataRoot, book, domain, category);
+  const item = payload.items.find((i) => i.id === itemId);
+  if (!item) throw new StoreError("not-found", itemId);
+  // imagePath must be a safe "<book>/<...>/<file>" under _assets
+  if (!/^[a-z0-9_]+\/(_inbox\/)?[A-Za-z0-9._-]+$/.test(imagePath || "")) {
+    throw new StoreError("bad-segment", String(imagePath));
+  }
+  const source = join(dataRoot, "_assets", imagePath);
+  if (!existsSync(source)) throw new StoreError("not-found", imagePath);
+  const src = item.meta?.book ?? book;
+  const rel = `${src}/${itemId}${extname(imagePath) || ".png"}`;
+  copyFileSync(source, join(dataRoot, "_assets", rel));
+  item.img = rel;
+  const path = categoryPath(dataRoot, book, domain, category);
+  const tmp = `${path}.tmp`;
+  writeFileSync(tmp, JSON.stringify(payload, null, 2) + "\n", "utf8");
+  renameSync(tmp, path);
+  return { img: rel };
+}
+
+export function deleteItem(dataRoot, book, domain, category, itemId) {
+  const payload = readCategory(dataRoot, book, domain, category);
+  const before = payload.items.length;
+  payload.items = payload.items.filter((i) => i.id !== itemId);
+  if (payload.items.length === before) throw new StoreError("not-found", itemId);
+  const path = categoryPath(dataRoot, book, domain, category);
+  const tmpPath = `${path}.tmp`;
+  writeFileSync(tmpPath, JSON.stringify(payload, null, 2) + "\n", "utf8");
+  renameSync(tmpPath, path);
+  return { deleted: itemId };
 }
 
 export function rewriteDomain(dataRoot, book, domain, mutate) {

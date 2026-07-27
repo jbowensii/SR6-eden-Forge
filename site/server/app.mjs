@@ -4,7 +4,7 @@ import express from "express";
 import { toFoundryDoc } from "../shared/edenTransform.mjs";
 import { loadBooks } from "./exportModule.mjs";
 import { assignIcon, libraryRoots, loadSettings, resolveLibraryFile, searchIcons } from "./iconLibrary.mjs";
-import { SEGMENT, StoreError, itemsByType, readCategory, searchItems, tree, typeTree, writeItem } from "./store.mjs";
+import { SEGMENT, StoreError, assignRender, deleteItem, itemsByType, listBookImages, readCategory, searchItems, tree, typeTree, writeItem } from "./store.mjs";
 
 const EXPORT_STATUSES = new Set(["approved", "reviewed", "all"]);
 
@@ -44,6 +44,13 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
 
   // item images live in data/_assets/<book>/...; served read-only for previews
   app.use("/assets", express.static(join(dataRoot, "_assets")));
+
+  // graphics extracted from a book, and assigning one as an item's render
+  app.get("/api/bookimages/:book", (req, res) => handle(res, () => ({ images: listBookImages(dataRoot, req.params.book) })));
+  app.post("/api/assign-render", (req, res) => {
+    const { book, domain, category, itemId, imagePath } = req.body ?? {};
+    handle(res, () => assignRender(dataRoot, book, domain, category, itemId, imagePath));
+  });
 
   // icon library roots (data/settings.json iconLibrary + data/_assets/iconsets)
   app.get("/api/icons", (req, res) => {
@@ -85,6 +92,9 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
   app.get("/api/category/:book/:domain/:category", (req, res) => {
     handle(res, () => readCategory(dataRoot, req.params.book, req.params.domain, req.params.category));
   });
+
+  app.delete("/api/item/:book/:domain/:category/:id", (req, res) =>
+    handle(res, () => deleteItem(dataRoot, req.params.book, req.params.domain, req.params.category, req.params.id)));
 
   app.put("/api/item/:book/:domain/:category/:id", (req, res) => {
     handle(res, () => {

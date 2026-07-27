@@ -1,7 +1,5 @@
 import React, { useState } from "react";
-
-const pretty = (s) =>
-  s.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+import { prettySubtype, prettyType } from "../labels.js";
 
 // TYPE -> SUBTYPE nested tree. A type row expands to its subtypes; clicking a
 // type or a subtype loads the items under it. The "" subtype is shown as an
@@ -36,7 +34,7 @@ export default function TypeTree({ tree, selected, onSelect }) {
                   ? (expanded ? "▾" : "▸") : "·"}
               </button>
               <span className="tree-name type-name" onClick={() => onSelect({ type: t.type })}>
-                {pretty(t.type)}
+                {prettyType(t.type)}
               </span>
               <span className="badge" title={`${t.qa.extracted} extracted · ${t.qa.reviewed} reviewed · ${t.qa.approved} approved`}>
                 {t.items}
@@ -51,7 +49,7 @@ export default function TypeTree({ tree, selected, onSelect }) {
                   onClick={() => onSelect({ type: t.type, subtype: s.subtype })}
                 >
                   <span className={`tree-name ${s.subtype ? "" : "no-subtype"}`}>
-                    {s.subtype ? pretty(s.subtype) : "(no subtype)"}
+                    {s.subtype ? prettySubtype(s.subtype) : "(no subtype)"}
                   </span>
                   <span className="badge">{s.items}</span>
                 </div>

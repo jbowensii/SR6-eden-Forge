@@ -3,7 +3,7 @@ import CategoryTable from "./components/CategoryTable.jsx";
 import ItemEditor from "./components/ItemEditor.jsx";
 import Preview from "./components/Preview.jsx";
 import TypeTree from "./components/TypeTree.jsx";
-import { assignIcon, exportModule, getBooks, getCategory, getItems, getTypeTree, putItem, searchItems, validate } from "./api.js";
+import { assignIcon, assignRender, deleteItem, exportModule, getBooks, getCategory, getItems, getTypeTree, putItem, searchItems, validate } from "./api.js";
 
 export default function App() {
   const [tree, setTree] = useState([]);      // TYPE -> SUBTYPE tree
@@ -86,6 +86,22 @@ export default function App() {
     }
   }
 
+  async function remove(item) {
+    const book = item._book ?? selected?.book;
+    const domain = item._domain ?? selected?.domain;
+    const category = item._category ?? selected?.category;
+    try {
+      await deleteItem(book, domain, category, item.id);
+      setEditing(null);
+      setDoc(null);
+      await refreshPayload();
+      setTree(await getTypeTree());
+      setStatus(`deleted ${item.id}`);
+    } catch (e) {
+      setStatus(`error: ${e.message ?? e}`);
+    }
+  }
+
   async function runValidate() {
     setStatus("validating…");
     try {
@@ -104,8 +120,24 @@ export default function App() {
     const res = await assignIcon({ book, domain, category, itemId: item.id, root: hit.r, libraryPath: hit.p, mode });
     setStatus(mode === "generic" ? `generic icon updated (${res.updated} item(s))` : `icon set for ${item.id}`);
     await refreshPayload();
+    setTree(await getTypeTree());  // counts/art may shift -> refresh the left pane
     const fresh = (await getCategory(book, domain, category)).items.find((i) => i.id === item.id);
     if (fresh) setEditing({ ...fresh, _book: book, _domain: domain, _category: category });
+  }
+
+  async function handleAssignRender(item, imagePath) {
+    const book = item._book ?? selected?.book;
+    const domain = item._domain ?? selected?.domain;
+    const category = item._category ?? selected?.category;
+    try {
+      await assignRender({ book, domain, category, itemId: item.id, imagePath });
+      await refreshPayload();
+      const fresh = (await getCategory(book, domain, category)).items.find((i) => i.id === item.id);
+      if (fresh) setEditing({ ...fresh, _book: book, _domain: domain, _category: category });
+      setStatus(`render set for ${item.id}`);
+    } catch (e) {
+      setStatus(`error: ${e.message ?? e}`);
+    }
   }
 
   async function runExport() {
@@ -201,7 +233,9 @@ export default function App() {
             pdfAvailable={Boolean(bookInfo?.pdf)}
             pdfHref={editing.meta ? `/api/pdf/${editing.meta.book}#page=${editing.meta.page}` : null}
             onSave={save}
+            onDelete={remove}
             onAssignIcon={handleAssignIcon}
+            onAssignRender={handleAssignRender}
           />
         )}
         {doc && <Preview doc={doc} />}
