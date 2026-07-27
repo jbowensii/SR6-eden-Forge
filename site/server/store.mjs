@@ -71,6 +71,7 @@ function _addQa(qa, item) {
 export const DOMAIN_GROUPING = {
   gear: { groupBy: "type", subBy: "subtype" },
   spells: { groupBy: "category", subBy: "subtype" },
+  rituals: { groupBy: "category", subBy: "subtype" },
 };
 
 export function domains(dataRoot) {
