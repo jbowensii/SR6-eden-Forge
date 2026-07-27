@@ -54,31 +54,34 @@
           "additionalProperties": false,
           "properties": {
             "category": {
-              "enum": [
-                "POSITIVE",
-                "NEGATIVE"
-              ]
-            },
-            "subtype": {
               "type": "string"
             },
-            "cost": {
+            "value": {
+              "type": "number"
+            },
+            "explain": {
               "type": "string"
             },
-            "gameEffect": {
-              "type": "string"
+            "modifier": {
+              "type": "number"
+            },
+            "level": {
+              "type": "boolean"
             },
             "description": {
+              "type": "string"
+            },
+            "product": {
               "type": "string"
             },
             "page": {
               "type": "integer",
               "minimum": 0
             },
-            "product": {
+            "genesisID": {
               "type": "string"
             },
-            "genesisID": {
+            "subtype": {
               "type": "string"
             }
           }

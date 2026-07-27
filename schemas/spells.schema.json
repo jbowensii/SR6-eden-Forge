@@ -1,52 +1,118 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:sr6forge:spell",
-  "title": "SR6-eden-Forge spell data file",
+  "$id": "urn:sr6forge:spells",
+  "title": "SR6-eden-Forge spells data file",
   "type": "object",
-  "required": ["book", "domain", "category", "items"],
+  "required": [
+    "book",
+    "domain",
+    "category",
+    "items"
+  ],
   "additionalProperties": false,
   "properties": {
-    "book": { "$ref": "urn:sr6forge:common#/$defs/slug" },
-    "domain": { "const": "spells" },
-    "category": { "$ref": "urn:sr6forge:common#/$defs/slug" },
+    "book": {
+      "$ref": "urn:sr6forge:common#/$defs/slug"
+    },
+    "domain": {
+      "const": "spells"
+    },
+    "category": {
+      "$ref": "urn:sr6forge:common#/$defs/slug"
+    },
     "items": {
       "type": "array",
-      "items": { "$ref": "#/$defs/spellItem" }
+      "items": {
+        "$ref": "#/$defs/item"
+      }
     }
   },
   "$defs": {
-    "spellItem": {
+    "item": {
       "type": "object",
-      "required": ["id", "name", "system", "meta"],
+      "required": [
+        "id",
+        "name",
+        "system",
+        "meta"
+      ],
       "additionalProperties": false,
       "properties": {
-        "id": { "$ref": "urn:sr6forge:common#/$defs/slug" },
-        "name": { "type": "string", "minLength": 1 },
-        "img": { "type": "string", "minLength": 1 },
-        "system": { "$ref": "#/$defs/spellSystem" },
-        "meta": { "$ref": "urn:sr6forge:common#/$defs/meta" }
-      }
-    },
-    "spellSystem": {
-      "type": "object",
-      "required": ["category"],
-      "additionalProperties": false,
-      "properties": {
-        "category": {
-          "enum": ["COMBAT", "DETECTION", "HEALTH", "ILLUSION", "MANIPULATION"]
+        "id": {
+          "$ref": "urn:sr6forge:common#/$defs/slug"
         },
-        "subtype": { "type": "string" },
-        "descriptor": { "type": "string" },
-        "spellType": { "enum": ["P", "M"] },
-        "range": { "type": "string" },
-        "duration": { "enum": ["I", "S", "P"] },
-        "drain": { "type": "string" },
-        "damage": { "type": "string" },
-        "description": { "type": "string" },
-        "sharedDescription": { "type": "boolean" },
-        "product": { "type": "string" },
-        "page": { "type": "integer", "minimum": 0 },
-        "genesisID": { "type": "string" }
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "img": {
+          "type": "string",
+          "minLength": 1
+        },
+        "system": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "category": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            },
+            "duration": {
+              "type": "string"
+            },
+            "range": {
+              "type": "string"
+            },
+            "drain": {
+              "type": "number"
+            },
+            "damage": {
+              "type": "string"
+            },
+            "combatSpellType": {
+              "type": "string"
+            },
+            "isSustained": {
+              "type": "boolean"
+            },
+            "alchemic": {
+              "type": "boolean"
+            },
+            "multiSense": {
+              "type": "boolean"
+            },
+            "isOpposed": {
+              "type": "boolean"
+            },
+            "withEssence": {
+              "type": "boolean"
+            },
+            "wildDie": {
+              "type": "boolean"
+            },
+            "description": {
+              "type": "string"
+            },
+            "product": {
+              "type": "string"
+            },
+            "page": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "genesisID": {
+              "type": "string"
+            },
+            "subtype": {
+              "type": "string"
+            }
+          }
+        },
+        "meta": {
+          "$ref": "urn:sr6forge:common#/$defs/meta"
+        }
       }
     }
   }

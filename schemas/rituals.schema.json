@@ -1,42 +1,88 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:sr6forge:rituals",
-  "title": "SR6-eden-Forge ritual data file",
+  "title": "SR6-eden-Forge rituals data file",
   "type": "object",
-  "required": ["book", "domain", "category", "items"],
+  "required": [
+    "book",
+    "domain",
+    "category",
+    "items"
+  ],
   "additionalProperties": false,
   "properties": {
-    "book": { "$ref": "urn:sr6forge:common#/$defs/slug" },
-    "domain": { "const": "rituals" },
-    "category": { "$ref": "urn:sr6forge:common#/$defs/slug" },
-    "items": { "type": "array", "items": { "$ref": "#/$defs/ritualItem" } }
+    "book": {
+      "$ref": "urn:sr6forge:common#/$defs/slug"
+    },
+    "domain": {
+      "const": "rituals"
+    },
+    "category": {
+      "$ref": "urn:sr6forge:common#/$defs/slug"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/item"
+      }
+    }
   },
   "$defs": {
-    "ritualItem": {
+    "item": {
       "type": "object",
-      "required": ["id", "name", "system", "meta"],
+      "required": [
+        "id",
+        "name",
+        "system",
+        "meta"
+      ],
       "additionalProperties": false,
       "properties": {
-        "id": { "$ref": "urn:sr6forge:common#/$defs/slug" },
-        "name": { "type": "string", "minLength": 1 },
-        "img": { "type": "string", "minLength": 1 },
-        "system": { "$ref": "#/$defs/ritualSystem" },
-        "meta": { "$ref": "urn:sr6forge:common#/$defs/meta" }
-      }
-    },
-    "ritualSystem": {
-      "type": "object",
-      "required": [],
-      "additionalProperties": false,
-      "properties": {
-        "category": { "const": "RITUAL" },
-        "subtype": { "type": "string" },
-        "keywords": { "type": "string" },
-        "threshold": { "type": "string" },
-        "description": { "type": "string" },
-        "product": { "type": "string" },
-        "page": { "type": "integer", "minimum": 0 },
-        "genesisID": { "type": "string" }
+        "id": {
+          "$ref": "urn:sr6forge:common#/$defs/slug"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "img": {
+          "type": "string",
+          "minLength": 1
+        },
+        "system": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "threshold": {
+              "type": "number"
+            },
+            "features": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "boolean"
+              }
+            },
+            "description": {
+              "type": "string"
+            },
+            "product": {
+              "type": "string"
+            },
+            "page": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "genesisID": {
+              "type": "string"
+            },
+            "subtype": {
+              "type": "string"
+            }
+          }
+        },
+        "meta": {
+          "$ref": "urn:sr6forge:common#/$defs/meta"
+        }
       }
     }
   }

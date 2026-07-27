@@ -53,26 +53,32 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "category": {
-              "const": "LIFESTYLE"
-            },
-            "subtype": {
+            "type": {
               "type": "string"
             },
             "cost": {
+              "type": "number"
+            },
+            "paid": {
+              "type": "number"
+            },
+            "sin": {
               "type": "string"
             },
             "description": {
+              "type": "string"
+            },
+            "product": {
               "type": "string"
             },
             "page": {
               "type": "integer",
               "minimum": 0
             },
-            "product": {
+            "genesisID": {
               "type": "string"
             },
-            "genesisID": {
+            "subtype": {
               "type": "string"
             }
           }
