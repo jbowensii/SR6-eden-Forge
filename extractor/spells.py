@@ -107,4 +107,19 @@ def read_spells(pdf_path, pages) -> list[dict]:
                             continue
                         buf.append(text)
                 _flush(cur, buf, section, page_no, items)
+
+    # paired/grouped spells (Clout+Blast, Animate Metal/Plastic/Stone/Wood) share
+    # one description printed after the last of the group; backfill it to the
+    # earlier members that were flushed before it appeared.
+    pending: list[dict] = []
+    for it in items:
+        desc = it["system"].get("description")
+        if desc:
+            for p in pending:
+                if p["system"]["category"] == it["system"]["category"]:
+                    p["system"]["description"] = desc
+                    p["system"]["sharedDescription"] = True
+            pending = []
+        else:
+            pending.append(it)
     return items

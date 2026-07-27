@@ -43,6 +43,7 @@
         "drain": { "type": "string" },
         "damage": { "type": "string" },
         "description": { "type": "string" },
+        "sharedDescription": { "type": "boolean" },
         "product": { "type": "string" },
         "page": { "type": "integer", "minimum": 0 },
         "genesisID": { "type": "string" }
