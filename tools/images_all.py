@@ -2,6 +2,10 @@
 (data/_assets/<book>/) as alpha PNGs, pairing confident art to items and
 applying offline rembg to opaque paired art. Assigned images are copied back
 into the merged library by item id. Unpaired art lands in _assets/<book>/_inbox."""
+
+import sys
+from pathlib import Path as _P
+sys.path.insert(0, str(_P(__file__).resolve().parent.parent))
 import json
 import shutil
 from pathlib import Path

@@ -6,7 +6,7 @@ const MODES = ["SS", "SA", "BF", "FA"];
 // rendered by dedicated controls above the generic field list
 const HANDLED = new Set(["description"]);
 
-export default function ItemEditor({ item, bookTitle, categoryName, pdfAvailable, pdfHref, onSave, onAssignIcon }) {
+export default function ItemEditor({ item, bookTitle, books = {}, categoryName, pdfAvailable, pdfHref, onSave, onAssignIcon }) {
   const [draft, setDraft] = useState(() => structuredClone(item));
   const [picking, setPicking] = useState(false);
   const [renderExists, setRenderExists] = useState(true);
@@ -66,7 +66,14 @@ export default function ItemEditor({ item, bookTitle, categoryName, pdfAvailable
       <div className="editor-head">
         <h2>{draft.name}</h2>
         <div className="ref-line">
-          <span className="ref-book">{bookTitle} — p. {draft.meta?.page}</span>
+          <span className="ref-book">
+            {(draft.meta?.sources?.length
+              ? draft.meta.sources
+              : [{ book: draft.meta?.book, page: draft.meta?.page }]
+            )
+              .map((s, i) => `${i === 0 ? bookTitle : books[s.book]?.title ?? s.book} — p. ${s.page}`)
+              .join(" · ")}
+          </span>
           <span className="ref-id">{draft.id}</span>
         </div>
       </div>

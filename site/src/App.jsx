@@ -88,7 +88,9 @@ export default function App() {
     }
   }
 
-  const bookInfo = selected ? books[selected.book] : null;
+  // the library is a merged namespace: each item's real source is meta.book,
+  // not the selected library folder. Show the title/PDF for the item's own book.
+  const bookInfo = editing?.meta?.book ? books[editing.meta.book] : null;
 
   return (
     <div className="layout">
@@ -127,7 +129,8 @@ export default function App() {
           <ItemEditor
             key={editing.id}
             item={editing}
-            bookTitle={bookInfo?.title ?? selected?.book}
+            bookTitle={bookInfo?.title ?? editing?.meta?.book ?? selected?.book}
+            books={books}
             categoryName={selected?.category?.replace(/_/g, " ")}
             pdfAvailable={Boolean(bookInfo?.pdf)}
             pdfHref={editing.meta ? `/api/pdf/${editing.meta.book}#page=${editing.meta.page}` : null}

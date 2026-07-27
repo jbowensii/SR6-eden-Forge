@@ -1,6 +1,10 @@
 """Ingest every gear-bearing book into the live library in publication-date
 order (earliest first so it becomes the variant base), city editions last as
 reprints. corebook and firing_squad are already merged; skipped here."""
+
+import sys
+from pathlib import Path as _P
+sys.path.insert(0, str(_P(__file__).resolve().parent.parent))
 from pathlib import Path
 from extractor.ingest import ingest_book, load_registry
 

@@ -20,6 +20,7 @@ from pathlib import Path
 from extractor.cache import read_cols
 from extractor.textcols import COLUMN_BREAK
 
+HEAD_SENTINEL = "\x00HEAD\x00"  # font-aware extractor marks heading boundaries
 MAX_SECTION_LINES = 120
 MAX_DESC_CHARS = 3500
 PAGE_WINDOW = 8       # heading may sit several pages before the item's table
@@ -213,6 +214,9 @@ def parse_sections(lines, index) -> dict[tuple[str, str], str]:
         page, raw = entry if isinstance(entry, tuple) else (None, entry)
         line = raw.strip()
         if not line:
+            continue
+        if line == HEAD_SENTINEL:
+            flush()  # font-aware input marks every heading; end the open section
             continue
         targets = index.match(line, page)
         if targets:
