@@ -20,8 +20,8 @@ export default function CategoryTable({ payload, issues, onEdit }) {
               {item.name}
             </td>
             <td className="cell-subtype">{item.system.subtype ?? ""}</td>
-            <td className="cell-num">{item.system.priceDef ?? item.system.price}</td>
-            <td className="cell-num">{item.system.availDef ?? item.system.avail}</td>
+            <td className="cell-num">{item.system.priceDef || item.system.price}</td>
+            <td className="cell-num">{item.system.availDef || item.system.avail}</td>
             <td className="cell-ref">p. {item.meta.page}</td>
             <td><span className={`qa-chip qa-${item.meta.qaStatus}`}>{item.meta.qaStatus}</span></td>
             <td className="cell-issues">{(issueMap.get(item.id) ?? []).map((i) => i.rule).join(", ")}</td>
