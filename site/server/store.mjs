@@ -79,6 +79,8 @@ export const DOMAIN_GROUPING = {
   lifestyles: { groupBy: "category", subBy: "subtype" },
   skills: { groupBy: "category", subBy: "attribute" },
   npcs: { groupBy: "category", subBy: "metatype" },
+  critters: { groupBy: "category", subBy: "subtype" },
+  spirits: { groupBy: "category", subBy: "subtype" },
 };
 
 export function domains(dataRoot) {
