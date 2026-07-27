@@ -36,7 +36,7 @@ def test_missing_meta_field_fails(gear_file):
 
 
 def test_unknown_domain_reports_no_schema(gear_file):
-    gear_file["domain"] = "npcs"
+    gear_file["domain"] = "nonexistent_domain"
     issues = check_file(df(gear_file))
     assert len(issues) == 1
     assert issues[0].rule == "no-schema"
