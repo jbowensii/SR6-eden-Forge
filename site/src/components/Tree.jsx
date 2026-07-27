@@ -1,9 +1,12 @@
 import React from "react";
 
 export default function Tree({ entries, selected, onSelect }) {
+  // the merged library lives under the "corebook" namespace but holds gear from
+  // every book, so label it plainly rather than implying it is core-only.
+  const label = (book) => (book === "corebook" ? "LIBRARY · ALL BOOKS" : book);
   const groups = new Map();
   for (const e of entries) {
-    const g = `${e.book} // ${e.domain}`;
+    const g = `${label(e.book)} // ${e.domain}`;
     if (!groups.has(g)) groups.set(g, []);
     groups.get(g).push(e);
   }
