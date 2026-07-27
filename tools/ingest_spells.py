@@ -11,8 +11,10 @@ from datetime import date
 
 import extractor
 from extractor.emit import slugify
-from extractor.ingest import LIBRARY, load_registry
+from extractor.ingest import LIBRARY, fill_blank_fields, load_registry
 from extractor.spells import read_spells
+
+SPELL_BASE_FIELDS = ("descriptor", "range", "drain", "damage", "description")
 
 DATA = _P("data")
 BOOK = "corebook"
@@ -48,6 +50,10 @@ for sp in spells:
     if sp["system"].get("description"):
         item["meta"]["descriptionFrom"] = BOOK
     by_cat.setdefault(cat, []).append(item)
+
+# every spell exposes its category's full string-field set (blank where missing)
+fill_blank_fields([i for items in by_cat.values() for i in items],
+                  SPELL_BASE_FIELDS, group_by="category")
 
 out_dir = DATA / LIBRARY / "spells"
 out_dir.mkdir(parents=True, exist_ok=True)

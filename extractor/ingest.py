@@ -206,6 +206,34 @@ def _prose_only_items(library: dict, hier: dict) -> dict:
     return out
 
 
+# string fields every gear item should expose for editing, even when blank
+_GEAR_BASE_FIELDS = ("availDef", "priceDef", "subtype", "notes", "description")
+
+
+def fill_blank_fields(items, base_fields=(), group_by="type"):
+    """Give every item the full set of string fields its peers use, blank ("")
+    where missing, so the editor always shows the slot to fill. Data-driven: the
+    template for a group is the union of string fields any item of that group
+    carries, plus `base_fields`. Numeric/structural fields are left untouched
+    (their typed value or a *Def string carries the blank). Returns count added."""
+    string_fields: dict[str, set] = {}
+    for i in items:
+        g = i["system"].get(group_by, "")
+        fields = string_fields.setdefault(g, set())
+        for k, v in i["system"].items():
+            if isinstance(v, str) and k not in ("type", "category"):
+                fields.add(k)
+    added = 0
+    for i in items:
+        g = i["system"].get(group_by, "")
+        want = set(base_fields) | string_fields.get(g, set())
+        for f in want:
+            if f not in i["system"]:
+                i["system"][f] = ""
+                added += 1
+    return added
+
+
 def ingest_book(data_root: Path, book: str, domain: str = "gear", redump: bool = False) -> dict:
     reg = load_registry(data_root)
     info = reg.get(book)
@@ -247,6 +275,8 @@ def ingest_book(data_root: Path, book: str, domain: str = "gear", redump: bool =
         if prose_items:
             _, pstats = merge_book(library, prose_items, book, dates, version, today)
             prose = pstats["new"]
+    # every item exposes its type's full string-field set (blank where missing)
+    fill_blank_fields([i for cat in library.values() for i in cat], _GEAR_BASE_FIELDS)
     write_library(data_root, domain, library, envelopes)
 
     stats.update(detected=sum(len(v) for v in library.values()), reprint=reprint,

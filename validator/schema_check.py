@@ -38,6 +38,17 @@ def _item_id_for(payload: dict, error_path: list) -> str | None:
     return None
 
 
+def _without_blanks(payload: dict) -> dict:
+    """A copy with empty-string system fields dropped. Items carry blank ("")
+    fields so the editor shows every applicable slot to fill; those blanks are
+    "not set" and must not be validated against a typed schema."""
+    out = {**payload, "items": []}
+    for item in payload.get("items", []):
+        system = {k: v for k, v in item.get("system", {}).items() if v != ""}
+        out["items"].append({**item, "system": system})
+    return out
+
+
 def check_file(df: DataFile) -> list[Issue]:
     validator = _validator_for(df.domain)
     if validator is None:
@@ -50,12 +61,13 @@ def check_file(df: DataFile) -> list[Issue]:
             )
         ]
     issues = []
-    for error in validator.iter_errors(df.payload):
+    cleaned = _without_blanks(df.payload)
+    for error in validator.iter_errors(cleaned):
         path = list(error.absolute_path)
         issues.append(
             Issue(
                 file=str(df.path),
-                item_id=_item_id_for(df.payload, path),
+                item_id=_item_id_for(cleaned, path),
                 rule="schema",
                 message=f"{'/'.join(str(p) for p in path) or '<root>'}: {error.message}",
             )
