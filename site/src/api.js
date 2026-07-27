@@ -4,6 +4,7 @@ async function json(res) {
 }
 
 export const getTree = () => fetch("/api/tree").then(json);
+export const searchItems = (q) => fetch(`/api/search?q=${encodeURIComponent(q)}`).then(json);
 export const getCategory = (b, d, c) => fetch(`/api/category/${b}/${d}/${c}`).then(json);
 export const putItem = (b, d, c, item) =>
   fetch(`/api/item/${b}/${d}/${c}/${item.id}`, {

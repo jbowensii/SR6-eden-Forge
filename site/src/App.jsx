@@ -3,7 +3,7 @@ import CategoryTable from "./components/CategoryTable.jsx";
 import ItemEditor from "./components/ItemEditor.jsx";
 import Preview from "./components/Preview.jsx";
 import Tree from "./components/Tree.jsx";
-import { assignIcon, exportModule, getBooks, getCategory, getTree, putItem, validate } from "./api.js";
+import { assignIcon, exportModule, getBooks, getCategory, getTree, putItem, searchItems, validate } from "./api.js";
 
 export default function App() {
   const [tree, setTree] = useState([]);
@@ -15,6 +15,32 @@ export default function App() {
   const [doc, setDoc] = useState(null);
   const [issues, setIssues] = useState(null);
   const [status, setStatus] = useState("");
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState(null); // null = not searching; [] = no hits
+
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) {
+      setResults(null);
+      return;
+    }
+    const t = setTimeout(() => {
+      searchItems(q).then(setResults).catch(() => setResults([]));
+    }, 180);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  async function openItem(hit) {
+    try {
+      setSelected({ book: hit.book, domain: hit.domain, category: hit.category });
+      setDoc(null);
+      const p = await getCategory(hit.book, hit.domain, hit.category);
+      setPayload(p);
+      setEditing(p.items.find((i) => i.id === hit.id) ?? null);
+    } catch (e) {
+      setStatus(`error: ${e.message ?? e}`);
+    }
+  }
 
   useEffect(() => {
     getTree().then(setTree).catch((e) => setStatus(String(e)));
@@ -104,7 +130,36 @@ export default function App() {
           <button onClick={runValidate}>Validate</button>
           <button onClick={runExport} disabled={!selected || exporting}>Export</button>
         </div>
-        <Tree entries={tree} selected={selected} onSelect={openCategory} />
+        <div className="search">
+          <input
+            type="search"
+            className="search-input"
+            placeholder="Find an item…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          {query && (
+            <button className="search-clear" title="Clear" onClick={() => setQuery("")}>×</button>
+          )}
+        </div>
+        {results === null ? (
+          <Tree entries={tree} selected={selected} onSelect={openCategory} />
+        ) : (
+          <nav className="search-results">
+            <div className="tree-group-title">{results.length} match{results.length === 1 ? "" : "es"}</div>
+            {results.map((hit) => (
+              <div
+                key={`${hit.category}/${hit.id}`}
+                className={`tree-row ${editing?.id === hit.id ? "active" : ""}`}
+                onClick={() => openItem(hit)}
+                title={`${hit.category.replace(/_/g, " ")} · ${books[hit.sourceBook]?.title ?? hit.sourceBook}`}
+              >
+                <span className="tree-name">{hit.name}</span>
+                <span className="badge">{hit.category.replace(/_/g, " ")}</span>
+              </div>
+            ))}
+          </nav>
+        )}
       </aside>
       <main>
         <div className="status" data-live={Boolean(status)}>{status || "ready"}</div>

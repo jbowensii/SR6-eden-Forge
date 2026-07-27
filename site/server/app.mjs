@@ -4,7 +4,7 @@ import express from "express";
 import { toFoundryDoc } from "../shared/edenTransform.mjs";
 import { loadBooks } from "./exportModule.mjs";
 import { assignIcon, libraryRoots, loadSettings, resolveLibraryFile, searchIcons } from "./iconLibrary.mjs";
-import { SEGMENT, StoreError, readCategory, tree, writeItem } from "./store.mjs";
+import { SEGMENT, StoreError, readCategory, searchItems, tree, writeItem } from "./store.mjs";
 
 const EXPORT_STATUSES = new Set(["approved", "reviewed", "all"]);
 
@@ -13,6 +13,10 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
   app.use(express.json({ limit: "2mb" }));
 
   app.get("/api/tree", (req, res) => handle(res, () => tree(dataRoot)));
+
+  // item finder for the left-pane search box
+  app.get("/api/search", (req, res) =>
+    handle(res, () => searchItems(dataRoot, String(req.query.q ?? ""), Number(req.query.limit ?? 60))));
 
   // book metadata (titles + whether a PDF is wired up) from data/books.json
   app.get("/api/books", (req, res) => {

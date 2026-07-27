@@ -58,6 +58,34 @@ export function tree(dataRoot) {
   return out.sort((a, b) => `${a.book}/${a.domain}/${a.category}`.localeCompare(`${b.book}/${b.domain}/${b.category}`));
 }
 
+export function searchItems(dataRoot, query, limit = 60) {
+  /** Scan every category file and return items whose name contains `query`
+   * (case-insensitive). Powers the left-pane item finder. */
+  const q = String(query || "").trim().toLowerCase();
+  if (!q) return [];
+  const hits = [];
+  for (const entry of tree(dataRoot)) {
+    if (entry.error) continue;
+    let payload;
+    try {
+      payload = readCategory(dataRoot, entry.book, entry.domain, entry.category);
+    } catch {
+      continue;
+    }
+    for (const item of payload.items ?? []) {
+      if (String(item.name || "").toLowerCase().includes(q)) {
+        hits.push({
+          book: entry.book, domain: entry.domain, category: entry.category,
+          id: item.id, name: item.name,
+          type: item.system?.type ?? "", sourceBook: item.meta?.book ?? entry.book,
+        });
+        if (hits.length >= limit) return hits;
+      }
+    }
+  }
+  return hits;
+}
+
 export function readCategory(dataRoot, book, domain, category) {
   const path = categoryPath(dataRoot, book, domain, category);
   let raw;

@@ -84,7 +84,40 @@ aside {
   background: linear-gradient(90deg, var(--magenta), transparent);
 }
 
-.actions { display: flex; gap: 8px; margin: 14px 0 18px; }
+.actions { display: flex; gap: 8px; margin: 14px 0 12px; }
+
+.search { position: relative; margin: 0 0 14px; }
+.search-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 7px 26px 7px 10px;
+  outline: none;
+  transition: border-color 0.12s;
+}
+.search-input:focus { border-color: var(--magenta); }
+.search-input::placeholder { color: var(--ink-dim); }
+.search-clear {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--ink-dim);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+.search-clear:hover { color: var(--magenta-soft); }
+.search-results .tree-row .badge { text-transform: capitalize; }
+.search-results .tree-name { text-transform: none; }
 
 .tree-group { margin-bottom: 14px; }
 .tree-group-title {
