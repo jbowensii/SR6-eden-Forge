@@ -112,8 +112,10 @@ KEY_STAT = {
 }
 
 
-def build_item(assigned: dict, wtype: str, skill: str, subtype: str, page: int, cells):
+def build_item(assigned: dict, wtype: str, skill: str, subtype: str, page: int, cells, name_fixer=None):
     name = assigned.get("_name", "")
+    if name_fixer:
+        name = name_fixer(name)  # repair mangled names before validation
     if not _valid_name(name):
         return None
     system = {"type": wtype}
@@ -164,7 +166,7 @@ def _section_title(line: list[dict]) -> str | None:
     return None
 
 
-def extract_page(words: list[dict], page: int) -> list[dict]:
+def extract_page(words: list[dict], page: int, name_fixer=None) -> list[dict]:
     lines = group_lines(words)
     items: list[dict] = []
     section = ""
@@ -197,7 +199,7 @@ def extract_page(words: list[dict], page: int) -> list[dict]:
             if _is_header(lines[j]) or _section_title(lines[j]):
                 break
             assigned = assign_row(lines[j], cells)
-            item = build_item(assigned, wtype, skill, subtype, page, cells)
+            item = build_item(assigned, wtype, skill, subtype, page, cells, name_fixer)
             if item:
                 item["_category"] = category
                 items.append(item)
@@ -215,15 +217,16 @@ def extract_page_words(words: list[dict], page_no: int) -> list[dict]:
     return extract_page(words, page_no)
 
 
-def extract_book(pdf_path, pages, word_source=None) -> dict:
+def extract_book(pdf_path, pages, word_source=None, name_fixer=None) -> dict:
     """word_source(page) -> [{text,x0,x1,top}]; defaults to pdfplumber words.
-    Broken-glyph books pass OCR words instead."""
+    Broken-glyph books pass OCR words instead. name_fixer(name) -> name repairs
+    mangled names (no-space-glyph tables) before validation."""
     import pdfplumber
 
     src = word_source or _pdf_words
     out: dict[str, list[dict]] = {}
     with pdfplumber.open(str(pdf_path)) as pdf:
         for page_no in pages:
-            for it in extract_page(src(pdf.pages[page_no - 1]), page_no):
+            for it in extract_page(src(pdf.pages[page_no - 1]), page_no, name_fixer):
                 out.setdefault(it.pop("_category"), []).append(it)
     return out
