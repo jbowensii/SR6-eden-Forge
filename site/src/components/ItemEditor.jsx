@@ -57,8 +57,14 @@ export default function ItemEditor({ item, bookTitle, books = {}, categoryName, 
     return <code>{JSON.stringify(value)}</code>;
   }
 
-  const imgSrc = draft.img && !/^(icons|systems|modules)\//.test(draft.img) ? `/assets/${draft.img}` : null;
-  // an extracted book render may exist even when a library icon is assigned
+  // the icon slot shows ONLY icon-library art (the loaded icon sets under
+  // iconsets/, a shared generic/ icon, or a per-item <book>/lib/ pick); a
+  // PDF-extracted render must never appear here — it belongs to the book-render
+  // slot below, which loads <book>/<id>.png directly.
+  const isIconAsset = draft.img && (
+    draft.img.startsWith("iconsets/") || draft.img.startsWith("generic/") || draft.img.includes("/lib/")
+  );
+  const imgSrc = isIconAsset ? `/assets/${draft.img}` : null;
   const renderPath = `${draft.meta?.book}/${draft.id}.png`;
 
   return (
