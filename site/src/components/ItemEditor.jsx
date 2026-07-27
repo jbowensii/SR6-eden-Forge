@@ -7,6 +7,12 @@ const QA = ["extracted", "reviewed", "approved"];
 const MODES = ["SS", "SA", "BF", "FA"];
 // rendered by dedicated controls above the generic field list
 const HANDLED = new Set(["description"]);
+// string fields that hold lists/prose and want a textarea, not a single line
+const LONG_FIELDS = new Set([
+  "activeSkills", "knowledgeSkills", "qualities", "spells", "gear", "weapons",
+  "powers", "optionalPowers", "skills", "specializations", "gameEffect",
+  "effect", "attacks", "contacts", "cyberware", "bioware", "augmentations",
+]);
 
 export default function ItemEditor({ item, bookTitle, books = {}, categoryName, pdfAvailable, pdfHref, onSave, onDelete, onAssignIcon, onAssignRender }) {
   const [draft, setDraft] = useState(() => structuredClone(item));
@@ -63,7 +69,34 @@ export default function ItemEditor({ item, bookTitle, books = {}, categoryName, 
       return <input type="number" value={value} onChange={(e) => setSystem(field, Number(e.target.value))} />;
     }
     if (typeof value === "string") {
+      // long, prose-y, or list fields get a textarea; short ones an input
+      if (value.length > 48 || LONG_FIELDS.has(field)) {
+        return (
+          <textarea rows={Math.min(8, Math.ceil((value.length || 1) / 48) + 1)}
+            value={value} onChange={(e) => setSystem(field, e.target.value)} />
+        );
+      }
       return <input type="text" value={value} onChange={(e) => setSystem(field, e.target.value)} />;
+    }
+    // a nested object (e.g. an actor's attributes) -> a labelled sub-field grid
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      return (
+        <span className="obj-grid">
+          {Object.entries(value).map(([k, v]) => (
+            <label key={k} className="obj-cell">
+              <span className="obj-key">{k}</span>
+              <input
+                type={typeof v === "number" ? "number" : "text"}
+                value={v}
+                onChange={(e) => {
+                  const nv = typeof v === "number" ? Number(e.target.value) : e.target.value;
+                  setSystem(field, { ...value, [k]: nv });
+                }}
+              />
+            </label>
+          ))}
+        </span>
+      );
     }
     return <code>{JSON.stringify(value)}</code>;
   }
