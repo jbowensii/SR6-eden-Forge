@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sr6forge:lifestyles",
+  "title": "SR6-eden-Forge lifestyles data file",
+  "type": "object",
+  "required": [
+    "book",
+    "domain",
+    "category",
+    "items"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "book": {
+      "$ref": "urn:sr6forge:common#/$defs/slug"
+    },
+    "domain": {
+      "const": "lifestyles"
+    },
+    "category": {
+      "$ref": "urn:sr6forge:common#/$defs/slug"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/item"
+      }
+    }
+  },
+  "$defs": {
+    "item": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "system",
+        "meta"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "urn:sr6forge:common#/$defs/slug"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "img": {
+          "type": "string",
+          "minLength": 1
+        },
+        "system": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "category": {
+              "const": "LIFESTYLE"
+            },
+            "subtype": {
+              "type": "string"
+            },
+            "cost": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "page": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "product": {
+              "type": "string"
+            },
+            "genesisID": {
+              "type": "string"
+            }
+          }
+        },
+        "meta": {
+          "$ref": "urn:sr6forge:common#/$defs/meta"
+        }
+      }
+    }
+  }
+}
