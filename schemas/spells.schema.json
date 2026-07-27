@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sr6forge:spell",
+  "title": "SR6-eden-Forge spell data file",
+  "type": "object",
+  "required": ["book", "domain", "category", "items"],
+  "additionalProperties": false,
+  "properties": {
+    "book": { "$ref": "urn:sr6forge:common#/$defs/slug" },
+    "domain": { "const": "spells" },
+    "category": { "$ref": "urn:sr6forge:common#/$defs/slug" },
+    "items": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/spellItem" }
+    }
+  },
+  "$defs": {
+    "spellItem": {
+      "type": "object",
+      "required": ["id", "name", "system", "meta"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "urn:sr6forge:common#/$defs/slug" },
+        "name": { "type": "string", "minLength": 1 },
+        "img": { "type": "string", "minLength": 1 },
+        "system": { "$ref": "#/$defs/spellSystem" },
+        "meta": { "$ref": "urn:sr6forge:common#/$defs/meta" }
+      }
+    },
+    "spellSystem": {
+      "type": "object",
+      "required": ["category"],
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "enum": ["COMBAT", "DETECTION", "HEALTH", "ILLUSION", "MANIPULATION"]
+        },
+        "subtype": { "type": "string" },
+        "descriptor": { "type": "string" },
+        "spellType": { "enum": ["P", "M"] },
+        "range": { "type": "string" },
+        "duration": { "enum": ["I", "S", "P"] },
+        "drain": { "type": "string" },
+        "damage": { "type": "string" },
+        "description": { "type": "string" },
+        "product": { "type": "string" },
+        "page": { "type": "integer", "minimum": 0 },
+        "genesisID": { "type": "string" }
+      }
+    }
+  }
+}

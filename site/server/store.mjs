@@ -67,12 +67,26 @@ function _addQa(qa, item) {
   if (s in qa) qa[s] += 1;
 }
 
-export function typeTree(dataRoot) {
-  /** Nested TYPE -> SUBTYPE grouping of every item, with counts + qa rollups.
-   * Items with no subtype fall under the "" (no subtype) bucket. */
+// how each domain groups in the left pane: primary field -> secondary field.
+export const DOMAIN_GROUPING = {
+  gear: { groupBy: "type", subBy: "subtype" },
+  spells: { groupBy: "category", subBy: "subtype" },
+};
+
+export function domains(dataRoot) {
+  /** Domains present in the library that have a schema-backed grouping. */
+  const found = new Set(tree(dataRoot).map((e) => e.domain));
+  return Object.keys(DOMAIN_GROUPING).filter((d) => found.has(d));
+}
+
+export function typeTree(dataRoot, domain = "gear") {
+  /** Nested primary -> secondary grouping of a domain's items (gear: type ->
+   * subtype; spells: category -> subtype), with counts + qa rollups. Items with
+   * no secondary value fall under the "" bucket. */
+  const { groupBy, subBy } = DOMAIN_GROUPING[domain] ?? DOMAIN_GROUPING.gear;
   const types = new Map();
   for (const entry of tree(dataRoot)) {
-    if (entry.error) continue;
+    if (entry.error || entry.domain !== domain) continue;
     let payload;
     try {
       payload = readCategory(dataRoot, entry.book, entry.domain, entry.category);
@@ -80,8 +94,8 @@ export function typeTree(dataRoot) {
       continue;
     }
     for (const item of payload.items ?? []) {
-      const type = item.system?.type || "UNTYPED";
-      const subtype = item.system?.subtype || "";
+      const type = item.system?.[groupBy] || "UNTYPED";
+      const subtype = (subBy && item.system?.[subBy]) || "";
       if (!types.has(type)) types.set(type, { type, items: 0, qa: _blankQa(), subs: new Map() });
       const t = types.get(type);
       t.items += 1;
@@ -102,13 +116,14 @@ export function typeTree(dataRoot) {
     .sort((a, b) => a.type.localeCompare(b.type));
 }
 
-export function itemsByType(dataRoot, type, subtype) {
-  /** Every item of a type (optionally narrowed to a subtype), each annotated
-   * with its source `category` so edits still route to the right file. */
+export function itemsByType(dataRoot, type, subtype, domain = "gear") {
+  /** Every item of a primary group (optionally narrowed to a secondary value),
+   * each annotated with its source category so edits route to the right file. */
+  const { groupBy, subBy } = DOMAIN_GROUPING[domain] ?? DOMAIN_GROUPING.gear;
   const wantSub = subtype === undefined ? null : subtype;
   const out = [];
   for (const entry of tree(dataRoot)) {
-    if (entry.error) continue;
+    if (entry.error || entry.domain !== domain) continue;
     let payload;
     try {
       payload = readCategory(dataRoot, entry.book, entry.domain, entry.category);
@@ -116,8 +131,8 @@ export function itemsByType(dataRoot, type, subtype) {
       continue;
     }
     for (const item of payload.items ?? []) {
-      if ((item.system?.type || "UNTYPED") !== type) continue;
-      if (wantSub !== null && (item.system?.subtype || "") !== wantSub) continue;
+      if ((item.system?.[groupBy] || "UNTYPED") !== type) continue;
+      if (wantSub !== null && ((subBy && item.system?.[subBy]) || "") !== wantSub) continue;
       out.push({ ...item, _category: entry.category, _book: entry.book, _domain: entry.domain });
     }
   }

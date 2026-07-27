@@ -4,7 +4,7 @@ import express from "express";
 import { toFoundryDoc } from "../shared/edenTransform.mjs";
 import { loadBooks } from "./exportModule.mjs";
 import { assignIcon, libraryRoots, loadSettings, resolveLibraryFile, searchIcons } from "./iconLibrary.mjs";
-import { SEGMENT, StoreError, assignRender, deleteItem, itemsByType, listBookImages, readCategory, searchItems, tree, typeTree, writeItem } from "./store.mjs";
+import { SEGMENT, StoreError, assignRender, deleteItem, domains, itemsByType, listBookImages, readCategory, searchItems, tree, typeTree, writeItem } from "./store.mjs";
 
 const EXPORT_STATUSES = new Set(["approved", "reviewed", "all"]);
 
@@ -18,11 +18,13 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
   app.get("/api/search", (req, res) =>
     handle(res, () => searchItems(dataRoot, String(req.query.q ?? ""), Number(req.query.limit ?? 60))));
 
-  // nested TYPE -> SUBTYPE tree, and the items under a chosen type/subtype
-  app.get("/api/typetree", (req, res) => handle(res, () => typeTree(dataRoot)));
+  // available domains, the per-domain grouping tree, and its items
+  app.get("/api/domains", (req, res) => handle(res, () => ({ domains: domains(dataRoot) })));
+  app.get("/api/typetree", (req, res) => handle(res, () => typeTree(dataRoot, String(req.query.domain ?? "gear"))));
   app.get("/api/items", (req, res) =>
     handle(res, () => itemsByType(dataRoot, String(req.query.type ?? ""),
-      req.query.subtype === undefined ? undefined : String(req.query.subtype))));
+      req.query.subtype === undefined ? undefined : String(req.query.subtype),
+      String(req.query.domain ?? "gear"))));
 
   // book metadata (titles + whether a PDF is wired up) from data/books.json
   app.get("/api/books", (req, res) => {

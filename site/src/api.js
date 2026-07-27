@@ -4,10 +4,11 @@ async function json(res) {
 }
 
 export const getTree = () => fetch("/api/tree").then(json);
-export const getTypeTree = () => fetch("/api/typetree").then(json);
-export const getItems = (type, subtype) => {
+export const getDomains = () => fetch("/api/domains").then(json);
+export const getTypeTree = (domain = "gear") => fetch(`/api/typetree?domain=${encodeURIComponent(domain)}`).then(json);
+export const getItems = (type, subtype, domain = "gear") => {
   const q = subtype === undefined ? "" : `&subtype=${encodeURIComponent(subtype)}`;
-  return fetch(`/api/items?type=${encodeURIComponent(type)}${q}`).then(json);
+  return fetch(`/api/items?domain=${encodeURIComponent(domain)}&type=${encodeURIComponent(type)}${q}`).then(json);
 };
 export const searchItems = (q) => fetch(`/api/search?q=${encodeURIComponent(q)}`).then(json);
 export const getCategory = (b, d, c) => fetch(`/api/category/${b}/${d}/${c}`).then(json);

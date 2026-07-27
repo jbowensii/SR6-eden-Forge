@@ -3,10 +3,12 @@ import CategoryTable from "./components/CategoryTable.jsx";
 import ItemEditor from "./components/ItemEditor.jsx";
 import Preview from "./components/Preview.jsx";
 import TypeTree from "./components/TypeTree.jsx";
-import { assignIcon, assignRender, deleteItem, exportModule, getBooks, getCategory, getItems, getTypeTree, putItem, searchItems, validate } from "./api.js";
+import { assignIcon, assignRender, deleteItem, exportModule, getBooks, getCategory, getDomains, getItems, getTypeTree, putItem, searchItems, validate } from "./api.js";
 
 export default function App() {
-  const [tree, setTree] = useState([]);      // TYPE -> SUBTYPE tree
+  const [tree, setTree] = useState([]);      // primary -> secondary tree for the domain
+  const [domain, setDomain] = useState("gear");
+  const [domainList, setDomainList] = useState(["gear"]);
   const [books, setBooks] = useState({});
   const [selected, setSelected] = useState(null); // {type, subtype?} or {book,domain,category}
   const [exporting, setExporting] = useState(false);
@@ -44,18 +46,25 @@ export default function App() {
   }
 
   useEffect(() => {
-    getTypeTree().then(setTree).catch((e) => setStatus(String(e)));
+    getDomains().then((r) => setDomainList(r.domains?.length ? r.domains : ["gear"])).catch(() => {});
     getBooks().then(setBooks).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    getTypeTree(domain).then(setTree).catch((e) => setStatus(String(e)));
+    setSelected(null);
+    setPayload(null);
+    setEditing(null);
+  }, [domain]);
 
   async function openType(sel) {
     try {
       setSelected(sel);
       setEditing(null);
       setDoc(null);
-      const res = await getItems(sel.type, sel.subtype);
+      const res = await getItems(sel.type, sel.subtype, domain);
       // items carry their source category/book so edits still route correctly
-      setPayload({ book: sel.type, domain: "gear", category: sel.subtype ?? sel.type, items: res.items });
+      setPayload({ book: sel.type, domain, category: sel.subtype ?? sel.type, items: res.items });
     } catch (e) {
       setStatus(`error: ${e.message ?? e}`);
     }
@@ -63,7 +72,7 @@ export default function App() {
 
   async function refreshPayload() {
     if (!selected) return;
-    if (selected.type) setPayload({ ...(await getItems(selected.type, selected.subtype)), book: selected.type, domain: "gear", category: selected.subtype ?? selected.type });
+    if (selected.type) setPayload({ ...(await getItems(selected.type, selected.subtype, domain)), book: selected.type, domain, category: selected.subtype ?? selected.type });
     else setPayload(await getCategory(selected.book, selected.domain, selected.category));
   }
 
@@ -79,7 +88,7 @@ export default function App() {
       setDoc(res.doc);
       setStatus(res.docError ? `saved; preview error: ${res.docError}` : `saved ${item.id}`);
       await refreshPayload();
-      setTree(await getTypeTree());
+      setTree(await getTypeTree(domain));
       setEditing({ ...res.item, _book: book, _domain: domain, _category: category });
     } catch (e) {
       setStatus(`error: ${e.message ?? e}`);
@@ -95,7 +104,7 @@ export default function App() {
       setEditing(null);
       setDoc(null);
       await refreshPayload();
-      setTree(await getTypeTree());
+      setTree(await getTypeTree(domain));
       setStatus(`deleted ${item.id}`);
     } catch (e) {
       setStatus(`error: ${e.message ?? e}`);
@@ -120,7 +129,7 @@ export default function App() {
     const res = await assignIcon({ book, domain, category, itemId: item.id, root: hit.r, libraryPath: hit.p, mode });
     setStatus(mode === "generic" ? `generic icon updated (${res.updated} item(s))` : `icon set for ${item.id}`);
     await refreshPayload();
-    setTree(await getTypeTree());  // counts/art may shift -> refresh the left pane
+    setTree(await getTypeTree(domain));  // counts/art may shift -> refresh the left pane
     const fresh = (await getCategory(book, domain, category)).items.find((i) => i.id === item.id);
     if (fresh) setEditing({ ...fresh, _book: book, _domain: domain, _category: category });
   }
@@ -173,6 +182,19 @@ export default function App() {
           <button onClick={runValidate}>Validate</button>
           <button onClick={runExport} disabled={!selected || exporting}>Export</button>
         </div>
+        {domainList.length > 1 && (
+          <div className="domain-tabs">
+            {domainList.map((d) => (
+              <button
+                key={d}
+                className={`domain-tab ${d === domain ? "active" : ""}`}
+                onClick={() => setDomain(d)}
+              >
+                {d}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="search">
           <input
             type="search"
