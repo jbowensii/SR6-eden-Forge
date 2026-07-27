@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import CategoryTable from "./components/CategoryTable.jsx";
 import ItemEditor from "./components/ItemEditor.jsx";
 import Preview from "./components/Preview.jsx";
-import Tree from "./components/Tree.jsx";
-import { assignIcon, exportModule, getBooks, getCategory, getTree, putItem, searchItems, validate } from "./api.js";
+import TypeTree from "./components/TypeTree.jsx";
+import { assignIcon, exportModule, getBooks, getCategory, getItems, getTypeTree, putItem, searchItems, validate } from "./api.js";
 
 export default function App() {
-  const [tree, setTree] = useState([]);
+  const [tree, setTree] = useState([]);      // TYPE -> SUBTYPE tree
   const [books, setBooks] = useState({});
-  const [selected, setSelected] = useState(null); // {book, domain, category}
+  const [selected, setSelected] = useState(null); // {type, subtype?} or {book,domain,category}
   const [exporting, setExporting] = useState(false);
   const [payload, setPayload] = useState(null);
   const [editing, setEditing] = useState(null); // item
@@ -36,36 +36,51 @@ export default function App() {
       setDoc(null);
       const p = await getCategory(hit.book, hit.domain, hit.category);
       setPayload(p);
-      setEditing(p.items.find((i) => i.id === hit.id) ?? null);
+      const found = p.items.find((i) => i.id === hit.id);
+      setEditing(found ? { ...found, _book: hit.book, _domain: hit.domain, _category: hit.category } : null);
     } catch (e) {
       setStatus(`error: ${e.message ?? e}`);
     }
   }
 
   useEffect(() => {
-    getTree().then(setTree).catch((e) => setStatus(String(e)));
+    getTypeTree().then(setTree).catch((e) => setStatus(String(e)));
     getBooks().then(setBooks).catch(() => {});
   }, []);
 
-  async function openCategory(entry) {
+  async function openType(sel) {
     try {
-      setSelected(entry);
+      setSelected(sel);
       setEditing(null);
       setDoc(null);
-      setPayload(await getCategory(entry.book, entry.domain, entry.category));
+      const res = await getItems(sel.type, sel.subtype);
+      // items carry their source category/book so edits still route correctly
+      setPayload({ book: sel.type, domain: "gear", category: sel.subtype ?? sel.type, items: res.items });
     } catch (e) {
       setStatus(`error: ${e.message ?? e}`);
     }
   }
 
+  async function refreshPayload() {
+    if (!selected) return;
+    if (selected.type) setPayload({ ...(await getItems(selected.type, selected.subtype)), book: selected.type, domain: "gear", category: selected.subtype ?? selected.type });
+    else setPayload(await getCategory(selected.book, selected.domain, selected.category));
+  }
+
   async function save(item) {
+    // route by the item's own source file (type/subtype views mix categories)
+    const book = item._book ?? selected.book;
+    const domain = item._domain ?? selected.domain;
+    const category = item._category ?? selected.category;
+    const clean = { ...item };
+    delete clean._book; delete clean._domain; delete clean._category;
     try {
-      const res = await putItem(selected.book, selected.domain, selected.category, item);
+      const res = await putItem(book, domain, category, clean);
       setDoc(res.doc);
       setStatus(res.docError ? `saved; preview error: ${res.docError}` : `saved ${item.id}`);
-      setPayload(await getCategory(selected.book, selected.domain, selected.category));
-      setTree(await getTree());
-      setEditing(res.item);
+      await refreshPayload();
+      setTree(await getTypeTree());
+      setEditing({ ...res.item, _book: book, _domain: domain, _category: category });
     } catch (e) {
       setStatus(`error: ${e.message ?? e}`);
     }
@@ -83,19 +98,14 @@ export default function App() {
   }
 
   async function handleAssignIcon(item, hit, mode) {
-    const res = await assignIcon({
-      book: selected.book,
-      domain: selected.domain,
-      category: selected.category,
-      itemId: item.id,
-      root: hit.r,
-      libraryPath: hit.p,
-      mode,
-    });
+    const book = item._book ?? selected.book;
+    const domain = item._domain ?? selected.domain;
+    const category = item._category ?? selected.category;
+    const res = await assignIcon({ book, domain, category, itemId: item.id, root: hit.r, libraryPath: hit.p, mode });
     setStatus(mode === "generic" ? `generic icon updated (${res.updated} item(s))` : `icon set for ${item.id}`);
-    setPayload(await getCategory(selected.book, selected.domain, selected.category));
-    const fresh = (await getCategory(selected.book, selected.domain, selected.category)).items.find((i) => i.id === item.id);
-    if (fresh) setEditing(fresh);
+    await refreshPayload();
+    const fresh = (await getCategory(book, domain, category)).items.find((i) => i.id === item.id);
+    if (fresh) setEditing({ ...fresh, _book: book, _domain: domain, _category: category });
   }
 
   async function runExport() {
@@ -105,7 +115,8 @@ export default function App() {
     setExporting(true);
     setStatus(`exporting (status: ${exportStatus})…`);
     try {
-      const res = await exportModule(selected.book, selected.domain, exportStatus);
+      // the whole merged library lives under the corebook/gear namespace
+      const res = await exportModule("corebook", "gear", exportStatus);
       setStatus(`exported ${res.count} item(s) (status: ${exportStatus}) -> ${res.moduleDir}`);
     } catch (e) {
       setStatus(`error: ${e.message ?? e}`);
@@ -143,7 +154,7 @@ export default function App() {
           )}
         </div>
         {results === null ? (
-          <Tree entries={tree} selected={selected} onSelect={openCategory} />
+          <TypeTree tree={tree} selected={selected} onSelect={openType} />
         ) : (
           <nav className="search-results">
             <div className="tree-group-title">{results.length} match{results.length === 1 ? "" : "es"}</div>
@@ -186,7 +197,7 @@ export default function App() {
             item={editing}
             bookTitle={bookInfo?.title ?? editing?.meta?.book ?? selected?.book}
             books={books}
-            categoryName={selected?.category?.replace(/_/g, " ")}
+            categoryName={(editing?._category ?? selected?.category ?? selected?.subtype ?? selected?.type)?.replace(/_/g, " ")}
             pdfAvailable={Boolean(bookInfo?.pdf)}
             pdfHref={editing.meta ? `/api/pdf/${editing.meta.book}#page=${editing.meta.page}` : null}
             onSave={save}

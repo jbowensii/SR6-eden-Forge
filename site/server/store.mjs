@@ -58,6 +58,72 @@ export function tree(dataRoot) {
   return out.sort((a, b) => `${a.book}/${a.domain}/${a.category}`.localeCompare(`${b.book}/${b.domain}/${b.category}`));
 }
 
+function _blankQa() {
+  return { extracted: 0, reviewed: 0, approved: 0 };
+}
+
+function _addQa(qa, item) {
+  const s = item.meta?.qaStatus;
+  if (s in qa) qa[s] += 1;
+}
+
+export function typeTree(dataRoot) {
+  /** Nested TYPE -> SUBTYPE grouping of every item, with counts + qa rollups.
+   * Items with no subtype fall under the "" (no subtype) bucket. */
+  const types = new Map();
+  for (const entry of tree(dataRoot)) {
+    if (entry.error) continue;
+    let payload;
+    try {
+      payload = readCategory(dataRoot, entry.book, entry.domain, entry.category);
+    } catch {
+      continue;
+    }
+    for (const item of payload.items ?? []) {
+      const type = item.system?.type || "UNTYPED";
+      const subtype = item.system?.subtype || "";
+      if (!types.has(type)) types.set(type, { type, items: 0, qa: _blankQa(), subs: new Map() });
+      const t = types.get(type);
+      t.items += 1;
+      _addQa(t.qa, item);
+      if (!t.subs.has(subtype)) t.subs.set(subtype, { subtype, items: 0, qa: _blankQa() });
+      const s = t.subs.get(subtype);
+      s.items += 1;
+      _addQa(s.qa, item);
+    }
+  }
+  return [...types.values()]
+    .map((t) => ({
+      type: t.type,
+      items: t.items,
+      qa: t.qa,
+      subtypes: [...t.subs.values()].sort((a, b) => a.subtype.localeCompare(b.subtype)),
+    }))
+    .sort((a, b) => a.type.localeCompare(b.type));
+}
+
+export function itemsByType(dataRoot, type, subtype) {
+  /** Every item of a type (optionally narrowed to a subtype), each annotated
+   * with its source `category` so edits still route to the right file. */
+  const wantSub = subtype === undefined ? null : subtype;
+  const out = [];
+  for (const entry of tree(dataRoot)) {
+    if (entry.error) continue;
+    let payload;
+    try {
+      payload = readCategory(dataRoot, entry.book, entry.domain, entry.category);
+    } catch {
+      continue;
+    }
+    for (const item of payload.items ?? []) {
+      if ((item.system?.type || "UNTYPED") !== type) continue;
+      if (wantSub !== null && (item.system?.subtype || "") !== wantSub) continue;
+      out.push({ ...item, _category: entry.category, _book: entry.book, _domain: entry.domain });
+    }
+  }
+  return { type, subtype: wantSub, items: out };
+}
+
 export function searchItems(dataRoot, query, limit = 60) {
   /** Scan every category file and return items whose name contains `query`
    * (case-insensitive). Powers the left-pane item finder. */

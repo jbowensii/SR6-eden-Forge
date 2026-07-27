@@ -119,6 +119,31 @@ aside {
 .search-results .tree-row .badge { text-transform: capitalize; }
 .search-results .tree-name { text-transform: none; }
 
+/* nested TYPE -> SUBTYPE tree */
+.type-group { margin-bottom: 2px; }
+.type-row .type-name {
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+.twisty {
+  background: none;
+  border: none;
+  color: var(--ink-dim);
+  cursor: pointer;
+  width: 16px;
+  padding: 0;
+  font-size: 11px;
+  flex: 0 0 16px;
+  text-align: center;
+}
+.twisty:hover { color: var(--cyan); }
+.subtype-row { padding-left: 26px; }
+.subtype-row .tree-name { text-transform: capitalize; color: var(--ink-dim); }
+.subtype-row:hover .tree-name { color: var(--ink); }
+.subtype-row.active .tree-name { color: #fff; }
+.no-subtype { font-style: italic; opacity: 0.7; }
+
 .tree-group { margin-bottom: 14px; }
 .tree-group-title {
   font-family: var(--font-display);
