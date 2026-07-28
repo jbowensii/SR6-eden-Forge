@@ -53,22 +53,16 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "category": {
-              "enum": [
-                "ACTIVE",
-                "KNOWLEDGE"
-              ]
+            "description": {
+              "type": "string"
+            },
+            "points": {
+              "type": "integer"
+            },
+            "modifier": {
+              "type": "integer"
             },
             "subtype": {
-              "type": "string"
-            },
-            "attribute": {
-              "type": "string"
-            },
-            "specializations": {
-              "type": "string"
-            },
-            "description": {
               "type": "string"
             },
             "page": {

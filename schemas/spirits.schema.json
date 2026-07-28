@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:sr6forge:spirits",
-  "title": "SR6-eden-Forge spirit data file",
+  "title": "SR6-eden-Forge spirits data file",
   "type": "object",
   "required": [
     "book",
@@ -54,16 +54,86 @@
           "additionalProperties": false,
           "properties": {
             "category": {
-              "const": "SPIRIT"
-            },
-            "subtype": {
               "type": "string"
+            },
+            "rating": {
+              "type": [
+                "number",
+                "string"
+              ]
             },
             "attributes": {
               "type": "object",
               "additionalProperties": {
-                "type": "string"
+                "type": [
+                  "number",
+                  "string"
+                ]
               }
+            },
+            "monitor": {
+              "type": "object",
+              "additionalProperties": {
+                "type": [
+                  "number",
+                  "string"
+                ]
+              }
+            },
+            "movement": {
+              "type": "object",
+              "additionalProperties": {
+                "type": [
+                  "number",
+                  "string"
+                ]
+              }
+            },
+            "page": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "product": {
+              "type": "string"
+            },
+            "genesisID": {
+              "type": "string"
+            },
+            "metatype": {
+              "type": "string"
+            },
+            "initiative": {
+              "type": "string"
+            },
+            "defenserating": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "notes": {
+              "type": "string"
+            },
+            "activeSkills": {
+              "type": "string"
+            },
+            "knowledgeSkills": {
+              "type": "string"
+            },
+            "languages": {
+              "type": "string"
+            },
+            "qualities": {
+              "type": "string"
+            },
+            "spells": {
+              "type": "string"
+            },
+            "complexForms": {
+              "type": "string"
+            },
+            "adeptPowers": {
+              "type": "string"
             },
             "powers": {
               "type": "string"
@@ -74,20 +144,40 @@
             "attacks": {
               "type": "string"
             },
-            "defenseRating": {
+            "bioware": {
               "type": "string"
             },
-            "description": {
+            "cyberware": {
               "type": "string"
             },
-            "page": {
-              "type": "integer",
-              "minimum": 0
-            },
-            "product": {
+            "augmentations": {
               "type": "string"
             },
-            "genesisID": {
+            "contacts": {
+              "type": "string"
+            },
+            "lifestyle": {
+              "type": "string"
+            },
+            "gear": {
+              "type": "string"
+            },
+            "nuyen": {
+              "type": "string"
+            },
+            "weapons": {
+              "type": "string"
+            },
+            "skills": {
+              "type": "string"
+            },
+            "weaknesses": {
+              "type": "string"
+            },
+            "subtype": {
+              "type": "string"
+            },
+            "spiritType": {
               "type": "string"
             }
           }

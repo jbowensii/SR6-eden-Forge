@@ -73,8 +73,6 @@ export const DOMAIN_GROUPING = {
   spells: { groupBy: "category", subBy: "subtype" },
   rituals: { groupBy: "category", subBy: "subtype" },
   adept_powers: { groupBy: "category", subBy: "subtype" },
-  toxins: { groupBy: "category", subBy: "subtype" },
-  drugs: { groupBy: "category", subBy: "subtype" },
   qualities: { groupBy: "category", subBy: "subtype" },
   lifestyles: { groupBy: "category", subBy: "subtype" },
   skills: { groupBy: "category", subBy: "attribute" },

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:sr6forge:npcs",
-  "title": "SR6-eden-Forge NPC data file",
+  "title": "SR6-eden-Forge npcs data file",
   "type": "object",
   "required": [
     "book",
@@ -54,27 +54,64 @@
           "additionalProperties": false,
           "properties": {
             "category": {
-              "const": "NPC"
+              "type": "string"
             },
-            "subtype": {
+            "rating": {
+              "type": [
+                "number",
+                "string"
+              ]
+            },
+            "attributes": {
+              "type": "object",
+              "additionalProperties": {
+                "type": [
+                  "number",
+                  "string"
+                ]
+              }
+            },
+            "monitor": {
+              "type": "object",
+              "additionalProperties": {
+                "type": [
+                  "number",
+                  "string"
+                ]
+              }
+            },
+            "movement": {
+              "type": "object",
+              "additionalProperties": {
+                "type": [
+                  "number",
+                  "string"
+                ]
+              }
+            },
+            "page": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "product": {
+              "type": "string"
+            },
+            "genesisID": {
               "type": "string"
             },
             "metatype": {
               "type": "string"
             },
-            "attributes": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "number"
-              }
-            },
             "initiative": {
               "type": "string"
             },
-            "conditionMonitors": {
+            "defenserating": {
               "type": "string"
             },
-            "defenseRating": {
+            "description": {
+              "type": "string"
+            },
+            "notes": {
               "type": "string"
             },
             "activeSkills": {
@@ -101,6 +138,12 @@
             "powers": {
               "type": "string"
             },
+            "optionalPowers": {
+              "type": "string"
+            },
+            "attacks": {
+              "type": "string"
+            },
             "bioware": {
               "type": "string"
             },
@@ -125,17 +168,22 @@
             "weapons": {
               "type": "string"
             },
-            "description": {
+            "skills": {
               "type": "string"
             },
-            "page": {
-              "type": "integer",
-              "minimum": 0
-            },
-            "product": {
+            "weaknesses": {
               "type": "string"
             },
-            "genesisID": {
+            "subtype": {
+              "type": "string"
+            },
+            "mortype": {
+              "type": "string"
+            },
+            "matrixIni": {
+              "type": "string"
+            },
+            "gruntmeta": {
               "type": "string"
             }
           }
