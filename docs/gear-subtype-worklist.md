@@ -1,19 +1,11 @@
 # Gear — items needing a subtype (manual review worklist)
 
-Generated after the electronics reclassification pass. Fix each in the review
-UI (edits persist via the corrections layer). Grouped by current file.
-**Total: 85 items**
+After the type/subtype repair pass. The electronics rows are mangled-name
+fragments from non-corebook books (real price/avail, name lost in extraction) —
+**Total: 77 items**
 
-
-## cyberware  (8)
-- **Crab Claw** — body_shop p51 · price 2000 · `crab_claw`
-- **Drone Rack** — body_shop p51 · price 15000 · `drone_rack`
-- **Flametosser** — body_shop p51 · price 4000 · `flametosser`
-- **Goring Horns** — body_shop p51 · price 500 · `goring_horns`
-- **Oral Slasher** — body_shop p51 · price 1000 · `oral_slasher`
-- **Tesla Coil** — body_shop p51 · price 15000 · `tesla_coil`
-- **Wrecker** — body_shop p51 · price 500 · `wrecker`
-- **Wrist Shield** — body_shop p51 · price 2000 · `wrist_shield`
+they need the real name read off the page. The weapons rows have good names and
+just need a subtype picked. Fix in the review UI; edits persist.
 
 ## electronics  (57)
 - **Chakri** — deadly_arts p48 · price 75 · `chakri`
