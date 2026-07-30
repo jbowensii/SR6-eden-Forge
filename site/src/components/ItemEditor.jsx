@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import IconPicker from "./IconPicker.jsx";
 import BookImages from "./BookImages.jsx";
+import ArtSearch from "./ArtSearch.jsx";
 import { prettyType } from "../labels.js";
 import { EDEN, edenFields, missingRequired, isBlank } from "../../shared/edenSpec.mjs";
 
@@ -19,6 +20,7 @@ export default function ItemEditor({ item, domain, bookTitle, books = {}, catego
   const [draft, setDraft] = useState(() => structuredClone(item));
   const [picking, setPicking] = useState(false);
   const [browsing, setBrowsing] = useState(false);
+  const [searchingArt, setSearchingArt] = useState(false);
   const [renderExists, setRenderExists] = useState(true);
 
   // an icon assignment persists a new img for the SAME item id; React reuses
@@ -30,6 +32,19 @@ export default function ItemEditor({ item, domain, bookTitle, books = {}, catego
   }, [item.img, item.id]);
 
   const setSystem = (field, value) => setDraft((d) => ({ ...d, system: { ...d.system, [field]: value } }));
+
+  // Pasting book text carries hard line breaks from the PDF columns; collapse
+  // CRs/newlines to single spaces so descriptions stay one clean paragraph.
+  const pasteClean = (e, current, commit) => {
+    const text = e.clipboardData?.getData("text") ?? "";
+    if (!/[\r\n]/.test(text)) return;                 // nothing to fix
+    e.preventDefault();
+    const el = e.target;
+    const clean = text.replace(/[\r\n]+/g, " ").replace(/[ \t]{2,}/g, " ").trim();
+    const s = el.selectionStart ?? current.length;
+    const en = el.selectionEnd ?? current.length;
+    commit(current.slice(0, s) + clean + current.slice(en));
+  };
 
   // Eden export readiness for this item's domain: which Foundry type it becomes,
   // which fields Eden recognizes, and which required ones are still blank.
@@ -91,7 +106,8 @@ export default function ItemEditor({ item, domain, bookTitle, books = {}, catego
       if (value.length > 48 || LONG_FIELDS.has(field)) {
         return (
           <textarea rows={Math.min(8, Math.ceil((value.length || 1) / 48) + 1)}
-            value={value} onChange={(e) => setSystem(field, e.target.value)} />
+            value={value} onChange={(e) => setSystem(field, e.target.value)}
+            onPaste={(e) => pasteClean(e, value, (v) => setSystem(field, v))} />
         );
       }
       return <input type="text" value={value} onChange={(e) => setSystem(field, e.target.value)} />;
@@ -196,6 +212,7 @@ export default function ItemEditor({ item, domain, bookTitle, books = {}, catego
           value={draft.system.description ?? ""}
           placeholder="Flavor text / rules summary for the Foundry sheet…"
           onChange={(e) => setSystem("description", e.target.value)}
+          onPaste={(e) => pasteClean(e, draft.system.description ?? "", (v) => setSystem("description", v))}
         />
       </label>
 
@@ -256,6 +273,7 @@ export default function ItemEditor({ item, domain, bookTitle, books = {}, catego
         <div className="art-actions">
           <button className="ghost" onClick={() => setPicking(true)}>Choose icon…</button>
           <button className="ghost" onClick={() => setBrowsing(true)}>Book graphics…</button>
+          <button className="ghost" onClick={() => setSearchingArt(true)} title="Search the web for artwork">Find art…</button>
         </div>
       </div>
 
@@ -291,6 +309,14 @@ export default function ItemEditor({ item, domain, bookTitle, books = {}, catego
           book={draft.meta?.book}
           onPick={(path) => { onAssignRender(draft, path); setBrowsing(false); }}
           onClose={() => setBrowsing(false)}
+        />
+      )}
+
+      {searchingArt && (
+        <ArtSearch
+          item={draft}
+          onAssigned={(img) => setDraft((d) => ({ ...d, img }))}
+          onClose={() => setSearchingArt(false)}
         />
       )}
 

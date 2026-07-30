@@ -149,7 +149,13 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
 
   app.get("/api/config/books", (_req, res) => handle(res, () => {
     const books = loadBooks(dataRoot);
+    const assetsDir = join(dataRoot, "_assets");
     return {
+      paths: {
+        data: dataRoot,
+        art: assetsDir,                                 // extracted book graphics live here
+        iconLibrary: libraryRoots(dataRoot)[0] ?? "(none configured)",
+      },
       books: Object.entries(books)
         .map(([slug, b]) => ({ slug, title: b.title ?? slug, pdf: b.pdf ?? "", exists: Boolean(b.pdf && existsSync(b.pdf)) }))
         .sort((a, b) => a.slug.localeCompare(b.slug)),
@@ -168,6 +174,59 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
     writeFileSync(booksPath, JSON.stringify(books, null, 2) + "\n", "utf8");
     return { changed };
   }));
+
+  // ── Artwork: internet image search + assign to the item's art slot ──────
+  // Best-effort Bing image scrape (no API key). Returns {thumb, full} pairs.
+  app.get("/api/artsearch", async (req, res) => {
+    const q = String(req.query.q ?? "").trim();
+    if (!q) return res.json({ results: [] });
+    const url = `https://www.bing.com/images/search?q=${encodeURIComponent("shadowrun cyberpunk " + q)}&form=HDRSC2`;
+    try {
+      const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" } });
+      const html = await r.text();
+      const seen = new Set(); const results = [];
+      const re = /m="\{[^}]*&quot;murl&quot;:&quot;(.*?)&quot;[^}]*&quot;turl&quot;:&quot;(.*?)&quot;/g;
+      let m;
+      while ((m = re.exec(html)) && results.length < 24) {
+        const full = m[1].replace(/&amp;/g, "&"); const thumb = m[2].replace(/&amp;/g, "&");
+        if (!seen.has(full)) { seen.add(full); results.push({ full, thumb }); }
+      }
+      res.json({ results, searchUrl: url });
+    } catch (err) {
+      res.json({ results: [], error: String(err.message ?? err), searchUrl: url });
+    }
+  });
+
+  // download an image URL into the item's art (render) slot
+  app.post("/api/art/download", async (req, res) => {
+    const { book, domain, category, id, url } = req.body ?? {};
+    if (![book, domain, category, id].every((s) => typeof s === "string" && SEGMENT.test(s))
+        || !/^https?:\/\//.test(url ?? "")) {
+      return res.status(400).json({ error: "bad-request" });
+    }
+    try {
+      const payload = readCategory(dataRoot, book, domain, category);
+      const item = payload.items.find((i) => i.id === id);
+      if (!item) return res.status(404).json({ error: "not-found" });
+      const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
+      if (!r.ok) return res.status(502).json({ error: `fetch ${r.status}` });
+      const ct = r.headers.get("content-type") || "";
+      const ext = ct.includes("png") ? "png" : ct.includes("webp") ? "webp" : "jpg";
+      const buf = Buffer.from(await r.arrayBuffer());
+      if (buf.length > 8_000_000) return res.status(413).json({ error: "image too large" });
+      const src = item.meta?.book ?? book;
+      const rel = `${src}/${id}.${ext}`;
+      const dest = join(dataRoot, "_assets", rel);
+      const { mkdirSync } = await import("node:fs");
+      mkdirSync(join(dataRoot, "_assets", src), { recursive: true });
+      writeFileSync(dest, buf);
+      item.img = rel;
+      writeItem(dataRoot, book, domain, category, id, item);   // persists + records correction
+      res.json({ img: rel });
+    } catch (err) {
+      res.status(500).json({ error: String(err.message ?? err) });
+    }
+  });
 
   app.get("/api/rebuild/status", (_req, res) =>
     res.json({ running: rebuild.running, startedAt: rebuild.startedAt, code: rebuild.code, log: rebuild.log.slice(-200) }));

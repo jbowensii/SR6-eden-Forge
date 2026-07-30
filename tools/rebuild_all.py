@@ -16,6 +16,8 @@ STEPS = [
     ("New item types: complex forms, foci, contacts, …", "ingest_new_types.py"),
     ("Vehicles + drones", "ingest_vehicles.py"),
     ("Book graphics", "dump_book_images.py"),
+    ("Auto-pair artwork", "pair_art.py"),
+    ("Re-apply manual corrections", "apply_corrections.py"),
 ]
 
 failed = []

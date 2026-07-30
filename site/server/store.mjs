@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, readFileSync, readdirSync, renameSync, statSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { extname, join } from "node:path";
 
 export const SEGMENT = /^[a-z0-9_]+$/;
@@ -197,6 +197,24 @@ export function readCategory(dataRoot, book, domain, category) {
   return JSON.parse(raw);
 }
 
+// Persistent manual corrections: every save is catalogued under
+// data/_corrections/<domain>/<id>.json. tools/apply_corrections.py re-applies
+// them after any re-import, so a manual edit survives re-extraction until it is
+// edited again. Deleting an item records a tombstone so it isn't re-added.
+export function recordCorrection(dataRoot, domain, category, item, { deleted = false } = {}) {
+  const dir = join(dataRoot, "_corrections", domain);
+  if (!SEGMENT.test(domain) || !SEGMENT.test(item.id)) return;
+  mkdirSync(dir, { recursive: true });
+  const rec = deleted
+    ? { domain, category, id: item.id, deleted: true, correctedAt: new Date().toISOString() }
+    : { domain, category, id: item.id, correctedAt: new Date().toISOString(),
+        name: item.name, img: item.img, system: item.system, qaStatus: item.meta?.qaStatus };
+  const path = join(dir, `${item.id}.json`);
+  const tmp = `${path}.tmp`;
+  writeFileSync(tmp, JSON.stringify(rec, null, 2) + "\n", "utf8");
+  renameSync(tmp, path);
+}
+
 export function writeItem(dataRoot, book, domain, category, itemId, item) {
   if (item.id !== itemId) throw new StoreError("id-mismatch", `${item.id} != ${itemId}`);
   const payload = readCategory(dataRoot, book, domain, category);
@@ -207,6 +225,7 @@ export function writeItem(dataRoot, book, domain, category, itemId, item) {
   const tmpPath = `${path}.tmp`;
   writeFileSync(tmpPath, JSON.stringify(payload, null, 2) + "\n", "utf8");
   renameSync(tmpPath, path);
+  recordCorrection(dataRoot, domain, category, item);
   return item;
 }
 
@@ -262,6 +281,7 @@ export function deleteItem(dataRoot, book, domain, category, itemId) {
   const tmpPath = `${path}.tmp`;
   writeFileSync(tmpPath, JSON.stringify(payload, null, 2) + "\n", "utf8");
   renameSync(tmpPath, path);
+  recordCorrection(dataRoot, domain, category, { id: itemId }, { deleted: true });
   return { deleted: itemId };
 }
 

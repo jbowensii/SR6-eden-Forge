@@ -11,6 +11,9 @@ export const putBooksConfig = (updates) =>
   fetch("/api/config/books", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ updates }) }).then(json);
 export const startRebuild = () => fetch("/api/rebuild", { method: "POST" }).then(json);
 export const rebuildStatus = () => fetch("/api/rebuild/status").then(json);
+export const artSearch = (q) => fetch(`/api/artsearch?q=${encodeURIComponent(q)}`).then(json);
+export const artDownload = (body) =>
+  fetch("/api/art/download", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then(json);
 export const getTypeTree = (domain = "gear") => fetch(`/api/typetree?domain=${encodeURIComponent(domain)}`).then(json);
 export const getItems = (type, subtype, domain = "gear") => {
   const q = subtype === undefined ? "" : `&subtype=${encodeURIComponent(subtype)}`;

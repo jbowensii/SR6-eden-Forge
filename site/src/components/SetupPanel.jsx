@@ -6,6 +6,7 @@ import { getBooksConfig, putBooksConfig, startRebuild, rebuildStatus } from "../
 // this polls its log.
 export default function SetupPanel({ onClose }) {
   const [books, setBooks] = useState([]);
+  const [paths, setPaths] = useState(null);
   const [edits, setEdits] = useState({});          // slug -> new pdf path
   const [saveMsg, setSaveMsg] = useState("");
   const [running, setRunning] = useState(false);
@@ -13,7 +14,7 @@ export default function SetupPanel({ onClose }) {
   const logRef = useRef(null);
   const poll = useRef(null);
 
-  const load = () => getBooksConfig().then((r) => setBooks(r.books)).catch(() => {});
+  const load = () => getBooksConfig().then((r) => { setBooks(r.books); setPaths(r.paths); }).catch(() => {});
   useEffect(() => { load(); return () => clearInterval(poll.current); }, []);
   useEffect(() => { if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight; }, [log]);
 
@@ -60,6 +61,14 @@ export default function SetupPanel({ onClose }) {
           absolute (e.g. <code>C:/Users/you/Books/Core.pdf</code>). Missing files
           are highlighted; books without a PDF are skipped during import.
         </p>
+
+        {paths && (
+          <div className="path-info">
+            <div><span className="path-label">Data</span><code>{paths.data}</code></div>
+            <div><span className="path-label">Extracted art</span><code>{paths.art}</code></div>
+            <div><span className="path-label">Icon library</span><code>{paths.iconLibrary}</code></div>
+          </div>
+        )}
 
         <div className="book-config">
           {books.map((b) => {
