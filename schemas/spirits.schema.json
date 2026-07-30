@@ -179,6 +179,9 @@
             },
             "spiritType": {
               "type": "string"
+            },
+            "defenseRating": {
+              "type": "string"
             }
           }
         },

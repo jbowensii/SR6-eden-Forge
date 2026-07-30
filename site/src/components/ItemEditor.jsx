@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import IconPicker from "./IconPicker.jsx";
 import BookImages from "./BookImages.jsx";
 import { prettyType } from "../labels.js";
+import { EDEN, edenFields, missingRequired, isBlank } from "../../shared/edenSpec.mjs";
 
 const QA = ["extracted", "reviewed", "approved"];
 const MODES = ["SS", "SA", "BF", "FA"];
@@ -14,7 +15,7 @@ const LONG_FIELDS = new Set([
   "effect", "attacks", "contacts", "cyberware", "bioware", "augmentations",
 ]);
 
-export default function ItemEditor({ item, bookTitle, books = {}, categoryName, pdfAvailable, pdfHref, onSave, onDelete, onAssignIcon, onAssignRender }) {
+export default function ItemEditor({ item, domain, bookTitle, books = {}, categoryName, pdfAvailable, pdfHref, onSave, onDelete, onAssignIcon, onAssignRender }) {
   const [draft, setDraft] = useState(() => structuredClone(item));
   const [picking, setPicking] = useState(false);
   const [browsing, setBrowsing] = useState(false);
@@ -29,6 +30,23 @@ export default function ItemEditor({ item, bookTitle, books = {}, categoryName, 
   }, [item.img, item.id]);
 
   const setSystem = (field, value) => setDraft((d) => ({ ...d, system: { ...d.system, [field]: value } }));
+
+  // Eden export readiness for this item's domain: which Foundry type it becomes,
+  // which fields Eden recognizes, and which required ones are still blank.
+  const dom = domain ?? item._domain;
+  const spec = EDEN[dom] ?? null;
+  const edenSet = edenFields(dom);
+  const missing = spec ? missingRequired(dom, draft.system) : [];
+  const reqTotal = spec ? spec.req.length : 0;
+  const reqSet = reqTotal - missing.length;
+  // required Eden fields entirely absent from the system block — offer to add
+  const absentReq = spec ? spec.req.filter((f) => !(f in draft.system)) : [];
+  const addMissingEden = () =>
+    setDraft((d) => {
+      const next = { ...d.system };
+      for (const f of absentReq) if (!(f in next)) next[f] = "";
+      return { ...d, system: next };
+    });
 
   function renderField(field, value) {
     if (field === "modes" && value && typeof value === "object") {
@@ -128,6 +146,32 @@ export default function ItemEditor({ item, bookTitle, books = {}, categoryName, 
         </div>
       </div>
 
+      {spec && (
+        <div className={`eden-panel ${missing.length ? "needs" : "ready"}`}>
+          <div className="eden-head">
+            <span className="eden-type" title="shadowrun6-eden Foundry document type">
+              Eden{spec.actor ? " actor" : ""} → <code>{spec.type}</code>
+            </span>
+            <span className={`eden-status ${missing.length ? "needs" : "ready"}`}>
+              {reqTotal === 0
+                ? (missing.length ? "" : "no required fields")
+                : `${reqSet}/${reqTotal} required set`}
+              {missing.length === 0 && " ✓"}
+            </span>
+          </div>
+          {missing.length > 0 && (
+            <div className="eden-missing">
+              Needs: {missing.map((f) => <code key={f} className="miss">{f}</code>)}
+              {absentReq.length > 0 && (
+                <button className="ghost tiny" onClick={addMissingEden} title="Add blank fields so you can fill them">
+                  + add {absentReq.length} field{absentReq.length > 1 ? "s" : ""}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       <label>
         Name <input type="text" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
       </label>
@@ -218,11 +262,19 @@ export default function ItemEditor({ item, bookTitle, books = {}, categoryName, 
       <div className="field-grid">
         {Object.entries(draft.system)
           .filter(([field]) => !HANDLED.has(field))
-          .map(([field, value]) => (
-            <label key={field}>
-              <span className="field-name">{field}</span> {renderField(field, value)}
-            </label>
-          ))}
+          .map(([field, value]) => {
+            const isEden = edenSet.has(field);
+            const isReq = spec?.req.includes(field);
+            const blankReq = isReq && isBlank(value);
+            return (
+              <label key={field} className={`${isEden ? "eden-field" : "extra-field"}${blankReq ? " blank-req" : ""}`}>
+                <span className="field-name">
+                  {field}
+                  {isEden && <span className={`eden-tag ${isReq ? "req" : ""}`} title={isReq ? "Eden required field" : "Eden field"}>eden{isReq ? "*" : ""}</span>}
+                </span> {renderField(field, value)}
+              </label>
+            );
+          })}
       </div>
 
       {picking && (

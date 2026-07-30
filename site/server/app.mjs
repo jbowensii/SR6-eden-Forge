@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import express from "express";
 import { toFoundryDoc } from "../shared/edenTransform.mjs";
+import { EDEN } from "../shared/edenSpec.mjs";
 import { loadBooks } from "./exportModule.mjs";
 import { assignIcon, libraryRoots, loadSettings, resolveLibraryFile, searchIcons } from "./iconLibrary.mjs";
 import { SEGMENT, StoreError, assignRender, deleteItem, domains, itemsByType, listBookImages, readCategory, searchItems, tree, typeTree, writeItem } from "./store.mjs";
@@ -82,6 +83,8 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
     handle(res, () => assignIcon(dataRoot, root, { book, domain, category, itemId, libraryPath, mode }));
   });
 
+  app.get("/api/edenspec", (_req, res) => handle(res, () => ({ eden: EDEN })));
+
   app.get("/api/schema/:domain", (req, res) => {
     if (!SEGMENT.test(req.params.domain)) return res.status(400).json({ error: "bad-segment" });
     try {
@@ -104,7 +107,7 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
       let doc = null;
       let docError = null;
       try {
-        doc = toFoundryDoc(item, { product: loadBooks(dataRoot)[req.params.book]?.title });
+        doc = toFoundryDoc(item, { product: loadBooks(dataRoot)[req.params.book]?.title, domain: req.params.domain });
       } catch (err) {
         docError = String(err.message ?? err);
       }

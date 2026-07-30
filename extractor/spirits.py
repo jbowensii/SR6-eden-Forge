@@ -11,7 +11,16 @@ from extractor.describe import _lines
 from extractor.enrich import _dehyphenate
 from extractor.normalize import normalize_text
 
-_NAME = re.compile(r"^Spirits? of ", re.I)
+# Two heading styles: corebook "Spirits of Air"; Street Wyrd & supplements
+# "Guardian spirits" / "Toxic spirits" / "Insect spirits" (type name first).
+# Prefix match (a heading may carry trailing text like "(Kindred Spirits)").
+_NAME = re.compile(r"^(spirits?\s+of\s+[A-Za-z]\w+|[A-Za-z][\w'-]*(?:\s+[\w'-]+){0,2}\s+spirits?\b)", re.I)
+
+
+def _norm_spirit_name(s):
+    m = _NAME.match(re.sub(r"\s+", " ", s).strip())
+    core = m.group(1) if m else s
+    return " ".join("of" if w.lower() == "of" else w[:1].upper() + w[1:].lower() for w in core.split())
 _ATTR_HDR = re.compile(r"\bB A R S W L I C M ESS\b")
 _FORMULA = re.compile(r"^F\S*(?: +F\S*){9}$")
 _KEYS = ["bod", "agi", "rea", "str", "wil", "log", "int", "cha", "mag", "ess"]
@@ -24,7 +33,9 @@ def read_spirits(pdf_path, pages):
     items, cur, want_vals = [], None, False
     with pdfplumber.open(str(pdf_path)) as pdf:
         for page_no in pages:
+            from collections import Counter
             words = [w for w in pdf.pages[page_no - 1].extract_words(extra_attrs=["size", "upright"]) if w.get("upright", True)]
+            body = Counter(round(w["size"], 1) for w in words).most_common(1)[0][0] if words else 10.0
             mid = pdf.pages[page_no - 1].width / 2
             stream = []
             for lo, hi in ((0, mid), (mid, pdf.pages[page_no - 1].width)):
@@ -33,7 +44,7 @@ def read_spirits(pdf_path, pages):
             for sz, text in stream:
                 if not text:
                     continue
-                if 12.4 <= sz <= 13.8 and _NAME.match(text) and len(text.split()) <= 6:
+                if sz >= body * 1.15 and _NAME.match(text) and len(text.split()) <= 6:
                     _flush(cur, page_no, items)
                     cur, want_vals = {"name": text, "sys": {}, "buf": []}, False
                     continue
@@ -65,4 +76,4 @@ def _flush(cur, page_no, items):
     desc = _dehyphenate(cur["buf"])
     if len(desc) > 40:
         system["description"] = desc
-    items.append({"name": cur["name"], "system": system, "page": page_no})
+    items.append({"name": _norm_spirit_name(cur["name"]), "system": system, "page": page_no})

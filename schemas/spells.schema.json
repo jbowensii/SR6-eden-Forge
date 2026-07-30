@@ -107,6 +107,9 @@
             },
             "subtype": {
               "type": "string"
+            },
+            "sharedDescription": {
+              "type": "boolean"
             }
           }
         },

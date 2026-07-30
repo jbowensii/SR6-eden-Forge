@@ -24,10 +24,14 @@ _SECTIONS = ("mundane critters", "awakened critters", "dracoforms")
 _NOT = {"critters", "mundane critters", "awakened critters", "dracoforms", "powers", "skills"}
 
 
-def _is_name(text, sz):
-    return (12.4 <= sz <= 13.8 and 1 <= len(text.split()) <= 4 and text[0:1].isupper()
+def _is_name(text, sz, body):
+    # a name is a short heading noticeably larger than this page's body font
+    # (font sizes differ per book, so relative sizing, not a fixed range)
+    return (sz >= body * 1.22 and 1 <= len(text.split()) <= 4 and text[0:1].isupper()
             and text.lower() not in _NOT and not text[0].isdigit()
-            and not _ATTR_HDR.search(text))
+            and "//" not in text and ":" not in text and "." not in text
+            and "," not in text and not any(c.isdigit() for c in text)
+            and not text.isupper() and not _ATTR_HDR.search(text))
 
 
 def _attrs(vals_line, has_mag):
@@ -39,29 +43,27 @@ def _attrs(vals_line, has_mag):
 
 
 def _page_stream(page):
+    from collections import Counter
     words = [w for w in page.extract_words(extra_attrs=["size", "upright"]) if w.get("upright", True)]
+    body = Counter(round(w["size"], 1) for w in words).most_common(1)[0][0] if words else 10.0
     mid = page.width / 2
     out = []
     for lo, hi in ((0, mid), (mid, page.width)):
         for ln in _lines([w for w in words if lo <= (w["x0"] + w["x1"]) / 2 < hi]):
             out.append((max(w["size"] for w in ln), normalize_text(" ".join(w["text"] for w in ln)).strip()))
-    return out
+    return body, out
 
 
 def read_critters(pdf_path, pages):
     import pdfplumber
-    items, cur, want_mag, in_section = [], None, None, False
+    items, cur, want_mag = [], None, None
     with pdfplumber.open(str(pdf_path)) as pdf:
         for page_no in pages:
-            for sz, text in _page_stream(pdf.pages[page_no - 1]):
+            body, stream = _page_stream(pdf.pages[page_no - 1])
+            for sz, text in stream:
                 if not text:
                     continue
-                low = text.lower()
-                if sz >= 14 and any(s in low for s in _SECTIONS):
-                    in_section = True
-                if not in_section:
-                    continue
-                if _is_name(text, sz):
+                if _is_name(text, sz, body):
                     _flush(cur, page_no, items)
                     cur, want_mag = {"name": text, "sys": {}, "buf": []}, None
                     continue
@@ -95,7 +97,7 @@ def read_critters(pdf_path, pages):
 
 
 def _flush(cur, page_no, items):
-    if not cur or "attributes" not in cur["sys"]:
+    if not cur or "attributes" not in cur["sys"] or not cur["sys"].get("powers"):
         return
     system = {"category": "CRITTER", **cur["sys"]}
     desc = _dehyphenate(cur["buf"])

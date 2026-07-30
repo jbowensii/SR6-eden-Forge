@@ -79,6 +79,16 @@ export const DOMAIN_GROUPING = {
   npcs: { groupBy: "category", subBy: "metatype" },
   critters: { groupBy: "category", subBy: "subtype" },
   spirits: { groupBy: "category", subBy: "subtype" },
+  complexforms: { groupBy: "category", subBy: "duration" },
+  echoes: { groupBy: "category", subBy: "subtype" },
+  sprite_powers: { groupBy: "category", subBy: "subtype" },
+  critter_powers: { groupBy: "category", subBy: "type" },
+  metamagics: { groupBy: "category", subBy: "subtype" },
+  martial_arts: { groupBy: "category", subBy: "subtype" },
+  martial_techniques: { groupBy: "category", subBy: "style" },
+  contacts: { groupBy: "category", subBy: "type" },
+  sins: { groupBy: "category", subBy: "quality" },
+  foci: { groupBy: "category", subBy: "subtype" },
 };
 
 export function domains(dataRoot) {

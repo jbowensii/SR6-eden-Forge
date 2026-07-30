@@ -21,12 +21,26 @@ from extractor.autodetect import _valid_name
 from extractor.emit import slugify
 from extractor.ingest import LIBRARY, fill_blank_fields, load_registry
 from extractor.merge import norm_base
+from extractor.normalize import dedouble
+from extractor.eden_align import ALIGNERS
+
+_RAW_FIELDS = ("cost", "gameEffect", "keywords", "descriptor", "spellType", "damage")
+
+
+def _align(domain, system):
+    """Convert a reader's raw system block to the Eden shape at ingest, so the
+    library never carries un-aligned content (spells/qualities/adept_powers/
+    rituals). Non-raw extras are preserved; corebook seed is untouched (skipped)."""
+    if domain not in ALIGNERS:
+        return system
+    keep = {k: v for k, v in system.items() if k not in _RAW_FIELDS}
+    return {**keep, **ALIGNERS[domain](system)}
 from extractor.spells import read_spells
 from extractor.rituals import read_rituals
 from extractor.adept_powers import read_adept_powers
 from extractor.toxins_drugs import read_toxins_drugs
 from extractor.qualities import read_qualities
-from extractor.actors import read_actors
+from extractor.actors import read_actors, read_npc_blocks
 from extractor.critters import read_critters
 from extractor.spirits import read_spirits
 
@@ -34,26 +48,26 @@ DATA = _P(__file__).resolve().parent.parent / "data"
 S = re.compile
 # domain -> (reader, signature, base_fields, group_by, extra_filter)
 DOMAINS = {
+    # base_fields for aligner-backed domains are the EDEN string fields (the raw
+    # reader fields cost/gameEffect/descriptor/… are converted by eden_align at
+    # ingest, below, so they must NOT be blank-filled back in).
     "spells": (read_spells, S(r"RANGE\s+TYPE\s+DURATION\s+DV"),
-               ("descriptor", "range", "drain", "damage", "description"), "category", None),
+               ("description",), "category", None),
     "rituals": (read_rituals, S(r"Threshold:\s*\d"),
-                ("keywords", "threshold", "description"), "category", None),
+                ("description",), "category", None),
     "adept_powers": (read_adept_powers, S(r"Cost:\s*[\d.]+\s*PP"),
-                     ("cost", "activation", "description"), "category", None),
+                     ("activation", "description"), "category", None),
     "qualities": (read_qualities, S(r"(?:Cost|Bonus):\s*\d+\s*Karma"),
-                  ("cost", "gameEffect", "description"), "category", None),
-    "npcs": (lambda p, pg: read_actors(p, pg, "NPC"), S(r"metatype:\s*\w"),
-             ("metatype", "activeSkills", "qualities", "gear", "weapons", "description"), "category", None),
+                  ("explain", "description"), "category", None),
+    "npcs": (read_npc_blocks, re.compile(r"Metatype:|B\s+A\s+R\s+S\s+W\s+L\s+I\s+C\s+EDG", re.I),
+             ("metatype", "activeSkills", "knowledgeSkills", "qualities", "gear",
+              "weapons", "augmentations", "description"), "category", None),
     "critters": (read_critters, S(r"\bB A R S W L I C (?:M )?ESS\b"),
                  ("skills", "powers", "movement", "description"), "category", None),
     "spirits": (read_spirits, S(r"Optional Powers:"),
                 ("powers", "optionalPowers", "attacks", "description"), "category", None),
-    "toxins": (lambda p, pg: [r for r in read_toxins_drugs(p, pg) if r["system"]["category"] == "TOXIN"],
-               S(r"Vector:\s*(?:Injection|Contact|Inhalation|Ingestion)"),
-               ("vector", "speed", "duration", "power", "effect", "description"), "category", None),
-    "drugs": (lambda p, pg: [r for r in read_toxins_drugs(p, pg) if r["system"]["category"] == "DRUG"],
-              S(r"Vector:\s*(?:Injection|Contact|Inhalation|Ingestion)"),
-              ("vector", "speed", "duration", "addictionRating", "addictionType", "effect", "description"), "category", None),
+    # toxins/drugs are folded into gear as type=CHEMICALS (subtype TOXIN/DRUG),
+    # not their own domains — see tools/merge_chemicals.py. Do not re-add here.
 }
 SKIP = {"gun_rack", "rides", "corebook"}
 
@@ -64,7 +78,7 @@ books = [(k, v["pdf"]) for k, v in reg.items() if k not in SKIP and _P(v.get("pd
 collected = {d: [] for d in DOMAINS}
 for book, pdf in books:
     with pdfplumber.open(pdf) as p:
-        texts = [(i, page.extract_text() or "") for i, page in enumerate(p.pages, 1)]
+        texts = [(i, dedouble(page.extract_text() or "")) for i, page in enumerate(p.pages, 1)]
     npages = len(texts)
     for domain, (reader, sig, *_rest) in DOMAINS.items():
         pages = set()
@@ -104,7 +118,7 @@ for domain, (_r, _s, base, group_by, extra) in DOMAINS.items():
         while sid in seen_ids:
             sid = f"{base_id}_{k}"; k += 1
         seen_ids.add(sid)
-        item = {"id": sid, "name": name, "system": rec["system"],
+        item = {"id": sid, "name": name, "system": _align(domain, rec["system"]),
                 "meta": {"book": book, "page": rec["page"], "sources": [{"book": book, "page": rec["page"]}],
                          "extractedAt": date.today().isoformat(), "extractorVersion": extractor.__version__,
                          "qaStatus": "extracted",

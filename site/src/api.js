@@ -5,6 +5,7 @@ async function json(res) {
 
 export const getTree = () => fetch("/api/tree").then(json);
 export const getDomains = () => fetch("/api/domains").then(json);
+export const getEdenSpec = () => fetch("/api/edenspec").then(json);
 export const getTypeTree = (domain = "gear") => fetch(`/api/typetree?domain=${encodeURIComponent(domain)}`).then(json);
 export const getItems = (type, subtype, domain = "gear") => {
   const q = subtype === undefined ? "" : `&subtype=${encodeURIComponent(subtype)}`;

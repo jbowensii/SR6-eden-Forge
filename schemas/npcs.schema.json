@@ -185,6 +185,12 @@
             },
             "gruntmeta": {
               "type": "string"
+            },
+            "conditionMonitors": {
+              "type": "string"
+            },
+            "defenseRating": {
+              "type": "string"
             }
           }
         },

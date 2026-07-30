@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:sr6forge:adept_powers",
-  "title": "SR6-eden-Forge adept_powers data file",
+  "$id": "urn:sr6forge:foci",
+  "title": "SR6-eden-Forge foci data file",
   "type": "object",
   "required": [
     "book",
@@ -15,7 +15,7 @@
       "$ref": "urn:sr6forge:common#/$defs/slug"
     },
     "domain": {
-      "const": "adept_powers"
+      "const": "foci"
     },
     "category": {
       "$ref": "urn:sr6forge:common#/$defs/slug"
@@ -53,19 +53,10 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "hasLevel": {
-              "type": "boolean"
-            },
-            "level": {
-              "type": "number"
-            },
-            "choice": {
+            "category": {
               "type": "string"
             },
-            "cost": {
-              "type": "number"
-            },
-            "activation": {
+            "subtype": {
               "type": "string"
             },
             "description": {
@@ -81,10 +72,23 @@
             "genesisID": {
               "type": "string"
             },
-            "subtype": {
+            "rating": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "force": {
               "type": "string"
             },
-            "category": {
+            "bonded": {
+              "type": "boolean"
+            },
+            "availability": {
+              "type": "string"
+            },
+            "price": {
+              "type": "string"
+            },
+            "priceDef": {
               "type": "string"
             }
           }

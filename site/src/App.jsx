@@ -249,6 +249,7 @@ export default function App() {
           <ItemEditor
             key={editing.id}
             item={editing}
+            domain={editing._domain ?? domain}
             bookTitle={bookInfo?.title ?? editing?.meta?.book ?? selected?.book}
             books={books}
             categoryName={(editing?._category ?? selected?.category ?? selected?.subtype ?? selected?.type)?.replace(/_/g, " ")}
