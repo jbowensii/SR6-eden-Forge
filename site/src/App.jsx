@@ -89,6 +89,8 @@ export default function App() {
       const res = await putItem(book, domain, category, clean);
       setDoc(res.doc);
       setStatus(res.docError ? `saved; preview error: ${res.docError}` : `saved ${item.id}`);
+      // update the center table immediately (name/subtype/etc.), then reconcile
+      setPayload((p) => (p ? { ...p, items: p.items.map((i) => (i.id === res.item.id ? { ...i, ...res.item } : i)) } : p));
       await refreshPayload();
       setTree(await getTypeTree(domain));
       setEditing({ ...res.item, _book: book, _domain: domain, _category: category });
