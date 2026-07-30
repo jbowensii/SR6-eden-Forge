@@ -47,9 +47,17 @@ body::after {
 
 .layout {
   display: grid;
-  grid-template-columns: 300px 1fr 400px;
+  grid-template-columns: var(--left-w, 300px) 6px minmax(0, 1fr) 6px var(--right-w, 400px);
   height: 100vh;
 }
+
+/* draggable dividers between panes */
+.splitter {
+  cursor: col-resize;
+  background: var(--line);
+  transition: background 0.12s;
+}
+.splitter:hover { background: var(--magenta); }
 
 /* ── left rail ─────────────────────────────────────────────── */
 
@@ -173,7 +181,8 @@ aside {
 .subtype-row.active .tree-name { color: #fff; }
 .no-subtype { font-style: italic; opacity: 0.7; }
 
-.art-actions { display: flex; gap: 6px; }
+.art-actions { display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; }
+.art-actions .ghost { white-space: nowrap; }
 .ghost.danger { color: var(--magenta-soft); border-color: rgba(229, 23, 123, 0.4); }
 .ghost.danger:hover { background: rgba(229, 23, 123, 0.14); }
 
@@ -387,7 +396,9 @@ tbody tr:hover { background: rgba(33, 208, 214, 0.06); box-shadow: inset 2px 0 0
   margin: 4px 0;
 }
 
-.editor-actions { display: flex; gap: 10px; margin-top: 14px; align-items: center; }
+.editor-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: center; }
+.editor { overflow: visible; }                 /* never clip art/buttons in the pane */
+.editor > * { min-width: 0; }
 
 /* ── buttons ───────────────────────────────────────────────── */
 
@@ -458,7 +469,7 @@ button:disabled, .button.disabled { opacity: 0.35; cursor: not-allowed; pointer-
 ::-webkit-scrollbar-thumb:hover { background: var(--magenta); }
 
 /* dual art preview */
-.art-row { display: flex; gap: 12px; margin: 6px 0; }
+.art-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 6px 0; align-items: flex-start; }
 .art-row figure { margin: 0; text-align: center; }
 .art-row figcaption {
   font-family: var(--font-mono);
@@ -596,3 +607,8 @@ button.ghost.tiny { padding: 1px 7px; font-size: 11px; }
 .sc-row { display: flex; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
 .sc-row label { display: flex; flex-direction: column; gap: 2px; font-size: 11px; color: var(--ink-dim); flex: 1; min-width: 140px; }
 .sc-row select, .sc-row input { background: var(--bg-raise); border: 1px solid var(--line); color: var(--ink); font-size: 12px; padding: 4px 6px; font-family: var(--font-mono); }
+
+.sc-actions { display: flex; gap: 10px; align-items: center; }
+.sc-test { font-size: 12px; }
+.sc-test.ok { color: var(--green); }
+.sc-test.bad { color: var(--amber); }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import CategoryTable from "./components/CategoryTable.jsx";
 import ItemEditor from "./components/ItemEditor.jsx";
 import Preview from "./components/Preview.jsx";
@@ -172,8 +172,40 @@ export default function App() {
   // not the selected library folder. Show the title/PDF for the item's own book.
   const bookInfo = editing?.meta?.book ? books[editing.meta.book] : null;
 
+  // draggable pane widths (persisted). The layout grid reads --left-w / --right-w.
+  const layoutRef = useRef(null);
+  useEffect(() => {
+    const root = layoutRef.current; if (!root) return;
+    const l = localStorage.getItem("sr6-left"); const r = localStorage.getItem("sr6-right");
+    if (l) root.style.setProperty("--left-w", l);
+    if (r) root.style.setProperty("--right-w", r);
+  }, []);
+  const startDrag = (which) => (e) => {
+    e.preventDefault();
+    const root = layoutRef.current;
+    const startX = e.clientX;
+    const cs = getComputedStyle(root);
+    const startL = parseInt(cs.getPropertyValue("--left-w")) || 300;
+    const startR = parseInt(cs.getPropertyValue("--right-w")) || 400;
+    const onMove = (ev) => {
+      const dx = ev.clientX - startX;
+      if (which === "left") root.style.setProperty("--left-w", `${Math.min(560, Math.max(190, startL + dx))}px`);
+      else root.style.setProperty("--right-w", `${Math.min(900, Math.max(300, startR - dx))}px`);
+    };
+    const onUp = () => {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      document.body.style.cursor = "";
+      localStorage.setItem("sr6-left", root.style.getPropertyValue("--left-w"));
+      localStorage.setItem("sr6-right", root.style.getPropertyValue("--right-w"));
+    };
+    document.body.style.cursor = "col-resize";
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  };
+
   return (
-    <div className="layout">
+    <div className="layout" ref={layoutRef}>
       <aside>
         <header className="brand">
           <span className="brand-sr6">SR6</span>
@@ -229,6 +261,7 @@ export default function App() {
           </nav>
         )}
       </aside>
+      <div className="splitter" title="Drag to resize" onMouseDown={startDrag("left")} />
       <main>
         <div className="status" data-live={Boolean(status)}>{status || "ready"}</div>
         {payload ? (
@@ -247,6 +280,7 @@ export default function App() {
           </div>
         )}
       </main>
+      <div className="splitter" title="Drag to resize" onMouseDown={startDrag("right")} />
       <section className="right">
         {editing && (
           <ItemEditor

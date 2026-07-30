@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { getBooksConfig, putBooksConfig, startRebuild, rebuildStatus, getSearchConfig, putSearchConfig } from "../api.js";
+import { getBooksConfig, putBooksConfig, startRebuild, rebuildStatus, getSearchConfig, putSearchConfig, testSearchConfig } from "../api.js";
 
 // Setup panel: point each registered book at its source PDF, then trigger the
 // extraction pipeline that (re)builds the site's data. Rebuild runs server-side;
@@ -19,13 +19,21 @@ export default function SetupPanel({ onClose }) {
   const load = () => getBooksConfig().then((r) => { setBooks(r.books); setPaths(r.paths); }).catch(() => {});
   useEffect(() => { load(); getSearchConfig().then(setSearch).catch(() => {}); return () => clearInterval(poll.current); }, []);
 
+  const [testMsg, setTestMsg] = useState("");
+  const searchCfg = () => ({ engine: search.engine, cseId: search.cseId, prefix: search.prefix, ...(apiKey ? { apiKey } : {}) });
   const saveSearch = async () => {
-    await putSearchConfig({ engine: search.engine, cseId: search.cseId, prefix: search.prefix,
-      ...(apiKey ? { apiKey } : {}) });
+    await putSearchConfig(searchCfg());
     setApiKey("");
     getSearchConfig().then(setSearch).catch(() => {});
     setSaveMsg("search settings saved");
     setTimeout(() => setSaveMsg(""), 3000);
+  };
+  const testSearch = async () => {
+    setTestMsg("testing…");
+    try {
+      const r = await testSearchConfig(searchCfg());
+      setTestMsg(r.ok ? `✓ working — ${r.count} results` : `✗ ${r.error || "no results"}`);
+    } catch (e) { setTestMsg(`✗ ${e.message ?? e}`); }
   };
   useEffect(() => { if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight; }, [log]);
 
@@ -108,7 +116,11 @@ export default function SetupPanel({ onClose }) {
               )}
             </div>
           )}
-          <button className="ghost" onClick={saveSearch}>Save search settings</button>
+          <div className="sc-actions">
+            <button className="ghost" onClick={testSearch}>Test</button>
+            <button className="ghost" onClick={saveSearch}>Save search settings</button>
+            {testMsg && <span className={`sc-test ${testMsg.startsWith("✓") ? "ok" : testMsg.startsWith("✗") ? "bad" : ""}`}>{testMsg}</span>}
+          </div>
         </div>
 
         <div className="book-config">

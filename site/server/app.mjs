@@ -195,6 +195,22 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
     return { saved: true };
   }));
 
+  // test the search config (engine + key) with a sample query, before saving.
+  // Uses the posted config, falling back to the saved key if none is entered.
+  app.post("/api/config/search/test", async (req, res) => {
+    const saved = loadSettings(dataRoot).search ?? {};
+    const b = req.body ?? {};
+    const cfg = { engine: b.engine ?? saved.engine ?? "scrape", apiKey: b.apiKey || saved.apiKey || "",
+                  cseId: b.cseId ?? saved.cseId ?? "", prefix: b.prefix ?? saved.prefix };
+    try {
+      const out = await imageSearch("Ares Predator", cfg);
+      const n = out.results?.length ?? 0;
+      res.json({ ok: n > 0 && !out.error, count: n, error: out.error ?? null, engine: cfg.engine });
+    } catch (err) {
+      res.json({ ok: false, error: String(err.message ?? err), engine: cfg.engine });
+    }
+  });
+
   // internet image search — dispatches on the configured engine
   app.get("/api/artsearch", async (req, res) => {
     const q = String(req.query.q ?? "").trim();
