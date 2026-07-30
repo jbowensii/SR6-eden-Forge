@@ -614,3 +614,6 @@ button.ghost.tiny { padding: 1px 7px; font-size: 11px; }
 .sc-test { font-size: 12px; }
 .sc-test.ok { color: var(--green); }
 .sc-test.bad { color: var(--amber); }
+
+th.sortable { cursor: pointer; user-select: none; white-space: nowrap; }
+th.sortable:hover { color: var(--magenta-soft); }

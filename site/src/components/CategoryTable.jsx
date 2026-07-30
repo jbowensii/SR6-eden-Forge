@@ -1,19 +1,66 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
+
+// number embedded in a stat string like "1,200¥" / "8R" -> comparable number
+const num = (v) => {
+  const m = String(v ?? "").replace(/,/g, "").match(/-?\d+(?:\.\d+)?/);
+  return m ? Number(m[0]) : Number.NEGATIVE_INFINITY;
+};
+const QA_ORDER = { extracted: 0, reviewed: 1, approved: 2 };
+
+// column key -> accessor + type (for sort). Header order matches COLUMNS.
+const COLUMNS = [
+  { key: "name", label: "Name", get: (it) => it.name, type: "str" },
+  { key: "subtype", label: "Subtype", get: (it) => it.system.subtype ?? "", type: "str" },
+  { key: "price", label: "Price", get: (it) => it.system.priceDef || it.system.price || "", type: "num" },
+  { key: "avail", label: "Avail", get: (it) => it.system.availDef || it.system.avail || "", type: "num" },
+  { key: "page", label: "Ref", get: (it) => it.meta.page ?? 0, type: "num" },
+  { key: "qa", label: "QA", get: (it) => QA_ORDER[it.meta.qaStatus] ?? 0, type: "num" },
+];
 
 export default function CategoryTable({ payload, issues, onEdit }) {
-  const issueMap = new Map();
-  for (const issue of issues ?? []) {
-    if (issue.item_id) issueMap.set(issue.item_id, [...(issueMap.get(issue.item_id) ?? []), issue]);
-  }
+  const [sort, setSort] = useState({ key: null, dir: 1 });
+
+  const issueMap = useMemo(() => {
+    const m = new Map();
+    for (const issue of issues ?? []) {
+      if (issue.item_id) m.set(issue.item_id, [...(m.get(issue.item_id) ?? []), issue]);
+    }
+    return m;
+  }, [issues]);
+
+  const rows = useMemo(() => {
+    const items = [...payload.items];
+    if (!sort.key) return items;
+    if (sort.key === "issues") {
+      items.sort((a, b) => ((issueMap.get(a.id)?.length ?? 0) - (issueMap.get(b.id)?.length ?? 0)) * sort.dir);
+      return items;
+    }
+    const col = COLUMNS.find((c) => c.key === sort.key);
+    items.sort((a, b) => {
+      const av = col.get(a), bv = col.get(b);
+      const cmp = col.type === "num" ? num(av) - num(bv) : String(av).localeCompare(String(bv), undefined, { numeric: true });
+      return cmp * sort.dir;
+    });
+    return items;
+  }, [payload.items, sort, issueMap]);
+
+  const toggle = (key) => setSort((s) => (s.key === key ? { key, dir: -s.dir } : { key, dir: 1 }));
+  const caret = (key) => (sort.key === key ? (sort.dir === 1 ? " ▲" : " ▼") : "");
+
   return (
-    <table>
+    <table className="cat-table">
       <thead>
         <tr>
-          <th>Name</th><th>Subtype</th><th>Price</th><th>Avail</th><th>Ref</th><th>QA</th><th>Issues</th>
+          {COLUMNS.map((c) => (
+            <th key={c.key} className="sortable" onClick={() => toggle(c.key)} title="Click to sort">
+              {c.label}{caret(c.key)}
+            </th>
+          ))}
+          <th className="sortable" onClick={() => toggle("issues")} title="Click to sort">Issues{caret("issues")}</th>
         </tr>
       </thead>
       <tbody>
-        {payload.items.map((item) => (
+        {rows.map((item) => (
           <tr key={item.id} onClick={() => onEdit(item)}>
             <td className="cell-name">
               {item.img && <span className="has-img" title={item.img}>◈</span>}
