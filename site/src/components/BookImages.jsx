@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { getBookImages } from "../api.js";
 
 // Gallery of every graphic extracted from the item's source book (top-level
@@ -11,7 +12,7 @@ export default function BookImages({ book, onPick, onClose }) {
     getBookImages(book).then((r) => setImages(r.images)).catch(() => setImages([]));
   }, [book]);
 
-  return (
+  return createPortal(
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal book-images" onClick={(e) => e.stopPropagation()}>
         <header>
@@ -32,6 +33,7 @@ export default function BookImages({ book, onPick, onClose }) {
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

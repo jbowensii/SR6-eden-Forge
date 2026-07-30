@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { artSearch, artDownload } from "../api.js";
 
 // Search the internet for artwork (Shadowrun/cyberpunk + item name) and assign a
@@ -30,7 +31,7 @@ export default function ArtSearch({ item, onAssigned, onClose }) {
     } catch (e) { setStatus(`failed: ${e.message ?? e}`); }
   };
 
-  return (
+  return createPortal(
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal art-search" onClick={(e) => e.stopPropagation()}>
         <div className="setup-head">
@@ -53,6 +54,7 @@ export default function ArtSearch({ item, onAssigned, onClose }) {
           ))}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
