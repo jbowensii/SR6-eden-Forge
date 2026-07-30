@@ -36,6 +36,57 @@ export function toFoundryDoc(item, { product, domain } = {}) {
 
 const _ATTR_KEYS = ["bod", "agi", "rea", "str", "wil", "log", "int", "cha", "edg", "mag", "res", "essence"];
 
+// SR6 active-skill name -> shadowrun6-eden skill code
+const _SKILL_CODE = {
+  astral: "astral", athletics: "athletics", biotech: "biotech", "close combat": "close_combat",
+  con: "con", conjuring: "conjuring", cracking: "cracking", electronics: "electronics",
+  enchanting: "enchanting", engineering: "engineering", "exotic weapons": "exotic_weapon",
+  "exotic weapon": "exotic_weapon", firearms: "firearms", influence: "influence",
+  outdoors: "outdoors", perception: "perception", piloting: "piloting", sorcery: "sorcery",
+  stealth: "stealth", tasking: "tasking",
+};
+const _SKILL_RE = /([A-Za-z][A-Za-z ]+?)\s+(\d+)(?:\s*\(([^)]+)\))?/g;
+
+function _mapSkills(str) {
+  // "Athletics 5, Close Combat 9 (Intimidation +2), Con 6" -> nested by code
+  const out = {};
+  let m;
+  while ((m = _SKILL_RE.exec(str)) !== null) {
+    const name = m[1].trim().toLowerCase();
+    const code = _SKILL_CODE[name];
+    if (!code) continue;
+    out[code] = { points: Number(m[2]) || 0, specialization: (m[3] || "").replace(/\s*[+\-]\d+/g, "").trim() };
+  }
+  return out;
+}
+
+function _mapMovement(str) {
+  // "10/25/+3" (walk / run / sprint-per-hit) -> {walk, run, sprint}
+  const m = String(str).match(/(\d+)\s*\/\s*(\d+)\s*\/\s*\+?(\d+)/);
+  return m ? { walk: Number(m[1]), run: Number(m[2]), sprint: Number(m[3]) } : null;
+}
+
+function _actorSubstructures(system) {
+  // Turn the extractor's flat strings into the nested objects Eden actor sheets
+  // read, while keeping the originals as *_text so nothing is lost.
+  const skillsStr = system.activeSkills || system.skills;
+  if (typeof skillsStr === "string" && skillsStr) {
+    const mapped = _mapSkills(skillsStr);
+    if (Object.keys(mapped).length) {
+      system.skills_text = skillsStr;
+      system.skills = mapped;
+    }
+  }
+  if (typeof system.movement === "string" && system.movement) {
+    const mv = _mapMovement(system.movement);
+    if (mv) { system.movement_text = system.movement; system.movement = mv; }
+  }
+  if (typeof system.defenseRating === "string" && system.defenseRating) {
+    const dr = system.defenseRating.match(/\d+/);
+    if (dr) system.defenserating = { physical: Number(dr[0]) };
+  }
+}
+
 function _nestAttributes(system) {
   // Eden actor sheets read system.attributes.<code>.base (nested), but the
   // extractor stores flat integers (bod: 4). Convert so the stat block populates.
@@ -57,7 +108,7 @@ function _wrap(item, type, system, product, domain) {
   system.product ??= product ?? item.meta?.book ?? "";
   system.page ??= item.meta?.page ?? 0;
   const isActor = EDEN[domain]?.actor || ["npc", "critter", "spirit"].includes(type);
-  if (isActor) _nestAttributes(system);
+  if (isActor) { _nestAttributes(system); _actorSubstructures(system); }
   const doc = {
     name: item.name,
     type,

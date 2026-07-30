@@ -175,25 +175,36 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
     return { changed };
   }));
 
-  // ── Artwork: internet image search + assign to the item's art slot ──────
-  // Best-effort Bing image scrape (no API key). Returns {thumb, full} pairs.
+  // ── Artwork: internet image search config (engine + API key) ────────────
+  app.get("/api/config/search", (_req, res) => handle(res, () => {
+    const s = loadSettings(dataRoot).search ?? {};
+    // never leak the full key to the browser — just whether one is set
+    return { engine: s.engine ?? "scrape", hasKey: Boolean(s.apiKey), cseId: s.cseId ?? "",
+             prefix: s.prefix ?? "shadowrun cyberpunk" };
+  }));
+  app.put("/api/config/search", (req, res) => handle(res, () => {
+    const cur = loadSettings(dataRoot);
+    const b = req.body ?? {};
+    cur.search = {
+      engine: ["scrape", "bing", "google"].includes(b.engine) ? b.engine : "scrape",
+      apiKey: b.apiKey === "" ? "" : (b.apiKey ?? cur.search?.apiKey ?? ""),   // "" clears; undefined keeps
+      cseId: b.cseId ?? cur.search?.cseId ?? "",
+      prefix: b.prefix ?? cur.search?.prefix ?? "shadowrun cyberpunk",
+    };
+    writeFileSync(join(dataRoot, "settings.json"), JSON.stringify(cur, null, 2) + "\n", "utf8");
+    return { saved: true };
+  }));
+
+  // internet image search — dispatches on the configured engine
   app.get("/api/artsearch", async (req, res) => {
     const q = String(req.query.q ?? "").trim();
     if (!q) return res.json({ results: [] });
-    const url = `https://www.bing.com/images/search?q=${encodeURIComponent("shadowrun cyberpunk " + q)}&form=HDRSC2`;
+    const cfg = loadSettings(dataRoot).search ?? {};
     try {
-      const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" } });
-      const html = await r.text();
-      const seen = new Set(); const results = [];
-      const re = /m="\{[^}]*&quot;murl&quot;:&quot;(.*?)&quot;[^}]*&quot;turl&quot;:&quot;(.*?)&quot;/g;
-      let m;
-      while ((m = re.exec(html)) && results.length < 24) {
-        const full = m[1].replace(/&amp;/g, "&"); const thumb = m[2].replace(/&amp;/g, "&");
-        if (!seen.has(full)) { seen.add(full); results.push({ full, thumb }); }
-      }
-      res.json({ results, searchUrl: url });
+      const out = await imageSearch(q, cfg);
+      res.json(out);
     } catch (err) {
-      res.json({ results: [], error: String(err.message ?? err), searchUrl: url });
+      res.json({ results: [], error: String(err.message ?? err) });
     }
   });
 
@@ -284,4 +295,40 @@ function handle(res, fn) {
     }
     res.status(500).json({ error: String(err.message ?? err) });
   }
+}
+
+// Internet image search dispatched by configured engine. Returns {results:
+// [{full, thumb}], searchUrl}. Google CSE and Bing API need a key; scrape is the
+// keyless fallback (fragile). Query is prefixed (default "shadowrun cyberpunk").
+export async function imageSearch(q, cfg = {}) {
+  const prefix = cfg.prefix ?? "shadowrun cyberpunk";
+  const query = `${prefix} ${q}`.trim();
+  const engine = cfg.engine ?? "scrape";
+  if (engine === "google" && cfg.apiKey && cfg.cseId) {
+    const u = `https://www.googleapis.com/customsearch/v1?key=${encodeURIComponent(cfg.apiKey)}` +
+      `&cx=${encodeURIComponent(cfg.cseId)}&searchType=image&num=10&q=${encodeURIComponent(query)}`;
+    const r = await fetch(u);
+    const j = await r.json();
+    if (j.error) return { results: [], error: j.error.message };
+    return { results: (j.items ?? []).map((it) => ({ full: it.link, thumb: it.image?.thumbnailLink ?? it.link })) };
+  }
+  if (engine === "bing" && cfg.apiKey) {
+    const u = `https://api.bing.microsoft.com/v7.0/images/search?count=20&q=${encodeURIComponent(query)}`;
+    const r = await fetch(u, { headers: { "Ocp-Apim-Subscription-Key": cfg.apiKey } });
+    const j = await r.json();
+    if (j.error) return { results: [], error: j.error.message ?? "bing error" };
+    return { results: (j.value ?? []).map((v) => ({ full: v.contentUrl, thumb: v.thumbnailUrl })) };
+  }
+  // keyless scrape of Bing image results
+  const url = `https://www.bing.com/images/search?q=${encodeURIComponent(query)}&form=HDRSC2`;
+  const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" } });
+  const html = await r.text();
+  const seen = new Set(); const results = [];
+  const re = /m="\{[^}]*&quot;murl&quot;:&quot;(.*?)&quot;[^}]*&quot;turl&quot;:&quot;(.*?)&quot;/g;
+  let m;
+  while ((m = re.exec(html)) && results.length < 24) {
+    const full = m[1].replace(/&amp;/g, "&"); const thumb = m[2].replace(/&amp;/g, "&");
+    if (!seen.has(full)) { seen.add(full); results.push({ full, thumb }); }
+  }
+  return { results, searchUrl: url };
 }

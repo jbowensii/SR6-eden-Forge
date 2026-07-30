@@ -590,3 +590,9 @@ button.ghost.tiny { padding: 1px 7px; font-size: 11px; }
 .art-cell { background: var(--bg); border: 1px solid var(--line); padding: 3px; cursor: pointer; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
 .art-cell:hover { border-color: var(--magenta); box-shadow: 0 0 12px rgba(229,23,123,0.3); }
 .art-cell img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+.search-config { margin: 8px 0 12px; padding: 8px 10px; background: var(--bg); border: 1px solid var(--line); }
+.sc-title { font-family: var(--font-display); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--magenta-soft); margin-bottom: 6px; }
+.sc-row { display: flex; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
+.sc-row label { display: flex; flex-direction: column; gap: 2px; font-size: 11px; color: var(--ink-dim); flex: 1; min-width: 140px; }
+.sc-row select, .sc-row input { background: var(--bg-raise); border: 1px solid var(--line); color: var(--ink); font-size: 12px; padding: 4px 6px; font-family: var(--font-mono); }
