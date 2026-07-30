@@ -22,16 +22,19 @@ export default function TypeTree({ tree, selected, onSelect }) {
       {tree.map((t) => {
         const expanded = open.has(t.type);
         const done = t.qa.reviewed + t.qa.approved;
+        // a single subtype (e.g. Foci -> Focus) adds no information: treat the
+        // type as a leaf and load all its items when clicked, no sublevel.
+        const hasChildren = t.subtypes.length > 1;
         return (
           <div key={t.type} className="type-group">
             <div className={`tree-row type-row ${isActive(t.type, undefined) ? "active" : ""}`}>
               <button
                 className="twisty"
                 title={expanded ? "Collapse" : "Expand"}
-                onClick={(e) => { e.stopPropagation(); toggle(t.type); }}
+                disabled={!hasChildren}
+                onClick={(e) => { e.stopPropagation(); if (hasChildren) toggle(t.type); }}
               >
-                {t.subtypes.length > 1 || (t.subtypes.length === 1 && t.subtypes[0].subtype)
-                  ? (expanded ? "▾" : "▸") : "·"}
+                {hasChildren ? (expanded ? "▾" : "▸") : "·"}
               </button>
               <span className="tree-name type-name" onClick={() => onSelect({ type: t.type })}>
                 {prettyType(t.type)}
@@ -41,7 +44,7 @@ export default function TypeTree({ tree, selected, onSelect }) {
               </span>
               <span className="qa-bar" style={{ "--pct": `${t.items ? Math.round((done / t.items) * 100) : 0}%` }} />
             </div>
-            {expanded &&
+            {expanded && hasChildren &&
               t.subtypes.map((s) => (
                 <div
                   key={s.subtype || "_none"}

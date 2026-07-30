@@ -3,6 +3,7 @@ import CategoryTable from "./components/CategoryTable.jsx";
 import ItemEditor from "./components/ItemEditor.jsx";
 import Preview from "./components/Preview.jsx";
 import TypeTree from "./components/TypeTree.jsx";
+import SetupPanel from "./components/SetupPanel.jsx";
 import { assignIcon, assignRender, deleteItem, exportModule, getBooks, getCategory, getDomains, getItems, getTypeTree, putItem, searchItems, validate } from "./api.js";
 
 export default function App() {
@@ -12,6 +13,7 @@ export default function App() {
   const [books, setBooks] = useState({});
   const [selected, setSelected] = useState(null); // {type, subtype?} or {book,domain,category}
   const [exporting, setExporting] = useState(false);
+  const [setupOpen, setSetupOpen] = useState(false);
   const [payload, setPayload] = useState(null);
   const [editing, setEditing] = useState(null); // item
   const [doc, setDoc] = useState(null);
@@ -181,6 +183,7 @@ export default function App() {
         <div className="actions">
           <button onClick={runValidate}>Validate</button>
           <button onClick={runExport} disabled={!selected || exporting}>Export</button>
+          <button onClick={() => setSetupOpen(true)} title="Configure book paths and rebuild the library">⚙ Setup</button>
         </div>
         {domainList.length > 1 && (
           <div className="domain-tabs">
@@ -263,6 +266,7 @@ export default function App() {
         )}
         {doc && <Preview doc={doc} />}
       </section>
+      {setupOpen && <SetupPanel onClose={() => setSetupOpen(false)} />}
     </div>
   );
 }

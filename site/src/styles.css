@@ -552,3 +552,26 @@ button.ghost.tiny { padding: 1px 7px; font-size: 11px; }
 .extra-field .field-name::after { content: " ·"; opacity: 0.4; }
 .blank-req { position: relative; }
 .blank-req input, .blank-req textarea { border-color: rgba(232, 163, 61, 0.6); background: rgba(232, 163, 61, 0.06); }
+
+/* ── Setup / library-config panel ───────────────────────────────────────── */
+.setup-panel { max-width: 780px; width: 90vw; max-height: 88vh; display: flex; flex-direction: column; }
+.setup-head { display: flex; align-items: center; justify-content: space-between; }
+.setup-head h2 { font-family: var(--font-display); color: var(--magenta-soft); letter-spacing: 0.04em; }
+.setup-hint { color: var(--ink-dim); font-size: 12px; margin: 6px 0 12px; }
+.setup-hint code { color: var(--cyan); }
+.book-config { overflow-y: auto; flex: 1; border: 1px solid var(--line); padding: 6px; background: var(--bg); }
+.book-row { display: grid; grid-template-columns: 190px 1fr 64px; gap: 8px; align-items: center; padding: 3px 4px; }
+.book-row + .book-row { border-top: 1px dashed var(--line); }
+.book-title { font-size: 12px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.book-row input { width: 100%; font-family: var(--font-mono); font-size: 11px; background: var(--bg-raise); border: 1px solid var(--line); color: var(--ink); padding: 3px 6px; }
+.book-row.missing input { border-color: rgba(232, 163, 61, 0.6); }
+.book-status { font-family: var(--font-mono); font-size: 11px; text-align: center; color: var(--green); }
+.book-row.missing .book-status { color: var(--amber); }
+.setup-actions { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+.setup-actions .save-msg { color: var(--green); font-size: 12px; }
+.setup-actions .warn-msg { color: var(--amber); font-size: 12px; }
+.rebuild-log {
+  margin-top: 12px; max-height: 220px; overflow-y: auto;
+  background: #05070b; border: 1px solid var(--line-bright); padding: 8px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--cyan); white-space: pre-wrap;
+}

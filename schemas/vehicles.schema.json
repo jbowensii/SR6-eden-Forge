@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sr6forge:vehicles",
+  "title": "SR6-eden-Forge vehicles data file",
+  "type": "object",
+  "required": [
+    "book",
+    "domain",
+    "category",
+    "items"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "book": {
+      "$ref": "urn:sr6forge:common#/$defs/slug"
+    },
+    "domain": {
+      "const": "vehicles"
+    },
+    "category": {
+      "$ref": "urn:sr6forge:common#/$defs/slug"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/item"
+      }
+    }
+  },
+  "$defs": {
+    "item": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "system",
+        "meta"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "urn:sr6forge:common#/$defs/slug"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "img": {
+          "type": "string",
+          "minLength": 1
+        },
+        "system": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "subtype": {
+              "type": "string"
+            },
+            "handling": {
+              "type": "string"
+            },
+            "accel": {
+              "type": "string"
+            },
+            "speedInterval": {
+              "type": "string"
+            },
+            "topSpeed": {
+              "type": "string"
+            },
+            "body": {
+              "type": "string"
+            },
+            "armor": {
+              "type": "string"
+            },
+            "pilot": {
+              "type": "string"
+            },
+            "sensor": {
+              "type": "string"
+            },
+            "seats": {
+              "type": "string"
+            },
+            "availability": {
+              "type": "string"
+            },
+            "price": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "product": {
+              "type": "string"
+            },
+            "genesisID": {
+              "type": "string"
+            },
+            "page": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "meta": {
+          "$ref": "urn:sr6forge:common#/$defs/meta"
+        }
+      }
+    }
+  }
+}

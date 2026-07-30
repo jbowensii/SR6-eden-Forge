@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { compilePack } from "@foundryvtt/foundryvtt-cli";
 import { toFoundryDoc } from "../shared/edenTransform.mjs";
+import { EDEN } from "../shared/edenSpec.mjs";
 
 
 export function loadBooks(dataRoot) {
@@ -202,6 +203,7 @@ export async function exportAll(dataRoot, exportRoot, { book, status = "all", ve
   const perDomain = {};
   try {
     for (const domain of domains) {
+      if (!EDEN[domain]) { perDomain[domain] = { skipped: "no Eden mapping (site-only)" }; continue; }
       let built;
       try {
         built = buildDocs(dataRoot, book, domain, status, { product });

@@ -1,5 +1,6 @@
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { spawn } from "node:child_process";
 import express from "express";
 import { toFoundryDoc } from "../shared/edenTransform.mjs";
 import { EDEN } from "../shared/edenSpec.mjs";
@@ -139,6 +140,52 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
       const statusCode = message.startsWith("no items match") ? 409 : 500;
       res.status(statusCode).json({ error: message });
     }
+  });
+
+  // ── Setup panel: configure book PDF paths + trigger the import pipeline ──
+  const repoRoot = dirname(dataRoot);
+  const booksPath = join(dataRoot, "books.json");
+  const rebuild = { running: false, log: [], startedAt: null, code: null };
+
+  app.get("/api/config/books", (_req, res) => handle(res, () => {
+    const books = loadBooks(dataRoot);
+    return {
+      books: Object.entries(books)
+        .map(([slug, b]) => ({ slug, title: b.title ?? slug, pdf: b.pdf ?? "", exists: Boolean(b.pdf && existsSync(b.pdf)) }))
+        .sort((a, b) => a.slug.localeCompare(b.slug)),
+    };
+  }));
+
+  // update one or more book PDF paths: body { updates: { slug: "C:/.../x.pdf" } }
+  app.put("/api/config/books", (req, res) => handle(res, () => {
+    const updates = req.body?.updates ?? {};
+    const books = loadBooks(dataRoot);
+    let changed = 0;
+    for (const [slug, pdf] of Object.entries(updates)) {
+      if (!SEGMENT.test(slug) || !(slug in books)) continue;
+      books[slug].pdf = String(pdf); changed += 1;
+    }
+    writeFileSync(booksPath, JSON.stringify(books, null, 2) + "\n", "utf8");
+    return { changed };
+  }));
+
+  app.get("/api/rebuild/status", (_req, res) =>
+    res.json({ running: rebuild.running, startedAt: rebuild.startedAt, code: rebuild.code, log: rebuild.log.slice(-200) }));
+
+  app.post("/api/rebuild", (_req, res) => {
+    if (rebuild.running) return res.status(409).json({ error: "already-running" });
+    rebuild.running = true; rebuild.log = []; rebuild.code = null; rebuild.startedAt = Date.now();
+    const py = process.env.PYTHON || "python";
+    const child = spawn(py, ["-u", join("tools", "rebuild_all.py")], { cwd: repoRoot });
+    const push = (buf) => {
+      for (const line of buf.toString().split(/\r?\n/)) if (line.trim()) rebuild.log.push(line);
+      if (rebuild.log.length > 500) rebuild.log = rebuild.log.slice(-500);
+    };
+    child.stdout.on("data", push);
+    child.stderr.on("data", (b) => { const s = b.toString(); if (!/FontBBox|CropBox/.test(s)) push(b); });
+    child.on("close", (code) => { rebuild.running = false; rebuild.code = code; rebuild.log.push(`__exit ${code}`); });
+    child.on("error", (e) => { rebuild.running = false; rebuild.code = -1; rebuild.log.push(`__error ${e.message}`); });
+    res.json({ started: true });
   });
 
   // Dot-segment path components (e.g. "..") get collapsed by URL normalization

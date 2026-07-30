@@ -89,6 +89,7 @@ export const DOMAIN_GROUPING = {
   contacts: { groupBy: "category", subBy: "type" },
   sins: { groupBy: "category", subBy: "quality" },
   foci: { groupBy: "category", subBy: "subtype" },
+  vehicles: { groupBy: "type", subBy: "subtype" },
 };
 
 export function domains(dataRoot) {

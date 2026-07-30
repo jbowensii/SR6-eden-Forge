@@ -6,6 +6,11 @@ async function json(res) {
 export const getTree = () => fetch("/api/tree").then(json);
 export const getDomains = () => fetch("/api/domains").then(json);
 export const getEdenSpec = () => fetch("/api/edenspec").then(json);
+export const getBooksConfig = () => fetch("/api/config/books").then(json);
+export const putBooksConfig = (updates) =>
+  fetch("/api/config/books", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ updates }) }).then(json);
+export const startRebuild = () => fetch("/api/rebuild", { method: "POST" }).then(json);
+export const rebuildStatus = () => fetch("/api/rebuild/status").then(json);
 export const getTypeTree = (domain = "gear") => fetch(`/api/typetree?domain=${encodeURIComponent(domain)}`).then(json);
 export const getItems = (type, subtype, domain = "gear") => {
   const q = subtype === undefined ? "" : `&subtype=${encodeURIComponent(subtype)}`;
