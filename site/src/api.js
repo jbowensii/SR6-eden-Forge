@@ -11,6 +11,8 @@ export const putBooksConfig = (updates) =>
   fetch("/api/config/books", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ updates }) }).then(json);
 export const startRebuild = () => fetch("/api/rebuild", { method: "POST" }).then(json);
 export const rebuildStatus = () => fetch("/api/rebuild/status").then(json);
+export const putPathsConfig = (paths) =>
+  fetch("/api/config/paths", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(paths) }).then(json);
 export const getSearchConfig = () => fetch("/api/config/search").then(json);
 export const putSearchConfig = (cfg) =>
   fetch("/api/config/search", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(cfg) }).then(json);

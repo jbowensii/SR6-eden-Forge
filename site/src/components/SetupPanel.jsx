@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { getBooksConfig, putBooksConfig, startRebuild, rebuildStatus, getSearchConfig, putSearchConfig, testSearchConfig } from "../api.js";
+import { getBooksConfig, putBooksConfig, putPathsConfig, startRebuild, rebuildStatus, getSearchConfig, putSearchConfig, testSearchConfig } from "../api.js";
 
 // Setup panel: point each registered book at its source PDF, then trigger the
 // extraction pipeline that (re)builds the site's data. Rebuild runs server-side;
@@ -19,6 +19,12 @@ export default function SetupPanel({ onClose }) {
   const load = () => getBooksConfig().then((r) => { setBooks(r.books); setPaths(r.paths); }).catch(() => {});
   useEffect(() => { load(); getSearchConfig().then(setSearch).catch(() => {}); return () => clearInterval(poll.current); }, []);
 
+  const savePaths = async () => {
+    const r = await putPathsConfig({ data: paths.data, art: paths.art, iconLibrary: paths.iconLibrary });
+    setSaveMsg(r.restartNeeded ? "paths saved — restart the server for Data/Art" : "paths saved");
+    getBooksConfig().then((x) => setPaths(x.paths)).catch(() => {});
+    setTimeout(() => setSaveMsg(""), 4000);
+  };
   const [testMsg, setTestMsg] = useState("");
   const searchCfg = () => ({ engine: search.engine, cseId: search.cseId, prefix: search.prefix, ...(apiKey ? { apiKey } : {}) });
   const saveSearch = async () => {
@@ -83,9 +89,16 @@ export default function SetupPanel({ onClose }) {
 
         {paths && (
           <div className="path-info">
-            <div><span className="path-label">Data</span><code>{paths.data}</code></div>
-            <div><span className="path-label">Extracted art</span><code>{paths.art}</code></div>
-            <div><span className="path-label">Icon library</span><code>{paths.iconLibrary}</code></div>
+            <label className="path-row"><span className="path-label">Data</span>
+              <input value={paths.data} onChange={(e) => setPaths({ ...paths, data: e.target.value })} /></label>
+            <label className="path-row"><span className="path-label">Extracted art</span>
+              <input value={paths.art} onChange={(e) => setPaths({ ...paths, art: e.target.value })} /></label>
+            <label className="path-row"><span className="path-label">Icon library</span>
+              <input value={paths.iconLibrary} onChange={(e) => setPaths({ ...paths, iconLibrary: e.target.value })} /></label>
+            <div className="path-actions">
+              <button className="ghost" onClick={savePaths}>Save paths</button>
+              <span className="setup-hint" style={{ margin: 0 }}>Icon library applies now; Data / Art on restart.</span>
+            </div>
           </div>
         )}
 

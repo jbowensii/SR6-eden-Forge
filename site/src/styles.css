@@ -588,9 +588,11 @@ button.ghost.tiny { padding: 1px 7px; font-size: 11px; }
 }
 
 .path-info { margin: 8px 0 12px; padding: 8px 10px; background: var(--bg); border: 1px solid var(--line); font-size: 11px; }
-.path-info > div { display: flex; gap: 8px; align-items: baseline; padding: 1px 0; }
-.path-info .path-label { display: inline-block; min-width: 92px; color: var(--cyan); font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.06em; font-size: 10px; }
-.path-info code { color: var(--ink-dim); word-break: break-all; }
+.path-row { display: flex; gap: 8px; align-items: center; padding: 2px 0; }
+.path-info .path-label { display: inline-block; min-width: 92px; color: var(--cyan); font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.06em; font-size: 10px; flex: 0 0 92px; }
+.path-row input { flex: 1; background: var(--bg-raise); border: 1px solid var(--line); color: var(--ink); font-family: var(--font-mono); font-size: 11px; padding: 3px 6px; }
+.path-row input:focus { border-color: var(--magenta); outline: none; }
+.path-actions { display: flex; gap: 10px; align-items: center; margin-top: 6px; }
 
 /* ── Artwork search ─────────────────────────────────────────────────────── */
 .art-search { width: 760px; max-width: 92vw; }

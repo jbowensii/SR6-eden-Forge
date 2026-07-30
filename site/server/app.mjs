@@ -1,5 +1,8 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { join, dirname, sep } from "node:path";
+
+// Show/store paths in the host OS's separator (Windows "\", POSIX "/").
+const osPath = (p) => (typeof p === "string" ? p.replace(/[\\/]+/g, sep) : p);
 import { spawn } from "node:child_process";
 import express from "express";
 import { toFoundryDoc } from "../shared/edenTransform.mjs";
@@ -46,8 +49,10 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
     res.sendFile(pdf);
   });
 
-  // item images live in data/_assets/<book>/...; served read-only for previews
-  app.use("/assets", express.static(join(dataRoot, "_assets")));
+  // extracted art lives in <artDir> (default data/_assets); served read-only.
+  // artDir is read at startup — editing it in Setup applies on restart.
+  const artRoot = loadSettings(dataRoot).artDir || join(dataRoot, "_assets");
+  app.use("/assets", express.static(artRoot));
 
   // graphics extracted from a book, and assigning one as an item's render
   app.get("/api/bookimages/:book", (req, res) => handle(res, () => ({ images: listBookImages(dataRoot, req.params.book) })));
@@ -149,17 +154,30 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
 
   app.get("/api/config/books", (_req, res) => handle(res, () => {
     const books = loadBooks(dataRoot);
-    const assetsDir = join(dataRoot, "_assets");
+    const s = loadSettings(dataRoot);
+    const icon = Array.isArray(s.iconLibrary) ? s.iconLibrary[0] : s.iconLibrary;
     return {
       paths: {
-        data: dataRoot,
-        art: assetsDir,                                 // extracted book graphics live here
-        iconLibrary: libraryRoots(dataRoot)[0] ?? "(none configured)",
+        data: osPath(s.dataDir || dataRoot),
+        art: osPath(s.artDir || join(dataRoot, "_assets")),
+        iconLibrary: osPath(icon || ""),
       },
       books: Object.entries(books)
-        .map(([slug, b]) => ({ slug, title: b.title ?? slug, pdf: b.pdf ?? "", exists: Boolean(b.pdf && existsSync(b.pdf)) }))
+        .map(([slug, b]) => ({ slug, title: b.title ?? slug, pdf: osPath(b.pdf ?? ""), exists: Boolean(b.pdf && existsSync(b.pdf)) }))
         .sort((a, b) => a.slug.localeCompare(b.slug)),
     };
+  }));
+
+  // edit the DATA / ART / ICON LIBRARY paths. iconLibrary applies live; dataDir
+  // and artDir take effect on server restart (read at startup).
+  app.put("/api/config/paths", (req, res) => handle(res, () => {
+    const cur = loadSettings(dataRoot);
+    const b = req.body ?? {};
+    if (typeof b.data === "string" && b.data.trim()) cur.dataDir = osPath(b.data.trim());
+    if (typeof b.art === "string" && b.art.trim()) cur.artDir = osPath(b.art.trim());
+    if (typeof b.iconLibrary === "string") cur.iconLibrary = b.iconLibrary.trim() ? osPath(b.iconLibrary.trim()) : undefined;
+    writeFileSync(join(dataRoot, "settings.json"), JSON.stringify(cur, null, 2) + "\n", "utf8");
+    return { saved: true, restartNeeded: Boolean(b.data || b.art) };
   }));
 
   // update one or more book PDF paths: body { updates: { slug: "C:/.../x.pdf" } }
