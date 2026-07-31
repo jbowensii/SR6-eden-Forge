@@ -23,7 +23,7 @@ try:
 except Exception:
     pass
 APPLY = "--apply" in sys.argv
-DOMAIN = "critters"
+DOMAIN = next((a.split("=")[1] for a in sys.argv if a.startswith("--domain=")), "critters")
 LIMIT = next((int(a.split("=")[1]) for a in sys.argv if a.startswith("--limit=")), None)
 CORR = {os.path.splitext(os.path.basename(f))[0]: f for f in glob.glob("data/_corrections/*/*.json")}
 API = "https://shadowrun.fandom.com/api.php"
