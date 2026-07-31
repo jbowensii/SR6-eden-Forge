@@ -19,11 +19,16 @@ import re
 from extractor.enrich import norm
 from extractor.writeups import LineRec, clean_block
 
-# spell stat column header; non-combat spells omit DAMAGE, so anchor on the stem
+# stat column headers that anchor each list entry. Non-combat spells omit DAMAGE,
+# so anchor on the stem. Critter powers use a different column order.
 SPELL_HEADER = re.compile(r"^RANGE\s+TYPE\s+DURATION\b")
-# same header anywhere in a line — column bleed can merge a prose tail with the
-# next entry's header onto one visual row ("Light tar- RANGE TYPE DURATION DV")
-_HEADER_ANYWHERE = re.compile(r"RANGE\s+TYPE\s+DURATION\b")
+CRITTER_POWER_HEADER = re.compile(r"^TYPE\s+ACTION\s+RANGE\s+DURATION\b")
+
+
+def _anywhere(header_re):
+    """Same header un-anchored — column bleed can merge a prose tail with the next
+    entry's header onto one visual row ("Light tar- RANGE TYPE DURATION DV")."""
+    return re.compile(header_re.pattern.lstrip("^"))
 
 
 def _entries(lines, known_norms, header_re):
@@ -48,6 +53,7 @@ def parse_list_descriptions(lines, known_norms, header_re=SPELL_HEADER) -> dict:
     recoverable. Grouped entries (no prose between them) share the prose that
     follows the group's last entry."""
     ents = _entries(lines, known_norms, header_re)
+    anywhere = _anywhere(header_re)
     result = {}
     n = len(ents)
     i = 0
@@ -70,7 +76,7 @@ def parse_list_descriptions(lines, known_norms, header_re=SPELL_HEADER) -> dict:
             ln = lines[k]
             if ln.col != last["col"] or ln.is_head:
                 break
-            m = _HEADER_ANYWHERE.search(ln.text)   # header may be merged mid-line by bleed
+            m = anywhere.search(ln.text)   # header may be merged mid-line by bleed
             if m:
                 pre = ln.text[:m.start()].strip()
                 if pre:

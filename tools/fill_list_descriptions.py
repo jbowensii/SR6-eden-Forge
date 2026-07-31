@@ -19,13 +19,13 @@ except Exception:
 import pdfplumber
 from extractor.enrich import norm
 from extractor.ingest import load_registry
-from extractor.spell_layout import SPELL_HEADER, parse_list_descriptions
+from extractor.spell_layout import CRITTER_POWER_HEADER, SPELL_HEADER, parse_list_descriptions
 from extractor.writeups import _page_recs
 
 APPLY = "--apply" in sys.argv
 DOMAIN = next((a.split("=")[1] for a in sys.argv if a.startswith("--domain=")), "spells")
 CORR = {os.path.splitext(os.path.basename(f))[0]: f for f in glob.glob("data/_corrections/*/*.json")}
-HEADERS = {"spells": SPELL_HEADER}
+HEADERS = {"spells": SPELL_HEADER, "critter_powers": CRITTER_POWER_HEADER}
 
 
 def patch_snapshot(item_id, desc):
