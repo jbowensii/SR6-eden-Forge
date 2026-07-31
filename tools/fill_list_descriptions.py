@@ -38,25 +38,36 @@ def patch_snapshot(item_id, desc):
 
 
 def main():
+    from collections import defaultdict
     header_re = HEADERS.get(DOMAIN, SPELL_HEADER)
-    items, pages, known = [], set(), set()
+    reg = load_registry(_P("data"))
+    # every item, grouped by its OWN source book so each book's PDF is read once
+    items, by_book, known = [], defaultdict(list), set()
     for f in sorted(glob.glob(f"data/corebook/{DOMAIN}/*.json")):
         payload = json.load(open(f, encoding="utf-8"))
         for it in payload.get("items", []):
             items.append((f, payload, it))
             known.add(norm(it["name"]))
+            by_book[it["meta"].get("book")].append((f, payload, it))
+
+    # parse each source book, restricted to the pages its items sit on (+/-1)
+    desc = {}
+    for book, entries in by_book.items():
+        pdf = (reg.get(book) or {}).get("pdf")
+        if not (pdf and _P(pdf).is_file()):
+            continue
+        pages = set()
+        for _, _, it in entries:
             p = it["meta"].get("page")
             if p:
                 pages.update([p - 1, p, p + 1])
-
-    pdf = (load_registry(_P("data")).get("corebook") or {}).get("pdf")
-    lines = []
-    with pdfplumber.open(pdf) as doc:
-        for p in sorted(pages):
-            if 1 <= p <= len(doc.pages):
-                lines.extend(_page_recs(doc.pages[p - 1], p))
-
-    desc = parse_list_descriptions(lines, known, header_re)
+        lines = []
+        with pdfplumber.open(pdf) as doc:
+            n = len(doc.pages)
+            for p in sorted(pages):
+                if 1 <= p <= n:
+                    lines.extend(_page_recs(doc.pages[p - 1], p))
+        desc.update(parse_list_descriptions(lines, known, header_re))
 
     filled = 0
     dirty = {}
