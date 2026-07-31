@@ -23,6 +23,7 @@ from extractor.writeups import LineRec, clean_block
 # so anchor on the stem. Critter powers use a different column order.
 SPELL_HEADER = re.compile(r"^RANGE\s+TYPE\s+DURATION\b")
 CRITTER_POWER_HEADER = re.compile(r"^TYPE\s+ACTION\s+RANGE\s+DURATION\b")
+COMPLEX_FORM_HEADER = re.compile(r"^FADE\s+VALUE\s+DURATION\b")
 
 
 def _anywhere(header_re):
