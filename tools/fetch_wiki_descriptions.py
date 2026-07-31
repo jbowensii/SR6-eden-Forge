@@ -18,10 +18,14 @@ import urllib.parse
 import urllib.request
 from pathlib import Path as _P
 
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")   # Windows cp1252 console
+except Exception:
+    pass
 APPLY = "--apply" in sys.argv
 DOMAIN = "critters"
 LIMIT = next((int(a.split("=")[1]) for a in sys.argv if a.startswith("--limit=")), None)
-CORR = {os.path.splitext(os.path.basename(f))[0] for f in glob.glob("data/_corrections/*/*.json")}
+CORR = {os.path.splitext(os.path.basename(f))[0]: f for f in glob.glob("data/_corrections/*/*.json")}
 API = "https://shadowrun.fandom.com/api.php"
 UA = "Mozilla/5.0 (SR6-eden-Forge personal-module description fetch)"
 MIN_LEN = 60
@@ -92,14 +96,24 @@ def fetch_description(name):
     return None, None
 
 
+def _patch_snapshot(item_id, new_desc):
+    f = CORR.get(item_id)
+    if not f:
+        return
+    c = json.load(open(f, encoding="utf-8"))
+    node = c.get("item", c)
+    node.setdefault("system", {})["description"] = new_desc
+    _P(f).write_text(json.dumps(c, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
 def main():
     files = sorted(glob.glob(f"data/corebook/{DOMAIN}/*.json"))
     targets = []
     for f in files:
         payload = json.load(open(f, encoding="utf-8"))
         for it in payload.get("items", []):
-            if it["id"] in CORR:
-                continue
+            # include corrected items too — per user decision, fill an EMPTY
+            # description and mirror it into the correction snapshot (below)
             if not (it["system"].get("description") or "").strip():
                 targets.append((f, payload, it))
     if LIMIT:
@@ -113,10 +127,12 @@ def main():
             found += 1
             it["system"]["description"] = prose
             dirty[f] = payload
-            print(f"  ✓ {it['name'][:28]:28} <- {title}", flush=True)
+            if APPLY and it["id"] in CORR:
+                _patch_snapshot(it["id"], prose)   # keep the snapshot in sync
+            print(f"  [hit] {it['name'][:28]:28} <- {title}", flush=True)
         else:
             miss += 1
-            print(f"  · {it['name'][:28]:28} (no page)", flush=True)
+            print(f"  [ - ] {it['name'][:28]:28} (no page)", flush=True)
         time.sleep(1.0)   # be polite to the wiki
 
     if APPLY:
