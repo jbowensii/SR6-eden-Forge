@@ -293,7 +293,7 @@ export default function App() {
             books={books}
             categoryName={(editing?._category ?? selected?.category ?? selected?.subtype ?? selected?.type)?.replace(/_/g, " ")}
             pdfAvailable={Boolean(bookInfo?.pdf)}
-            pdfHref={editing.meta ? `/api/pdf/${editing.meta.book}#page=${editing.meta.page}` : null}
+            pdfHref={editing.meta ? `/api/pdf/${editing.meta.book}?i=${encodeURIComponent(editing.id)}#page=${editing.meta.page}` : null}
             onSave={save}
             onDelete={remove}
             onAssignIcon={handleAssignIcon}
