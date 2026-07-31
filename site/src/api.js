@@ -51,6 +51,7 @@ export const assignRender = (payload) =>
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   }).then(json);
+export const applyCorrections = () => fetch("/api/corrections/apply", { method: "POST" }).then(json);
 export const searchIcons = (q) => fetch(`/api/icons?q=${encodeURIComponent(q)}`).then(json);
 export const assignIcon = (payload) =>
   fetch("/api/icon/assign", {

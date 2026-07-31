@@ -292,6 +292,28 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
     res.json({ started: true });
   });
 
+  // Re-overlay every manual correction (data/_corrections/*) back onto the data
+  // files. Runs the same tool the CLI uses; fast (pure JSON overlay, no PDFs).
+  app.post("/api/corrections/apply", (_req, res) => {
+    const py = process.env.PYTHON || "python";
+    const child = spawn(py, ["-u", join("tools", "apply_corrections.py")], { cwd: repoRoot });
+    let out = "";
+    child.stdout.on("data", (b) => { out += b.toString(); });
+    child.stderr.on("data", (b) => { const s = b.toString(); if (!/FontBBox|CropBox/.test(s)) out += s; });
+    child.on("close", (code) => {
+      const applied = out.match(/applied\s+(\d+)\s+correction/i);
+      const deleted = out.match(/(\d+)\s+deletion/i);
+      res.json({
+        ok: code === 0,
+        applied: applied ? Number(applied[1]) : null,
+        deletions: deleted ? Number(deleted[1]) : null,
+        code,
+        log: out.trim().split(/\r?\n/).slice(-20),
+      });
+    });
+    child.on("error", (e) => res.status(500).json({ ok: false, error: String(e.message ?? e) }));
+  });
+
   // Dot-segment path components (e.g. "..") get collapsed by URL normalization
   // before routing sees them, so a malformed /api/item/... PUT request never
   // matches the PUT route above. Anything left unmatched under /api/item for

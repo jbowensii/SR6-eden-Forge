@@ -4,7 +4,7 @@ import ItemEditor from "./components/ItemEditor.jsx";
 import Preview from "./components/Preview.jsx";
 import TypeTree from "./components/TypeTree.jsx";
 import SetupPanel from "./components/SetupPanel.jsx";
-import { assignIcon, assignRender, deleteItem, exportModule, getBooks, getCategory, getDomains, getItems, getTypeTree, putItem, searchItems, validate } from "./api.js";
+import { applyCorrections, assignIcon, assignRender, deleteItem, exportModule, getBooks, getCategory, getDomains, getItems, getTypeTree, putItem, searchItems, validate } from "./api.js";
 
 export default function App() {
   const [tree, setTree] = useState([]);      // primary -> secondary tree for the domain
@@ -115,6 +115,27 @@ export default function App() {
     }
   }
 
+  const [applyingCorr, setApplyingCorr] = useState(false);
+  async function runApplyCorrections() {
+    if (applyingCorr) return;
+    setApplyingCorr(true);
+    setStatus("applying manual corrections…");
+    try {
+      const res = await applyCorrections();
+      setStatus(res.ok
+        ? `corrections applied: ${res.applied ?? "?"} overlaid, ${res.deletions ?? 0} deletion(s)`
+        : `corrections failed (exit ${res.code}) — ${res.log?.slice(-1)[0] ?? ""}`);
+      if (res.ok) {
+        await refreshPayload();               // reflect restored edits in the center
+        setTree(await getTypeTree(domain));
+      }
+    } catch (e) {
+      setStatus(`error: ${e.message ?? e}`);
+    } finally {
+      setApplyingCorr(false);
+    }
+  }
+
   async function runValidate() {
     setStatus("validating…");
     try {
@@ -216,6 +237,9 @@ export default function App() {
         </header>
         <div className="actions">
           <button onClick={runValidate}>Validate</button>
+          <button onClick={runApplyCorrections} disabled={applyingCorr} title="Re-overlay every manual correction (data/_corrections) onto the data files">
+            {applyingCorr ? "Applying…" : "Apply corrections"}
+          </button>
           <button onClick={runExport} disabled={!selected || exporting}>Export</button>
           <button onClick={() => setSetupOpen(true)} title="Configure book paths and rebuild the library">⚙ Setup</button>
         </div>
