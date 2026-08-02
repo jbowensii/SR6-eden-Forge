@@ -43,6 +43,7 @@ our_files = defaultdict(list)           # (domain,file) -> [item]  (rebuilt)
 hide_count = defaultdict(int)
 gap_count = 0
 art_index = {}                          # (domain, norm_name) -> {img, id}
+desc_index = {}                         # (domain, norm_name) -> our description (cl6-lacks fallback)
 for f in sorted(glob.glob("data/corebook/*/*.json")):
     dom = f.replace("\\", "/").split("/")[-2]
     file = f.replace("\\", "/").split("/")[-1][:-5]
@@ -54,8 +55,12 @@ for f in sorted(glob.glob("data/corebook/*/*.json")):
         if b in covered_our:
             it.setdefault("meta", {})["hidden"] = True
             hide_count[b] += 1
+            key = (dom, norm(it["name"]))
             if it.get("img") or it["id"] in CORR:
-                art_index[(dom, norm(it["name"]))] = {"img": it.get("img", ""), "id": it["id"]}
+                art_index[key] = {"img": it.get("img", ""), "id": it["id"]}
+            d = (it["system"].get("description") or "").strip()
+            if d:
+                desc_index.setdefault(key, d)   # our description, for cl6 items that lack one
         else:
             gap_count += 1
         our_files[(dom, file)].append(it)
@@ -64,6 +69,7 @@ for f in sorted(glob.glob("data/corebook/*/*.json")):
 cl6_by_target = defaultdict(list)
 catchall = defaultdict(int)
 carried = 0
+backfilled = 0                         # our descriptions applied where cl6 has none
 seen_ids = set()                       # a cl6 id can appear in several books; first wins
 for cb in sorted(cl6_books):
     for rec in read_book(cb).values():
@@ -76,10 +82,15 @@ for cb in sorted(cl6_books):
         if not conv:
             continue
         domain, file, item = conv
-        art = art_index.get((domain, norm(item["name"])))
+        key = (domain, norm(item["name"]))
+        art = art_index.get(key)
         if art and art["img"]:
             item["img"] = art["img"]          # carry our artwork onto the cl6 item
             carried += 1
+        if not (item["system"].get("description") or "").strip() and key in desc_index:
+            item["system"]["description"] = desc_index[key]   # cl6 lacks one -> use ours
+            item["meta"]["descriptionFrom_text"] = "our-extraction"
+            backfilled += 1
         cl6_by_target[(domain, file)].append(item)
 
 cl6_total = sum(len(v) for v in cl6_by_target.values())
