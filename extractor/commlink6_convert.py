@@ -132,6 +132,33 @@ def _ammo(s):
     return _int(s), (t.group(1) if t else "")
 
 
+def _derive_nongear(domain, a, st, sysd):
+    """Map cl6 element attributes into our Eden fields for non-gear domains."""
+    if domain == "spells":
+        sysd.update(category=a.get("cat", ""), range=a.get("range", ""),
+                    type=a.get("type", ""), duration=a.get("dur", ""),
+                    drain=_int(a.get("drain")), damage=a.get("dmg", ""))
+    elif domain == "qualities":
+        sysd.update(category=("positive" if a.get("pos") == "true" else "negative"),
+                    value=_int(a.get("karma")), subtype=a.get("type", ""))
+    elif domain == "rituals":
+        feats = [v for k, v in st.items() if k.startswith("ritualfeature")]
+        sysd.update(threshold=_int(a.get("thr")), features={f: True for f in feats})
+    elif domain == "adept_powers":
+        try:
+            cost = float(a.get("cost", 0) or 0)
+        except ValueError:
+            cost = 0
+        sysd.update(cost=cost, hasLevel=(a.get("hasLevel") == "true"),
+                    activation=a.get("act", ""))
+    elif domain in ("critter_powers", "sprite_powers"):
+        sysd.update(type=a.get("type", ""), action=a.get("action", ""),
+                    range=a.get("range", ""), duration=a.get("dur", ""))
+    elif domain == "complexforms":
+        sysd.update(duration=a.get("dur", ""), fading=str(a.get("fad", "")),
+                    target=a.get("target", ""))
+
+
 def our_book(cl6_book):
     return CL6_TO_OUR_BOOK.get(cl6_book, cl6_book)
 
@@ -175,6 +202,7 @@ def to_item(rec, cl6_book):
     if "matrix.d" in st or "matrix.devrat" in st:
         sysd.update(d=_int(st.get("matrix.d")), f=_int(st.get("matrix.f")),
                     progSlots=_int(st.get("matrix.programs")), rating=_int(st.get("matrix.devrat")))
+    _derive_nongear(domain, rec["attrs"], st, sysd)
     item = {
         "id": f"cl6_{rec['id']}",
         "name": rec["name"],
