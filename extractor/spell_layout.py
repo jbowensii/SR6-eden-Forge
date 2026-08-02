@@ -68,14 +68,18 @@ def parse_list_descriptions(lines, known_norms, header_re=SPELL_HEADER) -> dict:
                 break
             run.append(ents[i + 1])
             i += 1
-        # prose after the last entry's values row, same column, until the next
-        # entry's name / a heading / another stat header
+        # prose after the last entry's values row, until the next entry's name /
+        # a heading / another stat header. Follows the two-column reading flow,
+        # including the col1 -> col0 wrap onto the next page (a stat block can end
+        # in the right column of one page and its prose start on the next).
         last = ents[i]
         end = ents[i + 1]["name_i"] if i + 1 < n else len(lines)
+        vline = lines[last["values_i"]]
+        cur_page, cur_col = vline.page, last["col"]
         prose = []
         for k in range(last["values_i"] + 1, end):
             ln = lines[k]
-            if ln.col != last["col"] or ln.is_head:
+            if ln.is_head:
                 break
             m = anywhere.search(ln.text)   # header may be merged mid-line by bleed
             if m:
@@ -83,8 +87,16 @@ def parse_list_descriptions(lines, known_norms, header_re=SPELL_HEADER) -> dict:
                 if pre:
                     prose.append(pre)
                 break
+            if ln.col != cur_col:
+                # allow only the natural wrap (right column -> left column on the
+                # next page); a within-page column change is a real boundary
+                if ln.page > cur_page and ln.col < cur_col:
+                    cur_col = ln.col
+                else:
+                    break
             if ln.text.strip():
                 prose.append(ln.text)
+            cur_page, cur_col = ln.page, ln.col
         desc = clean_block(prose)
         if len(desc) >= 40:
             for e in run:

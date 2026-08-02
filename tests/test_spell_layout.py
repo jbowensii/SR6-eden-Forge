@@ -81,6 +81,28 @@ def test_critter_power_header_variant():
     assert out[norm("Animal Control")] == "The critter can control the actions of a mundane animal."
 
 
+def test_prose_follows_col1_to_col0_page_wrap():
+    # a grouped pair's headers sit in the right column of one page; their shared
+    # description starts in the left column of the next page
+    lines = _mk([
+        (133, 1, True, "Acid Stream"),
+        (133, 1, False, "(Indirect Combat)"),
+        (133, 1, False, "RANGE TYPE DURATION DV DAMAGE"),
+        (133, 1, False, "LOS P I 5 P, Special"),
+        (133, 1, True, "Toxic Wave"),
+        (133, 1, False, "(Indirect Combat, Area)"),
+        (133, 1, False, "RANGE TYPE DURATION DV DAMAGE"),
+        (133, 1, False, "LOS (A) P I 6 P, Special"),
+        (134, 0, False, "These spells shoot acid at targets doing damage."),
+        (134, 0, False, "Acid Stream is single-target, Toxic Wave is area."),
+        (134, 0, True, "Clout"),
+    ])
+    known = {norm("Acid Stream"), norm("Toxic Wave"), norm("Clout")}
+    out = parse_list_descriptions(lines, known)
+    assert out[norm("Acid Stream")] == "These spells shoot acid at targets doing damage. Acid Stream is single-target, Toxic Wave is area."
+    assert out[norm("Toxic Wave")] == out[norm("Acid Stream")]
+
+
 def test_prose_stops_at_column_boundary():
     lines = _mk([
         (134, 0, False, "Heal"),
