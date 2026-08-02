@@ -63,6 +63,22 @@ def test_prose_cuts_header_merged_mid_line_by_bleed():
     assert "RANGE TYPE" not in out[norm("Light")]
 
 
+def test_no_values_row_prose_follows_header_directly():
+    # complex-form style: name / (type) / header / description (no stat-values row)
+    from extractor.spell_layout import COMPLEX_FORM_HEADER
+    lines = _mk([
+        (191, 0, False, "Diffusion (Matrix Attribute)"),
+        (191, 0, False, "FADE VALUE DURATION"),
+        (191, 0, False, "Make an opposed test that reduces the target attribute by one."),
+        (191, 0, False, "It can be purchased multiple times for different attributes."),
+        (191, 0, True, "Editor"),
+    ])
+    known = {norm("Diffusion")}
+    out = parse_list_descriptions(lines, known, COMPLEX_FORM_HEADER)
+    assert out[norm("Diffusion")].startswith("Make an opposed test")
+    assert "It can be purchased" in out[norm("Diffusion")]
+
+
 def test_critter_power_header_variant():
     # same list structure, different stat header column order
     lines = _mk([

@@ -41,11 +41,22 @@ def _entries(lines, known_norms, header_re):
             continue
         name_i = name = None
         for j in range(i - 1, max(-1, i - 6), -1):
-            if norm(lines[j].text) in known_norms:
-                name_i, name = j, lines[j].text.strip()
+            cand = lines[j].text
+            base = re.sub(r"\s*\([^)]*\)\s*$", "", cand).strip()  # drop trailing "(Category)"
+            if norm(cand) in known_norms or (base and norm(base) in known_norms):
+                name_i, name = j, (base or cand.strip())
                 break
         if name_i is not None:
-            out.append({"name": name, "name_i": name_i, "values_i": i + 1, "col": ln.col})
+            # Most entries have a short stat-values row right under the header
+            # ("LOS S", "P Major LOS Instant"); prose starts the line after it.
+            # Some layouts (complex forms) have NO values row — the description
+            # follows the header directly. Detect that by the next line being long
+            # (prose), and start the prose at the header so the first sentence
+            # isn't eaten as a values row.
+            vi = i + 1
+            if vi < len(lines) and len(lines[vi].text.strip()) > 34:
+                vi = i
+            out.append({"name": name, "name_i": name_i, "values_i": vi, "col": ln.col})
     return out
 
 
