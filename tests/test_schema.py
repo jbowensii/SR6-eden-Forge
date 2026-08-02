@@ -20,9 +20,16 @@ def test_bad_gear_type_fails(gear_file):
     assert issues[0].item_id == "example_autopistol"
 
 
-def test_unknown_system_field_fails(gear_file):
-    gear_file["items"][0]["system"]["dmgg"] = 3
+def test_unknown_item_field_fails(gear_file):
+    # system now accepts lossless Commlink6 extras, but the item shell stays strict
+    gear_file["items"][0]["bogus"] = 3
     assert any(i.rule == "schema" for i in check_file(df(gear_file)))
+
+
+def test_unknown_system_field_allowed(gear_file):
+    # lossless: unknown system fields (Commlink6 passthrough) no longer fail schema
+    gear_file["items"][0]["system"]["dmgg"] = 3
+    assert not any(i.rule == "schema" for i in check_file(df(gear_file)))
 
 
 def test_attack_rating_wrong_length_fails(gear_file):

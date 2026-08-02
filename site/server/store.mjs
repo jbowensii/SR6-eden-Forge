@@ -37,11 +37,12 @@ export function tree(dataRoot) {
         try {
           const payload = JSON.parse(readFileSync(join(domainDir, file), "utf8"));
           const qa = { extracted: 0, reviewed: 0, approved: 0 };
-          for (const item of payload.items ?? []) {
+          const visible = (payload.items ?? []).filter((i) => !i.meta?.hidden);
+          for (const item of visible) {
             const s = item.meta?.qaStatus;
             if (s in qa) qa[s] += 1;
           }
-          out.push({ book, domain, category, items: (payload.items ?? []).length, qa });
+          out.push({ book, domain, category, items: visible.length, qa });
         } catch {
           out.push({
             book,
@@ -112,7 +113,7 @@ export function typeTree(dataRoot, domain = "gear") {
     } catch {
       continue;
     }
-    for (const item of payload.items ?? []) {
+    for (const item of (payload.items ?? []).filter((i) => !i.meta?.hidden)) {
       const type = item.system?.[groupBy] || "UNTYPED";
       const subtype = (subBy && item.system?.[subBy]) || "";
       if (!types.has(type)) types.set(type, { type, items: 0, qa: _blankQa(), subs: new Map() });
@@ -149,7 +150,7 @@ export function itemsByType(dataRoot, type, subtype, domain = "gear") {
     } catch {
       continue;
     }
-    for (const item of payload.items ?? []) {
+    for (const item of (payload.items ?? []).filter((i) => !i.meta?.hidden)) {
       if ((item.system?.[groupBy] || "UNTYPED") !== type) continue;
       if (wantSub !== null && ((subBy && item.system?.[subBy]) || "") !== wantSub) continue;
       out.push({ ...item, _category: entry.category, _book: entry.book, _domain: entry.domain });
@@ -172,7 +173,7 @@ export function searchItems(dataRoot, query, limit = 60) {
     } catch {
       continue;
     }
-    for (const item of payload.items ?? []) {
+    for (const item of (payload.items ?? []).filter((i) => !i.meta?.hidden)) {
       if (String(item.name || "").toLowerCase().includes(q)) {
         hits.push({
           book: entry.book, domain: entry.domain, category: entry.category,

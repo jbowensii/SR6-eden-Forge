@@ -62,12 +62,21 @@ def _check_item(df: DataFile, item: dict) -> list[Issue]:
         if not system.get("dmgDef"):
             issues.append(_issue(df, item, "weapon-fields", "weapon has no dmgDef"))
 
-    if system.get("avail", 0) > MAX_AVAIL:
-        issues.append(_issue(df, item, "plausibility", f"avail {system['avail']} > {MAX_AVAIL}"))
-    if system.get("price", 0) > MAX_PRICE:
-        issues.append(_issue(df, item, "plausibility", f"price {system['price']} > {MAX_PRICE}"))
-    if meta.get("page", 1) > MAX_PAGE:
-        issues.append(_issue(df, item, "plausibility", f"page {meta['page']} > {MAX_PAGE}"))
+    def _num(v):
+        try:
+            return float(str(v).replace(",", "").strip() or 0)
+        except ValueError:
+            return 0
+    # plausibility gates catch PDF column-bleed; Commlink6 is authoritative data
+    # (naval/vehicle weapons legitimately exceed these), so exempt cl6-sourced items.
+    cl6 = meta.get("source") == "commlink6"
+    if not cl6:
+        if _num(system.get("avail", 0)) > MAX_AVAIL:
+            issues.append(_issue(df, item, "plausibility", f"avail {system['avail']} > {MAX_AVAIL}"))
+        if _num(system.get("price", 0)) > MAX_PRICE:
+            issues.append(_issue(df, item, "plausibility", f"price {system['price']} > {MAX_PRICE}"))
+        if _num(meta.get("page", 1)) > MAX_PAGE:
+            issues.append(_issue(df, item, "plausibility", f"page {meta['page']} > {MAX_PAGE}"))
     return issues
 
 

@@ -61,6 +61,7 @@ export function buildDocs(dataRoot, book, domain, status, { product } = {}) {
   for (const file of files) {
     const payload = JSON.parse(readFileSync(join(domainDir, file), "utf8"));
     for (const item of payload.items ?? []) {
+      if (item.meta?.hidden) continue;
       if (!statusAllows(status, item.meta?.qaStatus)) continue;
       if (seen.has(item.id)) {
         throw new Error(`duplicate item id "${item.id}" in ${domain}/${file} (also in ${seen.get(item.id)})`);
@@ -109,6 +110,7 @@ export async function exportModule(dataRoot, exportRoot, { book, domain, status 
   for (const file of files) {
     const payload = JSON.parse(readFileSync(join(domainDir, file), "utf8"));
     for (const item of payload.items ?? []) {
+      if (item.meta?.hidden) continue;
       if (!statusAllows(status, item.meta?.qaStatus)) continue;
       if (seen.has(item.id)) {
         throw new Error(`duplicate item id "${item.id}" in ${file} (also in ${seen.get(item.id)})`);

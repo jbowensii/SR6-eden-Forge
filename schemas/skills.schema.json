@@ -51,7 +51,7 @@
         },
         "system": {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "description": {
               "type": "string"
@@ -74,6 +74,9 @@
             },
             "genesisID": {
               "type": "string"
+            },
+            "_cl6": {
+              "type": "object"
             }
           }
         },

@@ -51,7 +51,7 @@
         },
         "system": {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "category": {
               "type": "string"
@@ -176,6 +176,9 @@
             },
             "subtype": {
               "type": "string"
+            },
+            "_cl6": {
+              "type": "object"
             }
           }
         },

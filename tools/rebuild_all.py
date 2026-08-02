@@ -46,7 +46,10 @@ STEPS = [
     # 5. subtypes (use descriptions; run after describe) -------------------------
     ("Subtypes: firearms from verified source tables", "subtype_firearms_from_book.py", ["--apply"]),
     ("Subtypes: infer blank gear subtypes (name -> keywords)", "infer_gear_subtypes.py", ["--apply"]),
-    # 6. corrections LAST -------------------------------------------------------
+    # 6. merge Commlink6 (source of truth): import cl6 wholesale into covered
+    #    books, hide our originals there, keep+convert gap books ----------------
+    ("Merge Commlink6 (lossless, source of truth)", "merge_commlink6.py", ["--apply"]),
+    # 7. corrections LAST -------------------------------------------------------
     ("Re-apply manual corrections", "apply_corrections.py", []),
 ]
 

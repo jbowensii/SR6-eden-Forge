@@ -35,7 +35,7 @@ def test_missing_path_exits_two(tmp_path, capsys):
 
 
 def test_schema_invalid_file_skips_sanity(tmp_path, gear_file, capsys):
-    gear_file["items"][0]["system"]["dmgg"] = 1
+    gear_file["items"][0]["system"]["attackRating"] = [10, 10, 8]   # wrong length -> schema fail
     gear_file["items"][0]["system"]["dmgDef"] = "3X"
     write(tmp_path / "corebook" / "gear" / "weapons_firearms.json", gear_file)
     main([str(tmp_path)])

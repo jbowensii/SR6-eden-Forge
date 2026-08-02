@@ -51,7 +51,7 @@
         },
         "system": {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "category": {
               "type": "string"
@@ -73,7 +73,10 @@
               "type": "string"
             },
             "rating": {
-              "type": "integer",
+              "type": [
+                "integer",
+                "string"
+              ],
               "minimum": 0
             },
             "force": {
@@ -86,10 +89,16 @@
               "type": "string"
             },
             "price": {
-              "type": "string"
+              "type": [
+                "integer",
+                "string"
+              ]
             },
             "priceDef": {
               "type": "string"
+            },
+            "_cl6": {
+              "type": "object"
             }
           }
         },

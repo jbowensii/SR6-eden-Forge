@@ -51,7 +51,7 @@
         },
         "system": {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "category": {
               "type": "string"
@@ -73,11 +73,17 @@
               "type": "string"
             },
             "rating": {
-              "type": "integer",
+              "type": [
+                "integer",
+                "string"
+              ],
               "minimum": 0
             },
             "quality": {
               "type": "string"
+            },
+            "_cl6": {
+              "type": "object"
             }
           }
         },

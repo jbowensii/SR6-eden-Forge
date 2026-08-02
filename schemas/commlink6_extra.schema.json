@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sr6forge:commlink6_extra",
+  "title": "SR6-eden-Forge Commlink6 lossless catch-all data file",
+  "type": "object",
+  "required": ["book", "domain", "category", "items"],
+  "additionalProperties": false,
+  "properties": {
+    "book": { "$ref": "urn:sr6forge:common#/$defs/slug" },
+    "domain": { "const": "commlink6_extra" },
+    "category": { "type": "string" },
+    "items": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/item" }
+    }
+  },
+  "$defs": {
+    "item": {
+      "type": "object",
+      "required": ["id", "name", "system", "meta"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "img": { "type": "string" },
+        "system": { "type": "object" },
+        "meta": { "$ref": "urn:sr6forge:common#/$defs/meta" }
+      }
+    }
+  }
+}

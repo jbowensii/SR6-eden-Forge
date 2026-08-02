@@ -51,7 +51,7 @@
         },
         "system": {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "category": {
               "type": "string"
@@ -83,6 +83,9 @@
             },
             "range": {
               "type": "string"
+            },
+            "_cl6": {
+              "type": "object"
             }
           }
         },

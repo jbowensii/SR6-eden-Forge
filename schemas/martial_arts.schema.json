@@ -51,7 +51,7 @@
         },
         "system": {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "category": {
               "type": "string"
@@ -80,6 +80,9 @@
               "additionalProperties": {
                 "type": "boolean"
               }
+            },
+            "_cl6": {
+              "type": "object"
             }
           }
         },
