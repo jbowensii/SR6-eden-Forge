@@ -72,7 +72,9 @@ DOMAINS = {
 SKIP = {"gun_rack", "rides", "corebook"}
 
 reg = load_registry(DATA)
-books = [(k, v["pdf"]) for k, v in reg.items() if k not in SKIP and _P(v.get("pdf", "")).is_file()]
+_only = set(sys.argv[1:])          # optional: restrict to specific book slugs (scoped run)
+books = [(k, v["pdf"]) for k, v in reg.items()
+         if k not in SKIP and _P(v.get("pdf", "")).is_file() and (not _only or k in _only)]
 
 # collect new records per domain across all books
 collected = {d: [] for d in DOMAINS}
