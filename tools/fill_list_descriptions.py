@@ -31,7 +31,7 @@ APPLY = "--apply" in sys.argv
 DOMAIN = next((a.split("=")[1] for a in sys.argv if a.startswith("--domain=")), "spells")
 CORR = {os.path.splitext(os.path.basename(f))[0]: f for f in glob.glob("data/_corrections/*/*.json")}
 HEADERS = {"spells": SPELL_HEADER, "critter_powers": CRITTER_POWER_HEADER,
-           "complexforms": COMPLEX_FORM_HEADER}
+           "complexforms": COMPLEX_FORM_HEADER, "rituals": SPELL_HEADER}
 
 
 def patch_snapshot(item_id, desc):
