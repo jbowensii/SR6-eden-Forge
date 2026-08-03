@@ -13,6 +13,8 @@ import glob
 import json
 from collections import Counter
 
+from extractor.eden_codes import map_code
+
 DATA = _P("data")
 LIBRARY = "corebook"
 CORR = DATA / "_corrections"
@@ -58,6 +60,9 @@ else:
             if it["system"].get(k) != v:
                 field_changes[f"{domain}.{k}"] += 1
             it["system"][k] = v
+        if it["system"].get("type"):     # keep type/subtype on the Eden vocabulary
+            it["system"]["type"], it["system"]["subtype"] = map_code(
+                it["system"].get("type") or "", it["system"].get("subtype") or "")
         if rec.get("name"):
             it["name"] = rec["name"]
         if rec.get("img"):
