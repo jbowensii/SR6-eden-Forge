@@ -161,6 +161,7 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
         data: osPath(s.dataDir || dataRoot),
         art: osPath(s.artDir || join(dataRoot, "_assets")),
         iconLibrary: osPath(icon || ""),
+        commlink6: osPath(s.commlink6Jar || "C:/Users/johnb/CommLink6/app/stable"),
       },
       books: Object.entries(books)
         .map(([slug, b]) => ({ slug, title: b.title ?? slug, pdf: osPath(b.pdf ?? ""), exists: Boolean(b.pdf && existsSync(b.pdf)) }))
@@ -176,6 +177,7 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
     if (typeof b.data === "string" && b.data.trim()) cur.dataDir = osPath(b.data.trim());
     if (typeof b.art === "string" && b.art.trim()) cur.artDir = osPath(b.art.trim());
     if (typeof b.iconLibrary === "string") cur.iconLibrary = b.iconLibrary.trim() ? osPath(b.iconLibrary.trim()) : undefined;
+    if (typeof b.commlink6 === "string") cur.commlink6Jar = b.commlink6.trim() ? osPath(b.commlink6.trim()) : undefined;
     writeFileSync(join(dataRoot, "settings.json"), JSON.stringify(cur, null, 2) + "\n", "utf8");
     return { saved: true, restartNeeded: Boolean(b.data || b.art) };
   }));

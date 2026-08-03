@@ -20,7 +20,7 @@ export default function SetupPanel({ onClose }) {
   useEffect(() => { load(); getSearchConfig().then(setSearch).catch(() => {}); return () => clearInterval(poll.current); }, []);
 
   const savePaths = async () => {
-    const r = await putPathsConfig({ data: paths.data, art: paths.art, iconLibrary: paths.iconLibrary });
+    const r = await putPathsConfig({ data: paths.data, art: paths.art, iconLibrary: paths.iconLibrary, commlink6: paths.commlink6 });
     setSaveMsg(r.restartNeeded ? "paths saved — restart the server for Data/Art" : "paths saved");
     getBooksConfig().then((x) => setPaths(x.paths)).catch(() => {});
     setTimeout(() => setSaveMsg(""), 4000);
@@ -95,6 +95,9 @@ export default function SetupPanel({ onClose }) {
               <input value={paths.art} onChange={(e) => setPaths({ ...paths, art: e.target.value })} /></label>
             <label className="path-row"><span className="path-label">Icon library</span>
               <input value={paths.iconLibrary} onChange={(e) => setPaths({ ...paths, iconLibrary: e.target.value })} /></label>
+            <label className="path-row"><span className="path-label">Commlink6 jar / install</span>
+              <input value={paths.commlink6 ?? ""} placeholder="C:\\Users\\…\\CommLink6\\app\\stable"
+                onChange={(e) => setPaths({ ...paths, commlink6: e.target.value })} /></label>
             <div className="path-actions">
               <button className="ghost" onClick={savePaths}>Save paths</button>
               <span className="setup-hint" style={{ margin: 0 }}>Icon library applies now; Data / Art on restart.</span>

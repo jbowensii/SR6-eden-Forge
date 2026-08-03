@@ -1,23 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ff4fa3"/>
-      <stop offset="1" stop-color="#e5177b"/>
-    </linearGradient>
     <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="1.1" result="b"/>
+      <feGaussianBlur stdDeviation="1" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
   <rect width="32" height="32" rx="6" fill="#0b0d12"/>
-  <!-- angular hex frame -->
   <path d="M16 3.2 27 9.4 27 22.6 16 28.8 5 22.6 5 9.4Z" fill="none"
-        stroke="url(#g)" stroke-width="2" stroke-linejoin="miter" filter="url(#glow)"/>
-  <!-- forge slash // motif -->
+        stroke="#e5177b" stroke-width="2" stroke-linejoin="miter" filter="url(#glow)"/>
   <g filter="url(#glow)">
-    <path d="M12.4 21 16 11" stroke="#e5177b" stroke-width="2.4" stroke-linecap="round"/>
-    <path d="M17.6 21 21.2 11" stroke="#ff4fa3" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M12 22 16.4 10" stroke="#21d0d6" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="M17.4 22 21.8 10" stroke="#21d0d6" stroke-width="2.2" stroke-linecap="round"/>
   </g>
-  <!-- circuit node -->
-  <circle cx="24.4" cy="8" r="1.7" fill="#21d0d6"/>
+  <text x="16" y="22.4" text-anchor="middle" font-family="Arial, sans-serif"
+        font-size="18" font-weight="700" fill="#ff4fa3" filter="url(#glow)">6</text>
 </svg>

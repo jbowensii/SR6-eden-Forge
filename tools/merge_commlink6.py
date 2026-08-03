@@ -23,7 +23,14 @@ try:
 except Exception:
     pass
 from extractor.commlink6 import BOOK_ALIAS, english_books, norm, read_book
-from extractor.commlink6_convert import CL6_TO_OUR_BOOK, target, to_item
+from extractor.commlink6_convert import CL6_TO_OUR_BOOK, our_book, target, to_item
+
+# a book's Commlink6 data is only imported if you own the book (its PDF is
+# registered and present) — you must have the PDF to import the data.
+_BOOKS = json.load(open("data/books.json", encoding="utf-8")) if _P("data/books.json").exists() else {}
+def _owned(cl6_book):
+    m = _BOOKS.get(our_book(cl6_book))
+    return bool(m and m.get("pdf") and _P(m["pdf"]).exists())
 
 APPLY = "--apply" in sys.argv
 DATA = _P("data/corebook")
@@ -70,8 +77,12 @@ cl6_by_target = defaultdict(list)
 catchall = defaultdict(int)
 carried = 0
 backfilled = 0                         # our descriptions applied where cl6 has none
+skipped_books = []                     # covered cl6 books with no owned PDF (not imported)
 seen_ids = set()                       # a cl6 id can appear in several books; first wins
 for cb in sorted(cl6_books):
+    if not _owned(cb):
+        skipped_books.append(cb)
+        continue                       # no PDF for this book -> don't import its data
     for rec in read_book(cb).values():
         if not rec["name"] or rec["id"] in seen_ids:
             continue
@@ -110,6 +121,8 @@ if not APPLY:
     print(f"\nour items to HIDE (covered books): {sum(hide_count.values())}")
     print(f"our GAP-book items kept+converted: {gap_count}")
     print(f"art/icons carried onto cl6 items: {carried}")
+    if skipped_books:
+        print(f"cl6 books SKIPPED (no owned PDF): {len(skipped_books)} -> {', '.join(skipped_books)}")
     if catchall:
         print(f"\ncatch-all -> commlink6_extra (retained losslessly): {sum(catchall.values())} items")
         for c, n in sorted(catchall.items(), key=lambda x: -x[1])[:20]:

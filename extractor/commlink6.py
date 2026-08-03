@@ -16,7 +16,29 @@ import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
 
-DEFAULT_JAR = Path("C:/Users/johnb/CommLink6/app/stable/commlink6-1.14.0-complete.jar")
+_DEFAULT_DIR = Path("C:/Users/johnb/CommLink6/app/stable")   # standard Commlink6 install
+
+
+def _resolve_jar() -> Path:
+    """Commlink6 data jar: settings.json 'commlink6Jar' (a jar file OR the
+    app/stable dir), else the default install; version-tolerant via glob."""
+    import json
+    p = None
+    try:
+        p = json.loads(Path("data/settings.json").read_text(encoding="utf-8")).get("commlink6Jar")
+    except Exception:
+        pass
+    cand = Path(p) if p else _DEFAULT_DIR
+    if cand.is_file():
+        return cand
+    if cand.is_dir():
+        jars = sorted(cand.glob("commlink6-*-complete.jar"))
+        if jars:
+            return jars[-1]
+    return _DEFAULT_DIR / "commlink6-1.14.0-complete.jar"
+
+
+DEFAULT_JAR = _resolve_jar()
 
 # our book slug -> Commlink6 book slug (English books only)
 BOOK_ALIAS = {
