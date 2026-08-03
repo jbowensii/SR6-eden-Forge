@@ -226,6 +226,13 @@ def to_item(rec, cl6_book):
                     progSlots=_int(st.get("matrix.programs")), rating=_int(st.get("matrix.devrat")))
     _derive_nongear(domain, rec["attrs"], st, sysd)
     _retype_accessory(sysd)
+    # a few vehicle/drone-typed items arrive via weapon/firearm categories; route
+    # them to the vehicles domain by their type (vehicle weapons keep type
+    # WEAPON_VEHICLE and stay in gear — they are weapons, not vehicles).
+    if sysd.get("type") in ("VEHICLES", "DRONES", "DRONE", "DRONE_MINI"):
+        if sysd["type"] == "DRONE_MINI":
+            sysd["type"] = "DRONE"
+        domain, file = "vehicles", "vehicles"
     item = {
         "id": f"cl6_{rec['id']}",
         "name": rec["name"],
