@@ -85,6 +85,28 @@ CAT_MAP = {
 
 _MODES = ("SS", "SA", "BF", "FA")
 
+# Commlink6 lumps many enhancements under type=ACCESSORY and distinguishes them by
+# subtype; our app groups by type ("Weapon Accessory"), so re-derive the display
+# type from the subtype (raw cl6 type preserved in system._cl6). WEAPON_ACCESSORY
+# / FIREARMS* / blank stay ACCESSORY (genuine weapon accessories & firearm mods).
+_ACCESSORY_RETYPE = {
+    "VISION_ENHANCEMENT": "ELECTRONICS", "AUDIO_ENHANCEMENT": "ELECTRONICS",
+    "IMAGING": "ELECTRONICS", "ELECTRONIC_ACCESSORIES": "ELECTRONICS",
+    "SENSOR": "ELECTRONICS", "OPTICAL": "ELECTRONICS",
+    "CYBER_LIMB_ACCESSORY": "CYBERWARE", "CYBER_LIMB_ENHANCEMENT": "CYBERWARE",
+    "VEHICLE_ACCESSORY": "VEHICLES", "LAUNCHERS": "WEAPON_FIREARMS",
+}
+
+
+def _retype_accessory(sysd):
+    if sysd.get("type") != "ACCESSORY":
+        return
+    sub = sysd.get("subtype") or ""
+    if sub.startswith("ARMOR"):
+        sysd["type"] = "ARMOR_ADDITION"
+    elif sub in _ACCESSORY_RETYPE:
+        sysd["type"] = _ACCESSORY_RETYPE[sub]
+
 # default system.type for cl6 categories that omit a type attr, keyed by target file
 _FILE_DEFAULT_TYPE = {
     "ammo": "AMMUNITION", "weapon_accessories": "ACCESSORY", "armor_additions": "ARMOR_ADDITION",
@@ -203,6 +225,7 @@ def to_item(rec, cl6_book):
         sysd.update(d=_int(st.get("matrix.d")), f=_int(st.get("matrix.f")),
                     progSlots=_int(st.get("matrix.programs")), rating=_int(st.get("matrix.devrat")))
     _derive_nongear(domain, rec["attrs"], st, sysd)
+    _retype_accessory(sysd)
     item = {
         "id": f"cl6_{rec['id']}",
         "name": rec["name"],
