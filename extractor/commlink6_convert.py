@@ -9,6 +9,8 @@ from __future__ import annotations
 import re
 from datetime import date
 
+from extractor.eden_codes import map_code
+
 _TODAY = date.today().isoformat()
 
 # Commlink6 book slug -> our registered book slug (keep cl6 attribution, our slugs)
@@ -255,6 +257,8 @@ def to_item(rec, cl6_book):
     _derive_nongear(domain, rec["attrs"], st, sysd)
     _retype_accessory(sysd)
     domain, file = _route_by_type(domain, file, sysd)
+    # adopt shadowrun6-eden codes (raw cl6 kept in system._cl6)
+    sysd["type"], sysd["subtype"] = map_code(sysd.get("type"), sysd.get("subtype"))
     item = {
         "id": f"cl6_{rec['id']}",
         "name": rec["name"],

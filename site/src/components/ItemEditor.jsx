@@ -175,6 +175,15 @@ export default function ItemEditor({ item, domain, bookTitle, books = {}, catego
               {missing.length === 0 && " ✓"}
             </span>
           </div>
+          {draft.system?.type && (
+            <div className="eden-codes" title="Adopted Eden type/subtype (raw Commlink6 code shown at right)">
+              <code>{draft.system.type}{draft.system.subtype ? ` / ${draft.system.subtype}` : ""}</code>
+              {draft.system?._cl6?.attrs && (
+                <span className="eden-src">← cl6 {draft.system._cl6.attrs.type || "?"}
+                  {draft.system._cl6.attrs.subtype ? `/${draft.system._cl6.attrs.subtype}` : ""}</span>
+              )}
+            </div>
+          )}
           {missing.length > 0 && (
             <div className="eden-missing">
               Needs: {missing.map((f) => <code key={f} className="miss">{f}</code>)}

@@ -24,6 +24,7 @@ except Exception:
     pass
 from extractor.commlink6 import BOOK_ALIAS, english_books, norm, read_book
 from extractor.commlink6_convert import CL6_TO_OUR_BOOK, our_book, target, to_item
+from extractor.eden_codes import map_code
 
 # a book's Commlink6 data is only imported if you own the book (its PDF is
 # registered and present) — you must have the PDF to import the data.
@@ -154,6 +155,14 @@ else:
             payload = json.load(open(path, encoding="utf-8"))
         else:
             payload = {"book": "corebook", "domain": dom, "category": file, "items": []}
+        for it in items:                       # adopt Eden codes on every item (gap items too)
+            s = it.get("system", {})
+            if s.get("type"):                  # only items that carry a type (gear-like)
+                s["type"], s["subtype"] = map_code(s.get("type") or "", s.get("subtype") or "")
+            if s.get("type") is None:          # heal null keys a prior pass may have added
+                s.pop("type", None)
+            if s.get("subtype") is None:
+                s.pop("subtype", None)
         payload["items"] = items
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")

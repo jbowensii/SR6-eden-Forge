@@ -77,6 +77,20 @@ aside {
   align-items: baseline;
   gap: 6px;
 }
+.eden-map { margin: 12px 0; border: 1px solid var(--line); border-radius: 4px; }
+.eden-map-head { width: 100%; display: flex; justify-content: space-between; align-items: center;
+  background: var(--bg-panel); color: var(--ink); border: 0; padding: 8px 10px; cursor: pointer; font-size: 12px; }
+.eden-map-sum { color: var(--ink-dim); font-size: 11px; }
+.eden-map-body { max-height: 320px; overflow: auto; }
+.eden-map-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.eden-map-table th { position: sticky; top: 0; background: var(--bg-raise); color: var(--ink-dim);
+  text-align: left; padding: 4px 8px; font-weight: 400; }
+.eden-map-table td { padding: 3px 8px; border-top: 1px solid var(--line); color: var(--ink); }
+.eden-map-table tr.eden-review td { background: rgba(229, 23, 123, 0.06); }
+.eden-src { color: var(--cyan); font-family: var(--font-mono); }
+.eden-codes { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; padding: 4px 0 2px; font-size: 11px; }
+.eden-codes code { color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 3px; padding: 1px 5px; }
+.eden-flag { color: var(--magenta); }
 .brand-mark {
   align-self: center;
   margin-right: 2px;

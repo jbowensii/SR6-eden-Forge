@@ -52,6 +52,7 @@ export const assignRender = (payload) =>
     body: JSON.stringify(payload),
   }).then(json);
 export const applyCorrections = () => fetch("/api/corrections/apply", { method: "POST" }).then(json);
+export const getEdenMap = () => fetch("/api/edenmap").then(json);
 export const searchIcons = (q) => fetch(`/api/icons?q=${encodeURIComponent(q)}`).then(json);
 export const assignIcon = (payload) =>
   fetch("/api/icon/assign", {

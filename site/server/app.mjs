@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, dirname, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 
 // Show/store paths in the host OS's separator (Windows "\", POSIX "/").
 const osPath = (p) => (typeof p === "string" ? p.replace(/[\\/]+/g, sep) : p);
@@ -26,6 +27,40 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
   // available domains, the per-domain grouping tree, and its items
   app.get("/api/domains", (req, res) => handle(res, () => ({ domains: domains(dataRoot) })));
   app.get("/api/typetree", (req, res) => handle(res, () => typeTree(dataRoot, String(req.query.domain ?? "gear"))));
+
+  // Eden type/subtype mapping overview: every distinct visible (type, subtype)
+  // with a count, whether the subtype is in Eden's vocabulary, and the source
+  // Commlink6 code(s) it came from. So the export vocabulary is visible up front.
+  app.get("/api/edenmap", (_req, res) => handle(res, () => {
+    let vocab = new Set();
+    try {
+      const p = join(dirname(fileURLToPath(import.meta.url)), "..", "shared", "eden_codes.json");
+      vocab = new Set(JSON.parse(readFileSync(p, "utf8")).vocab?.subtypes ?? []);
+    } catch { /* no vocab -> everything shows as review */ }
+    const agg = new Map();
+    for (const entry of tree(dataRoot)) {
+      if (entry.error) continue;
+      let payload;
+      try { payload = readCategory(dataRoot, entry.book, entry.domain, entry.category); } catch { continue; }
+      for (const it of (payload.items ?? []).filter((i) => !i.meta?.hidden)) {
+        const type = it.system?.type || "", subtype = it.system?.subtype || "";
+        const key = `${entry.domain}|${type}|${subtype}`;
+        if (!agg.has(key)) {
+          const cl6 = it.system?._cl6?.attrs;
+          const gearish = entry.domain === "gear" || entry.domain === "vehicles";
+          agg.set(key, {
+            domain: entry.domain, type, subtype, count: 0,
+            inVocab: (!gearish || !subtype) ? true : vocab.has(subtype),   // vocab is gear-focused
+            source: cl6 ? `${cl6.type || ""}/${cl6.subtype || ""}` : "",
+          });
+        }
+        agg.get(key).count += 1;
+      }
+    }
+    const rows = [...agg.values()].sort((a, b) =>
+      a.domain.localeCompare(b.domain) || a.type.localeCompare(b.type) || a.subtype.localeCompare(b.subtype));
+    return { rows, vocabSize: vocab.size, review: rows.filter((r) => !r.inVocab).length };
+  }));
   app.get("/api/items", (req, res) =>
     handle(res, () => itemsByType(dataRoot, String(req.query.type ?? ""),
       req.query.subtype === undefined ? undefined : String(req.query.subtype),

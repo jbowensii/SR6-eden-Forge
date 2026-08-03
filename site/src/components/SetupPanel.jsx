@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { getBooksConfig, putBooksConfig, putPathsConfig, startRebuild, rebuildStatus, getSearchConfig, putSearchConfig, testSearchConfig } from "../api.js";
+import { getBooksConfig, putBooksConfig, putPathsConfig, startRebuild, rebuildStatus, getSearchConfig, putSearchConfig, testSearchConfig, getEdenMap } from "../api.js";
 
 // Setup panel: point each registered book at its source PDF, then trigger the
 // extraction pipeline that (re)builds the site's data. Rebuild runs server-side;
@@ -16,8 +16,10 @@ export default function SetupPanel({ onClose }) {
   const logRef = useRef(null);
   const poll = useRef(null);
 
+  const [eden, setEden] = useState(null);          // { rows, review, vocabSize }
+  const [edenOpen, setEdenOpen] = useState(false);
   const load = () => getBooksConfig().then((r) => { setBooks(r.books); setPaths(r.paths); }).catch(() => {});
-  useEffect(() => { load(); getSearchConfig().then(setSearch).catch(() => {}); return () => clearInterval(poll.current); }, []);
+  useEffect(() => { load(); getSearchConfig().then(setSearch).catch(() => {}); getEdenMap().then(setEden).catch(() => {}); return () => clearInterval(poll.current); }, []);
 
   const savePaths = async () => {
     const r = await putPathsConfig({ data: paths.data, art: paths.art, iconLibrary: paths.iconLibrary, commlink6: paths.commlink6 });
@@ -102,6 +104,34 @@ export default function SetupPanel({ onClose }) {
               <button className="ghost" onClick={savePaths}>Save paths</button>
               <span className="setup-hint" style={{ margin: 0 }}>Icon library applies now; Data / Art on restart.</span>
             </div>
+          </div>
+        )}
+
+        {eden && (
+          <div className="eden-map">
+            <button className="eden-map-head" onClick={() => setEdenOpen((o) => !o)}>
+              <span>Eden type mapping</span>
+              <span className="eden-map-sum">
+                {eden.rows.length} codes · {eden.review} need review {edenOpen ? "▾" : "▸"}
+              </span>
+            </button>
+            {edenOpen && (
+              <div className="eden-map-body">
+                <table className="eden-map-table">
+                  <thead><tr><th>Domain</th><th>Type</th><th>Subtype</th><th>#</th><th>from Commlink6</th></tr></thead>
+                  <tbody>
+                    {eden.rows.map((r, i) => (
+                      <tr key={i} className={r.inVocab ? "" : "eden-review"}>
+                        <td>{r.domain}</td><td>{r.type}</td>
+                        <td>{r.subtype || "—"} {r.inVocab ? "" : <span className="eden-flag" title="not in Eden vocabulary">⚠</span>}</td>
+                        <td>{r.count}</td>
+                        <td className="eden-src">{r.source || "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
 
