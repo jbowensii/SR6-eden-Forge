@@ -234,8 +234,6 @@ export default function App() {
           <svg className="brand-mark" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
             <path d="M16 3.2 27 9.4 27 22.6 16 28.8 5 22.6 5 9.4Z" fill="none"
               stroke="var(--magenta)" strokeWidth="2" strokeLinejoin="miter" />
-            <path d="M12 22 16.4 10" stroke="var(--cyan)" strokeWidth="2.2" strokeLinecap="round" />
-            <path d="M17.4 22 21.8 10" stroke="var(--cyan)" strokeWidth="2.2" strokeLinecap="round" />
             <text x="16" y="22.4" textAnchor="middle" fontFamily="var(--font-display)"
               fontSize="18" fontWeight="700" fill="var(--magenta-soft)">6</text>
           </svg>
