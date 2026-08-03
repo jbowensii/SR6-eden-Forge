@@ -77,6 +77,11 @@ aside {
   align-items: baseline;
   gap: 6px;
 }
+.brand-mark {
+  align-self: center;
+  margin-right: 2px;
+  filter: drop-shadow(0 0 6px rgba(229, 23, 123, 0.5));
+}
 .brand-sr6 { color: var(--ink); font-weight: 700; }
 .brand-slash { color: var(--magenta); font-weight: 700; }
 .brand-forge {

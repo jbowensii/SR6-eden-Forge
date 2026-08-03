@@ -231,6 +231,13 @@ export default function App() {
     <div className="layout" ref={layoutRef}>
       <aside>
         <header className="brand">
+          <svg className="brand-mark" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
+            <path d="M16 3.2 27 9.4 27 22.6 16 28.8 5 22.6 5 9.4Z" fill="none"
+              stroke="var(--magenta)" strokeWidth="2" strokeLinejoin="miter" />
+            <path d="M12.4 21 16 11" stroke="var(--magenta)" strokeWidth="2.4" strokeLinecap="round" />
+            <path d="M17.6 21 21.2 11" stroke="var(--magenta-soft)" strokeWidth="2.4" strokeLinecap="round" />
+            <circle cx="24.4" cy="8" r="1.7" fill="var(--cyan)" />
+          </svg>
           <span className="brand-sr6">SR6</span>
           <span className="brand-slash">//</span>
           <span className="brand-forge">FORGE</span>
