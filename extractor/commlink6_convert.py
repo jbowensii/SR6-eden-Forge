@@ -181,6 +181,34 @@ def _derive_nongear(domain, a, st, sysd):
                     target=a.get("target", ""))
 
 
+# gear type -> the gear category file it belongs in (used to route items that
+# leaked into the vehicles domain via cl6's gear_vehicles/gear_drones categories
+# back to gear). Vehicle-mounted weapons keep type WEAPON_VEHICLE and go to gear.
+_TYPE_TO_GEAR_FILE = {
+    "WEAPON_FIREARMS": "weapons_firearms", "WEAPON_VEHICLE": "weapons_firearms",
+    "WEAPON_CLOSE_COMBAT": "weapons_close_combat", "WEAPON_RANGED": "weapons_ranged",
+    "WEAPON_SPECIAL": "weapons_special", "AMMUNITION": "ammo", "ACCESSORY": "weapon_accessories",
+    "ARMOR": "armor", "ARMOR_ADDITION": "armor_additions", "ELECTRONICS": "electronics",
+    "SOFTWARE": "software", "TOOLS": "tools", "CYBERWARE": "cyberware", "BIOWARE": "bioware",
+    "CHEMICALS": "chemicals", "MAGICAL": "magical", "SURVIVAL": "survival",
+}
+
+
+def _route_by_type(domain, file, sysd):
+    """Route by the item's final type at the gear<->vehicles boundary. Vehicles,
+    drones (any size) and vehicle mods (MOD_*) live in the vehicles domain;
+    gear/weapon-typed items that arrived via a vehicle category go back to gear."""
+    t = sysd.get("type", "") or ""
+    if t == "DRONE_MINI":
+        sysd["type"] = t = "DRONE"
+    is_vehicular = t in ("VEHICLES", "DRONES") or t.startswith("DRONE") or t.startswith("MOD_")
+    if is_vehicular:
+        return "vehicles", "vehicles"
+    if domain == "vehicles" and t in _TYPE_TO_GEAR_FILE:
+        return "gear", _TYPE_TO_GEAR_FILE[t]
+    return domain, file
+
+
 def our_book(cl6_book):
     return CL6_TO_OUR_BOOK.get(cl6_book, cl6_book)
 
@@ -226,13 +254,7 @@ def to_item(rec, cl6_book):
                     progSlots=_int(st.get("matrix.programs")), rating=_int(st.get("matrix.devrat")))
     _derive_nongear(domain, rec["attrs"], st, sysd)
     _retype_accessory(sysd)
-    # a few vehicle/drone-typed items arrive via weapon/firearm categories; route
-    # them to the vehicles domain by their type (vehicle weapons keep type
-    # WEAPON_VEHICLE and stay in gear — they are weapons, not vehicles).
-    if sysd.get("type") in ("VEHICLES", "DRONES", "DRONE", "DRONE_MINI"):
-        if sysd["type"] == "DRONE_MINI":
-            sysd["type"] = "DRONE"
-        domain, file = "vehicles", "vehicles"
+    domain, file = _route_by_type(domain, file, sysd)
     item = {
         "id": f"cl6_{rec['id']}",
         "name": rec["name"],
