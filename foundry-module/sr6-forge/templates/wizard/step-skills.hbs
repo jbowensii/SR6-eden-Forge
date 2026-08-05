@@ -1,18 +1,27 @@
 <h2>Skills</h2>
-<table class="skill-table">
-  <thead><tr><th>Skill</th><th>Rank</th><th>Specialization (1 pt)</th></tr></thead>
+<p>A specialization costs 1 skill point. Restricted skills need the matching Magic/Resonance path.</p>
+<div class="browser-head">
+  <input type="search" data-filter="skill" placeholder="Filter skills…" value="{{query}}" />
+</div>
+<table class="data" data-filter-scope="skill">
+  <thead><tr><th>Skill</th><th style="width:74px">Rank</th><th>Specialization</th></tr></thead>
   <tbody>
     {{#each skills}}
-    <tr class="{{#if locked}}locked{{/if}}">
-      <th>{{label}}{{#if restricted}} *{{/if}}</th>
+    <tr class="{{#if locked}}locked{{/if}}" data-filter-text="{{label}}"
+        data-detail-kind="skill" data-detail-id="{{id}}">
+      <th>{{label}}{{#if restricted}} <span title="restricted">✦</span>{{/if}}</th>
       <td>
-        <button type="button" data-action="adj" data-kind="skill" data-target="{{id}}" data-delta="-1">−</button>
-        {{points}}
-        <button type="button" data-action="adj" data-kind="skill" data-target="{{id}}" data-delta="1" {{#if locked}}disabled{{/if}}>+</button>
+        <span class="rank">{{points}}</span>
+        <span class="inline-step">
+          <button type="button" data-action="adj" data-kind="skill" data-target="{{id}}"
+                  data-delta="1" {{#if locked}}disabled{{/if}}>+</button>
+          <button type="button" data-action="adj" data-kind="skill" data-target="{{id}}"
+                  data-delta="-1">−</button>
+        </span>
       </td>
       <td>
         <select data-change="spec" data-skill="{{id}}" {{#unless points}}disabled{{/unless}}>
-          <option value=""></option>
+          <option value="">— none —</option>
           {{#each specs}}
           <option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>
           {{/each}}
@@ -22,21 +31,34 @@
     {{/each}}
   </tbody>
 </table>
-<p class="hint">* restricted — requires the matching Magic/Resonance path.</p>
 
-<h3>Knowledge & Languages</h3>
-<ul>
+<h3>Knowledge &amp; Languages</h3>
+<p class="hint">{{knowledgeHint}}</p>
+<div class="chosen-list">
   {{#each knowledge}}
-  <li>{{name}} <em>({{type}}{{#if native}}, native{{/if}})</em>
-    <button type="button" data-action="removeKnowledge" data-index="{{@index}}">✕</button></li>
+  <div class="chosen {{#if native}}free{{/if}}">
+    <span class="c-name">{{name}}
+      <span class="c-meta">{{type}}{{#if native}} · native{{/if}}</span>
+    </span>
+    <span>
+      {{#unless native}}
+      <span class="rank">{{points}}</span>
+      <span class="inline-step">
+        <button type="button" data-action="adj" data-kind="knowledgeRank" data-target="{{@index}}" data-delta="1">+</button>
+        <button type="button" data-action="adj" data-kind="knowledgeRank" data-target="{{@index}}" data-delta="-1">−</button>
+      </span>
+      {{/unless}}
+      <button type="button" class="x" data-action="removeKnowledge" data-index="{{@index}}">✕</button>
+    </span>
+  </div>
   {{/each}}
-</ul>
-<div class="knowledge-add">
+</div>
+<div class="browser-head">
   <input type="text" name="knowledge-name" placeholder="e.g. Seattle Gangs / Japanese" />
   <select name="knowledge-type">
     <option value="knowledge">Knowledge</option>
     <option value="language">Language</option>
   </select>
-  <label><input type="checkbox" name="knowledge-native" /> native</label>
+  <label style="font-size:11px"><input type="checkbox" name="knowledge-native" /> native</label>
   <button type="button" data-action="addKnowledge">Add</button>
 </div>

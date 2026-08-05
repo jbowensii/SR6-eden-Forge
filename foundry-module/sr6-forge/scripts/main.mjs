@@ -46,9 +46,14 @@ Hooks.once("ready", async () => {
   const mod = game.modules.get(MODULE_ID);
   mod.api = {
     chargenData,
-    openWizard: async () => {
+    /** Launcher: new character or resume a saved draft. */
+    open: async () => {
+      const { SR6ForgeLauncher } = await import("./apps/launcher.mjs");
+      return new SR6ForgeLauncher().render({ force: true });
+    },
+    openWizard: async (draftId) => {
       const { SR6ForgeWizard } = await import("./apps/wizard/wizard-app.mjs");
-      return new SR6ForgeWizard().render({ force: true });
+      return new SR6ForgeWizard(draftId ? { draftId } : {}).render({ force: true });
     },
     openAdvancement: async (actor) => {
       const { SR6AdvancementApp } = await import("./apps/advancement/advancement-app.mjs");
@@ -65,7 +70,7 @@ Hooks.on("renderActorDirectory", (app, html) => {
   const btn = document.createElement("button");
   btn.className = "sr6-forge-launch";
   btn.innerHTML = `<i class="fas fa-user-plus"></i> ${game.i18n.localize("SR6FORGE.Launch")}`;
-  btn.addEventListener("click", () => game.modules.get(MODULE_ID).api.openWizard());
+  btn.addEventListener("click", () => game.modules.get(MODULE_ID).api.open());
   footer.append(btn);
 });
 

@@ -1,15 +1,22 @@
 <h2>Metatype</h2>
-{{#unless metatypes.length}}<p><em>Assign the METATYPE priority first.</em></p>{{/unless}}
-<div class="metatype-cards">
+{{#unless metatypes.length}}
+<p class="hint">Assign the <strong>Metatype</strong> priority first — the letter decides which metatypes are available.</p>
+{{else}}
+<p>{{metatypes.length}} available at priority {{letter}}. Adjustment points shown per metatype.</p>
+<div class="browser-head">
+  <input type="search" data-filter="metatype" placeholder="Filter metatypes…" value="{{query}}" />
+</div>
+<div class="card-grid" data-filter-scope="metatype">
   {{#each metatypes}}
-  <button type="button" class="metatype-card {{#if selected}}active{{/if}}"
-          data-action="pickMetatype" data-metatype="{{id}}">
-    <strong>{{name}}</strong>
-    <span class="adj">{{adjustmentPoints}} adjustment pts</span>
-    {{#if maxima}}<span class="maxima">{{maxima}}</span>{{/if}}
-    {{#if variantOf}}<span class="variant">variant of {{variantOf}}</span>{{/if}}
-    {{#if karma}}<span class="karma-cost">{{karma}} karma</span>{{/if}}
-    {{#if racialQualityIds.length}}<span class="racial">{{racialQualityIds}}</span>{{/if}}
+  <button type="button" class="pick-card {{#if selected}}active{{/if}}"
+          data-action="pickMetatype" data-metatype="{{id}}"
+          data-detail-kind="metatype" data-detail-id="{{id}}"
+          data-filter-text="{{name}}">
+    <span class="pc-name">{{name}}</span>
+    <span class="pc-line">{{adjustmentPoints}} ADJ{{#if karma}} · {{karma}} karma{{/if}}</span>
+    {{#if maxima}}<span class="pc-sub">{{maxima}}</span>{{/if}}
+    {{#if variantOf}}<span class="pc-sub">variant of {{variantOf}}</span>{{/if}}
   </button>
   {{/each}}
 </div>
+{{/unless}}

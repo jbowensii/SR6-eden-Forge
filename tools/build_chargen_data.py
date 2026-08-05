@@ -21,11 +21,11 @@ try:
 except Exception:
     pass
 
-from extractor.commlink6 import DEFAULT_JAR, _i18n
+from extractor.commlink6 import DEFAULT_JAR
 from extractor.chargen_xml import (
-    parse_contacts, parse_lifepath, parse_lifestyles, parse_magicreson,
-    parse_metatypes, parse_priorities, parse_quality_meta, parse_rules,
-    parse_skills, read_category_trees,
+    i18n_by_prefix, parse_contacts, parse_lifepath, parse_lifestyles,
+    parse_magicreson, parse_metatypes, parse_priorities, parse_quality_meta,
+    parse_rules, parse_skills, read_category_trees, sub_i18n,
 )
 
 # (book, category, parser-key) — metatypes/qualities exist in several books
@@ -45,8 +45,10 @@ def build(jar: _P, out: _P) -> dict:
         "source": {"jar": jar.name, "note": "personal use only — not for distribution"},
     }
     with zipfile.ZipFile(jar) as z:
-        i18n = {b: _i18n(z, b) for b in
-                {"core", "companion", "astral_ways", "hack_slash", "no_future"}}
+        # prefix-aware: ids collide across prefixes (skill.firearms vs
+        # licensetype.firearms), so every section reads its own namespace
+        px = {b: i18n_by_prefix(z, b) for b in
+              {"core", "companion", "astral_ways", "hack_slash", "no_future"}}
 
         data["rules"] = parse_rules(read_category_trees(z, "core", "rules"))
         data["priorities"] = parse_priorities(read_category_trees(z, "core", "priorities"))
@@ -54,12 +56,14 @@ def build(jar: _P, out: _P) -> dict:
         metatypes: dict = {}
         for b in METATYPE_BOOKS:
             metatypes.update(parse_metatypes(read_category_trees(z, b, "metatypes"),
-                                             i18n.get(b, {}), b))
+                                             sub_i18n(px.get(b, {}), "metatype"), b))
         data["metatypes"] = metatypes
 
         data["morTypes"] = parse_magicreson(
-            read_category_trees(z, "core", "magicOrResonance"), i18n["core"])
-        data["skills"] = parse_skills(read_category_trees(z, "core", "skills"), i18n["core"])
+            read_category_trees(z, "core", "magicOrResonance"),
+            sub_i18n(px["core"], "mor"))
+        data["skills"] = parse_skills(read_category_trees(z, "core", "skills"),
+                                      sub_i18n(px["core"], "skill"))
 
         qmeta: dict = {}
         for b, cat in QUALITY_FILES:
@@ -67,14 +71,15 @@ def build(jar: _P, out: _P) -> dict:
         data["qualityMeta"] = qmeta
 
         data["lifestyles"] = parse_lifestyles(
-            read_category_trees(z, "core", "lifestyles"), i18n["core"])
+            read_category_trees(z, "core", "lifestyles"),
+            sub_i18n(px["core"], "lifestyle"))
         data["contactArchetypes"] = parse_contacts(
-            read_category_trees(z, "core", "contacts"), i18n["core"])
+            read_category_trees(z, "core", "contacts"), sub_i18n(px["core"], "npc"))
 
         lifepath: dict = {}
         for b, cat in LIFEPATH_FILES:
             lifepath.update(parse_lifepath(read_category_trees(z, b, cat),
-                                           i18n.get(b, {}), b))
+                                           sub_i18n(px.get(b, {}), "lifemod"), b))
         data["lifepathModules"] = lifepath
 
     out.parent.mkdir(parents=True, exist_ok=True)

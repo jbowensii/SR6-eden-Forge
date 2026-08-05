@@ -36,7 +36,8 @@ export function buildCommitPlan(state, data, rules, provider, budgets) {
       genesisID: q.genesisID, itemType: "quality",
       overrides: {
         ...(q.rating > 1 ? { "system.level": q.rating } : {}),
-        ...(q.choiceText ? { name: null /* filled by committer: "Name (choice)" */, choiceText: q.choiceText } : {}),
+        ...(q.note ? { "system.explain": q.note } : {}),
+        ...(q.choiceText ? { choiceText: q.choiceText } : {}),
       },
     });
   }
@@ -80,7 +81,7 @@ export function buildCommitPlan(state, data, rules, provider, budgets) {
   for (const k of state.knowledge) {
     syntheticItems.push({
       name: k.name, type: "skill",
-      system: { genesisID: k.type, points: k.native ? 4 : 1 },
+      system: { genesisID: k.type, points: k.native ? 4 : (k.points ?? 1) },
     });
   }
 

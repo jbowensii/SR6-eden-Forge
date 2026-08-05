@@ -1,30 +1,42 @@
-<h2>Review & Create</h2>
+<h2>Review &amp; Create</h2>
 
-<label>Character name
-  <input type="text" data-change="name" value="{{name}}" placeholder="Street name" />
-</label>
+<div class="browser-head">
+  <input type="text" data-change="name" value="{{name}}" placeholder="Street name" style="flex:1" />
+</div>
 
-<fieldset>
-  <legend>Convert leftover karma to nuyen ({{convRate}}¥ each)</legend>
-  <button type="button" data-action="adj" data-kind="karma2nuyen" data-delta="-1">−</button>
-  <strong>{{conversions.karmaToNuyen}}</strong>
-  <button type="button" data-action="adj" data-kind="karma2nuyen" data-delta="1">+</button>
-</fieldset>
-
-<h3>Validation</h3>
-<ul class="validation-issues">
-  {{#each issues}}
-  <li class="{{severity}}">[{{step}}] {{message}}</li>
-  {{else}}
-  <li class="ok">All checks pass — ready to create.</li>
-  {{/each}}
-</ul>
+<h3>Leftover karma → nuyen</h3>
+<p class="hint">{{convRate}}¥ per karma, up to {{convMax}} karma.</p>
+<div class="stepper" style="grid-auto-flow:column; align-items:center">
+  <button type="button" class="up" data-action="adj" data-kind="karma2nuyen" data-delta="1">+</button>
+  <span class="n">{{converted}}</span>
+  <button type="button" class="down" data-action="adj" data-kind="karma2nuyen" data-delta="-1">−</button>
+</div>
 
 <h3>Summary</h3>
-<ul class="summary">
-  <li>Metatype: {{state.metatypeId}} · Path: {{state.morId}} · Method: {{state.method}}</li>
-  <li>Karma left: {{budgets.karma.left}} · Nuyen left: {{budgets.nuyen.left}}¥ · Essence: {{budgets.essence.left}}</li>
-  <li>Qualities: {{state.qualities.length}} · Gear: {{state.purchases.length}}
-      · Spells: {{state.spells.length}} · Powers: {{state.powers.length}}
-      · Contacts: {{state.contacts.length}}</li>
-</ul>
+<table class="data">
+  <tbody>
+    <tr><th>Metatype</th><td>{{summary.metatype}}</td></tr>
+    <tr><th>Path</th><td>{{summary.mor}}</td></tr>
+    <tr><th>Method</th><td>{{summary.method}} · {{summary.ruleset}}</td></tr>
+    <tr><th>Attributes</th><td>{{summary.attrs}}</td></tr>
+    <tr><th>Skills</th><td>{{summary.skills}}</td></tr>
+    <tr><th>Qualities</th><td>{{summary.qualities}}</td></tr>
+    <tr><th>Gear</th><td>{{summary.gear}}</td></tr>
+    <tr><th>Magic</th><td>{{summary.magic}}</td></tr>
+    <tr><th>Contacts</th><td>{{summary.contacts}}</td></tr>
+    <tr><th>Remaining</th><td>{{summary.remaining}}</td></tr>
+  </tbody>
+</table>
+
+<h3>Validation</h3>
+<div class="issue-drawer" style="max-height:none; border:1px solid var(--sf-line)">
+  <ul>
+    {{#each issues}}
+    <li class="{{severity}}" data-action="goto" data-step="{{step}}">
+      <span class="sev">{{severity}}</span><span>{{message}}</span>
+    </li>
+    {{else}}
+    <li class="ok"><span class="sev">ok</span><span>All checks pass — ready to create.</span></li>
+    {{/each}}
+  </ul>
+</div>

@@ -1,79 +1,100 @@
-<h2>Purchases</h2>
-
-<nav class="shop-tabs">
+<h2>{{tabLabel}}</h2>
+<div class="tabs">
   {{#each tabs}}
-  <button type="button" class="{{#if active}}active{{/if}}" data-action="shopTab" data-tab="{{id}}">{{id}}</button>
+  <button type="button" class="{{#if active}}active{{/if}}" data-action="shopTab" data-tab="{{id}}"
+          {{#unless enabled}}disabled title="requires a matching Magic/Resonance path"{{/unless}}>{{label}}</button>
   {{/each}}
-</nav>
-<input type="search" data-search placeholder="Search…" value="{{query}}" />
-<div class="item-browser">
-  {{#each list}}
-  <div class="row {{#if overCap}}disabled{{/if}}">
-    <span class="name">{{name}}</span>
-    <span class="meta">{{price}}¥ · avail {{avail}}{{#if essence}} · ess {{essence}}{{/if}}</span>
-    <button type="button" data-action="addPurchase" data-uuid="{{uuid}}" data-name="{{name}}"
-            data-price="{{price}}" data-avail="{{avail}}" data-essence="{{essence}}"
-            data-item-type="{{itemType}}" {{#if overCap}}disabled{{/if}}>Buy</button>
+</div>
+
+{{#if isMagicTab}}
+  {{#unless magicKinds.length}}
+  <p class="hint">This character has no Magic or Resonance path — nothing to learn here.</p>
+  {{/unless}}
+  {{#each magicKinds}}
+  <h3>{{label}} ({{chosen.length}})</h3>
+  <div class="chosen-list">
+    {{#each chosen}}
+    <div class="chosen">
+      <span class="c-name">{{name}}</span>
+      <button type="button" class="x" data-action="removePick" data-kind="{{../kind}}" data-uuid="{{uuid}}">✕</button>
+    </div>
+    {{/each}}
+  </div>
+  <div class="browse-list" data-filter-scope="shop">
+    {{#each list}}
+    <div class="row" data-filter-text="{{name}}" data-detail-kind="uuid" data-detail-id="{{uuid}}">
+      <span class="nm">{{name}}</span>
+      <span class="mt">{{meta}}</span>
+      <button type="button" data-action="addPick" data-kind="{{../kind}}"
+              data-uuid="{{uuid}}" data-name="{{name}}" data-cost="{{cost}}">Learn</button>
+    </div>
+    {{else}}
+    <div class="browse-empty">Nothing matches.</div>
+    {{/each}}
   </div>
   {{/each}}
-</div>
 
-<h3>Owned</h3>
-<ul>
+{{else if isLifestyleTab}}
+  <h3>Lifestyle</h3>
+  <select data-change="lifestyle">
+    <option value="">— none —</option>
+    {{#each lifestyles}}
+    <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}} — {{cost}}¥/month</option>
+    {{/each}}
+  </select>
+  <h3>SINs &amp; Licenses</h3>
+  <div class="chosen-list">
+    {{#each sins}}
+    <div class="chosen">
+      <span class="c-name">{{name}} <span class="c-meta">rating {{rating}}</span></span>
+      <button type="button" class="x" data-action="removeSin" data-index="{{@index}}">✕</button>
+    </div>
+    {{/each}}
+  </div>
+  <div class="browser-head">
+    {{#each sinRatings}}
+    <button type="button" data-action="addSin" data-rating="{{this}}">+ Fake SIN R{{this}}</button>
+    {{/each}}
+  </div>
+
+{{else}}
+  <div class="browser-head">
+    <input type="search" data-filter="shop" placeholder="Search {{tabLabel}}…" value="{{query}}" />
+    {{#if subtypes.length}}
+    <select data-change="shopSubtype">
+      <option value="">All subtypes</option>
+      {{#each subtypes}}
+      <option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}} ({{count}})</option>
+      {{/each}}
+    </select>
+    {{/if}}
+  </div>
+  <div class="browse-list" data-filter-scope="shop">
+    {{#each list}}
+    <div class="row {{#if overCap}}over{{/if}}" data-filter-text="{{name}}"
+         data-detail-kind="uuid" data-detail-id="{{uuid}}">
+      <span class="nm">{{name}}</span>
+      <span class="mt">{{price}}¥ · A{{avail}}{{#if essence}} · E{{essence}}{{/if}}</span>
+      <button type="button" data-action="addPurchase" data-uuid="{{uuid}}" data-name="{{name}}"
+              data-price="{{price}}" data-avail="{{avail}}" data-essence="{{essence}}"
+              data-item-type="{{itemType}}" {{#if overCap}}disabled title="over availability cap"{{/if}}>Buy</button>
+    </div>
+    {{else}}
+    <div class="browse-empty">Nothing matches.</div>
+    {{/each}}
+  </div>
+{{/if}}
+
+<h3>Owned ({{owned.length}}) — {{spentText}}</h3>
+<div class="chosen-list">
   {{#each owned}}
-  <li>{{name}} ×{{qty}} — {{price}}¥
-    <button type="button" data-action="removePurchase" data-uuid="{{uuid}}">✕</button></li>
+  <div class="chosen">
+    <span class="c-name">{{name}}{{#if qty}} ×{{qty}}{{/if}}
+      <span class="c-meta">{{price}}¥{{#if essence}} · ess {{essence}}{{/if}}</span>
+    </span>
+    <button type="button" class="x" data-action="removePurchase" data-uuid="{{uuid}}">✕</button>
+  </div>
+  {{else}}
+  <div class="browse-empty">Nothing purchased yet.</div>
   {{/each}}
-</ul>
-
-{{#if canSpells}}
-<h3>Spells ({{spells.length}})</h3>
-<ul>{{#each spells}}<li>{{name}}
-  <button type="button" data-action="removePick" data-kind="spell" data-uuid="{{uuid}}">✕</button></li>{{/each}}</ul>
-<div class="item-browser">
-  {{#each picks.spell}}
-  <div class="row"><span class="name">{{name}}</span>
-    <button type="button" data-action="addPick" data-kind="spell" data-uuid="{{uuid}}" data-name="{{name}}">Learn</button></div>
-  {{/each}}
-</div>
-{{/if}}
-
-{{#if canPowers}}
-<h3>Adept Powers{{#if isMysticAdept}} (PP bought: {{ppBought}}){{/if}}</h3>
-<ul>{{#each powers}}<li>{{name}}
-  <button type="button" data-action="removePick" data-kind="power" data-uuid="{{uuid}}">✕</button></li>{{/each}}</ul>
-<div class="item-browser">
-  {{#each picks.power}}
-  <div class="row"><span class="name">{{name}}</span>
-    <button type="button" data-action="addPick" data-kind="power" data-uuid="{{uuid}}" data-name="{{name}}">Take</button></div>
-  {{/each}}
-</div>
-{{/if}}
-
-{{#if canCF}}
-<h3>Complex Forms ({{complexForms.length}})</h3>
-<ul>{{#each complexForms}}<li>{{name}}
-  <button type="button" data-action="removePick" data-kind="complexform" data-uuid="{{uuid}}">✕</button></li>{{/each}}</ul>
-<div class="item-browser">
-  {{#each picks.complexform}}
-  <div class="row"><span class="name">{{name}}</span>
-    <button type="button" data-action="addPick" data-kind="complexform" data-uuid="{{uuid}}" data-name="{{name}}">Thread</button></div>
-  {{/each}}
-</div>
-{{/if}}
-
-<h3>Lifestyle & SINs</h3>
-<select data-change="lifestyle">
-  <option value=""></option>
-  {{#each lifestyles}}
-  <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}} ({{cost}}¥/mo)</option>
-  {{/each}}
-</select>
-<div class="sins">
-  {{#each sins}}
-  <span class="chip">{{name}} (R{{rating}})
-    <button type="button" data-action="removeSin" data-index="{{@index}}">✕</button></span>
-  {{/each}}
-  <button type="button" data-action="addSin" data-rating="2">+ Fake SIN (R2)</button>
-  <button type="button" data-action="addSin" data-rating="4">+ Fake SIN (R4)</button>
 </div>

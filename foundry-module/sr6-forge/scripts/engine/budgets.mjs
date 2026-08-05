@@ -117,7 +117,10 @@ export function contactPoints(state, rules, provider) {
 
 export function knowledgePoints(state, rules, provider) {
   const max = attrRating(state, "log", provider);
-  const spent = state.knowledge.filter((k) => !k.native).length;
+  // each rank of a non-native knowledge/language costs one point
+  const spent = state.knowledge
+    .filter((k) => !k.native)
+    .reduce((n, k) => n + (k.points ?? 1), 0);
   return { max, spent, left: max - spent };
 }
 

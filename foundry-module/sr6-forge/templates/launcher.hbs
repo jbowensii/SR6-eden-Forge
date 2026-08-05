@@ -1,0 +1,25 @@
+<div style="padding:12px">
+  <button type="button" class="primary" data-action="newChar" style="width:100%">
+    + New Character
+  </button>
+
+  <h3 style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--sf-cyan,#2fd4d9);margin:14px 0 4px">
+    Saved drafts ({{drafts.length}})
+  </h3>
+  <div class="draft-list">
+    {{#each drafts}}
+    <div class="draft">
+      <span>
+        <span class="d-name">{{name}}</span><br />
+        <span class="d-meta">{{step}} · {{when}}</span>
+      </span>
+      <button type="button" data-action="resume" data-draft-id="{{id}}">Resume</button>
+      <button type="button" data-action="deleteDraft" data-draft-id="{{id}}" title="Delete draft">✕</button>
+    </div>
+    {{else}}
+    <div style="color:#5d6678;font-size:11px;font-style:italic;padding:8px 0">
+      No saved drafts. Use “Save Draft” in the wizard to keep work in progress.
+    </div>
+    {{/each}}
+  </div>
+</div>

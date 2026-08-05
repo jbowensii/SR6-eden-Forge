@@ -137,9 +137,9 @@ export class ChargenEngine {
         const already = s.qualities.filter((q) => q.genesisID === op.genesisID);
         if (already.length && !meta?.multi) return { ok: false, reason: "already-taken" };
         s.qualities.push({
-          genesisID: op.genesisID, rating: op.rating ?? 1,
+          genesisID: op.genesisID, name: op.name ?? op.genesisID, rating: op.rating ?? 1,
           choiceText: op.choiceText ?? null, subOptionKarma: op.subOptionKarma ?? null,
-          positive: meta?.positive ?? op.positive ?? true, free: false,
+          positive: meta?.positive ?? op.positive ?? true, note: "", free: false,
         });
         return { ok: true };
       }
@@ -187,7 +187,17 @@ export class ChargenEngine {
       case "knowledge": {
         if (op.remove) { s.knowledge.splice(op.index, 1); return { ok: true }; }
         s.knowledge.push({ name: op.name, type: op.type ?? "knowledge",
-          native: op.native ?? false });
+          native: op.native ?? false, points: op.native ? 4 : 1 });
+        return { ok: true };
+      }
+      case "knowledgeRank": {
+        const k = s.knowledge[Number(op.target)];
+        if (!k) return { ok: false, reason: "unknown-entry" };
+        if (k.native) return { ok: false, reason: "native-is-fixed" };
+        const next = (k.points ?? 1) + (op.delta ?? 1);
+        if (next < 1) return { ok: false, reason: "minimum-1" };
+        if (next > 6) return { ok: false, reason: "maximum-6" };
+        k.points = next;
         return { ok: true };
       }
       case "lifestyle": { s.lifestyleId = op.id; s.lifestyleMonths = op.months ?? 1; return { ok: true }; }

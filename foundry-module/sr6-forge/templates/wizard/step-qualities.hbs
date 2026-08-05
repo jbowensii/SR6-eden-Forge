@@ -1,21 +1,42 @@
 <h2>Qualities</h2>
-<div class="taken">
+<p>Positive qualities cost karma; negative qualities grant it. Caps: {{posCap}} / {{negCap}} karma.</p>
+
+<h3>Chosen ({{taken.length}})</h3>
+<div class="chosen-list">
   {{#each taken}}
-  <span class="chip">{{genesisID}}{{#if free}} (racial){{/if}}
+  <div class="chosen {{#if free}}free{{/if}}">
+    <span class="c-name">{{name}}
+      <span class="c-meta">{{#if free}}racial · free{{else}}{{sign}}{{karma}} karma{{/if}}{{#if rating}} · rating {{rating}}{{/if}}</span>
+    </span>
     {{#unless free}}
-    <button type="button" data-action="removeQuality" data-genesis-id="{{genesisID}}">✕</button>
+    <button type="button" class="x" data-action="removeQuality" data-genesis-id="{{genesisID}}">✕</button>
     {{/unless}}
-  </span>
+    {{#unless free}}
+    <input class="note-input" type="text" placeholder="Specifics (e.g. Allergy: peanuts, severe)"
+           value="{{note}}" data-change="qualityNote" data-genesis-id="{{genesisID}}" />
+    {{/unless}}
+  </div>
   {{/each}}
 </div>
 
-<input type="search" data-search placeholder="Search qualities…" value="{{query}}" />
-<div class="item-browser">
+<h3>Available</h3>
+<div class="browser-head">
+  <input type="search" data-filter="quality" placeholder="Search qualities…" value="{{query}}" />
+  <select data-change="qualityFilter">
+    <option value="all" {{#if (eq filter "all")}}selected{{/if}}>All</option>
+    <option value="positive" {{#if (eq filter "positive")}}selected{{/if}}>Positive</option>
+    <option value="negative" {{#if (eq filter "negative")}}selected{{/if}}>Negative</option>
+  </select>
+</div>
+<div class="browse-list" data-filter-scope="quality">
   {{#each list}}
-  <div class="row">
-    <span class="name">{{name}}</span>
-    <span class="meta">{{category}} · {{value}} karma</span>
-    <button type="button" data-action="addQuality" data-genesis-id="{{genesisID}}">Add</button>
+  <div class="row" data-filter-text="{{name}}"
+       data-detail-kind="uuid" data-detail-id="{{uuid}}">
+    <span class="nm">{{name}}</span>
+    <span class="mt">{{category}} · {{value}}</span>
+    <button type="button" data-action="addQuality" data-genesis-id="{{genesisID}}" data-name="{{name}}">Add</button>
   </div>
+  {{else}}
+  <div class="browse-empty">No qualities match.</div>
   {{/each}}
 </div>

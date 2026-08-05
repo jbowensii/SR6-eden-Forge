@@ -1,32 +1,34 @@
 <h2>Magic / Resonance</h2>
-<div class="mor-paths">
+<p>Path available at Magic priority {{letter}}. Mundane is always allowed.</p>
+<div class="card-grid">
   {{#each paths}}
-  <button type="button" class="mor-card {{#if selected}}active{{/if}}"
-          data-action="pickMor" data-mor="{{id}}">
-    <strong>{{name}}</strong>
-    {{#if rating}}<span>MAG/RES {{rating}}</span>{{/if}}
-    {{#if skillUnlocks.length}}<span class="unlocks">{{skillUnlocks}}</span>{{/if}}
+  <button type="button" class="pick-card {{#if selected}}active{{/if}}"
+          data-action="pickMor" data-mor="{{id}}"
+          data-detail-kind="mor" data-detail-id="{{id}}">
+    <span class="pc-name">{{name}}</span>
+    {{#if rating}}<span class="pc-line">MAG/RES {{rating}}</span>{{/if}}
+    {{#if unlockText}}<span class="pc-sub">unlocks {{unlockText}}</span>{{/if}}
   </button>
   {{/each}}
 </div>
 
 {{#if isAspected}}
-<fieldset>
-  <legend>Aspected discipline (pick one)</legend>
-  <select data-change="aspected">
-    <option value=""></option>
-    {{#each aspectedOptions}}
-    <option value="{{id}}" {{#if selected}}selected{{/if}}>{{id}}</option>
-    {{/each}}
-  </select>
-</fieldset>
+<h3>Aspected discipline</h3>
+<p class="hint">An aspected magician practises exactly one discipline.</p>
+<select data-change="aspected">
+  <option value="">— pick one —</option>
+  {{#each aspectedOptions}}
+  <option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+  {{/each}}
+</select>
 {{/if}}
 
 {{#if isMysticAdept}}
-<fieldset>
-  <legend>Power points (mystic adept — karma per point)</legend>
-  <button type="button" data-action="adj" data-kind="powerpoints" data-delta="-1">−</button>
-  <strong>{{state.powerPointsBought}}</strong>
-  <button type="button" data-action="adj" data-kind="powerpoints" data-delta="1">+</button>
-</fieldset>
+<h3>Power points</h3>
+<p class="hint">Mystic adepts buy power points with karma ({{ppCost}} karma each).</p>
+<div class="stepper">
+  <button type="button" class="up" data-action="adj" data-kind="powerpoints" data-delta="1">+</button>
+  <span class="n">{{ppBought}}</span>
+  <button type="button" class="down" data-action="adj" data-kind="powerpoints" data-delta="-1">−</button>
+</div>
 {{/if}}

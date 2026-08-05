@@ -1,58 +1,75 @@
-{{!-- ApplicationV2 requires ONE root element per part --}}
+{{!-- ApplicationV2: exactly ONE root element per part --}}
 <div class="wizard-root">
-<div class="wizard-grid">
-  <nav class="step-rail">
-    {{#each steps}}
-    <button type="button" class="step {{#if active}}active{{/if}} {{#if done}}done{{/if}}"
-            data-action="goto" data-step="{{id}}">{{index}}. {{label}}</button>
-    {{/each}}
-  </nav>
-  <section class="step-body">
-    {{{stepHtml}}}
-  </section>
-</div>
 
-<footer>
+  <div class="wizard-grid">
+    <nav class="step-rail">
+      <div class="rail-title">Creation</div>
+      {{#each steps}}
+      <button type="button" class="step {{#if active}}active{{/if}} {{#if done}}done{{/if}}"
+              data-action="goto" data-step="{{id}}">
+        <span class="num">{{index}}</span>
+        <span class="nm">{{label}}</span>
+        {{#if errors}}<span class="bad">{{errors}}</span>{{/if}}
+      </button>
+      {{/each}}
+    </nav>
+
+    <section class="step-body" data-scroll="body">
+      {{{stepHtml}}}
+    </section>
+
+    <aside class="detail-pane" data-scroll="detail">
+      {{#if detail}}
+        <div class="dp-name">{{detail.name}}</div>
+        {{#if detail.meta}}<div class="dp-meta">{{detail.meta}}</div>{{/if}}
+        {{#if detail.stats.length}}
+        <dl class="dp-stats">
+          {{#each detail.stats}}<dt>{{k}}</dt><dd>{{v}}</dd>{{/each}}
+        </dl>
+        {{/if}}
+        <div class="dp-desc">{{{detail.description}}}</div>
+      {{else}}
+        <div class="dp-empty">Select or hover an entry to see its details.</div>
+      {{/if}}
+    </aside>
+  </div>
+
+  {{#if issuesOpen}}
+  <div class="issue-drawer">
+    <ul>
+      {{#each issues}}
+      <li class="{{severity}}" data-action="goto" data-step="{{step}}">
+        <span class="sev">{{severity}}</span>
+        <span>{{message}}</span>
+      </li>
+      {{else}}
+      <li class="ok"><span class="sev">ok</span><span>All checks pass — ready to create.</span></li>
+      {{/each}}
+    </ul>
+  </div>
+  {{/if}}
+
   <div class="budget-bar">
-    <span class="chip {{#if (lt budgets.attributePoints.left 0)}}over{{/if}}"
-      title="{{localize 'SR6FORGE.Budget.attributePoints'}}">
-      ATTR {{budgets.attributePoints.left}}/{{budgets.attributePoints.max}}</span>
-    <span class="chip {{#if (lt budgets.adjustmentPoints.left 0)}}over{{/if}}"
-      title="{{localize 'SR6FORGE.Budget.adjustmentPoints'}}">
-      ADJ {{budgets.adjustmentPoints.left}}/{{budgets.adjustmentPoints.max}}</span>
-    <span class="chip {{#if (lt budgets.skillPoints.left 0)}}over{{/if}}"
-      title="{{localize 'SR6FORGE.Budget.skillPoints'}}">
-      SKILL {{budgets.skillPoints.left}}/{{budgets.skillPoints.max}}</span>
-    <span class="chip {{#if (lt budgets.karma.left 0)}}over{{/if}}"
-      title="{{localize 'SR6FORGE.Budget.karma'}}">
-      KARMA {{budgets.karma.left}}/{{budgets.karma.max}}</span>
-    <span class="chip {{#if (lt budgets.nuyen.left 0)}}over{{/if}}"
-      title="{{localize 'SR6FORGE.Budget.nuyen'}}">
-      ¥ {{budgets.nuyen.left}}/{{budgets.nuyen.max}}</span>
-    <span class="chip {{#if (lte budgets.essence.left 0)}}over{{/if}}"
-      title="{{localize 'SR6FORGE.Budget.essence'}}">
-      ESS {{budgets.essence.left}}</span>
-    {{#if budgets.powerPoints.max}}
-    <span class="chip {{#if (lt budgets.powerPoints.left 0)}}over{{/if}}"
-      title="{{localize 'SR6FORGE.Budget.powerPoints'}}">
-      PP {{budgets.powerPoints.left}}/{{budgets.powerPoints.max}}</span>
-    {{/if}}
-    <span class="chip {{#if (lt budgets.contactPoints.left 0)}}over{{/if}}"
-      title="{{localize 'SR6FORGE.Budget.contactPoints'}}">
-      CON {{budgets.contactPoints.left}}/{{budgets.contactPoints.max}}</span>
-    {{#if errorCount}}<span class="chip over">{{errorCount}} ⚠</span>{{/if}}
+    {{#each chips}}
+    <span class="chip {{cls}}" title="{{title}}">
+      <span class="k">{{k}}</span><span class="v">{{v}}</span>{{#if m}}<span class="m">/{{m}}</span>{{/if}}
+    </span>
+    {{/each}}
+    <button type="button" class="issue-toggle {{#unless errorCount}}clean{{/unless}}" data-action="toggleIssues">
+      {{#if errorCount}}{{errorCount}} error{{#if manyErrors}}s{{/if}}{{else}}checks ok{{/if}}
+      {{#if warnCount}} · {{warnCount}} warn{{/if}}
+    </button>
   </div>
+
   <div class="wizard-nav">
-    <button type="button" data-action="back" {{#if isFirst}}disabled{{/if}}>
-      {{localize "SR6FORGE.Wizard.Back"}}</button>
-    <button type="button" data-action="saveDraft">
-      {{localize "SR6FORGE.Wizard.SaveDraft"}}</button>
+    <button type="button" data-action="back" {{#if isFirst}}disabled{{/if}}>◄ Back</button>
+    <button type="button" data-action="saveDraft">Save Draft</button>
+    <span class="spacer"></span>
     {{#if isLast}}
-    <button type="button" data-action="finalize" {{#if errorCount}}disabled{{/if}}>
-      {{localize "SR6FORGE.Wizard.Finalize"}}</button>
+    <button type="button" class="primary" data-action="finalize" {{#if errorCount}}disabled{{/if}}>Create Character</button>
     {{else}}
-    <button type="button" data-action="next">{{localize "SR6FORGE.Wizard.Next"}}</button>
+    <button type="button" class="primary" data-action="next">Next ►</button>
     {{/if}}
   </div>
-</footer>
+
 </div>

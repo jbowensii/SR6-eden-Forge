@@ -15,6 +15,33 @@ from pathlib import Path
 
 from extractor.commlink6 import DEFAULT_JAR, _i18n
 
+# i18n keys are "<prefix>.<id>[.desc|.page|...]"; ids collide across prefixes
+# (skill.firearms=Firearms vs licensetype.firearms=Firearms License), so chargen
+# sections must look their labels up under the RIGHT prefix.
+_PFX_LINE = re.compile(
+    r"^([A-Za-z_]+)\.([A-Za-z0-9_.-]+?)(?:\.(desc|page|wifi|source))?\s*=\s*(.*)$")
+
+
+def i18n_by_prefix(z: zipfile.ZipFile, book: str) -> dict:
+    """{prefix: {id: {name, page, desc, wifi}}} for one book's English bundle."""
+    path = f"de/rpgframework/shadowrun6/data/{book}/i18n/{book}.properties"
+    out: dict = {}
+    if path not in set(z.namelist()):
+        return out
+    for ln in z.read(path).decode("utf-8", "replace").splitlines():
+        m = _PFX_LINE.match(ln)
+        if not m:
+            continue
+        prefix, iid, sub, val = m.groups()
+        rec = out.setdefault(prefix, {}).setdefault(iid, {})
+        rec[sub or "name"] = val.strip()
+    return out
+
+
+def sub_i18n(byprefix: dict, prefix: str) -> dict:
+    """One prefix's id->record map (what the section parsers expect)."""
+    return byprefix.get(prefix, {})
+
 # Commlink6 attribute names -> eden attribute codes
 ATTR_CODE = {
     "BODY": "bod", "AGILITY": "agi", "REACTION": "rea", "STRENGTH": "str",
@@ -198,9 +225,11 @@ def parse_skills(trees: list[dict], i18n: dict) -> dict:
             if c["tag"] != "skillspec":
                 continue
             spid = c["attrs"]["id"]
+            # "skill.<skill>.skillspec.<spec>" -> our per-prefix map stores the
+            # tail as "<skill>.skillspec.<spec>"
+            spec_rec = i18n.get(f"{sid}.skillspec.{spid}") or {}
             specs[spid] = {
-                "name": text.get(f"skillspec.{spid}", "")
-                        or spid.replace("_", " ").title(),
+                "name": spec_rec.get("name") or spid.replace("_", " ").title(),
                 "attr": ATTR_CODE.get(c["attrs"].get("attr", ""), None),
                 "subtypes": [s for s in c["attrs"].get("subtypes", "").split(",") if s],
             }
