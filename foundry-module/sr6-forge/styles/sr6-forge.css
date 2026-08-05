@@ -543,7 +543,31 @@
 .sr6-forge td.num { text-align: right; font-family: var(--sf-mono); }
 
 /* ------------------------------- options app ---------------------------- */
-.sr6-forge .opt-root { padding: 10px 14px 14px; }
+/* Fixed head + scrolling rule list + pinned footer. .window-content is
+   overflow:hidden (see shell), so the list must own its own scrollbar. */
+.sr6-forge .opt-root {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100%;
+  min-height: 0;
+  padding: 10px 14px 0;
+  box-sizing: border-box;
+}
+.sr6-forge .opt-head { flex: 0 0 auto; }
+.sr6-forge .opt-scroll {
+  overflow-y: auto;
+  min-height: 0;
+  margin-right: -6px;      /* let the scrollbar sit in the padding */
+  padding-right: 6px;
+}
+/* keep the column headers visible while the list scrolls */
+.sr6-forge .opt-scroll .opt-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--sf-panel);
+}
+.sr6-forge .opt-root .wizard-nav { padding: 8px 0; }
 .sr6-forge .opt-table td, .sr6-forge .opt-table th { vertical-align: top; }
 .sr6-forge .opt-table .opt-name { width: 55%; }
 .sr6-forge .opt-table .opt-desc {
@@ -648,7 +672,26 @@
 .sr6-forge-launch { width: 100%; margin: 2px 0; }
 
 /* ---------------------------- advancement app --------------------------- */
-.sr6-forge .adv-root { padding: 10px 14px 14px; }
+.sr6-forge .adv-root {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  padding: 10px 14px 14px;
+  box-sizing: border-box;
+}
+.sr6-forge .adv-scroll {
+  overflow-y: auto;
+  min-height: 0;
+  margin-right: -6px;
+  padding-right: 6px;
+}
+.sr6-forge .adv-scroll .data thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--sf-panel);
+}
 .sr6-forge .adv-root .data th { font-weight: 600; }
 .sr6-forge .adv-root .tabs { margin-bottom: 10px; }
 .sr6-forge .mod-choice { display: block; margin-top: 4px; }

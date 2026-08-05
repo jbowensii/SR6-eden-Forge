@@ -1,39 +1,53 @@
+{{!-- Three rows: fixed head, scrolling rule list, fixed footer. The rule list
+      is long (24 switches) and the window content does not scroll on its own. --}}
 <div class="opt-root">
   {{#if unavailable}}
   <p class="hint warn">{{unavailable}}</p>
+  <div class="opt-scroll"></div>
   {{else}}
-  <div class="browser-head">
-    <label class="field grow">
-      <span class="field-label">Rule interpretation</span>
-      <select data-change="ruleset">
-        {{#each rulesets}}
-        <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
-        {{/each}}
-      </select>
-    </label>
-    <button type="button" data-action="resetRules">Reset overrides</button>
+  <div class="opt-head">
+    <div class="browser-head">
+      <label class="field grow">
+        <span class="field-label">Rule interpretation</span>
+        <select data-change="ruleset">
+          {{#each rulesets}}
+          <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+          {{/each}}
+        </select>
+      </label>
+      <button type="button" data-action="resetRules">Reset overrides</button>
+    </div>
+    <p class="hint">Optional rules layered on top of the interpretation above.
+       Blank numeric fields fall back to that interpretation's default, shown at
+       the right. {{rows.length}} switches.</p>
   </div>
-  <p class="hint">These are the same optional switches Commlink6 exposes. Blank
-     numeric fields fall back to the interpretation default (shown at right).</p>
 
-  <table class="data opt-table">
-    <thead><tr><th>Optional rule</th><th style="width:96px">Setting</th><th style="width:62px">Default</th></tr></thead>
-    <tbody>
-      {{#each rows}}
-      <tr class="{{#if overridden}}overridden{{/if}}">
-        <td class="opt-name">{{label}}<span class="opt-desc">{{key}}</span></td>
-        <td>
-          {{#if numeric}}
-          <input type="number" data-rule="{{key}}" value="{{value}}" placeholder="—" />
-          {{else}}
-          <input type="checkbox" data-rule="{{key}}" {{#if value}}checked{{/if}} />
-          {{/if}}
-        </td>
-        <td class="dflt">{{defaultText}}</td>
-      </tr>
-      {{/each}}
-    </tbody>
-  </table>
+  <div class="opt-scroll" data-scroll="options">
+    <table class="data opt-table">
+      <thead>
+        <tr>
+          <th>Optional rule</th>
+          <th style="width:96px">Setting</th>
+          <th style="width:62px">Default</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each rows}}
+        <tr class="{{#if overridden}}overridden{{/if}}">
+          <td class="opt-name">{{label}}<span class="opt-desc">{{key}}</span></td>
+          <td>
+            {{#if numeric}}
+            <input type="number" data-rule="{{key}}" value="{{value}}" placeholder="—" />
+            {{else}}
+            <input type="checkbox" data-rule="{{key}}" {{#if value}}checked{{/if}} />
+            {{/if}}
+          </td>
+          <td class="dflt">{{defaultText}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
   {{/if}}
 
   <div class="wizard-nav">

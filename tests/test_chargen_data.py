@@ -130,3 +130,40 @@ def test_lifestyles_and_contacts(data):
 def test_lifepath_english_only(data):
     assert set(data["lifepathModules"]) >= {"ganger", "it_support",
                                             "teen_diva", "15_min_fame"}
+
+
+def test_quality_coverage_is_broad(data):
+    """Every English quality file is read, not just the core/companion pair."""
+    qm = data["qualityMeta"]
+    assert len(qm) > 500, f"expected the full English quality set, got {len(qm)}"
+    books = {v.get("book") for v in qm.values()}
+    for expected in ("core", "companion", "firing_squad", "hack_slash",
+                     "street_wyrd", "body_shop", "double_clutch"):
+        assert expected in books, f"no qualities read from {expected}"
+
+
+def test_mentor_spirits_inherit_the_parent_quality_price(data):
+    """Core p74: Mentor Spirit costs 10 Karma and is POSITIVE.
+
+    Commlink6 models each spirit as its own entity with no cost, and our packs
+    flatten them into quality items categorised 'negative'. Left alone, taking
+    Bear would pay the character karma instead of costing it.
+    """
+    qm = data["qualityMeta"]
+    parent = qm["mentor_spirit"]
+    assert parent["karma"] == 10 and parent["positive"] is True
+    for spirit in ("bear", "cat", "dragonslayer", "wolf"):
+        if spirit not in qm:
+            continue
+        assert qm[spirit]["karma"] == parent["karma"], f"{spirit} mispriced"
+        assert qm[spirit]["positive"] is True, f"{spirit} would grant karma"
+        assert qm[spirit].get("mentorSpirit") is True
+
+
+def test_contact_types_are_the_ten_book_categories(data):
+    """The Companion life path assigns each module's contact points to one of
+    these categories (p33)."""
+    ct = data["contactTypes"]
+    for expected in ("ACADEMIC", "CORPORATE", "CRIMINAL", "GOVERNMENT",
+                     "MAGIC", "MATRIX", "MEDIA", "MEDICAL", "STREET"):
+        assert expected in ct, f"contact type {expected} missing"

@@ -24,15 +24,37 @@ except Exception:
 from extractor.commlink6 import DEFAULT_JAR
 from extractor.chargen_xml import (
     i18n_by_prefix, parse_contacts, parse_lifepath, parse_lifestyles,
+    parse_mentor_spirits, MENTOR_BOOKS,
     parse_magicreson, parse_metatypes, parse_priorities, parse_quality_meta,
     parse_rule_labels, parse_rules, parse_skills, read_category_trees, sub_i18n,
 )
 
 # (book, category, parser-key) — metatypes/qualities exist in several books
-METATYPE_BOOKS = ["core", "companion", "astral_ways", "hack_slash"]
-QUALITY_FILES = [("core", "qualities"), ("companion", "qualities"),
-                 ("companion", "qualities-metagenetic"), ("companion", "qualities-infected"),
-                 ("hack_slash", "qualities_ai"), ("hack_slash", "qualities_streams")]
+METATYPE_BOOKS = ["core", "companion", "astral_ways", "hack_slash", "other_us"]
+
+#: Every English quality file in the Commlink6 jar. Regional variants
+#: (qualities_seattle / qualities_berlin) are listed BEFORE the main books so a
+#: base-book definition wins any id collision; the builder reports collisions
+#: rather than silently letting load order decide.
+QUALITY_FILES = [
+    ("core", "qualities_seattle"), ("core", "qualities_berlin"),
+    ("sif_new_orleans", "qualities_easycome"),
+    ("core", "qualities"),
+    ("companion", "qualities"), ("companion", "qualities-metagenetic"),
+    ("companion", "qualities-infected"),
+    ("astral_ways", "qualities"), ("bestial_nature", "qualities"),
+    ("body_shop", "qualities"), ("deadly_arts", "qualities"),
+    ("dealers_of_death", "qualities"), ("double_clutch", "qualities"),
+    ("firing_squad", "qualities"), ("hack_slash", "qualities"),
+    ("hack_slash", "qualities_ai"), ("hack_slash", "qualities_streams"),
+    ("no_future", "qualities"), ("other_us", "qualities"),
+    ("smooth_operations", "qualities"),
+    ("street_wyrd", "qualities1"), ("street_wyrd", "qualities2"),
+    ("tarnished_star", "qualities"),
+]
+
+#: The ten contact categories the Companion life path assigns modules to.
+CONTACT_TYPE_FILES = [("companion", "contact_types"), ("astral_ways", "contact_types")]
 LIFEPATH_FILES = [("companion", "lifepath"), ("companion", "lifepath2"),
                   ("companion", "lifepaths"), ("companion", "lifemods"),
                   ("companion", "LifePathModules"), ("no_future", "lifepath")]
@@ -67,15 +89,43 @@ def build(jar: _P, out: _P) -> dict:
                                       sub_i18n(px["core"], "skill"))
 
         qmeta: dict = {}
+        collisions = []
         for b, cat in QUALITY_FILES:
-            qmeta.update(parse_quality_meta(read_category_trees(z, b, cat), b))
+            batch = parse_quality_meta(read_category_trees(z, b, cat), b)
+            for qid in set(batch) & set(qmeta):
+                if batch[qid].get("karma") != qmeta[qid].get("karma"):
+                    collisions.append(f"{qid} ({qmeta[qid]['book']} -> {b})")
+            qmeta.update(batch)
+        # Individual mentor spirits inherit the parent quality's cost and sign
+        # (core p74) — without this they arrive priced at 0 and marked negative.
+        for pid in ("mentor_spirit", "paragon"):
+            parent = qmeta.get(pid)
+            if not parent:
+                continue
+            for b in MENTOR_BOOKS:
+                qmeta.update(parse_mentor_spirits(
+                    read_category_trees(z, b, "mentorspirits"), b, parent))
         data["qualityMeta"] = qmeta
+        if collisions:
+            print(f"  ! {len(collisions)} quality id collisions with differing karma:")
+            for c in collisions[:10]:
+                print(f"      {c}")
 
         data["lifestyles"] = parse_lifestyles(
             read_category_trees(z, "core", "lifestyles"),
             sub_i18n(px["core"], "lifestyle"))
         data["contactArchetypes"] = parse_contacts(
             read_category_trees(z, "core", "contacts"), sub_i18n(px["core"], "npc"))
+        # Contact categories (Academic, Corporate, ... Street) — the life path
+        # ties each module's contact points to one of these.
+        ctypes: dict = {}
+        for b, cat in CONTACT_TYPE_FILES:
+            for t in read_category_trees(z, b, cat):
+                if t["tag"] != "contacttype":
+                    continue
+                cid = t["attrs"]["id"]
+                ctypes[cid] = {"id": cid, "name": cid.replace("_", " ").title(), "book": b}
+        data["contactTypes"] = ctypes
 
         lifepath: dict = {}
         for b, cat in LIFEPATH_FILES:
@@ -124,6 +174,7 @@ def main():
           f" | qualityMeta: {len(d['qualityMeta'])}"
           f" | lifestyles: {len(d['lifestyles'])}"
           f" | contacts: {len(d['contactArchetypes'])}"
+          f" | contactTypes: {len(d['contactTypes'])}"
           f" | lifepath(EN): {len(d['lifepathModules'])}")
 
 

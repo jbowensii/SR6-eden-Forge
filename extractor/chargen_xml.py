@@ -477,3 +477,32 @@ def parse_lifepath(trees: list[dict], i18n: dict, book: str) -> dict:
                         "page": text.get("page", ""), "desc": text.get("desc", ""),
                         "grants": lifemod_grants(t), "book": book, "raw": t}
     return out
+
+
+#: Books whose mentor-spirit lists are English.
+MENTOR_BOOKS = ["core", "street_wyrd", "hack_slash", "smooth_operations", "other_us"]
+
+
+def parse_mentor_spirits(trees: list[dict], book: str, parent: dict) -> dict:
+    """mentorspirits.xml -> qualityMeta entries for each individual spirit.
+
+    Commlink6 models a mentor spirit as its own entity, but Shadowrun prices it
+    as one quality — core p74: "Mentor Spirit ... Cost: 10 Karma" — with the
+    particular spirit as the choice. Our packs flatten the spirits into
+    individual quality items, which therefore arrive with no karma of their own
+    and (wrongly) categorised as negative. Giving each one the parent quality's
+    cost and sign is what stops "Bear" from paying the character 0 karma to take.
+
+    :param parent: the ``mentor_spirit`` / ``paragon`` qualityMeta entry
+    """
+    karma = parent.get("karma", 10)
+    positive = parent.get("positive", True)
+    out: dict = {}
+    for t in trees:
+        if t["tag"] != "mentorspirit":
+            continue
+        out[t["attrs"]["id"]] = {
+            "karma": karma, "positive": positive, "max": 1, "multi": False,
+            "book": book, "mentorSpirit": True, "subOptions": {}, "raw": t,
+        }
+    return out
