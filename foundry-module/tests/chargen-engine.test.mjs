@@ -370,3 +370,134 @@ describe("optional-rule overrides", () => {
     expect(e.validate().map((i) => i.id)).not.toContain("gear.availCap");
   });
 });
+
+describe("Point Buy (Companion p28-29)", () => {
+  function pb(morId = "mundane") {
+    const e = new ChargenEngine(data, rules, { state: blankState("pointbuy") });
+    e.setMethod("pointbuy");
+    e.setMetatype("human");
+    e.setMagicPath(morId);
+    return e;
+  }
+
+  it("starts with the free allotments and 100 CP", () => {
+    const e = pb();
+    const b = e.budgets();
+    expect(b.characterPoints.max).toBe(100);
+    expect(b.characterPoints.spent).toBe(0);
+    expect(b.attributePoints.max).toBe(4);
+    expect(b.skillPoints.max).toBe(12);
+    expect(b.adjustmentPoints.max).toBe(1);
+    expect(b.nuyen.max).toBe(10000);
+  });
+
+  it("prices each pool as the book does", () => {
+    const e = pb();
+    e.spend({ kind: "cp", target: "attribute", delta: 20 });   // 20 x 2 = 40 CP
+    e.spend({ kind: "cp", target: "skill", delta: 20 });       // 20 x 2 = 40 CP
+    e.spend({ kind: "cp", target: "adjustment", delta: 5 });   //  5 x 4 = 20 CP
+    const b = e.budgets();
+    expect(b.characterPoints.spent).toBe(100);
+    expect(b.characterPoints.left).toBe(0);
+    expect(b.attributePoints.max).toBe(24);                    // 4 free + 20
+    expect(b.skillPoints.max).toBe(32);                        // 12 free + 20
+    expect(b.adjustmentPoints.max).toBe(6);                    // 1 free + 5
+    expect(e.validate().map((i) => i.id)).not.toContain("pointbuy.unspent");
+  });
+
+  it("charges 10 CP for Awakened and starts an aspected magician at Magic 2", () => {
+    const e = pb("aspectedmagician");
+    expect(e.budgets().characterPoints.spent).toBe(10);
+    expect(e.attrRating("mag")).toBe(2);
+    const t = pb("technomancer");
+    expect(t.attrRating("res")).toBe(1);
+  });
+
+  it("converts resource CP at 20,000 nuyen each", () => {
+    const e = pb();
+    e.spend({ kind: "cp", target: "resources", delta: 22 });    // the 440,000 cap
+    expect(e.budgets().nuyen.max).toBe(450000);
+    expect(e.budgets().characterPoints.spent).toBe(22);
+    e.spend({ kind: "cp", target: "resources", delta: 1 });
+    expect(e.validate().map((i) => i.id)).toContain("pointbuy.poolCap");
+  });
+
+  it("requires every CP to be spent and flags overspending", () => {
+    const e = pb();
+    expect(e.validate().map((i) => i.id)).toContain("pointbuy.unspent");
+    e.spend({ kind: "cp", target: "attribute", delta: 20 });
+    e.spend({ kind: "cp", target: "skill", delta: 20 });
+    e.spend({ kind: "cp", target: "adjustment", delta: 12 });   // 40+40+48 = 128
+    expect(e.validate().map((i) => i.id)).toContain("pointbuy.overspent");
+  });
+
+  it("allows only one specialization", () => {
+    const e = pb();
+    e.spend({ kind: "skill", target: "firearms", delta: 2 });
+    e.spend({ kind: "skill", target: "stealth", delta: 2 });
+    e.spend({ kind: "spec", target: "firearms", spec: "pistols" });
+    expect(e.validate().map((i) => i.id)).not.toContain("pointbuy.oneSpecialization");
+    e.spend({ kind: "spec", target: "stealth", spec: "sneaking" });
+    expect(e.validate().map((i) => i.id)).toContain("pointbuy.oneSpecialization");
+  });
+});
+
+describe("Karma build (Commlink6-sourced)", () => {
+  function kb() {
+    const e = new ChargenEngine(data, rules, { state: blankState("karma") });
+    e.setMethod("karma");
+    return e;
+  }
+
+  it("opens a 1000-karma pool and no point pools", () => {
+    const e = kb();
+    const b = e.budgets();
+    expect(b.karma.max).toBe(1000);
+    expect(b.attributePoints.max).toBe(0);
+    expect(b.skillPoints.max).toBe(0);
+    expect(b.nuyen.max).toBe(0);
+  });
+
+  it("charges the metatype and the Magic/Resonance path out of the pool", () => {
+    const e = kb();
+    e.setMetatype("troll");
+    e.setMagicPath("magician");
+    const meta = data.metatypes.troll.karma ?? 0;
+    const mor = data.morTypes.magician.karmaCost ?? 0;
+    expect(mor).toBe(60);
+    expect(e.budgets().karma.spent).toBe(meta + mor);
+  });
+});
+
+describe("Life path (Companion p31-48)", () => {
+  function lp() {
+    const e = new ChargenEngine(data, rules, { state: blankState("lifepath") });
+    e.setMethod("lifepath");
+    e.setMetatype("human");
+    return e;
+  }
+
+  it("totals the grants of the modules taken", () => {
+    const e = lp();
+    e.spend({ kind: "lifemodule", id: "ganger", stage: "ADULT" });
+    const g = data.lifepathModules.ganger.grants;
+    const b = e.budgets();
+    expect(b.attributePoints.max).toBe(g.attributePoints);
+    expect(b.skillPoints.max).toBe(g.skillPoints);
+    expect(b.nuyen.max).toBe(g.nuyen);
+    // module contact points ride on top of the Charisma allowance
+    expect(b.contactPoints.max).toBe(e.attrRating("cha") * 6 + g.contactPoints);
+  });
+
+  it("requires the three opening stages before adult modules", () => {
+    const e = lp();
+    e.spend({ kind: "lifemodule", id: "ganger", stage: "ADULT" });
+    expect(e.validate().map((i) => i.id)).toContain("lifepath.openingStages");
+  });
+
+  it("refuses to take the same module twice", () => {
+    const e = lp();
+    e.spend({ kind: "lifemodule", id: "ganger", stage: "ADULT" });
+    expect(e.spend({ kind: "lifemodule", id: "ganger", stage: "ADULT" }).ok).toBe(false);
+  });
+});

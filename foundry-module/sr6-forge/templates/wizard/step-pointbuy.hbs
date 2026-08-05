@@ -1,0 +1,35 @@
+<h2>Character Points</h2>
+<p>{{hint}}</p>
+
+<div class="cp-summary {{#if over}}over{{/if}}">
+  <span class="cp-big">{{cp.left}}</span>
+  <span class="cp-lbl">of {{cp.max}} CP left</span>
+  {{#if over}}<span class="cp-warn">over budget</span>
+  {{else}}{{#if unspent}}<span class="cp-warn">all CP must be spent</span>{{/if}}{{/if}}
+</div>
+
+<table class="data">
+  <thead><tr><th>Pool</th><th style="width:150px">Bought</th><th style="width:110px">Total</th><th style="width:70px">CP</th></tr></thead>
+  <tbody>
+    <tr>
+      <th>Magic / Resonance</th>
+      <td colspan="2">{{morName}} <span class="hint">— set on the Magic step</span></td>
+      <td class="num">{{morCost}}</td>
+    </tr>
+    {{#each pools}}
+    <tr>
+      <th>{{label}}<span class="opt-desc">{{note}}</span></th>
+      <td>
+        <span class="rank">{{bought}}</span>
+        <span class="inline-step">
+          <button type="button" data-action="adj" data-kind="cp" data-target="{{id}}" data-delta="1">+</button>
+          <button type="button" data-action="adj" data-kind="cp" data-target="{{id}}" data-delta="-1">−</button>
+        </span>
+        <span class="hint">/ {{cap}}</span>
+      </td>
+      <td>{{#if valueText}}{{valueText}}{{else}}{{total}}{{/if}}</td>
+      <td class="num">{{cpCost}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>

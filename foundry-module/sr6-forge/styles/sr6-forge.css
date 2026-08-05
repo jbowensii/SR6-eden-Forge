@@ -505,6 +505,43 @@
 }
 .sr6-forge .rank.total { color: var(--sf-cyan); font-weight: 700; }
 
+/* --------------------- point-buy / karma-build summary ------------------ */
+.sr6-forge .cp-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 10px 0 14px;
+  padding: 10px 14px;
+  border: 1px solid var(--sf-line-hot);
+  background: linear-gradient(90deg, rgba(0,229,255,.07), transparent 70%);
+}
+.sr6-forge .cp-summary .cp-big {
+  font-family: var(--sf-mono);
+  font-size: 30px;
+  line-height: 1;
+  color: var(--sf-cyan);
+}
+.sr6-forge .cp-summary .cp-lbl {
+  font-family: var(--sf-mono);
+  font-size: 10px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--sf-ink-dim);
+}
+.sr6-forge .cp-summary.over { border-color: var(--sf-magenta); }
+.sr6-forge .cp-summary.over .cp-big { color: var(--sf-magenta); }
+.sr6-forge .cp-summary.good .cp-big { color: #6dff9a; }
+.sr6-forge .cp-warn {
+  margin-left: auto;
+  font-family: var(--sf-mono);
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--sf-magenta);
+}
+.sr6-forge .hint.warn { color: var(--sf-magenta); }
+.sr6-forge td.num { text-align: right; font-family: var(--sf-mono); }
+
 /* ------------------------------- options app ---------------------------- */
 .sr6-forge .opt-root { padding: 10px 14px 14px; }
 .sr6-forge .opt-table td, .sr6-forge .opt-table th { vertical-align: top; }

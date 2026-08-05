@@ -20,6 +20,10 @@ export function blankState(method = "priority", rulesetId = "core") {
     optionalRules: {},              // world overrides of CHARGEN_* constants
     name: "",
     priorities: { METATYPE: null, ATTRIBUTE: null, MAGIC: null, SKILLS: null, RESOURCES: null },
+    // point-buy: character points allocated to each pool (Companion p28-29)
+    cp: { attribute: 0, skill: 0, adjustment: 0, resources: 0,
+          powerPoints: 0, spells: 0, complexForms: 0 },
+    lifepath: [],                   // [{id, stage, choices:{uuid: pick}}]
     metatypeId: null,
     morId: "mundane",
     aspectedSkill: null,
@@ -208,6 +212,26 @@ export class ChargenEngine {
         if (next < 1) return { ok: false, reason: "minimum-1" };
         if (next > 6) return { ok: false, reason: "maximum-6" };
         k.points = next;
+        return { ok: true };
+      }
+      case "cp": {
+        // point-buy: move CP into one of the pools, respecting the book caps
+        const pool = op.target;
+        if (!(pool in s.cp)) return { ok: false, reason: "unknown-pool" };
+        const next = (s.cp[pool] ?? 0) + (op.delta ?? 1);
+        if (next < 0) return { ok: false, reason: "below-zero" };
+        s.cp[pool] = next;
+        return { ok: true };
+      }
+      case "lifemodule": {
+        if (op.remove) {
+          const i = s.lifepath.findIndex((m) => m.id === op.id);
+          if (i < 0) return { ok: false, reason: "not-taken" };
+          s.lifepath.splice(i, 1);
+          return { ok: true };
+        }
+        if (s.lifepath.some((m) => m.id === op.id)) return { ok: false, reason: "already-taken" };
+        s.lifepath.push({ id: op.id, stage: op.stage ?? "ADULT", choices: op.choices ?? {} });
         return { ok: true };
       }
       case "lifestyle": { s.lifestyleId = op.id; s.lifestyleMonths = op.months ?? 1; return { ok: true }; }

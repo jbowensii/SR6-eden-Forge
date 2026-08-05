@@ -2,15 +2,20 @@
  *  object (fail) — message keys live in lang/en.json as SR6FORGE.Validate.<id>.
  *  ctx = { state, data, rules, provider, budgets } */
 import { CORE_ATTRS, SPECIAL_ATTRS, attrRating, qualityKarma, ruleConst, skillRank } from "./budgets.mjs";
+import { POINT_BUY } from "./providers.mjs";
 
 /** Split of paid quality karma (free racial qualities excluded). */
 const qualitySplit = (state, data) => qualityKarma(state, data);
 
+/** Only Priority and Sum-to-Ten assign letters; the other methods have none. */
+const usesPriorities = (provider) =>
+  provider.constructor.id === "priority" || provider.constructor.id === "sumtoten";
+
 export const VALIDATION_RULES = [
   {
     id: "prio.allAssigned", severity: "error", step: "priority",
-    check: ({ state }) =>
-      Object.values(state.priorities).every(Boolean) ? null : {},
+    check: ({ state, provider }) =>
+      !usesPriorities(provider) || Object.values(state.priorities).every(Boolean) ? null : {},
   },
   {
     id: "prio.lettersUnique", severity: "error", step: "priority",
@@ -190,6 +195,59 @@ export const VALIDATION_RULES = [
         }
       }
       return null;
+    },
+  },
+  {
+    // Companion p28: "All of your CP must be spent finishing your character;
+    // none of it can carry over in any way."
+    id: "pointbuy.overspent", severity: "error", step: "priority",
+    check: ({ budgets }) => {
+      const cp = budgets.characterPoints;
+      if (!cp) return null;                       // not the point-buy method
+      return cp.left >= 0 ? null : { over: -cp.left };
+    },
+  },
+  {
+    id: "pointbuy.unspent", severity: "error", step: "review",
+    check: ({ budgets }) => {
+      const cp = budgets.characterPoints;
+      if (!cp) return null;
+      return cp.left === 0 ? null : { left: cp.left };
+    },
+  },
+  {
+    // Companion p29 caps each pool independently of the 100 CP total.
+    id: "pointbuy.poolCap", severity: "error", step: "priority",
+    check: ({ state, provider }) => {
+      if (provider.constructor.id !== "pointbuy") return null;
+      const max = POINT_BUY.max;
+      const cp = state.cp ?? {};
+      for (const [pool, cap] of [["attribute", max.attribute], ["skill", max.skill],
+        ["adjustment", max.adjustment], ["resources", max.nuyen / POINT_BUY.nuyenPerCp]]) {
+        if ((cp[pool] ?? 0) > cap) return { pool, cap };
+      }
+      return null;
+    },
+  },
+  {
+    // Companion p29: "You may also have no more than one specialization at
+    // character creation." (The priority system has no such limit.)
+    id: "pointbuy.oneSpecialization", severity: "error", step: "skills",
+    check: ({ state, provider }) => {
+      if (provider.constructor.id !== "pointbuy") return null;
+      const n = Object.values(state.skills).filter((s) => s.spec).length;
+      return n <= 1 ? null : { count: n };
+    },
+  },
+  {
+    // Companion p31: the life path opens with one module from each of the
+    // three starting stages before any adult module.
+    id: "lifepath.openingStages", severity: "error", step: "priority",
+    check: ({ state, provider }) => {
+      if (provider.constructor.id !== "lifepath") return null;
+      const taken = new Set((state.lifepath ?? []).map((m) => m.stage));
+      const missing = ["NATIONALITY", "FORMATIVE", "TEEN"].filter((s) => !taken.has(s));
+      return missing.length ? { missing: missing.join(", ") } : null;
     },
   },
   {

@@ -1,0 +1,33 @@
+<h2>Life Path</h2>
+<p>{{hint}}</p>
+
+{{#if gap}}
+<p class="hint warn">{{gap}}</p>
+{{/if}}
+
+{{#each stages}}
+<h3>{{label}}</h3>
+{{#if taken.length}}
+<div class="chosen-list">
+  {{#each taken}}
+  <div class="chosen">
+    <span class="c-name">{{name}}</span>
+    <span class="mt">{{grants}}</span>
+    <button type="button" class="x" data-action="removeModule" data-id="{{id}}">✕</button>
+  </div>
+  {{/each}}
+</div>
+{{/if}}
+<div class="browse-list" data-filter-scope="lifepath">
+  {{#each options}}
+  <div class="row" data-filter-text="{{name}}">
+    <span class="nm">{{name}}{{#if page}} <span class="mt">p{{page}}</span>{{/if}}</span>
+    <span class="mt">{{grants}}</span>
+    <button type="button" data-action="addModule" data-id="{{id}}" data-stage="{{stage}}"
+            {{#if chosen}}disabled{{/if}}>{{#if chosen}}Taken{{else}}Take{{/if}}</button>
+  </div>
+  {{else}}
+  <div class="browse-empty">No modules available for this stage.</div>
+  {{/each}}
+</div>
+{{/each}}

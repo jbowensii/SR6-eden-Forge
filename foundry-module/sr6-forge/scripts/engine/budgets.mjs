@@ -81,7 +81,8 @@ export function qualityKarma(state, data) {
 }
 
 export function karmaBudget(state, data, rules, provider) {
-  const start = rules.startingKarma.value;
+  // Karma-build replaces the 50-karma allowance with its own pool
+  const start = provider.startingKarma?.(rules) ?? rules.startingKarma.value;
   const q = qualityKarma(state, data);
   const spellCost = Math.max(0, state.spells.length - rules.spellsAtCreation.freeSpells)
     * rules.spellsAtCreation.karmaCost;
@@ -100,8 +101,10 @@ export function karmaBudget(state, data, rules, provider) {
     }, 0);
   const skillKarma = skillKarmaSpent(state, rules);
   const metaKarma = data.metatypes?.[state.metatypeId]?.karma ?? 0;
-  const spent = q.pos + spellCost + cfCost + ppCost + attrKarma + skillKarma + metaKarma
-    + (state.conversions.karmaToNuyen ?? 0);
+  // only karma-build charges for the Magic/Resonance path
+  const morKarma = provider.morKarma?.(state) ?? 0;
+  const spent = q.pos + spellCost + cfCost + ppCost + attrKarma + skillKarma
+    + metaKarma + morKarma + (state.conversions.karmaToNuyen ?? 0);
   return { max: start + q.neg, spent, left: start + q.neg - spent };
 }
 
@@ -137,7 +140,8 @@ export function powerPoints(state, data, rules, provider) {
 export function contactPoints(state, rules, provider) {
   const cha = attrRating(state, "cha", provider);
   const mult = Number(String(rules.contactPointsFormula.value).split("*")[1] ?? 6);
-  const max = cha * mult;
+  // life modules grant extra contact points on top of the Charisma allowance
+  const max = cha * mult + (provider.contactPointsBonus?.(state) ?? 0);
   const spent = state.contacts.reduce((n, c) => n + (c.connection ?? 1) + (c.loyalty ?? 1), 0);
   return { max, spent, left: max - spent, ratingCap: cha };
 }
@@ -166,5 +170,7 @@ export function allBudgets(state, data, rules, provider) {
     powerPoints: powerPoints(state, data, rules, provider),
     contactPoints: contactPoints(state, rules, provider),
     knowledgePoints: knowledgePoints(state, rules, provider),
+    // point-buy only; undefined for every other method
+    characterPoints: provider.characterPoints?.(state),
   };
 }

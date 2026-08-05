@@ -3,7 +3,6 @@
   "SR6FORGE.Advancement": "Advancement",
   "SR6FORGE.Settings.Ruleset": "Rule interpretation",
   "SR6FORGE.Settings.RulesetHint": "Which chargen rule set applies (availability caps, leftover limits, ...).",
-
   "SR6FORGE.Wizard.Title": "SR6 Forge — Character Generation",
   "SR6FORGE.Wizard.Next": "Next",
   "SR6FORGE.Wizard.Back": "Back",
@@ -19,7 +18,6 @@
   "SR6FORGE.Step.purchases": "Purchases",
   "SR6FORGE.Step.contacts": "Contacts",
   "SR6FORGE.Step.review": "Review",
-
   "SR6FORGE.Budget.attributePoints": "Attribute Points",
   "SR6FORGE.Budget.adjustmentPoints": "Adjustment Points",
   "SR6FORGE.Budget.skillPoints": "Skill Points",
@@ -28,7 +26,6 @@
   "SR6FORGE.Budget.essence": "Essence",
   "SR6FORGE.Budget.powerPoints": "Power Points",
   "SR6FORGE.Budget.contactPoints": "Contact Points",
-
   "SR6FORGE.Validate.prio.lettersUnique": "Each priority letter (A–E) may be used only once.",
   "SR6FORGE.Validate.prio.allAssigned": "Assign a letter to every priority column.",
   "SR6FORGE.Validate.prio.metatypeAllowed": "{metatype} is not available at Metatype priority {letter}.",
@@ -51,5 +48,14 @@
   "SR6FORGE.Validate.leftover.nuyen": "No more than {cap}¥ may remain unspent.",
   "SR6FORGE.Validate.magic.spellsAllowed": "This Magic/Resonance path cannot learn spells.",
   "SR6FORGE.Validate.adept.ppBudget": "Power point budget exceeded.",
-  "SR6FORGE.Validate.contact.budget": "Contact point budget exceeded."
+  "SR6FORGE.Validate.contact.budget": "Contact point budget exceeded.",
+  "SR6FORGE.Validate.pointbuy.overspent": "You are {over} character points over the 100 CP budget.",
+  "SR6FORGE.Validate.pointbuy.unspent": "{left} character points are unspent — all 100 CP must be spent (Companion p28).",
+  "SR6FORGE.Validate.pointbuy.poolCap": "The {pool} pool is capped at {cap} purchased points.",
+  "SR6FORGE.Validate.pointbuy.oneSpecialization": "Point Buy allows only one specialization at creation; you have {count}.",
+  "SR6FORGE.Validate.lifepath.openingStages": "Take one module from each opening stage first — missing: {missing}.",
+  "SR6FORGE.Validate.contact.ratingCap": "{name}: neither Connection nor Loyalty may exceed your Charisma ({cap}) at creation.",
+  "SR6FORGE.Settings.OptionalRules": "Optional rules",
+  "SR6FORGE.Settings.OptionalRulesHint": "World-level overrides of the chargen rule constants.",
+  "SR6FORGE.Options.Title": "SR6 Forge — Optional Rules"
 }

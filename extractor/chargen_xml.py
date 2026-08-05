@@ -354,8 +354,65 @@ def parse_contacts(trees: list[dict], i18n: dict) -> dict:
     return out
 
 
+#: <valmod type="CREATION_POINTS" ref="..."> -> chargen budget field
+_CREATION_POINT_FIELD = {
+    "NUYEN": "nuyen",
+    "RESOURCES": "nuyen",
+    "CONTACT_POINTS": "contactPoints",
+    "KARMA": "karma",
+    "ATTRIBUTE_POINTS": "attributePoints",
+    "SKILL_POINTS": "skillPoints",
+    "ADJUSTMENT_POINTS": "adjustmentPoints",
+    "SPECIAL_POINTS": "adjustmentPoints",
+}
+
+
+def lifemod_grants(tree: dict) -> dict:
+    """Sum a life module's unconditional budget grants.
+
+    ``<choices>`` declares the player's "choose one" options and ``<selmod>``
+    wraps mutually exclusive alternatives — counting either would over-grant, so
+    both are skipped and left in ``raw`` for the UI to resolve. A top-level
+    ``valmod`` of type ATTRIBUTE or SKILL (typically ``ref="CHOICE"``, pointing
+    at one of those choices) is worth one point of the matching pool.
+    """
+    grants: dict[str, int] = {}
+
+    def add(field: str, raw_value) -> None:
+        try:
+            grants[field] = grants.get(field, 0) + int(float(raw_value or 0))
+        except (TypeError, ValueError):
+            pass
+
+    for node in tree.get("children", []):
+        if node["tag"] == "choices":
+            continue
+        stack = [node]
+        while stack:
+            n = stack.pop()
+            if n["tag"] == "selmod":
+                continue                        # pick-one, not cumulative
+            a = n.get("attrs", {})
+            kind = (a.get("type") or "").upper()
+            if kind == "CREATION_POINTS":
+                field = _CREATION_POINT_FIELD.get((a.get("ref") or "").upper())
+                if field:
+                    add(field, a.get("value"))
+            elif kind == "ATTRIBUTE":
+                add("attributePoints", a.get("value"))
+            elif kind == "SKILL" and (a.get("ref") or "").lower() not in ("knowledge", "language"):
+                add("skillPoints", a.get("value"))
+            stack.extend(n.get("children", []))
+    return {k: v for k, v in grants.items() if v}
+
+
 def parse_lifepath(trees: list[dict], i18n: dict, book: str) -> dict:
-    """lifepath*.xml -> {id: {name, stage, raw}} — full grants kept in raw."""
+    """lifepath*.xml -> {id: {name, stage, page, grants, raw}}.
+
+    German-only modules are skipped: Commlink6 ships 84 of them in
+    ``lifemods.xml`` with German ids and no English i18n, and this project
+    deliberately imports English books only.
+    """
     out: dict = {}
     for t in trees:
         if t["tag"] != "lifemod":
@@ -365,5 +422,6 @@ def parse_lifepath(trees: list[dict], i18n: dict, book: str) -> dict:
         if not text.get("name"):
             continue                            # skip German-only modules
         out[a["id"]] = {"name": text["name"], "stage": a.get("type", "ADULT"),
-                        "book": book, "raw": t}
+                        "page": text.get("page", ""), "desc": text.get("desc", ""),
+                        "grants": lifemod_grants(t), "book": book, "raw": t}
     return out

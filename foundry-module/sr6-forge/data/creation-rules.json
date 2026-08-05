@@ -14,6 +14,10 @@
   "mysticAdeptPowerPoints": { "karmaPerPoint": 5, "maxPoints": "mag", "verify": "V-C10" },
   "adeptPowerPoints": { "formula": "mag" },
   "aspectedPickOne": { "value": true, "options": ["sorcery", "conjuring", "enchanting"], "verify": "V-C11" },
+  "karmaBuild": {
+    "_source": "NOT from an English rulebook. Commlink6 1.14.0 KarmaCharacterGenerator sets startKarma = 1000; attributes and skills use the shared advancement price (5 x new rank), metatype and Magic/Resonance use their data karma costs. Override on the optional-rules screen if your table uses different numbers.",
+    "startingKarma": 1000
+  },
   "karmaCosts": {
     "_verified": "core rulebook p68-70 — 'Spend 5 Karma x new level to advance ... for each rank'; the Attribute and Skill Advancement table (p69) is the cumulative form of the same 5 x new rank rule",
     "attributePerRank": 5,

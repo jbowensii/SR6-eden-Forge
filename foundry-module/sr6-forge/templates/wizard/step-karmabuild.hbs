@@ -1,0 +1,27 @@
+<h2>Karma Pool</h2>
+<p>{{hint}}</p>
+{{#if unverified}}
+<p class="hint warn">Unverified: no English rulebook we own describes this method.</p>
+{{/if}}
+
+<div class="cp-summary {{#if karma.left}}{{else}}good{{/if}}">
+  <span class="cp-big">{{karma.left}}</span>
+  <span class="cp-lbl">of {{karma.max}} karma left</span>
+</div>
+
+<table class="data">
+  <thead><tr><th>What</th><th>Price</th><th style="width:80px">Karma</th></tr></thead>
+  <tbody>
+    {{#each rows}}
+    <tr>
+      <th>{{label}}</th>
+      <td>{{value}}</td>
+      <td class="num">{{#if karma}}{{karma}}{{else}}—{{/if}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+
+<p class="hint">Spend the pool on the Attributes and Skills steps (both have a
+KARMA stepper), on qualities, and on gear via the karma-to-nuyen conversion on
+the Review step.</p>

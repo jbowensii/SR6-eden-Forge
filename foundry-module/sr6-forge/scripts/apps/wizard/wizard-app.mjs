@@ -5,6 +5,7 @@
 import { MODULE_ID, SETTINGS, ACTOR_SKILLS } from "../../config.mjs";
 import { chargenData } from "../../main.mjs";
 import { ChargenEngine } from "../../engine/chargen-engine.mjs";
+import { POINT_BUY } from "../../engine/providers.mjs";
 import { qualityKarma, ruleConst } from "../../engine/budgets.mjs";
 import { DraftStore } from "../../services/draft-store.mjs";
 import { PackCatalog } from "../../services/pack-catalog.mjs";
@@ -16,6 +17,17 @@ const renderTpl = (p, d) => foundry.applications.handlebars.renderTemplate(p, d)
 
 const STEPS = ["method", "priority", "metatype", "magic", "attributes",
   "skills", "qualities", "purchases", "contacts", "review"];
+/** The second step is method-specific: priorities, a CP ledger, a karma pool
+ *  or the life path. One step slot, four templates. */
+const BUILD_TEMPLATE = {
+  priority: "priority", sumtoten: "priority",
+  pointbuy: "pointbuy", karma: "karmabuild", lifepath: "lifepath",
+};
+const BUILD_LABEL = {
+  priority: "Priorities", sumtoten: "Priorities",
+  pointbuy: "Character Points", karma: "Karma Pool", lifepath: "Life Path",
+};
+
 const STEP_LABEL = {
   method: "Method", priority: "Priorities", metatype: "Metatype",
   magic: "Magic / Res", attributes: "Attributes", skills: "Skills",
@@ -79,6 +91,8 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
       addSin: SR6ForgeWizard.#onAddSin,
       removeSin: SR6ForgeWizard.#onRemoveSin,
       shopTab: SR6ForgeWizard.#onShopTab,
+      addModule: SR6ForgeWizard.#onAddModule,
+      removeModule: SR6ForgeWizard.#onRemoveModule,
     },
   };
 
@@ -120,14 +134,17 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
     for (const i of issues) {
       if (i.severity === "error") errsByStep[i.step] = (errsByStep[i.step] ?? 0) + 1;
     }
-    const stepHtml = await renderTpl(TPL(`step-${this.step}`),
+    const tplName = this.step === "priority"
+      ? `step-${BUILD_TEMPLATE[e.state.method] ?? "priority"}` : `step-${this.step}`;
+    const stepHtml = await renderTpl(TPL(tplName),
       await this.#stepContext(this.step, e, budgets, issues));
 
     const errorCount = issues.filter((i) => i.severity === "error").length;
     return {
       step: this.step,
       steps: STEPS.map((s, i) => ({
-        id: s, index: i + 1, label: STEP_LABEL[s],
+        id: s, index: i + 1,
+        label: s === "priority" ? (BUILD_LABEL[e.state.method] ?? STEP_LABEL[s]) : STEP_LABEL[s],
         active: s === this.step, done: STEPS.indexOf(this.step) > i,
         errors: errsByStep[s] ?? 0,
       })),
@@ -149,6 +166,7 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
         cls: o.left < 0 ? "over" : (o.left === 0 ? "good" : "") };
     };
     const out = [
+      b.characterPoints ? mk("CP", b.characterPoints, "Character points") : null,
       mk("ATTR", b.attributePoints, "Attribute points"),
       mk("ADJ", b.adjustmentPoints, "Adjustment points"),
       mk("SKILL", b.skillPoints, "Skill points"),
@@ -162,6 +180,129 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
       mk("CON", b.contactPoints, "Contact points"),
     ];
     return out.filter(Boolean);
+  }
+
+  /* ------------------- method-specific build steps ----------------------- */
+
+  /** Point Buy — Companion p28-29. Each pool is a CP-priced stepper. */
+  #pointBuyContext(e, budgets, data) {
+    const st = e.state;
+    const cp = budgets.characterPoints ?? { max: 0, spent: 0, left: 0 };
+    const c = POINT_BUY.cost;
+    const ppPrice = st.morId === "mysticadept" ? c.mysticPowerPoint : c.powerPoint;
+    const mor = data.morTypes?.[st.morId] ?? {};
+    const pools = [
+      { id: "attribute", label: "Attribute points", price: c.attribute,
+        free: POINT_BUY.free.attribute, cap: POINT_BUY.max.attribute,
+        bought: st.cp.attribute, total: budgets.attributePoints.max,
+        note: `${POINT_BUY.free.attribute} free, up to ${POINT_BUY.max.attribute} more at ${c.attribute} CP each` },
+      { id: "skill", label: "Skill points", price: c.skill,
+        free: POINT_BUY.free.skill, cap: POINT_BUY.max.skill,
+        bought: st.cp.skill, total: budgets.skillPoints.max,
+        note: `${POINT_BUY.free.skill} free, up to ${POINT_BUY.max.skill} more at ${c.skill} CP each` },
+      { id: "adjustment", label: "Adjustment points", price: c.adjustment,
+        free: POINT_BUY.free.adjustment, cap: POINT_BUY.max.adjustment,
+        bought: st.cp.adjustment, total: budgets.adjustmentPoints.max,
+        note: `1 free, up to ${POINT_BUY.max.adjustment} more at ${c.adjustment} CP each` },
+      { id: "resources", label: "Resources", price: 1,
+        free: 0, cap: POINT_BUY.max.nuyen / POINT_BUY.nuyenPerCp,
+        bought: st.cp.resources, total: budgets.nuyen.max,
+        valueText: `${budgets.nuyen.max.toLocaleString()}¥`,
+        note: `${POINT_BUY.free.nuyen.toLocaleString()}¥ free, then ${POINT_BUY.nuyenPerCp.toLocaleString()}¥ per CP (max ${POINT_BUY.max.nuyen.toLocaleString()}¥)` },
+    ];
+    if (mor.powers) {
+      pools.push({ id: "powerPoints", label: "Adept power points", price: ppPrice,
+        free: 0, cap: e.attrRating("mag"), bought: st.cp.powerPoints,
+        total: st.cp.powerPoints,
+        note: `${ppPrice} CP each, no more than your final Magic (${e.attrRating("mag")})` });
+    }
+    if (mor.spells) {
+      pools.push({ id: "spells", label: "Spells / rituals bought with CP", price: c.spell,
+        free: 0, cap: e.attrRating("mag") * 2, bought: st.cp.spells, total: st.cp.spells,
+        note: `${c.spell} CP each (or 5 karma), up to Magic x 2` });
+    }
+    if (mor.resonance) {
+      pools.push({ id: "complexForms", label: "Complex forms bought with CP", price: c.complexForm,
+        free: 0, cap: e.attrRating("res") * 2, bought: st.cp.complexForms, total: st.cp.complexForms,
+        note: `${c.complexForm} CP each (or 5 karma), up to Resonance x 2` });
+    }
+    for (const pool of pools) pool.cpCost = pool.bought * pool.price;
+    return {
+      cp, pools,
+      morCost: st.morId && st.morId !== "mundane" ? POINT_BUY.awakened : 0,
+      morName: mor.name ?? "Mundane",
+      hint: "100 character points, and every one of them must be spent. Your "
+        + "metatype costs no CP — its karma comes out of the usual 50.",
+      unspent: cp.left,
+      over: cp.left < 0,
+    };
+  }
+
+  /** Karma build — see the provenance note in providers.mjs. */
+  #karmaBuildContext(e, budgets, data, rules) {
+    const st = e.state;
+    const mor = data.morTypes?.[st.morId] ?? {};
+    const mt = data.metatypes?.[st.metatypeId];
+    return {
+      karma: budgets.karma,
+      startKarma: e.provider.startingKarma(rules),
+      rows: [
+        { label: "Metatype", value: mt?.name ?? "—", karma: mt?.karma ?? 0 },
+        { label: "Magic / Resonance", value: mor.name ?? "Mundane", karma: mor.karmaCost ?? 0 },
+        { label: "Attributes", value: "5 x new rating, per rank", karma: null },
+        { label: "Skills", value: "5 x new rank, per rank", karma: null },
+        { label: "Nuyen", value: `${rules.karmaToNuyen.rate.toLocaleString()}¥ per karma`, karma: null },
+      ],
+      unverified: true,
+      hint: "Everything is priced in karma. This method is not in any English "
+        + "rulebook we own — the numbers come from the Commlink6 1.14.0 "
+        + "implementation and can be changed on the optional-rules screen.",
+    };
+  }
+
+  /** Life modules — Companion p31-48. */
+  #lifepathContext(e, budgets, data) {
+    const st = e.state;
+    const modules = data.lifepathModules ?? {};
+    const taken = (st.lifepath ?? []).map((pick) => ({
+      ...pick, name: modules[pick.id]?.name ?? pick.id,
+      grants: this.#grantText(modules[pick.id]?.grants),
+    }));
+    const stages = e.provider.stages().map((stage) => ({
+      id: stage,
+      label: { NATIONALITY: "Nationality", FORMATIVE: "Formative Years",
+        TEEN: "Teen Years", ADULT: "Adult", EVENT: "Real Life" }[stage] ?? stage,
+      taken: taken.filter((t) => t.stage === stage),
+      options: e.provider.modulesForStage(stage).map((m) => ({
+        id: m.id, stage, name: m.name, page: m.page ?? "",
+        grants: this.#grantText(m.grants),
+        chosen: taken.some((t) => t.id === m.id),
+      })),
+    }));
+    const empty = !Object.keys(modules).length;
+    return {
+      stages, empty, query: q0(this, "lifepath"),
+      budgets,
+      hint: "Each life module grants attribute points, skill ranks, nuyen and "
+        + "contact points. Take one Nationality, one Formative and one Teen "
+        + "module before any Adult module.",
+      gap: empty
+        ? "No English life modules are loaded. Commlink6 ships 84 modules but "
+          + "only in German, so they are deliberately excluded; the English set "
+          + "has to be extracted from the Sixth World Companion (p31-48)."
+        : null,
+    };
+  }
+
+  #grantText(g) {
+    if (!g) return "";
+    const bits = [];
+    if (g.attributePoints) bits.push(`${g.attributePoints} attr`);
+    if (g.skillPoints) bits.push(`${g.skillPoints} skill`);
+    if (g.adjustmentPoints) bits.push(`${g.adjustmentPoints} adj`);
+    if (g.nuyen) bits.push(`${g.nuyen.toLocaleString()}¥`);
+    if (g.contactPoints) bits.push(`${g.contactPoints} contact`);
+    return bits.join(" · ");
   }
 
   /* ------------------------------ per step ------------------------------- */
@@ -190,7 +331,7 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
           methods: ["priority", "sumtoten", "pointbuy", "karma", "lifepath"].map((id) => ({
             id, label: { priority: "Priority System", sumtoten: "Sum to Ten System",
               pointbuy: "Point Buy System", karma: "Karma System", lifepath: "Life Path System" }[id],
-            desc: desc[id] + (["pointbuy", "karma", "lifepath"].includes(id) ? "  (coming soon)" : ""),
+            desc: desc[id],
             enabled: ["priority", "sumtoten"].includes(id),
             active: st.method === id,
           })),
@@ -203,6 +344,10 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
       }
 
       case "priority": {
+        // one step slot, four methods — dispatch to the method's own context
+        if (st.method === "pointbuy") return this.#pointBuyContext(e, budgets, data);
+        if (st.method === "karma") return this.#karmaBuildContext(e, budgets, data, rules);
+        if (st.method === "lifepath") return this.#lifepathContext(e, budgets, data);
         const letters = ["A", "B", "C", "D", "E"];
         const cols = [
           { id: "METATYPE", label: "Metatype" }, { id: "ATTRIBUTE", label: "Attributes" },
@@ -674,6 +819,12 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
   }
   static #onRemovePick(_ev, t) {
     this.#spend({ kind: t.dataset.kind, uuid: t.dataset.uuid, remove: true });
+  }
+  static #onAddModule(_ev, t) {
+    this.#spend({ kind: "lifemodule", id: t.dataset.id, stage: t.dataset.stage });
+  }
+  static #onRemoveModule(_ev, t) {
+    this.#spend({ kind: "lifemodule", id: t.dataset.id, remove: true });
   }
   static #onAddContact() { this.#spend({ kind: "contact", name: "" }); }
   static #onRemoveContact(_ev, t) { this.#spend({ kind: "contact", index: Number(t.dataset.index), remove: true }); }
