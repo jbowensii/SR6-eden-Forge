@@ -1,33 +1,60 @@
 <h2>Life Path</h2>
 <p>{{hint}}</p>
 
-{{#if gap}}
-<p class="hint warn">{{gap}}</p>
-{{/if}}
+<h3>Starting down the life path</h3>
+<div class="chosen-list">
+  {{#each opening}}
+  <div class="chosen free">
+    <span class="c-name">{{name}}<span class="opt-desc">{{text}}</span></span>
+  </div>
+  {{/each}}
+</div>
 
-{{#each stages}}
-<h3>{{label}}</h3>
+<h3>Adult modules — {{chosen}} of {{needed}}</h3>
 {{#if taken.length}}
 <div class="chosen-list">
   {{#each taken}}
   <div class="chosen">
-    <span class="c-name">{{name}}</span>
-    <span class="mt">{{grants}}</span>
+    <span class="c-name">{{name}}
+      <span class="mt">{{grants}}</span>
+      {{#each choices}}
+      <span class="mod-choice">
+        <span class="opt-desc">{{text}}</span>
+        <select data-change="moduleChoice" data-index="{{../index}}" data-choice="{{i}}">
+          <option value="">— pick one —</option>
+          {{#each options}}
+          <option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        </select>
+      </span>
+      {{/each}}
+    </span>
     <button type="button" class="x" data-action="removeModule" data-id="{{id}}">✕</button>
   </div>
   {{/each}}
 </div>
+{{else}}
+<div class="browse-empty">No adult modules taken yet.</div>
 {{/if}}
+
+<div class="browser-head">
+  <label class="field grow">
+    <span class="field-label">Search</span>
+    <input type="search" data-filter="lifepath" placeholder="Search life modules…" value="{{query}}" />
+  </label>
+</div>
 <div class="browse-list" data-filter-scope="lifepath">
-  {{#each options}}
+  {{#each available}}
   <div class="row" data-filter-text="{{name}}">
-    <span class="nm">{{name}}{{#if page}} <span class="mt">p{{page}}</span>{{/if}}</span>
-    <span class="mt">{{grants}}</span>
-    <button type="button" data-action="addModule" data-id="{{id}}" data-stage="{{stage}}"
-            {{#if chosen}}disabled{{/if}}>{{#if chosen}}Taken{{else}}Take{{/if}}</button>
+    <span class="nm">{{name}}
+      {{#if page}}<span class="mt">p{{page}}</span>{{/if}}
+      {{#if requires}}<span class="mt">{{requires}} only</span>{{/if}}
+    </span>
+    <span class="mt">{{grants}}{{#if knowledge}} · {{knowledge}} know{{/if}}</span>
+    <button type="button" data-action="addModule" data-id="{{id}}" data-stage="ADULT"
+            {{#if taken}}disabled{{/if}}>{{#if taken}}Taken{{else}}Take{{/if}}</button>
   </div>
   {{else}}
-  <div class="browse-empty">No modules available for this stage.</div>
+  <div class="browse-empty">No life modules are loaded — rebuild chargen-data.json.</div>
   {{/each}}
 </div>
-{{/each}}

@@ -5,7 +5,7 @@
 import { MODULE_ID, SETTINGS, ACTOR_SKILLS } from "../../config.mjs";
 import { chargenData } from "../../main.mjs";
 import { ChargenEngine } from "../../engine/chargen-engine.mjs";
-import { POINT_BUY } from "../../engine/providers.mjs";
+import { POINT_BUY, LIFEPATH_ADULT_COUNT } from "../../engine/providers.mjs";
 import { qualityKarma, ruleConst } from "../../engine/budgets.mjs";
 import { DraftStore } from "../../services/draft-store.mjs";
 import { PackCatalog } from "../../services/pack-catalog.mjs";
@@ -264,33 +264,41 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
   #lifepathContext(e, budgets, data) {
     const st = e.state;
     const modules = data.lifepathModules ?? {};
-    const taken = (st.lifepath ?? []).map((pick) => ({
-      ...pick, name: modules[pick.id]?.name ?? pick.id,
-      grants: this.#grantText(modules[pick.id]?.grants),
-    }));
-    const stages = e.provider.stages().map((stage) => ({
-      id: stage,
-      label: { NATIONALITY: "Nationality", FORMATIVE: "Formative Years",
-        TEEN: "Teen Years", ADULT: "Adult", EVENT: "Real Life" }[stage] ?? stage,
-      taken: taken.filter((t) => t.stage === stage),
-      options: e.provider.modulesForStage(stage).map((m) => ({
-        id: m.id, stage, name: m.name, page: m.page ?? "",
-        grants: this.#grantText(m.grants),
-        chosen: taken.some((t) => t.id === m.id),
-      })),
-    }));
-    const empty = !Object.keys(modules).length;
+    const taken = (st.lifepath ?? []).map((pick, index) => {
+      const mod = modules[pick.id] ?? {};
+      return {
+        index, id: pick.id, name: mod.name ?? pick.id,
+        grants: this.#grantText(mod.grants),
+        // "+1 to Edge, Sorcery, or Enchanting" needs the player to say which
+        choices: (mod.choices ?? []).map((c, i) => ({
+          i, text: c.text, mixed: c.kind === "mixed",
+          picked: pick.choices?.[i] ?? "",
+          options: c.options.map((o) => ({
+            id: o,
+            label: o.startsWith("nuyen:")
+              ? `${Number(o.slice(6)).toLocaleString()}¥`
+              : o.replaceAll("_", " "),
+            selected: pick.choices?.[i] === o })),
+        })).filter((c) => c.mixed),
+      };
+    });
+    const available = e.provider.available(st);
     return {
-      stages, empty, query: q0(this, "lifepath"),
-      budgets,
-      hint: "Each life module grants attribute points, skill ranks, nuyen and "
-        + "contact points. Take one Nationality, one Formative and one Teen "
-        + "module before any Adult module.",
-      gap: empty
-        ? "No English life modules are loaded. Commlink6 ships 84 modules but "
-          + "only in German, so they are deliberately excluded; the English set "
-          + "has to be extracted from the Sixth World Companion (p31-48)."
-        : null,
+      opening: e.provider.opening(),
+      taken, needed: LIFEPATH_ADULT_COUNT, chosen: taken.length,
+      complete: taken.length === LIFEPATH_ADULT_COUNT,
+      available: available.slice(0, ROW_CAP).map((m) => ({
+        id: m.id, name: m.name, page: m.page ?? "", taken: m.taken,
+        requires: m.requires ?? "",
+        grants: this.#grantText(m.grants),
+        knowledge: m.knowledgeSkills ?? 0,
+      })),
+      query: this.ui.query.lifepath ?? "",
+      empty: !available.length,
+      hint: `The three opening modules are fixed. Then take exactly `
+        + `${LIFEPATH_ADULT_COUNT} adult modules — Charisma grants no contact `
+        + `points on this path, and knowledge skills come from the modules `
+        + `rather than from Logic.`,
     };
   }
 
@@ -730,6 +738,11 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
       case "lifestyle": e.spend({ kind: "lifestyle", id: el.value || null }); break;
       case "qualityFilter": this.ui.qualityFilter = el.value; break;
       case "shopSubtype": this.ui.shopSubtype = el.value; break;
+      case "moduleChoice": {
+        const pick = e.state.lifepath[Number(el.dataset.index)];
+        if (pick) (pick.choices ??= {})[Number(el.dataset.choice)] = el.value || null;
+        break;
+      }
       case "qualityNote": {
         const q = e.state.qualities.find((x) => x.genesisID === el.dataset.genesisId);
         if (q) q.note = el.value;

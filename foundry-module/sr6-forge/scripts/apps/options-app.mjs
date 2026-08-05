@@ -36,7 +36,15 @@ export class SR6ForgeOptions extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   async _prepareContext() {
-    const data = chargenData();
+    // reachable from Foundry's settings pane, where a failed data load would
+    // otherwise surface as a stack trace instead of an explanation
+    let data;
+    try {
+      data = chargenData();
+    } catch {
+      return { rows: [], rulesets: [], rulesetId: null,
+        unavailable: "chargen-data.json is not loaded — rebuild and redeploy the module." };
+    }
     const rulesetId = game.settings.get(MODULE_ID, SETTINGS.RULESET);
     const base = data.rules?.[rulesetId]?.set ?? {};
     const over = game.settings.get(MODULE_ID, SETTINGS.OPTIONAL_RULES) ?? {};

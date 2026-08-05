@@ -1,4 +1,7 @@
 <div class="opt-root">
+  {{#if unavailable}}
+  <p class="hint warn">{{unavailable}}</p>
+  {{else}}
   <div class="browser-head">
     <label class="field grow">
       <span class="field-label">Rule interpretation</span>
@@ -31,6 +34,7 @@
       {{/each}}
     </tbody>
   </table>
+  {{/if}}
 
   <div class="wizard-nav">
     <span class="spacer"></span>

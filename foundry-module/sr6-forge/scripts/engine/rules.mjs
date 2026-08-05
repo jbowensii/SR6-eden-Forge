@@ -2,7 +2,7 @@
  *  object (fail) — message keys live in lang/en.json as SR6FORGE.Validate.<id>.
  *  ctx = { state, data, rules, provider, budgets } */
 import { CORE_ATTRS, SPECIAL_ATTRS, attrRating, qualityKarma, ruleConst, skillRank } from "./budgets.mjs";
-import { POINT_BUY } from "./providers.mjs";
+import { POINT_BUY, LIFEPATH_ADULT_COUNT } from "./providers.mjs";
 
 /** Split of paid quality karma (free racial qualities excluded). */
 const qualitySplit = (state, data) => qualityKarma(state, data);
@@ -240,14 +240,29 @@ export const VALIDATION_RULES = [
     },
   },
   {
-    // Companion p31: the life path opens with one module from each of the
-    // three starting stages before any adult module.
-    id: "lifepath.openingStages", severity: "error", step: "priority",
+    // Companion p33: "You must take exactly eight life modules." The three
+    // opening modules are fixed and do not count toward that total.
+    id: "lifepath.moduleCount", severity: "error", step: "priority",
     check: ({ state, provider }) => {
       if (provider.constructor.id !== "lifepath") return null;
-      const taken = new Set((state.lifepath ?? []).map((m) => m.stage));
-      const missing = ["NATIONALITY", "FORMATIVE", "TEEN"].filter((s) => !taken.has(s));
-      return missing.length ? { missing: missing.join(", ") } : null;
+      const n = (state.lifepath ?? []).length;
+      return n === LIFEPATH_ADULT_COUNT ? null : { count: n, need: LIFEPATH_ADULT_COUNT };
+    },
+  },
+  {
+    // Companion p33: contact ratings cap at 8 on the life path, not Charisma.
+    id: "lifepath.mixedChoices", severity: "error", step: "priority",
+    check: ({ state, data, provider }) => {
+      if (provider.constructor.id !== "lifepath") return null;
+      for (const pick of state.lifepath ?? []) {
+        const mod = data.lifepathModules?.[pick.id];
+        for (const [i, choice] of (mod?.choices ?? []).entries()) {
+          if (choice.kind === "mixed" && !pick.choices?.[i]) {
+            return { module: mod?.name ?? pick.id, text: choice.text };
+          }
+        }
+      }
+      return null;
     },
   },
   {

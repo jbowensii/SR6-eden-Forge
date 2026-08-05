@@ -651,3 +651,5 @@
 .sr6-forge .adv-root { padding: 10px 14px 14px; }
 .sr6-forge .adv-root .data th { font-weight: 600; }
 .sr6-forge .adv-root .tabs { margin-bottom: 10px; }
+.sr6-forge .mod-choice { display: block; margin-top: 4px; }
+.sr6-forge .mod-choice select { max-width: 260px; }

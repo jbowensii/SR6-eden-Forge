@@ -81,11 +81,31 @@ def build(jar: _P, out: _P) -> dict:
         for b, cat in LIFEPATH_FILES:
             lifepath.update(parse_lifepath(read_category_trees(z, b, cat),
                                            sub_i18n(px.get(b, {}), "lifemod"), b))
+        # Commlink6's 84 life modules are German-only, so the English catalogue
+        # comes from our own Companion PDF. It wins on id collisions.
+        lifepath.update(companion_lifepath())
         data["lifepathModules"] = lifepath
 
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     return data
+
+
+def companion_lifepath() -> dict:
+    """English life modules read out of the Sixth World Companion PDF."""
+    books = _P("data/books.json")
+    if not books.exists():
+        return {}
+    pdf = json.loads(books.read_text(encoding="utf-8")).get("companion", {}).get("pdf")
+    if not pdf or not _P(pdf).exists():
+        print(f"  ! companion PDF not found ({pdf}) — English life modules skipped")
+        return {}
+    try:
+        from extractor.lifepath_pdf import extract
+        return extract(pdf)
+    except Exception as err:                       # pragma: no cover - diagnostics
+        print(f"  ! life-module extraction failed: {err}")
+        return {}
 
 
 def main():

@@ -53,9 +53,13 @@
   "SR6FORGE.Validate.pointbuy.unspent": "{left} character points are unspent — all 100 CP must be spent (Companion p28).",
   "SR6FORGE.Validate.pointbuy.poolCap": "The {pool} pool is capped at {cap} purchased points.",
   "SR6FORGE.Validate.pointbuy.oneSpecialization": "Point Buy allows only one specialization at creation; you have {count}.",
-  "SR6FORGE.Validate.lifepath.openingStages": "Take one module from each opening stage first — missing: {missing}.",
   "SR6FORGE.Validate.contact.ratingCap": "{name}: neither Connection nor Loyalty may exceed your Charisma ({cap}) at creation.",
   "SR6FORGE.Settings.OptionalRules": "Optional rules",
   "SR6FORGE.Settings.OptionalRulesHint": "World-level overrides of the chargen rule constants.",
-  "SR6FORGE.Options.Title": "SR6 Forge — Optional Rules"
+  "SR6FORGE.Options.Title": "SR6 Forge — Optional Rules",
+  "SR6FORGE.Settings.MenuName": "Character creation rules",
+  "SR6FORGE.Settings.MenuLabel": "Configure SR6 Forge",
+  "SR6FORGE.Settings.MenuHint": "Rule interpretation and the optional chargen rules. The same screen opens from the gear on the SR6 Forge launcher.",
+  "SR6FORGE.Validate.lifepath.moduleCount": "Take exactly {need} adult life modules — you have {count}.",
+  "SR6FORGE.Validate.lifepath.mixedChoices": "{module}: choose where the point goes ({text})."
 }

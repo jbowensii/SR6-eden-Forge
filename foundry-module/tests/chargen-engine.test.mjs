@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { ChargenEngine, blankState } from "../sr6-forge/scripts/engine/chargen-engine.mjs";
+import { LIFEPATH_OPENING } from "../sr6-forge/scripts/engine/providers.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const data = JSON.parse(readFileSync(join(here, "..", "..", "export", "chargen-data.json"), "utf8"));
@@ -476,28 +477,89 @@ describe("Life path (Companion p31-48)", () => {
     e.setMetatype("human");
     return e;
   }
+  // opening totals, before any adult module is taken
+  const OPEN = LIFEPATH_OPENING.reduce((acc, m) => {
+    for (const [k, v] of Object.entries(m.grants)) acc[k] = (acc[k] ?? 0) + v;
+    return acc;
+  }, {});
 
-  it("totals the grants of the modules taken", () => {
-    const e = lp();
-    e.spend({ kind: "lifemodule", id: "ganger", stage: "ADULT" });
-    const g = data.lifepathModules.ganger.grants;
-    const b = e.budgets();
-    expect(b.attributePoints.max).toBe(g.attributePoints);
-    expect(b.skillPoints.max).toBe(g.skillPoints);
-    expect(b.nuyen.max).toBe(g.nuyen);
-    // module contact points ride on top of the Charisma allowance
-    expect(b.contactPoints.max).toBe(e.attrRating("cha") * 6 + g.contactPoints);
+  it("starts from the three fixed opening modules", () => {
+    const b = lp().budgets();
+    expect(b.skillPoints.max).toBe(OPEN.skillPoints);       // 8 + 4
+    expect(b.attributePoints.max).toBe(OPEN.attributePoints);
+    expect(b.nuyen.max).toBe(OPEN.nuyen);
+    expect(b.contactPoints.max).toBe(OPEN.contactPoints);
   });
 
-  it("requires the three opening stages before adult modules", () => {
+  it("adds each module's grants on top", () => {
     const e = lp();
-    e.spend({ kind: "lifemodule", id: "ganger", stage: "ADULT" });
-    expect(e.validate().map((i) => i.id)).toContain("lifepath.openingStages");
+    e.spend({ kind: "lifemodule", id: "artifact_hunter" });
+    const g = data.lifepathModules.artifact_hunter.grants;
+    const b = e.budgets();
+    expect(b.attributePoints.max).toBe(OPEN.attributePoints + g.attributePoints);
+    expect(b.nuyen.max).toBe(OPEN.nuyen + g.nuyen);
+  });
+
+  it("takes contact points from modules only, capped at 8, not Charisma", () => {
+    const e = lp();
+    e.spend({ kind: "attribute", target: "cha", delta: 4 });   // Charisma 5
+    const b = e.budgets();
+    expect(b.contactPoints.max).toBe(OPEN.contactPoints);      // NOT cha x 6
+    expect(b.contactPoints.ratingCap).toBe(8);
+  });
+
+  it("takes knowledge skills from modules, not Logic", () => {
+    const e = lp();
+    e.spend({ kind: "attribute", target: "log", delta: 4 });
+    expect(e.budgets().knowledgePoints.max).toBe(0);
+    e.spend({ kind: "lifemodule", id: "artifact_hunter" });
+    expect(e.budgets().knowledgePoints.max)
+      .toBe(data.lifepathModules.artifact_hunter.knowledgeSkills);
+  });
+
+  it("requires exactly eight adult modules", () => {
+    const e = lp();
+    const ids = Object.keys(data.lifepathModules)
+      .filter((id) => !data.lifepathModules[id].requires).slice(0, 8);
+    expect(e.validate().map((i) => i.id)).toContain("lifepath.moduleCount");
+    for (const id of ids) e.spend({ kind: "lifemodule", id });
+    expect(e.state.lifepath).toHaveLength(8);
+    expect(e.validate().map((i) => i.id)).not.toContain("lifepath.moduleCount");
   });
 
   it("refuses to take the same module twice", () => {
     const e = lp();
-    e.spend({ kind: "lifemodule", id: "ganger", stage: "ADULT" });
-    expect(e.spend({ kind: "lifemodule", id: "ganger", stage: "ADULT" }).ok).toBe(false);
+    e.spend({ kind: "lifemodule", id: "artifact_hunter" });
+    expect(e.spend({ kind: "lifemodule", id: "artifact_hunter" }).ok).toBe(false);
+  });
+
+  it("hides Awakened-only modules from a mundane character", () => {
+    const e = lp();
+    const ids = e.provider.available(e.state).map((m) => m.id);
+    expect(ids).not.toContain("alchemist");
+    e.setMagicPath("magician");
+    expect(e.provider.available(e.state).map((m) => m.id)).toContain("alchemist");
+  });
+
+  it("holds a mixed choice's point back until the player assigns it", () => {
+    const e = lp();
+    const id = Object.keys(data.lifepathModules)
+      .find((k) => (data.lifepathModules[k].choices ?? []).some((c) => c.kind === "mixed")
+        && !data.lifepathModules[k].requires);
+    expect(id).toBeTruthy();
+    const mod = data.lifepathModules[id];
+    const idx = mod.choices.findIndex((c) => c.kind === "mixed");
+    const attrOption = mod.choices[idx].options.find((o) =>
+      ["bod", "agi", "rea", "str", "wil", "log", "int", "cha", "edg", "mag", "res"].includes(o));
+
+    e.spend({ kind: "lifemodule", id });
+    const before = e.budgets();
+    expect(e.validate().map((i) => i.id)).toContain("lifepath.mixedChoices");
+
+    if (attrOption) {
+      e.state.lifepath[0].choices = { [idx]: attrOption };
+      expect(e.budgets().attributePoints.max)
+        .toBe(before.attributePoints.max + (mod.choices[idx].points ?? 1));
+    }
   });
 });

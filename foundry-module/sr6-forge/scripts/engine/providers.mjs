@@ -213,6 +213,29 @@ export class KarmaProvider {
 /* modules' grants rather than a table lookup.                                */
 /* ========================================================================== */
 
+/** Companion p32-33: the three opening modules are fixed, not chosen, and
+ *  they grant a flat opening budget before any adult module is picked. */
+export const LIFEPATH_OPENING = [
+  { id: "born_this_way", name: "Born This Way",
+    text: "Metatype, metavariant and metagenetic qualities; mundane, Awakened "
+      + "or Emerged; a nationality; one language at rank 4 (Native); and one or "
+      + "two qualities (if two, one positive and one negative).",
+    grants: {} },
+  { id: "growing_up", name: "Growing Up: Early Childhood and Adolescence",
+    text: "Four of Athletics, Close Combat, Con, Electronics, Influence, "
+      + "Outdoors, Perception and Stealth, each at rank 2; one or two "
+      + "qualities; the [Area] Knowledge skill for where you grew up.",
+    grants: { skillPoints: 8 } },                 // four skills at rank 2
+  { id: "coming_of_age", name: "Coming of Age: Early Adult",
+    text: "One skill at rank 4 (rank 6 if already chosen); your best attribute "
+      + "+5; one or two qualities; and one contact with four points split "
+      + "between Connection and Loyalty.",
+    grants: { skillPoints: 4, attributePoints: 5, nuyen: 25000, contactPoints: 4 } },
+];
+
+/** Companion p33: "You must take exactly eight life modules." */
+export const LIFEPATH_ADULT_COUNT = 8;
+
 export class LifepathProvider {
   static id = "lifepath";
 
@@ -220,19 +243,53 @@ export class LifepathProvider {
 
   lettersValid() { return true; }
 
-  /** Total of a grant field across every module the character has taken. */
+  /** Total of a grant field: the three fixed opening modules plus the picks. */
   #sum(state, field) {
+    const opening = LIFEPATH_OPENING.reduce((n, m) => n + (m.grants[field] ?? 0), 0);
     return (state.lifepath ?? []).reduce((n, pick) => {
       const mod = this.data.lifepathModules?.[pick.id];
-      return n + (mod?.grants?.[field] ?? 0);
-    }, 0);
+      let v = mod?.grants?.[field] ?? 0;
+      // a "mixed" choice ("+1 to Edge, Sorcery, or Enchanting") is only worth a
+      // point once the player has said which pool it lands in
+      for (const [i, choice] of (mod?.choices ?? []).entries()) {
+        if (choice.kind !== "mixed") continue;
+        const picked = pick.choices?.[i];
+        if (!picked) continue;
+        if (picked.startsWith("nuyen:")) {          // "or +25,000 nuyen"
+          if (field === "nuyen") v += Number(picked.slice(6)) || 0;
+        } else if (ATTR_IDS.has(picked)) {
+          if (field === "attributePoints") v += choice.points ?? 1;
+        } else if (field === "skillPoints") {
+          v += choice.points ?? 1;
+        }
+      }
+      return n + v;
+    }, opening);
   }
 
   attributePoints(state) { return this.#sum(state, "attributePoints"); }
   skillPoints(state) { return this.#sum(state, "skillPoints"); }
   adjustmentPoints(state) { return this.#sum(state, "adjustmentPoints"); }
   nuyen(state) { return this.#sum(state, "nuyen"); }
-  contactPointsBonus(state) { return this.#sum(state, "contactPoints"); }
+
+  /** Companion p33: "your Charisma does not provide you with contact points,
+   *  and your contacts' ratings are not limited by your Charisma attribute."
+   *  Points come from the modules alone and no rating may exceed 8. */
+  contactPoints(state) {
+    const max = this.#sum(state, "contactPoints");
+    const spent = state.contacts.reduce((n, c) => n + (c.connection ?? 1) + (c.loyalty ?? 1), 0);
+    return { max, spent, left: max - spent, ratingCap: 8 };
+  }
+
+  /** Companion p33: knowledge and language skills come from the modules, so
+   *  "you do not gain additional ones based on your Logic attribute". */
+  knowledgePoints(state) {
+    const max = (state.lifepath ?? []).reduce((n, pick) =>
+      n + (this.data.lifepathModules?.[pick.id]?.knowledgeSkills ?? 0), 0);
+    const spent = state.knowledge.filter((k) => !k.native)
+      .reduce((n, k) => n + (k.points ?? 1), 0);
+    return { max, spent, left: max - spent };
+  }
 
   legalMetatypes() {
     return Object.entries(this.data.metatypes ?? {})
@@ -245,21 +302,38 @@ export class LifepathProvider {
       .map(([id, m]) => ({ id, ...m, rating: m.magic || m.resonance ? 1 : 0 }));
   }
 
+  /** Born This Way: Emerged start at Resonance 1, full magicians / adepts /
+   *  mystic adepts at Magic 1, aspected magicians at Magic 2. */
   magicRating(state) {
     const mor = this.data.morTypes?.[state.morId] ?? {};
-    return (mor.magic || mor.resonance ? 1 : 0) + this.#sum(state, "magic");
+    if (!mor.magic && !mor.resonance) return 0;
+    return state.morId === "aspectedmagician" ? 2 : 1;
   }
 
-  /** Modules are taken in stages; the Companion requires one of each of the
-   *  three opening stages before any adult module. */
-  stages() { return ["NATIONALITY", "FORMATIVE", "TEEN", "ADULT", "EVENT"]; }
-
-  modulesForStage(stage) {
+  /** Modules a character of this path may still take. */
+  available(state) {
+    const taken = new Set((state.lifepath ?? []).map((m) => m.id));
+    const mor = this.data.morTypes?.[state.morId] ?? {};
     return Object.entries(this.data.lifepathModules ?? {})
-      .filter(([, m]) => (m.stage ?? "ADULT") === stage)
       .map(([id, m]) => ({ id, ...m }))
+      .filter((m) => {
+        if (!m.requires) return true;
+        if (m.requires === "emerged") return !!mor.resonance;
+        if (m.requires === "awakened") return !!mor.magic;
+        if (m.requires === "adept") return !!mor.powers;
+        if (m.requires === "magician") return !!mor.spells;
+        return true;
+      })
+      .map((m) => ({ ...m, taken: taken.has(m.id) }))
       .sort((a, b) => a.name.localeCompare(b.name));
   }
+
+  opening() { return LIFEPATH_OPENING; }
+}
+
+const ATTR_IDS = new Set([...CORE_ATTR_IDS(), "edg", "mag", "res"]);
+function CORE_ATTR_IDS() {
+  return ["bod", "agi", "rea", "str", "wil", "log", "int", "cha"];
 }
 
 export function makeProvider(method, data) {

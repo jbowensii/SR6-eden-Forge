@@ -2,6 +2,10 @@
  *  extends compendium index fields, exposes the module API, and adds the
  *  launcher button to the Actors directory. */
 import { MODULE_ID, SETTINGS, EXTRA_INDEX_FIELDS } from "./config.mjs";
+// Static so it can back the settings menu registered during "init". The cycle
+// with this file is safe: options-app only calls chargenData() at render time,
+// and function declarations hoist.
+import { SR6ForgeOptions } from "./apps/options-app.mjs";
 
 const state = { chargenData: null };
 
@@ -18,11 +22,24 @@ Hooks.once("init", () => {
   game.settings.register(MODULE_ID, SETTINGS.OPTIONAL_RULES, {
     scope: "world", config: false, type: Object, default: {},
   });
+  // config:false — the interpretation dropdown lives in the options app, so
+  // Foundry's settings pane and the launcher's gear open the same one screen
+  // rather than offering two half-configurations.
   game.settings.register(MODULE_ID, SETTINGS.RULESET, {
     name: "SR6FORGE.Settings.Ruleset",
     hint: "SR6FORGE.Settings.RulesetHint",
-    scope: "world", config: true, type: String, default: "core",
+    scope: "world", config: false, type: String, default: "core",
     choices: { core: "Core Rulebook", core_seattle: "Standard (Seattle)", srm: "Shadowrun Missions", houserules: "House Rules" },
+  });
+
+  /* The module's entry in Configure Settings → Module Settings. */
+  game.settings.registerMenu(MODULE_ID, "config", {
+    name: "SR6FORGE.Settings.MenuName",
+    label: "SR6FORGE.Settings.MenuLabel",
+    hint: "SR6FORGE.Settings.MenuHint",
+    icon: "fas fa-sliders-h",
+    type: SR6ForgeOptions,
+    restricted: true,                 // world rules — GM only
   });
 
   // browse lists need these on top of eden's ["name","type","system.genesisID"]

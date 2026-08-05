@@ -138,15 +138,17 @@ export function powerPoints(state, data, rules, provider) {
 /** Core p68: Charisma x 6 points across Connection + Loyalty; neither rating
  *  may exceed Charisma at creation. */
 export function contactPoints(state, rules, provider) {
+  // the life path replaces this rule wholesale (Companion p33)
+  if (provider.contactPoints) return provider.contactPoints(state);
   const cha = attrRating(state, "cha", provider);
   const mult = Number(String(rules.contactPointsFormula.value).split("*")[1] ?? 6);
-  // life modules grant extra contact points on top of the Charisma allowance
-  const max = cha * mult + (provider.contactPointsBonus?.(state) ?? 0);
+  const max = cha * mult;
   const spent = state.contacts.reduce((n, c) => n + (c.connection ?? 1) + (c.loyalty ?? 1), 0);
   return { max, spent, left: max - spent, ratingCap: cha };
 }
 
 export function knowledgePoints(state, rules, provider) {
+  if (provider.knowledgePoints) return provider.knowledgePoints(state);
   const max = attrRating(state, "log", provider);
   // each rank of a non-native knowledge/language costs one point
   const spent = state.knowledge
