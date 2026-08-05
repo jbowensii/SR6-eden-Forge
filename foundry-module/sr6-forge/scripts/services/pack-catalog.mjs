@@ -30,7 +30,9 @@ export const PackCatalog = {
     for (const { pack, domain: d } of this.list()) {
       if (d !== domain) continue;
       if (!cache.has(pack.collection)) {
-        const idx = await pack.getIndex({ fields: ["system", ...EXTRA_INDEX_FIELDS] });
+        // explicit dotted paths only — getIndex merges these with the pack's
+        // configured indexFields (which already include system.genesisID)
+        const idx = await pack.getIndex({ fields: EXTRA_INDEX_FIELDS });
         cache.set(pack.collection, idx.contents.map((r) => ({
           ...r, uuid: `Compendium.${pack.collection}.Item.${r._id}`,
         })));
