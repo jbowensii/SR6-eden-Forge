@@ -66,6 +66,16 @@ def norm(s: str) -> str:
     return re.sub(r"[^a-z0-9]+", "", (s or "").casefold())
 
 
+def decode_props(raw: bytes) -> str:
+    """Commlink6 bundles are mostly UTF-8, but a few (kechibi, de_alpen) are
+    Latin-1 — decoding those as UTF-8 mangles accented names ("Kuàizi").
+    Try UTF-8 first, fall back to cp1252."""
+    try:
+        return raw.decode("utf-8")
+    except UnicodeDecodeError:
+        return raw.decode("cp1252", "replace")
+
+
 def _i18n(z: zipfile.ZipFile, book: str) -> dict:
     """id -> {name, page, desc, wifi} from the English properties."""
     path = f"de/rpgframework/shadowrun6/data/{book}/i18n/{book}.properties"
@@ -73,7 +83,7 @@ def _i18n(z: zipfile.ZipFile, book: str) -> dict:
     names = set(z.namelist())
     if path not in names:
         return out
-    for ln in z.read(path).decode("utf-8", "replace").splitlines():
+    for ln in decode_props(z.read(path)).splitlines():
         m = _SUBKEY.match(ln)
         if m:
             out.setdefault(m.group(1), {})[m.group(2)] = m.group(3).strip()

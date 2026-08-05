@@ -13,7 +13,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
 
-from extractor.commlink6 import DEFAULT_JAR, _i18n
+from extractor.commlink6 import DEFAULT_JAR, _i18n, decode_props
 
 # i18n keys are "<prefix>.<id>[.desc|.page|...]"; ids collide across prefixes
 # (skill.firearms=Firearms vs licensetype.firearms=Firearms License), so chargen
@@ -28,7 +28,7 @@ def i18n_by_prefix(z: zipfile.ZipFile, book: str) -> dict:
     out: dict = {}
     if path not in set(z.namelist()):
         return out
-    for ln in z.read(path).decode("utf-8", "replace").splitlines():
+    for ln in decode_props(z.read(path)).splitlines():
         m = _PFX_LINE.match(ln)
         if not m:
             continue

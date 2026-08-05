@@ -87,6 +87,34 @@ CAT_MAP = {
 
 _MODES = ("SS", "SA", "BF", "FA")
 
+# Commlink6's own text has a few defects we correct on import:
+#  * SR6 capitalises SIN-derived words (SIN = System Identification Number), so
+#    "Sinner" must read "SINner"; the source lowercases them.
+#  * two entries have literal U+FFFD bytes baked into the jar (upstream data
+#    corruption, not an encoding problem on our side).
+_NAME_FIXES = {
+    "Sinner": "SINner",
+    "Sinless": "SINless",
+    "Sinners": "SINners",
+    "Real World Na�vet�": "Real World Naïveté",
+}
+# whole-word casing repairs applied inside longer names
+_WORD_FIXES = [
+    (re.compile(r"\bSinner(s?)\b"), r"SINner\1"),
+    (re.compile(r"\bSinless\b"), "SINless"),
+    (re.compile(r"\bSin\b(?!\s*[a-z])"), "SIN"),
+]
+
+
+def fix_name(name: str) -> str:
+    if not name:
+        return name
+    if name in _NAME_FIXES:
+        return _NAME_FIXES[name]
+    for rx, repl in _WORD_FIXES:
+        name = rx.sub(repl, name)
+    return name
+
 # Commlink6 lumps many enhancements under type=ACCESSORY and distinguishes them by
 # subtype; our app groups by type ("Weapon Accessory"), so re-derive the display
 # type from the subtype (raw cl6 type preserved in system._cl6). WEAPON_ACCESSORY
@@ -264,7 +292,7 @@ def to_item(rec, cl6_book):
     sysd["genesisID"] = rec["id"]
     item = {
         "id": f"cl6_{rec['id']}".replace("-", "_").lower(),   # slug: lowercase, no '-'
-        "name": rec["name"],
+        "name": fix_name(rec["name"]),
         "system": sysd,
         "meta": {"book": our_book(cl6_book), "page": _int(rec["page"]) or 1,
                  "source": "commlink6", "qaStatus": "extracted",
