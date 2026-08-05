@@ -259,8 +259,11 @@ def to_item(rec, cl6_book):
     domain, file = _route_by_type(domain, file, sysd)
     # adopt shadowrun6-eden codes (raw cl6 kept in system._cl6)
     sysd["type"], sysd["subtype"] = map_code(sysd.get("type"), sysd.get("subtype"))
+    # genesisID = RAW cl6 id: eden's Commlink6/Genesis importer swaps items by
+    # system.genesisID, and the chargen engine references qualities the same way.
+    sysd["genesisID"] = rec["id"]
     item = {
-        "id": f"cl6_{rec['id']}",
+        "id": f"cl6_{rec['id']}".replace("-", "_").lower(),   # slug: lowercase, no '-'
         "name": rec["name"],
         "system": sysd,
         "meta": {"book": our_book(cl6_book), "page": _int(rec["page"]) or 1,

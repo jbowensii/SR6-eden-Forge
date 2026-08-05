@@ -56,8 +56,10 @@ GERMAN_BOOKS = {"de_alpen", "de_berlin2080", "de_bundeswehr", "de_feuerlaeufer",
                 "de_sota2082", "de_sota2083", "de_westphalen"}
 NON_CONTENT = {"icons", "placeholder", "other_us"}
 
-_SUBKEY = re.compile(r"^[A-Za-z_]+\.([A-Za-z0-9_]+)\.(desc|page|wifi|source)=(.*)$")
-_NAMEKEY = re.compile(r"^[A-Za-z_]+\.([A-Za-z0-9_]+)=(.*)$")
+# NOTE: some bundles pad the separator ("metatype.human = Human"), so allow
+# whitespace around '=' — without it the 5 core metatypes lose their names.
+_SUBKEY = re.compile(r"^[A-Za-z_]+\.([A-Za-z0-9_-]+)\.(desc|page|wifi|source)\s*=\s*(.*)$")
+_NAMEKEY = re.compile(r"^[A-Za-z_]+\.([A-Za-z0-9_-]+)\s*=\s*(.*)$")
 
 
 def norm(s: str) -> str:
@@ -120,9 +122,10 @@ def read_book(book: str, jar: Path = DEFAULT_JAR) -> dict:
     with zipfile.ZipFile(jar) as z:
         text = _i18n(z, book)
         stats = _stats(z, book)
+    lower = {k.lower(): v for k, v in text.items()}
     recs = {}
     for iid, s in stats.items():
-        t = text.get(iid, {})
+        t = text.get(iid) or lower.get(iid.lower()) or {}   # ids can differ in case (mrJohnson)
         a = s["attrs"]
         recs[iid] = {
             "id": iid, "name": t.get("name", ""), "page": t.get("page", ""),
