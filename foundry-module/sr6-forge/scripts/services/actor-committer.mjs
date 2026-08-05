@@ -1,7 +1,16 @@
 /** Turn a ChargenEngine commit plan into a live eden Player actor.
- *  Raw inputs only — eden's prepareData derives pools/monitors/essence.
- *  Items are embedded via createEmbeddedDocuments so eden's preCreateItem
- *  genesisID enrichment runs. Rollback deletes the actor on any failure. */
+ *
+ *  Raw inputs only. Eden derives everything else in Shadowrun6Actor.prepareData:
+ *  attribute pools as `max(0, base + min(4, mod))`, the condition monitors, and
+ *  essence from gear. We must never write those.
+ *
+ *  Items go through createEmbeddedDocuments rather than being stuffed into the
+ *  actor's creation data, so eden's `preCreateItem` hook runs on each one — it
+ *  swaps in the system icon for the item's type and, when a translation exists
+ *  for `<type>.<genesisID>`, replaces the name and description with eden's
+ *  localized text.
+ *
+ *  Rollback deletes the actor on any failure. */
 import { MODULE_ID, FLAGS } from "../config.mjs";
 import { PackCatalog } from "./pack-catalog.mjs";
 

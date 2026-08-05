@@ -175,12 +175,34 @@ export function registerQuenchBatches(quench) {
       });
 
       it("lets EDEN derive the pools — this is the whole architecture", function () {
-        // we never write .pool; if eden computed it, raw-inputs-only is working
-        const agi = actor.system.attributes.agi;
-        assert.equal(agi.pool, agi.base + (agi.mod ?? 0) + (agi.augment ?? 0),
-          "eden did not derive the attribute pool");
+        // We never write .pool. Eden's formula (documents/actor.js) is
+        //   pool = max(0, base + min(4, mod))
+        // note: mod is capped at 4 and `augment` is NOT part of it.
+        for (const attr of ["bod", "agi", "rea", "str", "wil", "log", "int", "cha"]) {
+          const a = actor.system.attributes[attr];
+          const expected = Math.max(0, a.base + Math.min(4, a.mod ?? 0));
+          assert.equal(a.pool, expected, `eden did not derive ${attr}.pool`);
+        }
         assert.isNumber(actor.system.physical?.max, "no derived physical monitor");
         assert.isAbove(actor.system.physical.max, 0);
+        assert.isNumber(actor.system.stun?.max, "no derived stun monitor");
+      });
+
+      it("matches eden's attribute field shapes exactly", function () {
+        // template.json: core attrs are {base,mod,modString,augment,pool};
+        // edg is {current,max} with NO base; mag adds min+initiation; res adds
+        // submersion. Writing the wrong shape silently loses data.
+        assert.property(actor.system.attributes.bod, "base");
+        assert.property(actor.system.attributes.edg, "max");
+        assert.property(actor.system.attributes.edg, "current");
+        assert.notProperty(actor.system.attributes.edg, "base",
+          "edge has no base in eden's template");
+      });
+
+      it("zeroes Magic for a mundane, as eden insists", function () {
+        // eden forces mag.base = 0 when !isAwakened, res.base = 0 when !isTechno
+        assert.equal(actor.system.attributes.mag.base, 0);
+        assert.equal(actor.system.attributes.res.base, 0);
       });
 
       it("records the chargen snapshot for later reference", function () {

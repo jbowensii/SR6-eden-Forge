@@ -42,13 +42,30 @@ Hooks.once("init", () => {
     restricted: true,                 // world rules — GM only
   });
 
-  // browse lists need these on top of eden's ["name","type","system.genesisID"]
+  addIndexFields();
+});
+
+/**
+ * The wizard's browse lists need price/avail/type indexed on top of eden's
+ * `["name", "type", "system.genesisID"]`.
+ *
+ * Eden *assigns* that array in its own `init` rather than appending, so any
+ * field pushed before it is discarded. Today we win on ordering — the server
+ * loads system esmodules at priority 6 and normal module esmodules at 8
+ * (dist/server/views/view.mjs), so eden's init runs first and our push lands
+ * after it. That is not something to rely on: a `library: true` module loads at
+ * priority 4, and eden could reorder its own init at any time. Re-applying at
+ * `setup` (after every init has run) makes the outcome independent of all that.
+ */
+function addIndexFields() {
   for (const f of EXTRA_INDEX_FIELDS) {
     if (!CONFIG.Item.compendiumIndexFields.includes(f)) {
       CONFIG.Item.compendiumIndexFields.push(f);
     }
   }
-});
+}
+
+Hooks.once("setup", addIndexFields);
 
 Hooks.once("ready", async () => {
   try {
