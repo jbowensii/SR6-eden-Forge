@@ -10,6 +10,15 @@
   overflow: hidden;
 }
 
+/* single root element per ApplicationV2 part */
+.sr6-forge .wizard-root {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+
 /* wizard frame: step rail | body, budget bar below */
 .sr6-forge .wizard-grid {
   display: grid;

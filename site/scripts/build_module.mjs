@@ -44,12 +44,21 @@ if (args.includes("--deploy")) {
       "(point it at your local FoundryVTT Data folder)");
   }
   const modules = join(dataPath, "modules");
-  for (const id of ["sr6-forge", "sr6-forge-corebook"]) {
+  // --app-only skips the data module (its LevelDB packs are locked while
+  // Foundry is running; they rarely change anyway).
+  const ids = args.includes("--app-only") ? ["sr6-forge"] : ["sr6-forge", "sr6-forge-corebook"];
+  for (const id of ids) {
     const from = join(root, "export", id);
     if (!existsSync(from)) { console.log(`skip ${id} (not built)`); continue; }
     const to = join(modules, id);
-    rmSync(to, { recursive: true, force: true });
-    cpSync(from, to, { recursive: true });
-    console.log(`deployed ${id} -> ${to}`);
+    try {
+      rmSync(to, { recursive: true, force: true });
+      cpSync(from, to, { recursive: true });
+      console.log(`deployed ${id} -> ${to}`);
+    } catch (err) {
+      if (err.code === "EPERM" || err.code === "EBUSY") {
+        console.warn(`SKIPPED ${id}: files locked (close Foundry to redeploy packs)`);
+      } else throw err;
+    }
   }
 }
