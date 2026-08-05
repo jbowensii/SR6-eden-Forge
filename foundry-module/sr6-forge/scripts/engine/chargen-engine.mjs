@@ -17,7 +17,7 @@ function blankAttributes() {
 export function blankState(method = "priority", rulesetId = "core") {
   return {
     method, rulesetId,
-    optionalRules: {},              // world overrides of CHARGEN_* constants
+    optionalRules: {},              // world overrides of the creation settings
     name: "",
     priorities: { METATYPE: null, ATTRIBUTE: null, MAGIC: null, SKILLS: null, RESOURCES: null },
     // point-buy: character points allocated to each pool (Companion p28-29)

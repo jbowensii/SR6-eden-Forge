@@ -2,18 +2,37 @@
   "id": "sr6-forge",
   "title": "SR6 Forge — Character Generation & Advancement",
   "description": "Shadowrun 6e character generation (Priority, Sum-to-Ten, Point-Buy, Karma, Lifepath) and karma advancement for the shadowrun6-eden system. Personal-use build — not for distribution.",
-  "version": "0.3.0",
-  "compatibility": { "minimum": "13", "verified": "13", "maximum": "14" },
-  "authors": [{ "name": "SR6-eden-Forge" }],
-  "esmodules": ["scripts/main.mjs"],
-  "styles": ["styles/sr6-forge.css"],
-  "languages": [{ "lang": "en", "name": "English", "path": "lang/en.json" }],
+  "version": "0.4.0",
+  "compatibility": {
+    "minimum": "13",
+    "verified": "13"
+  },
+  "authors": [
+    {
+      "name": "SR6-eden-Forge"
+    }
+  ],
+  "esmodules": [
+    "scripts/main.mjs"
+  ],
+  "styles": [
+    "styles/sr6-forge.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
   "relationships": {
     "systems": [
       {
         "id": "shadowrun6-eden",
         "type": "system",
-        "compatibility": { "minimum": "4.0.0" }
+        "compatibility": {
+          "minimum": "4.0.0"
+        }
       }
     ],
     "requires": [
@@ -26,6 +45,17 @@
     ]
   },
   "flags": {
-    "hotReload": { "extensions": ["css", "hbs", "json"], "paths": ["styles", "templates", "lang"] }
+    "hotReload": {
+      "extensions": [
+        "css",
+        "hbs",
+        "json"
+      ],
+      "paths": [
+        "styles",
+        "templates",
+        "lang"
+      ]
+    }
   }
 }

@@ -86,6 +86,17 @@ Hooks.once("ready", async () => {
   };
 });
 
+/* Quench integration tests — only loaded when that module is active, so the
+   test code never ships weight into a normal session. */
+Hooks.on("quenchReady", async (quench) => {
+  try {
+    const { registerQuenchBatches } = await import("./tests/quench-batches.mjs");
+    registerQuenchBatches(quench);
+  } catch (err) {
+    console.error(`${MODULE_ID} | failed to register Quench batches`, err);
+  }
+});
+
 /* Launcher: button in the Actors directory footer (v13 AppV2 directory). */
 Hooks.on("renderActorDirectory", (app, html) => {
   const el = html instanceof HTMLElement ? html : html[0];

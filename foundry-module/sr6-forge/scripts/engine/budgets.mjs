@@ -4,20 +4,25 @@
 export const CORE_ATTRS = ["bod", "agi", "rea", "str", "wil", "log", "int", "cha"];
 export const SPECIAL_ATTRS = ["edg", "mag", "res"];
 
-/** Effective creation rule value: ruleset interpretation overrides defaults. */
-export function ruleConst(name, data, rules, rulesetId, overrides = null) {
-  // world-level optional-rule overrides beat the interpretation defaults
+/**
+ * Effective value of a creation setting, most specific source first:
+ * world override → rule interpretation → our own default.
+ *
+ * Setting names are this project's own (camelCase, Foundry/eden style); the
+ * source data's SCREAMING_SNAKE rule ids are translated once at the import
+ * boundary, in extractor/chargen_xml.py.
+ *
+ * @param {string} name        e.g. "maxAvailability"
+ * @param {object} data        chargen-data.json
+ * @param {object} rules       creation-rules.json
+ * @param {string} rulesetId   selected rule interpretation
+ * @param {object|null} overrides  world-level optional-rule overrides
+ */
+export function creationSetting(name, data, rules, rulesetId, overrides = null) {
   if (overrides && name in overrides) return overrides[name];
-  const set = data.rules?.[rulesetId]?.set ?? {};
-  if (name in set) return set[name];
-  const d = rules.defaults;
-  switch (name) {
-    case "CHARGEN_MAX_AVAILABILITY": return d.maxAvailability;
-    case "CHARGEN_MAX_KARMA_REMAIN": return d.maxKarmaRemain;
-    case "CHARGEN_MAX_NUYEN_REMAIN": return d.maxNuyenRemain;
-    case "CHARGEN_NEGATIVE_NUYEN": return d.allowNegativeNuyen;
-    default: return undefined;
-  }
+  const fromRuleset = data.rules?.[rulesetId]?.settings ?? {};
+  if (name in fromRuleset) return fromRuleset[name];
+  return rules.defaults?.[name];
 }
 
 /** Natural rating of an attribute from raw spends (all start at 1; mag/res
@@ -80,15 +85,34 @@ export function qualityKarma(state, data) {
   return { pos, neg };
 }
 
+/**
+ * Spells, rituals and complex forms a character gets for free at creation.
+ *
+ * Core p66: a full magician gets Magic x 2, a technomancer Resonance x 2, and
+ * both use the PRIORITY rating — "not as altered with any points, Karma, or
+ * any other adjustments". Core p67: a mystic adept first spends priority Magic
+ * on power points, then doubles what is left.
+ */
+export function freeSpellSlots(state, data, provider) {
+  const mor = data.morTypes?.[state.morId] ?? {};
+  const priorityRating = provider.magicRating(state);   // priority table only
+  if (mor.resonance) return priorityRating * 2;
+  if (!mor.spells) return 0;
+  const spentOnPowers = mor.paysPowers ? (state.powerPointsBought ?? 0) : 0;
+  return Math.max(0, priorityRating - spentOnPowers) * 2;
+}
+
 export function karmaBudget(state, data, rules, provider) {
   // Karma-build replaces the 50-karma allowance with its own pool
   const start = provider.startingKarma?.(rules) ?? rules.startingKarma.value;
   const q = qualityKarma(state, data);
-  const spellCost = Math.max(0, state.spells.length - rules.spellsAtCreation.freeSpells)
-    * rules.spellsAtCreation.karmaCost;
-  const cfCost = Math.max(0, state.complexForms.length - rules.complexFormsAtCreation.freeForms)
+  const free = freeSpellSlots(state, data, provider);
+  const known = state.spells.length + state.rituals.length;
+  const spellCost = Math.max(0, known - free) * rules.spellsAtCreation.karmaCost;
+  const cfCost = Math.max(0, state.complexForms.length - free)
     * rules.complexFormsAtCreation.karmaCost;
-  const ppCost = (state.powerPointsBought ?? 0) * rules.mysticAdeptPowerPoints.karmaPerPoint;
+  // Power points are a split of the priority Magic, not a karma purchase.
+  const ppCost = 0;
   const perRank = rules.karmaCosts?.attributePerRank ?? 5;
   const attrKarma = [...CORE_ATTRS, ...SPECIAL_ATTRS]
     .reduce((n, k) => {
@@ -126,13 +150,18 @@ export function essenceUsed(state) {
   return state.purchases.reduce((n, p) => n + (p.essence ?? 0) * (p.qty ?? 1), 0);
 }
 
+/**
+ * Adept power points. Core p67: an adept's pool equals "their Magic (as listed
+ * in the Priority table, before any adjustments)"; a mystic adept instead buys
+ * power points out of that same priority Magic, capped by it.
+ */
 export function powerPoints(state, data, rules, provider) {
   const mor = data.morTypes?.[state.morId] ?? {};
   let max = 0;
-  if (mor.powers && !mor.paysPowers) max = attrRating(state, "mag", provider);       // adept
-  else if (mor.powers && mor.paysPowers) max = state.powerPointsBought ?? 0;         // mystic adept
+  if (mor.powers && !mor.paysPowers) max = provider.magicRating(state);       // adept
+  else if (mor.powers && mor.paysPowers) max = state.powerPointsBought ?? 0;  // mystic adept
   const spent = state.powers.reduce((n, p) => n + (p.cost ?? 0) * (p.level ?? 1), 0);
-  return { max, spent, left: max - spent };
+  return { max, spent, left: max - spent, cap: provider.magicRating(state) };
 }
 
 /** Core p68: Charisma x 6 points across Connection + Loyalty; neither rating
@@ -170,6 +199,13 @@ export function allBudgets(state, data, rules, provider) {
     nuyen: nuyenBudget(state, data, rules, provider),
     essence: { max: 6, spent: essenceUsed(state), left: 6 - essenceUsed(state) },
     powerPoints: powerPoints(state, data, rules, provider),
+    spellSlots: (() => {
+      const max = freeSpellSlots(state, data, provider);
+      const mor = data.morTypes?.[state.morId] ?? {};
+      const used = mor.resonance ? state.complexForms.length
+        : state.spells.length + state.rituals.length;
+      return { max, spent: used, left: max - used };
+    })(),
     contactPoints: contactPoints(state, rules, provider),
     knowledgePoints: knowledgePoints(state, rules, provider),
     // point-buy only; undefined for every other method

@@ -1,19 +1,76 @@
 {
   "_note": "Character-creation constants. Every value with a 'verify' id is confirmed against the owned core rulebook / Companion PDFs in the Phase-4 verification pass before release — do not trust unverified numbers.",
-  "startingKarma": { "value": 50, "verify": "V-C1" },
-  "qualityNetBonusKarmaCap": { "value": 20, "verified": "core rulebook p67 — 'the net bonus Karma cannot be more than 20'" },
-  "qualityMaxCount": { "value": 6, "verified": "core rulebook p67 — 'You can't select more than six total qualities at character creation' (free racial qualities excluded)" },
-  "attributeStartingValue": { "value": 1 },
-  "oneAttributeAtMax": { "value": true, "includesEdge": false, "verify": "V-C3" },
-  "skillCreationCap": { "value": 6, "aptitudeCap": 7, "aptitudeQualityId": "aptitude", "verify": "V-C5" },
-  "knowledgePointsFormula": { "value": "log", "freeNativeLanguage": true, "verified": "core rulebook p68 — 'a certain number of free Knowledge and Language skills at character creation ... equal to their Logic, plus one free Native Language'" },
-  "contactPointsFormula": { "value": "cha*6", "ratingCap": "cha", "verified": "core rulebook p68 — 'you have a total of Charisma x 6 points to spend on Connection and Loyalty ratings for your contacts, and at this point, neither rating can be higher than the character's Charisma'" },
-  "karmaToNuyen": { "rate": 2000, "maxKarma": 10, "verify": "V-C8" },
-  "spellsAtCreation": { "karmaCost": 5, "freeSpells": 0, "verify": "V-C9" },
-  "complexFormsAtCreation": { "karmaCost": 5, "freeForms": 0, "verify": "V-C9" },
-  "mysticAdeptPowerPoints": { "karmaPerPoint": 5, "maxPoints": "mag", "verify": "V-C10" },
-  "adeptPowerPoints": { "formula": "mag" },
-  "aspectedPickOne": { "value": true, "options": ["sorcery", "conjuring", "enchanting"], "verify": "V-C11" },
+  "startingKarma": {
+    "value": 50,
+    "verified": "core rulebook p67 Step Five — the 50 Karma of customization every character receives; the Companion repeats it for each alternate method ('You still gain 50 points of customization Karma', p28)"
+  },
+  "qualityNetBonusKarmaCap": {
+    "value": 20,
+    "verified": "core rulebook p67 — 'the net bonus Karma cannot be more than 20'"
+  },
+  "qualityMaxCount": {
+    "value": 6,
+    "verified": "core rulebook p67 — 'You can't select more than six total qualities at character creation' (free racial qualities excluded)"
+  },
+  "attributeStartingValue": {
+    "value": 1
+  },
+  "oneAttributeAtMax": {
+    "value": true,
+    "includesEdge": false,
+    "verified": "core rulebook p66 — only one attribute may start at its metatype maximum; the same paragraph caps skills separately, and Edge is not one of the eight standard attributes"
+  },
+  "skillCreationCap": {
+    "value": 6,
+    "aptitudeCap": 7,
+    "aptitudeQualityId": "aptitude",
+    "verified": "core rulebook p66 — 'During character creation, skills can be purchased up to rank 6 (7 with the Aptitude Quality). Only one skill can be put at that maximum level (6 or 7).'"
+  },
+  "knowledgePointsFormula": {
+    "value": "log",
+    "freeNativeLanguage": true,
+    "verified": "core rulebook p68 — 'a certain number of free Knowledge and Language skills at character creation ... equal to their Logic, plus one free Native Language'"
+  },
+  "contactPointsFormula": {
+    "value": "cha*6",
+    "ratingCap": "cha",
+    "verified": "core rulebook p68 — 'you have a total of Charisma x 6 points to spend on Connection and Loyalty ratings for your contacts, and at this point, neither rating can be higher than the character's Charisma'"
+  },
+  "karmaToNuyen": {
+    "rate": 2000,
+    "inDebtRate": 5000,
+    "maxKarma": 10,
+    "verified": "core rulebook p67 — 'The exchange rate is 2,000 nuyen per Karma, or 5,000 with the In Debt quality.'",
+    "maxKarmaNote": "The core rules state no explicit cap on karma converted to nuyen; the 10-karma limit is this project's guard rail and can be changed on the optional-rules screen."
+  },
+  "spellsAtCreation": {
+    "freeFormula": "priorityMagic*2",
+    "karmaCost": 5,
+    "verified": "core rulebook p66 — full magicians 'get a number of spells or rituals equal to their Magic x 2 — the rating used for that calculation is the Magic in the Priority table, not as altered with any points, Karma, or any other adjustments'; extras cost 5 Karma (p70, and Companion p29 'either 2 CP or 5 Karma each')"
+  },
+  "complexFormsAtCreation": {
+    "freeFormula": "priorityResonance*2",
+    "karmaCost": 5,
+    "verified": "core rulebook p66 — technomancers 'select a number of complex forms equal to Resonance x 2 (using the Resonance figure from the Priority table, not the number as adjusted)'"
+  },
+  "mysticAdeptPowerPoints": {
+    "source": "priorityMagic",
+    "spellsFromRemainingMagic": true,
+    "verified": "core rulebook p67 — mystic adepts 'must split their Magic between spells and adept powers. They first purchase adept powers up to a maximum of their Magic attribute then multiply the remaining Magic by 2 to determine their starting number of spell choices.' Power points are a split of the priority Magic, NOT bought with Karma."
+  },
+  "adeptPowerPoints": {
+    "formula": "priorityMagic",
+    "verified": "core rulebook p67 — 'Adepts have a pool of points equal to their Magic (as listed in the Priority table, before any adjustments)'"
+  },
+  "aspectedPickOne": {
+    "value": true,
+    "options": [
+      "sorcery",
+      "conjuring",
+      "enchanting"
+    ],
+    "verified": "core rulebook p66 — 'Aspected magicians are only able to utilize one of the three aspects of magic: spellcasting (Sorcery), summoning (Conjuring), or enchanting (Enchanting)', and gain an extra point of Magic to compensate"
+  },
   "karmaBuild": {
     "_source": "NOT from an English rulebook. Commlink6 1.14.0 KarmaCharacterGenerator sets startKarma = 1000; attributes and skills use the shared advancement price (5 x new rank), metatype and Magic/Resonance use their data karma costs. Override on the optional-rules screen if your table uses different numbers.",
     "startingKarma": 1000
@@ -33,10 +90,13 @@
     "removeNegativeQualityMultiplier": 2
   },
   "defaults": {
+    "_note": "Fallbacks when neither a world override nor the selected rule interpretation supplies a value. Names match the setting vocabulary in extractor/chargen_xml.py RULE_SETTING_NAMES.",
     "maxAvailability": 6,
-    "maxKarmaRemain": 5,
-    "maxNuyenRemain": 5000,
+    "maxKarmaRemaining": 5,
+    "maxNuyenRemaining": 5000,
     "allowNegativeNuyen": false,
-    "verify": "V-C13 (core defaults; ruleset interpretations override via chargen-data rules)"
+    "adjustmentOnLoweredMax": false,
+    "sumToTenTarget": 10,
+    "verified": "core rulebook p68 — 'you can't go into the game with more than' 5,000 nuyen; availability 6 and the 5-karma leftover are the core creation limits"
   }
 }

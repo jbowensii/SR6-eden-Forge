@@ -6,7 +6,7 @@ import { MODULE_ID, SETTINGS, ACTOR_SKILLS } from "../../config.mjs";
 import { chargenData } from "../../main.mjs";
 import { ChargenEngine } from "../../engine/chargen-engine.mjs";
 import { POINT_BUY, LIFEPATH_ADULT_COUNT } from "../../engine/providers.mjs";
-import { qualityKarma, ruleConst } from "../../engine/budgets.mjs";
+import { qualityKarma, creationSetting } from "../../engine/budgets.mjs";
 import { DraftStore } from "../../services/draft-store.mjs";
 import { PackCatalog } from "../../services/pack-catalog.mjs";
 import { commitCharacter } from "../../services/actor-committer.mjs";
@@ -504,7 +504,7 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
           id: t.id, label: t.label, active: t.id === tabDef.id,
           enabled: t.magic ? !!(mor.spells || mor.powers || mor.resonance) : true,
         }));
-        const cap = ruleConst("CHARGEN_MAX_AVAILABILITY", data, rules, st.rulesetId, st.optionalRules);
+        const cap = creationSetting("maxAvailability", data, rules, st.rulesetId, st.optionalRules);
         const base = {
           tabs, tabLabel: tabDef.label, owned: st.purchases,
           spentText: `${budgets.nuyen.spent.toLocaleString()}¥ spent · ${budgets.nuyen.left.toLocaleString()}¥ left`,
@@ -864,7 +864,8 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
       return ui.notifications.error("SR6 Forge: resolve all errors before creating the character.");
     }
     try {
-      const actor = await commitCharacter(this.engine.commitPlan());
+      const actor = await commitCharacter(this.engine.commitPlan(),
+        { engineState: this.engine.toDraft() });
       await DraftStore.delete(this.draftId);
       ui.notifications.info(`SR6 Forge: ${actor.name} created.`);
       await this.close();

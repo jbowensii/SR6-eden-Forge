@@ -245,9 +245,54 @@ def parse_skills(trees: list[dict], i18n: dict) -> dict:
     return out
 
 
+#: Upstream rule identifiers -> the setting names this project uses.
+#:
+#: The source data labels its optional rules with SCREAMING_SNAKE constants.
+#: Those are the upstream application's identifier namespace, not ours, so they
+#: are translated once here, at the import boundary. Everything downstream —
+#: chargen-data.json, the engine, the options screen — speaks only the
+#: camelCase names on the right, which match Foundry and shadowrun6-eden style.
+RULE_SETTING_NAMES = {
+    "CHARGEN_MAX_AVAILABILITY": "maxAvailability",
+    "CHARGEN_MAX_KARMA_REMAIN": "maxKarmaRemaining",
+    "CHARGEN_MAX_NUYEN_REMAIN": "maxNuyenRemaining",
+    "CHARGEN_NEGATIVE_NUYEN": "allowNegativeNuyen",
+    "CHARGEN_ADJUSTMENT_ON_LOWERED_MAX": "adjustmentOnLoweredMax",
+    "CHARGEN_SUM_TO_TEN_ELITE": "sumToTenTarget",
+    "CHARGEN_ALLOW_INITIATION": "allowInitiation",
+    "CHARGEN_MAX_INITIATION": "maxInitiationGrade",
+    "CHARGEN_MAX_SUBMERSION": "maxSubmersionGrade",
+    "CHARGEN_MAX_TRANSHUMAN": "maxTranshumanGrade",
+    "CHARGEN_MAX_ANIMALISM": "maxAnimalismGrade",
+    "CHARGEN_BUY_SPELLS_KARMA": "buySpellsWithKarma",
+    "CHARGEN_RAISE_ABOVE_6": "raiseMagicAboveSix",
+    "CHARGEN_EXTENDED_CONTACT": "extendedContactRules",
+    "CHARGEN_MORE_KNOWLEDGE": "knowledgeFromLogicAndIntuition",
+    "CHARGEN_PRIO_ADEPT_PP_PRIO_MAGIC": "powerPointsFromPriorityOnly",
+    "CHARGEN_PRIO_ADJUSTED_MAGIC_RESO": "useAdjustedMagicResonance",
+    "CHARGEN_ERRATED_POINT_BUY": "erratedPointBuyResources",
+    "ALLOW_TRANSHUMANISM": "allowTranshumanism",
+    "ALLOW_NEUROMORPHISM": "allowNeuromorphism",
+    "ALLOW_ANIMALISM": "allowAnimalism",
+    "ALLOW_USED_CULTURED_BIOWARE": "allowUsedCulturedBioware",
+    "ADD_STRENGTH_TO_MELEE_AR": "addStrengthToMeleeAttackRating",
+    "HIGH_STRENGTH_ADDS_DAMAGE": "strengthAddsMeleeDamage",
+    "EXPANDED_SPECIALIZATIONS": "expandedSpecializations",
+    "MYSTADEPT_ADVANCE_RAISE_MAGIC_RAISE_PP": "mysticAdeptMagicRaisesPowerPoints",
+    "CARGOFACTOR_IS_WITHOUT_SEATS": "seatsOccupyCargoFactor",
+}
+
+
+def setting_name(upstream_id: str) -> str:
+    """Translate an upstream rule id; unmapped ids fall back to camelCase."""
+    if upstream_id in RULE_SETTING_NAMES:
+        return RULE_SETTING_NAMES[upstream_id]
+    head, *rest = upstream_id.lower().split("_")
+    return head + "".join(w.capitalize() for w in rest)
+
+
 def parse_rule_labels(z: zipfile.ZipFile) -> dict:
-    """Shadowrun6Rules.properties -> {RULE_CONST: label} — the optional-rule
-    switches Commlink6 exposes in its settings."""
+    """Shadowrun6Rules.properties -> {settingName: label} for the optional rules."""
     path = "de/rpgframework/shadowrun6/Shadowrun6Rules.properties"
     if path not in set(z.namelist()):
         return {}
@@ -255,12 +300,18 @@ def parse_rule_labels(z: zipfile.ZipFile) -> dict:
     for ln in decode_props(z.read(path)).splitlines():
         m = re.match(r"^rule\.([a-z0-9_.]+)\s*=\s*(.*)$", ln.strip())
         if m:
-            out[m.group(1).upper().replace(".", "_")] = m.group(2).strip()
+            upstream = m.group(1).upper().replace(".", "_")
+            out[setting_name(upstream)] = m.group(2).strip()
     return out
 
 
 def parse_rules(trees: list[dict]) -> dict:
-    """rules.xml -> {interpretationId: {restrict[], set{RULE: value}}}."""
+    """rules.xml -> {interpretationId: {restrict[], settings{name: value}}}.
+
+    Rule ids are translated to this project's setting names (see
+    ``RULE_SETTING_NAMES``) so no downstream code carries the upstream
+    application's identifier namespace.
+    """
     def coerce(v: str):
         if v in ("true", "false"):
             return v == "true"
@@ -270,16 +321,17 @@ def parse_rules(trees: list[dict]) -> dict:
     for t in trees:
         if t["tag"] != "interpretation":
             continue
-        sets = {}
+        settings = {}
         for c in t["children"]:
             if c["tag"] == "rules":
                 for s in c["children"]:
                     if s["tag"] == "set":
-                        sets[s["attrs"]["rule"]] = coerce(s["attrs"].get("to", ""))
+                        name = setting_name(s["attrs"]["rule"])
+                        settings[name] = coerce(s["attrs"].get("to", ""))
         out[t["attrs"]["id"]] = {
             "lang": t["attrs"].get("lang", ""),
             "restrict": [r for r in t["attrs"].get("restrict", "").split(",") if r],
-            "set": sets,
+            "settings": settings,
         }
     return out
 

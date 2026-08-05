@@ -86,11 +86,32 @@ def test_skills_and_specs(data):
 
 
 def test_rules_interpretations(data):
-    srm = data["rules"]["srm"]["set"]
-    assert srm["CHARGEN_MAX_AVAILABILITY"] == 7
-    assert srm["CHARGEN_MAX_KARMA_REMAIN"] == 5
-    assert srm["CHARGEN_ADJUSTMENT_ON_LOWERED_MAX"] is False
-    assert srm["EXPANDED_SPECIALIZATIONS"] is True
+    srm = data["rules"]["srm"]["settings"]
+    assert srm["maxAvailability"] == 7
+    assert srm["maxKarmaRemaining"] == 5
+    assert srm["adjustmentOnLoweredMax"] is False
+    assert srm["expandedSpecializations"] is True
+
+
+def test_upstream_rule_ids_never_reach_the_shipped_data(data):
+    """The source data's SCREAMING_SNAKE rule ids are the upstream application's
+    identifier namespace. They are translated once at the import boundary, so
+    nothing downstream should ever see one."""
+    for ruleset in data["rules"].values():
+        for key in ruleset["settings"]:
+            assert not key.isupper(), f"untranslated rule id in settings: {key}"
+    for key in data["ruleLabels"]:
+        assert not key.isupper(), f"untranslated rule id in ruleLabels: {key}"
+
+
+def test_rule_setting_names_are_camel_case(data):
+    from extractor.chargen_xml import RULE_SETTING_NAMES, setting_name
+
+    assert setting_name("CHARGEN_MAX_AVAILABILITY") == "maxAvailability"
+    # an id we have not mapped still comes out camelCase, never SCREAMING_SNAKE
+    assert setting_name("SOME_FUTURE_RULE") == "someFutureRule"
+    for name in RULE_SETTING_NAMES.values():
+        assert name[0].islower() and "_" not in name
 
 
 def test_quality_meta(data):

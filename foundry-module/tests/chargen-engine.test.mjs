@@ -367,7 +367,7 @@ describe("optional-rule overrides", () => {
     e.setMetatype("human");
     e.state.purchases.push({ uuid: "x", name: "Ares Alpha", price: 0, avail: 12, qty: 1 });
     expect(e.validate().map((i) => i.id)).toContain("gear.availCap");
-    e.setOptionalRules({ CHARGEN_MAX_AVAILABILITY: 12 });
+    e.setOptionalRules({ maxAvailability: 12 });
     expect(e.validate().map((i) => i.id)).not.toContain("gear.availCap");
   });
 });
@@ -561,5 +561,90 @@ describe("Life path (Companion p31-48)", () => {
       expect(e.budgets().attributePoints.max)
         .toBe(before.attributePoints.max + (mod.choices[idx].points ?? 1));
     }
+  });
+});
+
+describe("magic at creation (core p66-67)", () => {
+  /** MAGIC priority A: full 4, aspected 5, mystic adept 4, adept 4, techno 4. */
+  function mage(morId, magicLetter = "A") {
+    const e = engineWith({ METATYPE: "D", ATTRIBUTE: "B", MAGIC: magicLetter,
+      SKILLS: "C", RESOURCES: "E" });
+    e.setMetatype("human");
+    e.setMagicPath(morId);
+    return e;
+  }
+
+  it("gives a full magician priority Magic x 2 spells for free", () => {
+    const e = mage("magician");
+    const priority = e.provider.magicRating(e.state);
+    expect(e.budgets().spellSlots.max).toBe(priority * 2);
+    for (let i = 0; i < priority * 2; i++) {
+      e.spend({ kind: "spell", uuid: `s${i}`, name: `Spell ${i}` });
+    }
+    expect(e.budgets().karma.spent).toBe(0);            // all free
+    expect(e.budgets().spellSlots.left).toBe(0);
+  });
+
+  it("charges 5 karma per spell beyond the free allotment", () => {
+    const e = mage("magician");
+    const free = e.budgets().spellSlots.max;
+    for (let i = 0; i <= free; i++) {
+      e.spend({ kind: "spell", uuid: `s${i}`, name: `Spell ${i}` });
+    }
+    expect(e.budgets().karma.spent).toBe(rules.spellsAtCreation.karmaCost);
+  });
+
+  it("counts rituals against the same allotment as spells", () => {
+    const e = mage("magician");
+    const free = e.budgets().spellSlots.max;
+    for (let i = 0; i < free; i++) e.spend({ kind: "spell", uuid: `s${i}`, name: `S${i}` });
+    expect(e.budgets().karma.spent).toBe(0);
+    e.spend({ kind: "ritual", uuid: "r1", name: "A ritual" });
+    expect(e.budgets().karma.spent).toBe(rules.spellsAtCreation.karmaCost);
+  });
+
+  it("uses the PRIORITY Magic, not the adjusted rating", () => {
+    const e = mage("magician");
+    const priority = e.provider.magicRating(e.state);
+    e.spend({ kind: "attribute", target: "mag", pool: "adjust", delta: 2 });
+    expect(e.attrRating("mag")).toBe(priority + 2);      // the attribute rose
+    expect(e.budgets().spellSlots.max).toBe(priority * 2); // the allotment did not
+  });
+
+  it("gives an adept power points equal to priority Magic, free", () => {
+    const e = mage("adept");
+    const priority = e.provider.magicRating(e.state);
+    expect(e.budgets().powerPoints.max).toBe(priority);
+    expect(e.budgets().karma.spent).toBe(0);
+  });
+
+  it("splits a mystic adept's Magic between power points and spells", () => {
+    const e = mage("mysticadept");
+    const priority = e.provider.magicRating(e.state);
+    expect(e.budgets().spellSlots.max).toBe(priority * 2);
+    e.spend({ kind: "powerpoints", delta: 1 });
+    expect(e.budgets().powerPoints.max).toBe(1);
+    expect(e.budgets().spellSlots.max).toBe((priority - 1) * 2);
+    expect(e.budgets().karma.spent).toBe(0);            // a split, not a purchase
+  });
+
+  it("caps a mystic adept's power points at its priority Magic", () => {
+    const e = mage("mysticadept");
+    const priority = e.provider.magicRating(e.state);
+    for (let i = 0; i < priority; i++) e.spend({ kind: "powerpoints", delta: 1 });
+    expect(e.budgets().spellSlots.max).toBe(0);
+    expect(e.validate().map((i) => i.id)).not.toContain("adept.ppCap");
+    e.spend({ kind: "powerpoints", delta: 1 });
+    expect(e.validate().map((i) => i.id)).toContain("adept.ppCap");
+  });
+
+  it("gives a technomancer Resonance x 2 complex forms for free", () => {
+    const e = mage("technomancer");
+    const priority = e.provider.magicRating(e.state);
+    expect(e.budgets().spellSlots.max).toBe(priority * 2);
+    for (let i = 0; i < priority * 2; i++) {
+      e.spend({ kind: "complexform", uuid: `c${i}`, name: `Form ${i}` });
+    }
+    expect(e.budgets().karma.spent).toBe(0);
   });
 });

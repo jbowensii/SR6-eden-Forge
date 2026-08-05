@@ -1,7 +1,7 @@
 /** Declarative creation-validation rules. Each returns null (pass) or a params
  *  object (fail) — message keys live in lang/en.json as SR6FORGE.Validate.<id>.
  *  ctx = { state, data, rules, provider, budgets } */
-import { CORE_ATTRS, SPECIAL_ATTRS, attrRating, qualityKarma, ruleConst, skillRank } from "./budgets.mjs";
+import { CORE_ATTRS, SPECIAL_ATTRS, attrRating, qualityKarma, creationSetting, skillRank } from "./budgets.mjs";
 import { POINT_BUY, LIFEPATH_ADULT_COUNT } from "./providers.mjs";
 
 /** Split of paid quality karma (free racial qualities excluded). */
@@ -70,7 +70,7 @@ export const VALIDATION_RULES = [
     id: "attr.adjustTargets", severity: "error", step: "attributes",
     check: ({ state, data, rules }) => {
       const maxima = data.metatypes?.[state.metatypeId]?.attributeMaxCreation ?? {};
-      const onLowered = ruleConst("CHARGEN_ADJUSTMENT_ON_LOWERED_MAX",
+      const onLowered = creationSetting("adjustmentOnLoweredMax",
         data, rules, state.rulesetId, state.optionalRules) ?? false;
       for (const k of CORE_ATTRS) {
         if (!(state.attributes[k]?.adjust > 0)) continue;
@@ -147,14 +147,14 @@ export const VALIDATION_RULES = [
   {
     id: "nuyen.overspent", severity: "error", step: "purchases",
     check: ({ budgets, state, data, rules }) => {
-      const allowNeg = ruleConst("CHARGEN_NEGATIVE_NUYEN", data, rules, state.rulesetId, state.optionalRules);
+      const allowNeg = creationSetting("allowNegativeNuyen", data, rules, state.rulesetId, state.optionalRules);
       return budgets.nuyen.left >= 0 || allowNeg ? null : {};
     },
   },
   {
     id: "gear.availCap", severity: "error", step: "purchases",
     check: ({ state, data, rules }) => {
-      const cap = ruleConst("CHARGEN_MAX_AVAILABILITY", data, rules, state.rulesetId, state.optionalRules);
+      const cap = creationSetting("maxAvailability", data, rules, state.rulesetId, state.optionalRules);
       for (const p of state.purchases) {
         if ((p.avail ?? 0) > cap) return { item: p.name ?? p.uuid, cap };
       }
@@ -178,6 +178,18 @@ export const VALIDATION_RULES = [
       const mor = data.morTypes?.[state.morId];
       if (!mor?.powers) return state.powers.length ? {} : null;
       return budgets.powerPoints.left >= 0 ? null : {};
+    },
+  },
+  {
+    // Core p67: a mystic adept buys power points "up to a maximum of their
+    // Magic attribute" from the priority table.
+    id: "adept.ppCap", severity: "error", step: "purchases",
+    check: ({ budgets, state, data }) => {
+      const mor = data.morTypes?.[state.morId];
+      if (!mor?.paysPowers) return null;
+      const cap = budgets.powerPoints.cap;
+      const bought = state.powerPointsBought ?? 0;
+      return bought <= cap ? null : { bought, cap };
     },
   },
   {
@@ -268,14 +280,14 @@ export const VALIDATION_RULES = [
   {
     id: "leftover.karma", severity: "warning", step: "review",
     check: ({ budgets, state, data, rules }) => {
-      const cap = ruleConst("CHARGEN_MAX_KARMA_REMAIN", data, rules, state.rulesetId, state.optionalRules);
+      const cap = creationSetting("maxKarmaRemaining", data, rules, state.rulesetId, state.optionalRules);
       return budgets.karma.left <= cap ? null : { cap };
     },
   },
   {
     id: "leftover.nuyen", severity: "warning", step: "review",
     check: ({ budgets, state, data, rules }) => {
-      const cap = ruleConst("CHARGEN_MAX_NUYEN_REMAIN", data, rules, state.rulesetId, state.optionalRules);
+      const cap = creationSetting("maxNuyenRemaining", data, rules, state.rulesetId, state.optionalRules);
       return budgets.nuyen.left <= cap ? null : { cap };
     },
   },

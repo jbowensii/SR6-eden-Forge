@@ -6,11 +6,11 @@ import { chargenData } from "../main.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-/** Rules that take a NUMBER rather than a yes/no. */
-const NUMERIC_RULES = new Set([
-  "CHARGEN_MAX_AVAILABILITY", "CHARGEN_MAX_INITIATION", "CHARGEN_MAX_SUBMERSION",
-  "CHARGEN_MAX_TRANSHUMAN", "CHARGEN_MAX_ANIMALISM", "CHARGEN_SUM_TO_TEN_ELITE",
-  "CHARGEN_MAX_KARMA_REMAIN", "CHARGEN_MAX_NUYEN_REMAIN",
+/** Creation settings that take a number rather than a yes/no. */
+const NUMERIC_SETTINGS = new Set([
+  "maxAvailability", "maxInitiationGrade", "maxSubmersionGrade",
+  "maxTranshumanGrade", "maxAnimalismGrade", "sumToTenTarget",
+  "maxKarmaRemaining", "maxNuyenRemaining",
 ]);
 
 export class SR6ForgeOptions extends HandlebarsApplicationMixin(ApplicationV2) {
@@ -30,7 +30,7 @@ export class SR6ForgeOptions extends HandlebarsApplicationMixin(ApplicationV2) {
   /** Effective value: world override -> interpretation default -> undefined. */
   static effective(rulesetId) {
     const data = chargenData();
-    const base = data.rules?.[rulesetId]?.set ?? {};
+    const base = data.rules?.[rulesetId]?.settings ?? {};
     const over = game.settings.get(MODULE_ID, SETTINGS.OPTIONAL_RULES) ?? {};
     return { ...base, ...over };
   }
@@ -46,14 +46,14 @@ export class SR6ForgeOptions extends HandlebarsApplicationMixin(ApplicationV2) {
         unavailable: "chargen-data.json is not loaded — rebuild and redeploy the module." };
     }
     const rulesetId = game.settings.get(MODULE_ID, SETTINGS.RULESET);
-    const base = data.rules?.[rulesetId]?.set ?? {};
+    const base = data.rules?.[rulesetId]?.settings ?? {};
     const over = game.settings.get(MODULE_ID, SETTINGS.OPTIONAL_RULES) ?? {};
     const labels = data.ruleLabels ?? {};
     const rows = Object.entries(labels).sort((a, b) => a[1].localeCompare(b[1]))
       .map(([key, label]) => {
         const dflt = base[key];
         const cur = key in over ? over[key] : dflt;
-        const numeric = NUMERIC_RULES.has(key) || typeof dflt === "number";
+        const numeric = NUMERIC_SETTINGS.has(key) || typeof dflt === "number";
         return {
           key, label, numeric,
           value: numeric ? (cur ?? "") : !!cur,
