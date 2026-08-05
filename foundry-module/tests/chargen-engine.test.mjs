@@ -162,6 +162,28 @@ describe("qualities & karma", () => {
     expect(e.validate().some((i) => i.id === "quality.posCap")).toBe(true);
   });
 
+  it("negative qualities GRANT karma even when chargen-data has no metadata", () => {
+    // qualityMeta covers only the books we parsed (273 of 686 pack qualities);
+    // the pack row's category/value must win, or negatives get charged as positives.
+    const e = engineWith();
+    e.setMetatype("human");
+    const before = e.budgets().karma;
+    e.spend({ kind: "quality", genesisID: "not_in_chargen_data_xyz",
+      name: "Made-up Flaw", positive: false, karma: 20 });
+    const after = e.budgets().karma;
+    expect(after.max).toBe(before.max + 20);      // budget grew
+    expect(after.spent).toBe(before.spent);        // nothing was charged
+    expect(after.left).toBe(before.left + 20);
+  });
+
+  it("positive qualities still cost karma when unknown to chargen-data", () => {
+    const e = engineWith();
+    e.setMetatype("human");
+    e.spend({ kind: "quality", genesisID: "unknown_boon", name: "Boon",
+      positive: true, karma: 7 });
+    expect(e.budgets().karma.spent).toBe(7);
+  });
+
   it("karma-to-nuyen conversion is capped", () => {
     const e = engineWith();
     e.setMetatype("human");

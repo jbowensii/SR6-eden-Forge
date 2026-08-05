@@ -310,9 +310,10 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
           negCap: rules.qualityNegativeKarmaCap.value,
           taken: st.qualities.map((qq) => {
             const m = meta[qq.genesisID] ?? {};
+            const positive = qq.positive ?? m.positive ?? true;
             return { ...qq, name: qq.name ?? qq.genesisID,
-              karma: (qq.subOptionKarma ?? m.karma ?? 0) * (qq.rating ?? 1),
-              sign: (m.positive ?? qq.positive) ? "−" : "+",
+              karma: Math.abs(qq.subOptionKarma ?? qq.karma ?? m.karma ?? 0) * (qq.rating ?? 1),
+              sign: positive ? "−" : "+",
               note: qq.note ?? "" };
           }),
         };
@@ -611,7 +612,11 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#spend(op, d.kind === "skill" ? "skill" : null);
   }
   static #onAddQuality(_ev, t) {
-    this.#spend({ kind: "quality", genesisID: t.dataset.genesisId, name: t.dataset.name }, "quality");
+    const d = t.dataset;
+    // category/karma come from the pack row: chargen-data's qualityMeta only
+    // covers the books we parsed, so it cannot be the sole source of truth.
+    this.#spend({ kind: "quality", genesisID: d.genesisId, name: d.name,
+      positive: d.category !== "negative", karma: Math.abs(Number(d.value ?? 0)) }, "quality");
   }
   static #onRemoveQuality(_ev, t) {
     this.#spend({ kind: "quality", genesisID: t.dataset.genesisId, remove: true });

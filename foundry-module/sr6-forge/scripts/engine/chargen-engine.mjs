@@ -139,7 +139,11 @@ export class ChargenEngine {
         s.qualities.push({
           genesisID: op.genesisID, name: op.name ?? op.genesisID, rating: op.rating ?? 1,
           choiceText: op.choiceText ?? null, subOptionKarma: op.subOptionKarma ?? null,
-          positive: meta?.positive ?? op.positive ?? true, note: "", free: false,
+          // caller-supplied values (from the pack row) win: qualityMeta only
+          // covers the books we parsed, so it is a fallback, not the authority.
+          positive: op.positive ?? meta?.positive ?? true,
+          karma: op.karma ?? meta?.karma ?? 0,
+          note: "", free: false,
         });
         return { ok: true };
       }

@@ -41,9 +41,15 @@
 
 .sr6-forge .wizard-grid {
   display: grid;
-  grid-template-columns: 186px minmax(0, 1fr) 290px;
+  grid-template-columns: 186px minmax(0, 1fr) 300px;
   min-height: 0;
   overflow: hidden;
+  container-type: inline-size;
+}
+/* narrow windows: drop the detail pane to keep the working area usable */
+@container (max-width: 860px) {
+  .sr6-forge .wizard-grid { grid-template-columns: 150px minmax(0, 1fr); }
+  .sr6-forge .detail-pane { display: none; }
 }
 
 /* ------------------------------------------------------------ step rail -- */
@@ -106,7 +112,7 @@
 /* ------------------------------------------------------------ step body -- */
 .sr6-forge .step-body {
   overflow-y: auto;
-  padding: 14px 16px 18px;
+  padding: 18px 22px 26px;
   min-width: 0;
 }
 .sr6-forge .step-body h2 {
@@ -115,19 +121,19 @@
   text-transform: uppercase;
   color: #fff;
   border-bottom: 1px solid var(--sf-line);
-  padding-bottom: 6px;
-  margin: 0 0 4px;
+  padding-bottom: 8px;
+  margin: 0 0 10px;
 }
 .sr6-forge .step-body h3 {
   font-size: 12px;
   letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--sf-cyan);
-  margin: 16px 0 6px;
+  margin: 22px 0 8px;
   border: 0;
 }
-.sr6-forge .step-body .hint { color: var(--sf-dim); font-size: 11px; margin: 6px 0; }
-.sr6-forge .step-body p { margin: 6px 0 12px; color: var(--sf-dim); }
+.sr6-forge .step-body .hint { color: var(--sf-dim); font-size: 11.5px; margin: 8px 0; line-height: 1.5; }
+.sr6-forge .step-body p { margin: 8px 0 14px; color: var(--sf-dim); line-height: 1.55; }
 
 /* ---------------------------------------------------------- detail pane -- */
 .sr6-forge .detail-pane {
@@ -260,14 +266,21 @@
   border-top: 1px solid var(--sf-line);
 }
 .sr6-forge .wizard-nav .spacer { flex: 1; }
+/* Foundry forces height/min-height (--button-size), display:flex, centered
+   content and zero vertical padding on EVERY button. Undo that here — our
+   cards and steppers are multi-line and must size to their content. */
 .sr6-forge button {
   font-family: inherit;
   background: var(--sf-panel-2);
   border: 1px solid var(--sf-line-hot);
+  border-radius: 0;
   color: var(--sf-ink);
-  padding: 5px 14px;
+  height: auto;
+  min-height: 0;
+  padding: 6px 14px;
   cursor: pointer;
-  line-height: 1.4;
+  line-height: 1.45;
+  white-space: normal;
   transition: background .12s, border-color .12s, color .12s;
 }
 .sr6-forge button:hover:not(:disabled) { background: #1d2230; border-color: var(--sf-magenta); }
@@ -282,19 +295,22 @@
 .sr6-forge button.primary:hover:not(:disabled) { filter: brightness(1.12); }
 
 /* --------------------------------------------------------- method cards -- */
-.sr6-forge .method-list { display: grid; gap: 8px; margin-top: 10px; }
+.sr6-forge .method-list { display: grid; gap: 10px; margin-top: 12px; }
 .sr6-forge .method-card {
-  display: block;
+  display: grid;                 /* beats Foundry's flex+center */
+  gap: 4px;
+  justify-items: start;
+  align-content: start;
   width: 100%;
   text-align: left;
-  padding: 12px 14px;
+  padding: 13px 16px;
   background: var(--sf-panel);
   border: 1px solid var(--sf-line);
 }
 .sr6-forge .method-card:hover:not(:disabled) { border-color: var(--sf-magenta); background: var(--sf-panel-2); }
 .sr6-forge .method-card.active { border-color: var(--sf-magenta); box-shadow: inset 3px 0 0 var(--sf-magenta); }
-.sr6-forge .method-card .mc-name { font-size: 13px; color: #fff; font-weight: 600; }
-.sr6-forge .method-card .mc-desc { font-size: 11px; color: var(--sf-dim); margin-top: 3px; line-height: 1.5; }
+.sr6-forge .method-card .mc-name { display: block; font-size: 13.5px; color: #fff; font-weight: 600; }
+.sr6-forge .method-card .mc-desc { display: block; font-size: 11.5px; color: var(--sf-dim); line-height: 1.55; }
 
 /* -------------------------------------------------------- priority grid -- */
 .sr6-forge .prio-table { width: 100%; border-collapse: collapse; margin-top: 8px; table-layout: fixed; }
@@ -330,38 +346,46 @@
 /* ------------------------------------------------------- metatype cards -- */
 .sr6-forge .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 8px;
-  margin-top: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  align-items: stretch;
+  gap: 10px;
+  margin-top: 10px;
 }
 .sr6-forge .pick-card {
+  display: grid;                 /* beats Foundry's flex+center */
+  gap: 4px;
+  justify-items: start;
+  align-content: start;
   text-align: left;
-  padding: 9px 10px;
+  padding: 11px 13px;
+  min-height: 78px;              /* even rows, content still free to grow */
   background: var(--sf-panel);
   border: 1px solid var(--sf-line);
-  display: grid;
-  gap: 3px;
 }
 .sr6-forge .pick-card:hover { border-color: var(--sf-cyan); }
-.sr6-forge .pick-card.active { border-color: var(--sf-magenta); background: rgba(255,45,142,.10); }
-.sr6-forge .pick-card .pc-name { color: #fff; font-weight: 600; font-size: 12.5px; }
-.sr6-forge .pick-card .pc-line { font-family: var(--sf-mono); font-size: 10px; color: var(--sf-cyan); }
-.sr6-forge .pick-card .pc-sub  { font-size: 10px; color: var(--sf-mute); overflow-wrap: anywhere; }
+.sr6-forge .pick-card.active {
+  border-color: var(--sf-magenta);
+  background: rgba(255,45,142,.10);
+  box-shadow: inset 0 0 0 1px var(--sf-magenta);
+}
+.sr6-forge .pick-card .pc-name { display: block; color: #fff; font-weight: 600; font-size: 13px; line-height: 1.3; }
+.sr6-forge .pick-card .pc-line { display: block; font-family: var(--sf-mono); font-size: 10.5px; color: var(--sf-cyan); }
+.sr6-forge .pick-card .pc-sub  { display: block; font-size: 10.5px; color: var(--sf-mute); line-height: 1.45; overflow-wrap: anywhere; }
 
 /* --------------------------------------------------- attribute steppers -- */
 .sr6-forge .attr-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
-  gap: 8px;
-  margin-top: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
 }
 .sr6-forge .attr-cell {
   background: var(--sf-panel);
   border: 1px solid var(--sf-line);
-  padding: 8px 6px 6px;
+  padding: 12px 10px 10px;
   text-align: center;
   display: grid;
-  gap: 4px;
+  gap: 6px;
   justify-items: center;
 }
 .sr6-forge .attr-cell.at-max { border-color: var(--sf-amber); }
@@ -388,11 +412,14 @@
   color: var(--sf-mute);
 }
 .sr6-forge .stepper button {
-  width: 30px;
-  padding: 1px 0;
-  font-size: 14px;
-  line-height: 1.2;
+  width: 34px;
+  min-width: 34px;
+  padding: 2px 0;                /* Foundry forces 0 .5rem — override */
+  font-size: 15px;
+  line-height: 1.25;
   font-weight: 700;
+  display: grid;
+  place-items: center;
 }
 .sr6-forge .stepper .up:hover:not(:disabled)   { border-color: var(--sf-green); color: var(--sf-green); }
 .sr6-forge .stepper .down:hover:not(:disabled) { border-color: var(--sf-red);   color: var(--sf-red); }
@@ -427,7 +454,15 @@
   display: inline-block;
 }
 .sr6-forge .inline-step { display: inline-flex; flex-direction: column; gap: 2px; vertical-align: middle; }
-.sr6-forge .inline-step button { width: 26px; padding: 0; font-size: 12px; line-height: 1.35; }
+.sr6-forge .inline-step button {
+  width: 28px; min-width: 28px; padding: 0;
+  font-size: 13px; line-height: 1.5; font-weight: 700;
+  display: grid; place-items: center;
+}
+.sr6-forge .inline-step button:first-child:hover:not(:disabled) { border-color: var(--sf-green); color: var(--sf-green); }
+.sr6-forge .inline-step button:last-child:hover:not(:disabled)  { border-color: var(--sf-red);   color: var(--sf-red); }
+.sr6-forge .chosen .x { width: 30px; min-width: 30px; padding: 0; display: grid; place-items: center; }
+.sr6-forge .browse-list .row button { padding: 3px 12px; }
 
 /* ------------------------------------------------------------ browser ---- */
 .sr6-forge .browser-head {
@@ -472,12 +507,13 @@
   overflow-y: auto;
   background: #0c0e14;
 }
+.sr6-forge .browse-list { max-height: 340px; }
 .sr6-forge .browse-list .row {
   display: grid;
-  grid-template-columns: 1fr auto auto;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 12px;
   align-items: center;
-  padding: 4px 8px;
+  padding: 6px 10px;
   border-bottom: 1px solid rgba(255,255,255,.05);
   cursor: pointer;
 }
@@ -498,10 +534,10 @@
 .sr6-forge .chosen-list { display: grid; gap: 4px; margin-top: 6px; }
 .sr6-forge .chosen {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px 10px;
   align-items: center;
-  padding: 5px 8px;
+  padding: 8px 10px;
   background: var(--sf-panel);
   border-left: 2px solid var(--sf-magenta);
 }

@@ -45,14 +45,18 @@ export function skillPointsSpent(state) {
   return n;
 }
 
+/** Karma from qualities. The stored entry is authoritative (it carries the
+ *  pack row's category/value); qualityMeta is only a fallback because it covers
+ *  just the books we parsed. */
 export function qualityKarma(state, data) {
   let pos = 0, neg = 0;
   for (const q of state.qualities) {
     if (q.free) continue;                          // racial qualities are free
     const meta = data.qualityMeta?.[q.genesisID];
-    const per = q.subOptionKarma ?? meta?.karma ?? 0;
-    const total = per * (q.rating ?? 1);
-    if (meta?.positive ?? q.positive) pos += total; else neg += total;
+    const per = q.subOptionKarma ?? q.karma ?? meta?.karma ?? 0;
+    const total = Math.abs(per) * (q.rating ?? 1);
+    const positive = q.positive ?? meta?.positive ?? true;
+    if (positive) pos += total; else neg += total;
   }
   return { pos, neg };
 }
