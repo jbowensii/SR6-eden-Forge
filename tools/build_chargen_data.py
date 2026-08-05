@@ -72,7 +72,10 @@ def build(jar: _P, out: _P) -> dict:
         px = {b: i18n_by_prefix(z, b) for b in
               {"core", "companion", "astral_ways", "hack_slash", "no_future"}}
 
-        data["rules"] = parse_rules(read_category_trees(z, "core", "rules"))
+        # English rule interpretations only — "*_de" are the German ones.
+        data["rules"] = {k: v for k, v in
+                         parse_rules(read_category_trees(z, "core", "rules")).items()
+                         if not k.endswith("_de")}
         data["ruleLabels"] = parse_rule_labels(z)
         data["priorities"] = parse_priorities(read_category_trees(z, "core", "priorities"))
 

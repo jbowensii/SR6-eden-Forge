@@ -648,3 +648,67 @@ describe("magic at creation (core p66-67)", () => {
     expect(e.budgets().karma.spent).toBe(0);
   });
 });
+
+describe("quality karma signs (core p67)", () => {
+  // A positive quality COSTS karma; a negative quality GIVES karma. The wizard
+  // therefore shows a positive quality as "−n" and a negative one as "+n".
+  function withQualities(...list) {
+    const e = engineWith();
+    e.setMetatype("human");
+    for (const [name, karma, positive] of list) {
+      e.spend({ kind: "quality", genesisID: name, name, karma, positive });
+    }
+    return e;
+  }
+
+  it("charges for positive qualities and pays for negative ones", () => {
+    const base = engineWith();
+    base.setMetatype("human");
+    const start = base.budgets().karma.max;
+
+    const pos = withQualities(["catlike", 12, true]);
+    expect(pos.budgets().karma.spent).toBe(12);       // costs
+    expect(pos.budgets().karma.max).toBe(start);      // pool unchanged
+
+    const neg = withQualities(["sinner", 8, false]);
+    expect(neg.budgets().karma.spent).toBe(0);        // costs nothing
+    expect(neg.budgets().karma.max).toBe(start + 8);  // enlarges the pool
+  });
+
+  it("reproduces John's example character exactly", () => {
+    // mentor spirit −10 (positive), honorbound +10, SINner +8,
+    // prejudice +8, dependants +4  ->  net bonus karma +20, which is legal
+    const e = withQualities(
+      ["mentor_spirit", 10, true],
+      ["honorbound", 10, false],
+      ["sinner", 8, false],
+      ["prejudice", 8, false],
+      ["dependents", 4, false],
+    );
+    const b = e.budgets();
+    expect(b.karma.spent).toBe(10);                   // the one positive
+    expect(b.karma.max).toBe(50 + 30);                // 30 karma of negatives
+    const ids = e.validate().map((i) => i.id);
+    expect(ids).not.toContain("quality.netBonusCap"); // net +20 is exactly the cap
+    expect(ids).not.toContain("quality.maxCount");    // five qualities, cap is six
+  });
+
+  it("flags a net bonus above 20", () => {
+    const e = withQualities(
+      ["a", 10, false], ["b", 8, false], ["c", 8, false],
+    );                                                // net +26, no positives
+    expect(e.validate().map((i) => i.id)).toContain("quality.netBonusCap");
+  });
+
+  it("prices a mentor spirit as the positive quality it is", () => {
+    // the packs categorise individual spirits as "negative" with no value;
+    // chargen-data now supplies the parent quality's 10 karma / positive
+    const meta = data.qualityMeta.bear;
+    expect(meta.karma).toBe(10);
+    expect(meta.positive).toBe(true);
+    const e = engineWith();
+    e.setMetatype("human");
+    e.spend({ kind: "quality", genesisID: "bear", name: "Bear" });
+    expect(e.budgets().karma.spent).toBe(10);         // costs, never pays
+  });
+});
