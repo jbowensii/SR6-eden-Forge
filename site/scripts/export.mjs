@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { parseArgs } from "node:util";
-import { exportModule } from "../server/exportModule.mjs";
+import { exportAll, exportModule } from "../server/exportModule.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(here, "..", "..");
@@ -9,6 +9,7 @@ const { values } = parseArgs({
   options: {
     book: { type: "string" },
     domain: { type: "string", default: "gear" },
+    all: { type: "boolean", default: false },
     status: { type: "string", default: "approved" },
     version: { type: "string", default: "0.1.0" },
   },
@@ -22,8 +23,15 @@ if (!values.book) {
   process.exit(2);
 }
 try {
-  const res = await exportModule(join(repoRoot, "data"), join(repoRoot, "export"), values);
-  console.log(`exported ${res.count} item(s) -> ${res.moduleDir}`);
+  if (values.all) {
+    const res = await exportAll(join(repoRoot, "data"), join(repoRoot, "export"), values);
+    const counts = Object.entries(res.perDomain)
+      .filter(([, v]) => v.count).map(([d, v]) => `${d}:${v.count}`).join(" ");
+    console.log(`exported ${res.packs} pack(s) -> ${res.moduleDir}\n  ${counts}`);
+  } else {
+    const res = await exportModule(join(repoRoot, "data"), join(repoRoot, "export"), values);
+    console.log(`exported ${res.count} item(s) -> ${res.moduleDir}`);
+  }
 } catch (err) {
   console.error(String(err.message ?? err));
   process.exit(1);
