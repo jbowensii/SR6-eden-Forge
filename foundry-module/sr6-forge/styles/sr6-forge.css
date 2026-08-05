@@ -1,0 +1,48 @@
+/* SR6 Forge — matches eden's dark magenta look where possible. */
+.sr6-forge-launch {
+  width: 100%;
+  margin: 2px 0;
+}
+
+.sr6-forge .window-content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* wizard frame: step rail | body, budget bar below */
+.sr6-forge .wizard-grid {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+}
+.sr6-forge .step-rail { border-right: 1px solid var(--color-border-dark-tertiary, #444); padding-right: 6px; }
+.sr6-forge .step-rail .step {
+  display: block; width: 100%; text-align: left;
+  padding: 6px 8px; margin: 2px 0; border-radius: 4px;
+  background: transparent; border: none; cursor: pointer;
+}
+.sr6-forge .step-rail .step.active { background: rgba(184, 32, 127, 0.25); font-weight: bold; }
+.sr6-forge .step-rail .step.done::after { content: " \2713"; color: #7c7; }
+.sr6-forge .step-rail .step:disabled { opacity: 0.45; cursor: default; }
+
+.sr6-forge .step-body { overflow-y: auto; padding: 0 6px; }
+
+.sr6-forge .budget-bar {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  border-top: 1px solid var(--color-border-dark-tertiary, #444);
+  padding: 6px 4px 0; margin-top: 6px; font-size: 0.86em;
+}
+.sr6-forge .budget-bar .chip { padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,0.07); }
+.sr6-forge .budget-bar .chip.over { background: rgba(200, 40, 40, 0.35); font-weight: bold; }
+
+.sr6-forge .wizard-nav { display: flex; justify-content: space-between; margin-top: 6px; }
+
+.sr6-forge .validation-issues .error { color: #e66; }
+.sr6-forge .validation-issues .warning { color: #dc6; }
+
+.sr6-forge .item-browser .row { display: flex; gap: 8px; align-items: center; padding: 2px 4px; }
+.sr6-forge .item-browser .row:nth-child(even) { background: rgba(255,255,255,0.04); }
+.sr6-forge .item-browser .row.disabled { opacity: 0.4; }
