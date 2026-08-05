@@ -1,0 +1,15 @@
+<h2>Metatype</h2>
+{{#unless metatypes.length}}<p><em>Assign the METATYPE priority first.</em></p>{{/unless}}
+<div class="metatype-cards">
+  {{#each metatypes}}
+  <button type="button" class="metatype-card {{#if selected}}active{{/if}}"
+          data-action="pickMetatype" data-metatype="{{id}}">
+    <strong>{{name}}</strong>
+    <span class="adj">{{adjustmentPoints}} adjustment pts</span>
+    {{#if maxima}}<span class="maxima">{{maxima}}</span>{{/if}}
+    {{#if variantOf}}<span class="variant">variant of {{variantOf}}</span>{{/if}}
+    {{#if karma}}<span class="karma-cost">{{karma}} karma</span>{{/if}}
+    {{#if racialQualityIds.length}}<span class="racial">{{racialQualityIds}}</span>{{/if}}
+  </button>
+  {{/each}}
+</div>

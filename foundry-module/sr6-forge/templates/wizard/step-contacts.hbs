@@ -1,0 +1,18 @@
+<h2>Contacts</h2>
+<table class="contact-table">
+  <thead><tr><th>Name</th><th>Archetype</th><th>Connection</th><th>Loyalty</th><th></th></tr></thead>
+  <tbody>
+    {{#each contacts}}
+    <tr>
+      <td><input type="text" value="{{name}}" data-change="contactField" data-index="{{@index}}" data-field="name" /></td>
+      <td>{{archetypeId}}</td>
+      <td><input type="number" min="1" max="6" value="{{connection}}"
+                 data-change="contactField" data-index="{{@index}}" data-field="connection" /></td>
+      <td><input type="number" min="1" max="6" value="{{loyalty}}"
+                 data-change="contactField" data-index="{{@index}}" data-field="loyalty" /></td>
+      <td><button type="button" data-action="removeContact" data-index="{{@index}}">✕</button></td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+<button type="button" data-action="addContact">+ Add contact</button>

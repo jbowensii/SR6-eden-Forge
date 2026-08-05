@@ -1,0 +1,28 @@
+<h2>Priorities</h2>
+<p>Assign each column a letter A–E (each letter once for Priority; values sum ≤ 10 for Sum-to-Ten).</p>
+<table class="priority-table">
+  <thead>
+    <tr>{{#each columns}}<th>{{id}}</th>{{/each}}</tr>
+    <tr>
+      {{#each columns}}
+      <td>
+        <select data-change="priority" data-column="{{id}}">
+          <option value=""></option>
+          {{#each letters}}
+          <option value="{{this}}" {{#if (eq this ../current)}}selected{{/if}}>{{this}}</option>
+          {{/each}}
+        </select>
+      </td>
+      {{/each}}
+    </tr>
+  </thead>
+  <tbody>
+    {{#each grid}}
+    <tr>
+      {{#each cells}}
+      <td class="{{#if picked}}picked{{/if}}"><strong>{{../letter}}</strong> — {{text}}</td>
+      {{/each}}
+    </tr>
+    {{/each}}
+  </tbody>
+</table>

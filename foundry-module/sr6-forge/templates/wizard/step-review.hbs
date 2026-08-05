@@ -1,0 +1,30 @@
+<h2>Review & Create</h2>
+
+<label>Character name
+  <input type="text" data-change="name" value="{{name}}" placeholder="Street name" />
+</label>
+
+<fieldset>
+  <legend>Convert leftover karma to nuyen ({{convRate}}¥ each)</legend>
+  <button type="button" data-action="adj" data-kind="karma2nuyen" data-delta="-1">−</button>
+  <strong>{{conversions.karmaToNuyen}}</strong>
+  <button type="button" data-action="adj" data-kind="karma2nuyen" data-delta="1">+</button>
+</fieldset>
+
+<h3>Validation</h3>
+<ul class="validation-issues">
+  {{#each issues}}
+  <li class="{{severity}}">[{{step}}] {{message}}</li>
+  {{else}}
+  <li class="ok">All checks pass — ready to create.</li>
+  {{/each}}
+</ul>
+
+<h3>Summary</h3>
+<ul class="summary">
+  <li>Metatype: {{state.metatypeId}} · Path: {{state.morId}} · Method: {{state.method}}</li>
+  <li>Karma left: {{budgets.karma.left}} · Nuyen left: {{budgets.nuyen.left}}¥ · Essence: {{budgets.essence.left}}</li>
+  <li>Qualities: {{state.qualities.length}} · Gear: {{state.purchases.length}}
+      · Spells: {{state.spells.length}} · Powers: {{state.powers.length}}
+      · Contacts: {{state.contacts.length}}</li>
+</ul>

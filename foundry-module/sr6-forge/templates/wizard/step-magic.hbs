@@ -1,0 +1,32 @@
+<h2>Magic / Resonance</h2>
+<div class="mor-paths">
+  {{#each paths}}
+  <button type="button" class="mor-card {{#if selected}}active{{/if}}"
+          data-action="pickMor" data-mor="{{id}}">
+    <strong>{{name}}</strong>
+    {{#if rating}}<span>MAG/RES {{rating}}</span>{{/if}}
+    {{#if skillUnlocks.length}}<span class="unlocks">{{skillUnlocks}}</span>{{/if}}
+  </button>
+  {{/each}}
+</div>
+
+{{#if isAspected}}
+<fieldset>
+  <legend>Aspected discipline (pick one)</legend>
+  <select data-change="aspected">
+    <option value=""></option>
+    {{#each aspectedOptions}}
+    <option value="{{id}}" {{#if selected}}selected{{/if}}>{{id}}</option>
+    {{/each}}
+  </select>
+</fieldset>
+{{/if}}
+
+{{#if isMysticAdept}}
+<fieldset>
+  <legend>Power points (mystic adept — karma per point)</legend>
+  <button type="button" data-action="adj" data-kind="powerpoints" data-delta="-1">−</button>
+  <strong>{{state.powerPointsBought}}</strong>
+  <button type="button" data-action="adj" data-kind="powerpoints" data-delta="1">+</button>
+</fieldset>
+{{/if}}

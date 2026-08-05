@@ -1,0 +1,42 @@
+<h2>Skills</h2>
+<table class="skill-table">
+  <thead><tr><th>Skill</th><th>Rank</th><th>Specialization (1 pt)</th></tr></thead>
+  <tbody>
+    {{#each skills}}
+    <tr class="{{#if locked}}locked{{/if}}">
+      <th>{{label}}{{#if restricted}} *{{/if}}</th>
+      <td>
+        <button type="button" data-action="adj" data-kind="skill" data-target="{{id}}" data-delta="-1">−</button>
+        {{points}}
+        <button type="button" data-action="adj" data-kind="skill" data-target="{{id}}" data-delta="1" {{#if locked}}disabled{{/if}}>+</button>
+      </td>
+      <td>
+        <select data-change="spec" data-skill="{{id}}" {{#unless points}}disabled{{/unless}}>
+          <option value=""></option>
+          {{#each specs}}
+          <option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        </select>
+      </td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+<p class="hint">* restricted — requires the matching Magic/Resonance path.</p>
+
+<h3>Knowledge & Languages</h3>
+<ul>
+  {{#each knowledge}}
+  <li>{{name}} <em>({{type}}{{#if native}}, native{{/if}})</em>
+    <button type="button" data-action="removeKnowledge" data-index="{{@index}}">✕</button></li>
+  {{/each}}
+</ul>
+<div class="knowledge-add">
+  <input type="text" name="knowledge-name" placeholder="e.g. Seattle Gangs / Japanese" />
+  <select name="knowledge-type">
+    <option value="knowledge">Knowledge</option>
+    <option value="language">Language</option>
+  </select>
+  <label><input type="checkbox" name="knowledge-native" /> native</label>
+  <button type="button" data-action="addKnowledge">Add</button>
+</div>

@@ -1,0 +1,21 @@
+<h2>Qualities</h2>
+<div class="taken">
+  {{#each taken}}
+  <span class="chip">{{genesisID}}{{#if free}} (racial){{/if}}
+    {{#unless free}}
+    <button type="button" data-action="removeQuality" data-genesis-id="{{genesisID}}">✕</button>
+    {{/unless}}
+  </span>
+  {{/each}}
+</div>
+
+<input type="search" data-search placeholder="Search qualities…" value="{{query}}" />
+<div class="item-browser">
+  {{#each list}}
+  <div class="row">
+    <span class="name">{{name}}</span>
+    <span class="meta">{{category}} · {{value}} karma</span>
+    <button type="button" data-action="addQuality" data-genesis-id="{{genesisID}}">Add</button>
+  </div>
+  {{/each}}
+</div>

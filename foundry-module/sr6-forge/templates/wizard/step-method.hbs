@@ -1,0 +1,9 @@
+<h2>Generation method</h2>
+<p>Pick how this character is built. Priority is the Core Rulebook standard.</p>
+{{#each methods}}
+<div class="method-row">
+  <button type="button" data-action="pickMethod" data-method="{{id}}" {{#unless enabled}}disabled{{/unless}}>
+    {{label}}
+  </button>
+</div>
+{{/each}}

@@ -1,0 +1,39 @@
+<h2>Attributes</h2>
+<table class="attr-table">
+  <thead><tr><th></th><th>Rating</th><th>Max</th><th>Points</th><th>Adjust</th></tr></thead>
+  <tbody>
+    {{#each rows}}
+    <tr>
+      <th>{{label}}</th>
+      <td class="rating">{{rating}}</td>
+      <td>{{max}}</td>
+      <td>
+        <button type="button" data-action="adj" data-kind="attribute" data-target="{{key}}" data-delta="-1">−</button>
+        {{points}}
+        <button type="button" data-action="adj" data-kind="attribute" data-target="{{key}}" data-delta="1">+</button>
+      </td>
+      <td>
+        <button type="button" data-action="adj" data-kind="attribute" data-target="{{key}}" data-pool="adjust" data-delta="-1" {{#unless adjusted}}disabled{{/unless}}>−</button>
+        {{adjust}}
+        <button type="button" data-action="adj" data-kind="attribute" data-target="{{key}}" data-pool="adjust" data-delta="1" {{#unless adjusted}}disabled{{/unless}}>+</button>
+      </td>
+    </tr>
+    {{/each}}
+  </tbody>
+  <tbody class="specials">
+    {{#each specials}}
+    <tr>
+      <th>{{label}}</th>
+      <td class="rating">{{rating}}</td>
+      <td>{{max}}</td>
+      <td>—</td>
+      <td>
+        <button type="button" data-action="adj" data-kind="attribute" data-target="{{key}}" data-pool="adjust" data-delta="-1">−</button>
+        {{adjust}}
+        <button type="button" data-action="adj" data-kind="attribute" data-target="{{key}}" data-pool="adjust" data-delta="1">+</button>
+      </td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+<p class="hint">Adjustment points go to Edge, Magic/Resonance, or metatype-adjusted attributes.</p>
