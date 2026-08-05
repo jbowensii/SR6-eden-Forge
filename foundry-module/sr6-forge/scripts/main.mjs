@@ -109,14 +109,48 @@ Hooks.on("renderActorDirectory", (app, html) => {
   footer.append(btn);
 });
 
-/* Advancement header button — dual registration (eden PC sheet is AppV1 today,
- * may migrate to AppV2; context-menu fallback always works). */
+/* Advancement entry points. Eden's PC sheet is ApplicationV1 today and may
+ * migrate to V2, and the two generations use different hooks — so register for
+ * both, plus a directory context-menu entry that works regardless. */
+const advancementLabel = () => game.i18n.localize("SR6FORGE.Advancement");
+const openAdvancement = (actor) => game.modules.get(MODULE_ID).api.openAdvancement(actor);
+
+/* ApplicationV1 sheets. */
 Hooks.on("getActorSheetHeaderButtons", (sheet, buttons) => {
   if (sheet.actor?.type !== "Player") return;
   buttons.unshift({
-    label: game.i18n.localize("SR6FORGE.Advancement"),
+    label: advancementLabel(),
     class: "sr6-forge-advancement",
     icon: "fas fa-arrow-trend-up",
-    onclick: () => game.modules.get(MODULE_ID).api.openAdvancement(sheet.actor),
+    onclick: () => openAdvancement(sheet.actor),
+  });
+});
+
+/* ApplicationV2 sheets — `getHeaderControls` fires with (app, controls). */
+Hooks.on("getHeaderControls", (app, controls) => {
+  const actor = app?.document ?? app?.actor;
+  if (actor?.documentName !== "Actor" || actor.type !== "Player") return;
+  if (controls.some((c) => c.action === "sr6ForgeAdvancement")) return;
+  controls.unshift({
+    action: "sr6ForgeAdvancement",
+    icon: "fas fa-arrow-trend-up",
+    label: advancementLabel(),
+    onClick: () => openAdvancement(actor),
+  });
+});
+
+/* Actors directory context menu — the fallback that needs no sheet at all. */
+Hooks.on("getActorContextOptions", (_html, options) => {
+  options.push({
+    name: advancementLabel(),
+    icon: '<i class="fas fa-arrow-trend-up"></i>',
+    condition: (li) => {
+      const actor = game.actors.get(li.dataset?.entryId ?? li.dataset?.documentId);
+      return actor?.type === "Player" && actor.isOwner;
+    },
+    callback: (li) => {
+      const actor = game.actors.get(li.dataset?.entryId ?? li.dataset?.documentId);
+      if (actor) openAdvancement(actor);
+    },
   });
 });

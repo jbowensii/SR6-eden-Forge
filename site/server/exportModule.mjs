@@ -40,7 +40,7 @@ export function buildManifest({ book, version, packs, title }) {
     title: title ?? `SR6 Forge — ${book} gear`,
     description: "Personal-use compendium built with SR6-eden-Forge. Not for distribution.",
     version,
-    compatibility: { minimum: "13", verified: "13" },
+    compatibility: { minimum: "13", verified: "14" },
     authors: [{ name: "SR6-eden-Forge" }],
     // each pack carries its own type ("Item" default, "Actor" for actor domains)
     packs: packs.map((p) => ({ name: p.name, label: p.label, path: p.path,

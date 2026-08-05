@@ -45,7 +45,7 @@ describe("export", () => {
     const m = buildManifest({ book: "testbook", version: "1.2.3", packs: [{ name: "testbook-gear", label: "Testbook Gear", path: "packs/gear" }] });
     expect(m.id).toBe("sr6-forge-testbook");
     expect(m.version).toBe("1.2.3");
-    expect(m.compatibility).toEqual({ minimum: "13", verified: "13" });
+    expect(m.compatibility).toEqual({ minimum: "13", verified: "14" });
     expect(m.packs[0]).toMatchObject({ type: "Item", system: "shadowrun6-eden" });
     expect(m.relationships.systems[0].id).toBe("shadowrun6-eden");
   });

@@ -78,6 +78,16 @@ export function registerQuenchBatches(quench) {
         }
       });
 
+      it("registers an advancement entry point for both sheet generations", function () {
+        // eden's PC sheet is AppV1 today and may migrate; the directory
+        // context menu is the fallback that works either way
+        for (const hook of ["getActorSheetHeaderButtons", "getHeaderControls",
+          "getActorContextOptions"]) {
+          const fns = Hooks.events[hook] ?? [];
+          assert.isAbove(fns.length, 0, `nothing listening on ${hook}`);
+        }
+      });
+
       it("pushes the index fields the browse lists need", function () {
         for (const f of ["system.type", "system.price", "system.avail"]) {
           assert.include(CONFIG.Item.compendiumIndexFields, f, `${f} not indexed`);
