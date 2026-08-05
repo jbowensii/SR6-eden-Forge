@@ -25,6 +25,10 @@
     "specialization": 5,
     "expertise": 5,
     "spell": 5,
+    "ritual": 5,
+    "complexForm": 5,
+    "initiationBase": 10,
+    "initiationPerLevel": 1,
     "positiveQualityMultiplier": 2,
     "removeNegativeQualityMultiplier": 2
   },

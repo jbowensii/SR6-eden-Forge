@@ -1,0 +1,132 @@
+<div class="adv-root">
+  <div class="cp-summary">
+    <span class="cp-big">{{karma}}</span>
+    <span class="cp-lbl">karma available · {{karmaTotal}} earned lifetime</span>
+    <span class="cp-lbl">{{nuyen}}¥</span>
+  </div>
+
+  <div class="tabs">
+    {{#each tabs}}
+    <button type="button" class="{{#if active}}active{{/if}}" data-action="tab" data-tab="{{id}}"
+            {{#if (eq id "magic")}}{{#unless enabled}}disabled{{/unless}}{{/if}}>{{label}}</button>
+    {{/each}}
+  </div>
+
+  {{#if (eq tab "attributes")}}
+  <table class="data">
+    <thead><tr><th>Attribute</th><th style="width:70px">Rank</th><th style="width:90px">Karma</th><th style="width:90px"></th></tr></thead>
+    <tbody>
+      {{#each attributes}}
+      <tr>
+        <th>{{label}}</th>
+        <td><span class="rank">{{from}}</span></td>
+        <td class="num">{{karma}}</td>
+        <td><button type="button" data-action="buy" data-op="raiseAttribute" data-target="{{key}}"
+                    {{#unless ok}}disabled title="{{reason}}"{{/unless}}>+1</button></td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  <p class="hint">Core p68: 5 karma x the new rating, paid for each rank.</p>
+
+  <h3>Karma to nuyen</h3>
+  <p class="hint">{{convert.label}}</p>
+  <div class="browser-head">
+    <button type="button" data-action="buy" data-op="karmaToNuyen" data-karma="1">Convert 1 karma</button>
+    <button type="button" data-action="buy" data-op="karmaToNuyen" data-karma="5">Convert 5 karma</button>
+  </div>
+  {{/if}}
+
+  {{#if (eq tab "skills")}}
+  <table class="data">
+    <thead><tr><th>Skill</th><th style="width:60px">Rank</th><th style="width:70px">Karma</th>
+      <th style="width:60px"></th><th>Specialization / expertise</th></tr></thead>
+    <tbody>
+      {{#each skills}}
+      <tr>
+        <th>{{name}}</th>
+        <td><span class="rank">{{points}}</span></td>
+        <td class="num">{{raise.karma}}</td>
+        <td><button type="button" data-action="buy" data-op="raiseSkill" data-target="{{id}}" data-name="{{name}}"
+                    {{#unless raise.ok}}disabled title="{{raise.reason}}"{{/unless}}>+1</button></td>
+        <td>
+          {{#if specialization}}
+            <span class="mt">{{specialization}}</span>
+            {{#if expertise}}
+              <span class="mt">· expertise: {{expertise}}</span>
+            {{else}}
+              <button type="button" data-action="buy" data-op="addExpertise" data-target="{{id}}"
+                      data-name="{{name}}" data-value="{{specialization}}">Expertise ({{expertiseCost}})</button>
+            {{/if}}
+          {{else}}
+            {{#if canSpec}}
+            <select data-change="specValue" data-skill="{{id}}">
+              <option value="">— pick —</option>
+              {{#each specs}}<option value="{{label}}">{{label}}</option>{{/each}}
+            </select>
+            <button type="button" data-action="buy" data-op="addSpecialization" data-target="{{id}}"
+                    data-name="{{name}}">Add ({{specCost}})</button>
+            {{else}}
+            <span class="hint">train the skill first</span>
+            {{/if}}
+          {{/if}}
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  <p class="hint">Core p68-70: 5 karma x the new rank; specializations and expertise cost 5 each.</p>
+  {{/if}}
+
+  {{#if (eq tab "magic")}}
+  <table class="data">
+    <thead><tr><th>Advancement</th><th style="width:90px">Karma</th><th style="width:90px"></th></tr></thead>
+    <tbody>
+      {{#each magic}}
+      <tr>
+        <th>{{label}}</th>
+        <td class="num">{{karma}}</td>
+        <td><button type="button" data-action="buy" data-op="{{kind}}"
+                    {{#unless ok}}disabled title="{{reason}}"{{/unless}}>Buy</button></td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  <p class="hint">Core p70: initiation and submersion cost 10 karma plus the new grade.</p>
+
+  {{#each learnable}}
+  <h3>{{label}} — {{cost}} karma each</h3>
+  <div class="browse-list">
+    {{#each list}}
+    <div class="row">
+      <span class="nm">{{name}}</span>
+      <button type="button" data-action="buy" data-op="{{../op}}"
+              data-uuid="{{uuid}}" data-name="{{name}}">Learn</button>
+    </div>
+    {{else}}
+    <div class="browse-empty">Nothing left to learn here.</div>
+    {{/each}}
+  </div>
+  {{/each}}
+  {{/if}}
+
+  {{#if (eq tab "ledger")}}
+  <p class="hint">{{ledgerSpent}} karma spent through this ledger. Only the most
+     recent entry can be undone — reversing an older one would leave the entries
+     after it standing on state that no longer exists.</p>
+  <table class="data">
+    <thead><tr><th>What</th><th style="width:70px">Karma</th><th style="width:90px"></th></tr></thead>
+    <tbody>
+      {{#each ledger}}
+      <tr>
+        <th>{{label}}</th>
+        <td class="num">{{karma}}</td>
+        <td>{{#if last}}<button type="button" data-action="undo">Undo</button>{{/if}}</td>
+      </tr>
+      {{else}}
+      <tr><td colspan="3"><div class="browse-empty">Nothing bought yet.</div></td></tr>
+      {{/each}}
+    </tbody>
+  </table>
+  {{/if}}
+</div>

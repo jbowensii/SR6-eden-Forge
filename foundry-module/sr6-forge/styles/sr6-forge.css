@@ -493,7 +493,7 @@
   font-size: 9px;
   letter-spacing: .16em;
   text-transform: uppercase;
-  color: var(--sf-ink-dim);
+  color: var(--sf-dim);
 }
 .sr6-forge .field > input,
 .sr6-forge .field > select {
@@ -513,7 +513,7 @@
   margin: 10px 0 14px;
   padding: 10px 14px;
   border: 1px solid var(--sf-line-hot);
-  background: linear-gradient(90deg, rgba(0,229,255,.07), transparent 70%);
+  background: linear-gradient(90deg, rgba(47,212,217,.08), transparent 70%);
 }
 .sr6-forge .cp-summary .cp-big {
   font-family: var(--sf-mono);
@@ -526,11 +526,11 @@
   font-size: 10px;
   letter-spacing: .16em;
   text-transform: uppercase;
-  color: var(--sf-ink-dim);
+  color: var(--sf-dim);
 }
 .sr6-forge .cp-summary.over { border-color: var(--sf-magenta); }
 .sr6-forge .cp-summary.over .cp-big { color: var(--sf-magenta); }
-.sr6-forge .cp-summary.good .cp-big { color: #6dff9a; }
+.sr6-forge .cp-summary.good .cp-big { color: var(--sf-green); }
 .sr6-forge .cp-warn {
   margin-left: auto;
   font-family: var(--sf-mono);
@@ -549,7 +549,7 @@
 .sr6-forge .opt-table .opt-desc {
   display: block;
   font-size: 11px;
-  color: var(--sf-ink-dim);
+  color: var(--sf-dim);
   margin-top: 2px;
 }
 .sr6-forge .opt-table input[type="number"] { width: 84px; }
@@ -646,3 +646,8 @@
 
 /* sidebar launcher button */
 .sr6-forge-launch { width: 100%; margin: 2px 0; }
+
+/* ---------------------------- advancement app --------------------------- */
+.sr6-forge .adv-root { padding: 10px 14px 14px; }
+.sr6-forge .adv-root .data th { font-weight: 600; }
+.sr6-forge .adv-root .tabs { margin-bottom: 10px; }
