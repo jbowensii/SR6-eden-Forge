@@ -32,7 +32,8 @@ export function blankState(method = "priority", rulesetId = "core") {
     knowledge: [],                  // {name, type:"knowledge"|"language", native}
     qualities: [],                  // {genesisID, rating, choiceText, subOptionKarma, free, positive}
     spells: [], powers: [], complexForms: [], rituals: [], foci: [],
-    purchases: [],                  // {uuid, name, price, avail, essence, qty, rating}
+    purchases: [],                  // {uuid, name, price, avail, essence, qty, rating,
+                                    //  accessories:[{uuid,genesisID,name,price,avail,slot}]}
     contacts: [],                   // {name, archetype (free text), connection, loyalty}
     lifestyleId: null, lifestyleMonths: 1,
     sins: [],                       // {name, rating(1-4? VERIFY), licenses[]}
@@ -169,7 +170,56 @@ export class ChargenEngine {
         if (existing && op.stack) existing.qty = (existing.qty ?? 1) + 1;
         else s.purchases.push({ uuid: op.uuid, name: op.name, price: op.price ?? 0,
           avail: op.avail ?? 0, essence: op.essence ?? 0, qty: 1, rating: op.rating ?? null,
-          itemType: op.itemType ?? "gear" });
+          itemType: op.itemType ?? "gear",
+          genesisID: op.genesisID ?? null, subtype: op.subtype ?? null,
+          // factory-fitted accessories occupy their slot and cost nothing extra
+          accessories: (this.data.gearMounts?.[op.genesisID]?.embedded ?? [])
+            .filter((e) => e.included)
+            .map((e) => ({ genesisID: e.ref, name: e.ref.replaceAll("_", " "),
+              slot: e.slot || "INTERNAL", price: 0, avail: 0, included: true })) });
+        return { ok: true };
+      }
+      case "accessory": {
+        const host = s.purchases[Number(op.index)];
+        if (!host) return { ok: false, reason: "unknown-host" };
+        host.accessories ??= [];
+        if (op.remove) {
+          const i = host.accessories.findIndex((x) => x.uuid === op.uuid);
+          if (i < 0) return { ok: false, reason: "not-fitted" };
+          if (host.accessories[i].included) return { ok: false, reason: "factory-fitted" };
+          host.accessories.splice(i, 1);
+          return { ok: true };
+        }
+        const mounts = this.data.gearMounts ?? {};
+        const hostMeta = mounts[host.genesisID] ?? {};
+        const accMeta = mounts[op.genesisID] ?? {};
+        const hooks = hostMeta.hooks ?? [];
+        // pick the slot: the caller's, else the first slot both sides share
+        const slot = op.slot
+          ?? (accMeta.fits ?? []).find((f) => hooks.includes(f));
+        if (!slot) return { ok: false, reason: "no-compatible-slot" };
+        if (!hooks.includes(slot)) return { ok: false, reason: "host-lacks-slot" };
+        if (host.accessories.some((x) => x.slot === slot)) {
+          return { ok: false, reason: "slot-occupied" };
+        }
+        const allowed = accMeta.hostSubtypes;
+        if (allowed?.length && !allowed.includes(host.subtype)) {
+          return { ok: false, reason: "subtype-not-allowed" };
+        }
+        host.accessories.push({
+          uuid: op.uuid, genesisID: op.genesisID, name: op.name,
+          price: op.price ?? 0, avail: op.avail ?? 0, slot, included: false,
+        });
+        return { ok: true };
+      }
+      case "powerLevel": {
+        const pw = s.powers[Number(op.index)];
+        if (!pw) return { ok: false, reason: "unknown-power" };
+        const meta = this.data.adeptPowers?.[pw.genesisID] ?? {};
+        if (!meta.hasLevel) return { ok: false, reason: "power-has-no-levels" };
+        const next = (pw.level ?? 1) + (op.delta ?? 1);
+        if (next < 1) return { ok: false, reason: "minimum-level-1" };
+        pw.level = next;
         return { ok: true };
       }
       case "spell": case "complexform": case "power": case "ritual": case "focus": {
@@ -181,8 +231,18 @@ export class ChargenEngine {
           list.splice(i, 1);
           return { ok: true };
         }
-        if (list.some((x) => x.uuid === op.uuid)) return { ok: false, reason: "duplicate" };
-        list.push({ uuid: op.uuid, name: op.name, cost: op.cost ?? 0, level: op.level ?? 1 });
+        const meta = op.kind === "power"
+          ? (this.data.adeptPowers?.[op.genesisID] ?? {}) : {};
+        // a "multi" power (Attribute Boost) may be taken more than once
+        if (!meta.multi && list.some((x) => x.uuid === op.uuid)) {
+          return { ok: false, reason: "duplicate" };
+        }
+        list.push({
+          uuid: op.uuid, name: op.name, genesisID: op.genesisID ?? null,
+          cost: op.cost ?? meta.cost ?? 0,
+          level: op.level ?? 1,
+          hasLevel: meta.hasLevel ?? false,
+        });
         return { ok: true };
       }
       case "powerpoints": {

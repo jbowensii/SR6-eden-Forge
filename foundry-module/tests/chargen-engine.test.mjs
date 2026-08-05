@@ -712,3 +712,134 @@ describe("quality karma signs (core p67)", () => {
     expect(e.budgets().karma.spent).toBe(10);         // costs, never pays
   });
 });
+
+describe("accessory mounting", () => {
+  // Commlink6's two-sided contract: the host declares HOOK slots, the
+  // accessory declares the slots it fits plus which host subtypes accept it.
+  function armed() {
+    const e = engineWith();
+    e.setMetatype("human");
+    e.spend({ kind: "purchase", uuid: "Item.pred", name: "Ares Predator VI",
+      genesisID: "ares_predator_vi", subtype: "PISTOLS_HEAVY", price: 750, avail: 2 });
+    return e;
+  }
+  const fit = (e, over = {}) => e.spend({
+    kind: "accessory", index: 0, uuid: "Item.sil", genesisID: "silencer",
+    name: "Silencer", price: 500, avail: 4, ...over,
+  });
+
+  it("knows the Predator's mount slots", () => {
+    expect(data.gearMounts.ares_predator_vi.hooks).toEqual(["BARREL", "TOP"]);
+    expect(data.gearMounts.silencer.fits).toEqual(["BARREL"]);
+  });
+
+  it("fits a silencer to the barrel and charges for it", () => {
+    const e = armed();
+    const before = e.budgets().nuyen.spent;
+    expect(fit(e).ok).toBe(true);
+    const acc = e.state.purchases[0].accessories.find((a) => a.genesisID === "silencer");
+    expect(acc.slot).toBe("BARREL");
+    expect(e.budgets().nuyen.spent).toBe(before + 500);
+  });
+
+  it("refuses a second accessory in an occupied slot", () => {
+    const e = armed();
+    fit(e);
+    const again = fit(e, { uuid: "Item.sil2" });
+    expect(again.ok).toBe(false);
+    expect(again.reason).toBe("slot-occupied");
+  });
+
+  it("refuses a host whose subtype the accessory does not allow", () => {
+    const e = engineWith();
+    e.setMetatype("human");
+    // a sword has no business taking a silencer
+    e.spend({ kind: "purchase", uuid: "Item.sword", name: "Katana",
+      genesisID: "katana", subtype: "BLADES", price: 350, avail: 4 });
+    const r = fit(e);
+    expect(r.ok).toBe(false);
+    expect(["no-compatible-slot", "host-lacks-slot", "subtype-not-allowed"])
+      .toContain(r.reason);
+  });
+
+  it("carries factory-fitted accessories and will not let them be removed", () => {
+    const e = armed();
+    const fitted = e.state.purchases[0].accessories;
+    // the Predator ships with a smartgun system and variable ammo
+    expect(fitted.some((a) => a.genesisID === "smartgun_system")).toBe(true);
+    expect(fitted.every((a) => a.price === 0)).toBe(true);
+    const r = e.spend({ kind: "accessory", index: 0, remove: true,
+      uuid: fitted[0].uuid });
+    expect(r.ok).toBe(false);
+  });
+
+  it("counts an accessory against the availability cap", () => {
+    const e = armed();
+    fit(e, { avail: 12 });
+    expect(e.validate().map((i) => i.id)).toContain("gear.availCap");
+  });
+});
+
+describe("adept powers", () => {
+  function adept() {
+    const e = engineWith({ METATYPE: "D", ATTRIBUTE: "B", MAGIC: "A",
+      SKILLS: "C", RESOURCES: "E" });
+    e.setMetatype("human");
+    e.setMagicPath("adept");
+    return e;
+  }
+
+  it("reads a real power-point cost from chargen-data", () => {
+    // the packs carry no PP cost for adept powers; chargen-data does
+    expect(data.adeptPowers.improved_reflexes.cost).toBeGreaterThan(0);
+    expect(data.adeptPowers.improved_reflexes.hasLevel).toBe(true);
+    expect(data.adeptPowers.astral_perception.hasLevel).toBe(false);
+  });
+
+  it("charges the power's cost, not zero", () => {
+    const e = adept();
+    e.spend({ kind: "power", uuid: "Item.ip", name: "Improved Reflexes",
+      genesisID: "improved_reflexes" });
+    const per = data.adeptPowers.improved_reflexes.cost;
+    expect(e.budgets().powerPoints.spent).toBe(per);
+  });
+
+  it("multiplies the cost by the level", () => {
+    const e = adept();
+    e.spend({ kind: "power", uuid: "Item.ip", name: "Improved Reflexes",
+      genesisID: "improved_reflexes" });
+    const per = data.adeptPowers.improved_reflexes.cost;
+    e.spend({ kind: "powerLevel", index: 0, delta: 2 });      // level 3
+    expect(e.state.powers[0].level).toBe(3);
+    expect(e.budgets().powerPoints.spent).toBe(per * 3);
+  });
+
+  it("refuses levels on a power that has none", () => {
+    const e = adept();
+    e.spend({ kind: "power", uuid: "Item.ap", name: "Astral Perception",
+      genesisID: "astral_perception" });
+    const r = e.spend({ kind: "powerLevel", index: 0, delta: 1 });
+    expect(r.ok).toBe(false);
+    expect(r.reason).toBe("power-has-no-levels");
+  });
+
+  it("lets a multi power be taken more than once, others not", () => {
+    const e = adept();
+    const take = (gid, uuid) => e.spend({ kind: "power", uuid, name: gid, genesisID: gid });
+    expect(take("attribute_boost", "Item.ab1").ok).toBe(true);   // multi="yes"
+    expect(take("attribute_boost", "Item.ab1").ok).toBe(true);
+    expect(take("astral_perception", "Item.ap").ok).toBe(true);
+    expect(take("astral_perception", "Item.ap").ok).toBe(false);
+  });
+
+  it("overspending power points is flagged", () => {
+    const e = adept();
+    const max = e.budgets().powerPoints.max;
+    for (let i = 0; i < max + 2; i++) {
+      e.spend({ kind: "power", uuid: `Item.x${i}`, name: "Killing Hands",
+        genesisID: "improved_reflexes", cost: 1 });
+    }
+    expect(e.budgets().powerPoints.left).toBeLessThan(0);
+    expect(e.validate().map((i) => i.id)).toContain("adept.ppBudget");
+  });
+});

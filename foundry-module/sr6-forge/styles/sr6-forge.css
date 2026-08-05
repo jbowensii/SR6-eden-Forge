@@ -696,3 +696,35 @@
 .sr6-forge .adv-root .tabs { margin-bottom: 10px; }
 .sr6-forge .mod-choice { display: block; margin-top: 4px; }
 .sr6-forge .mod-choice select { max-width: 260px; }
+
+/* --------------------- accessory mounts on owned gear ------------------- */
+.sr6-forge .owned-item { align-items: flex-start; }
+.sr6-forge .slots { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.sr6-forge .slots .slot {
+  font-family: var(--sf-mono);
+  font-size: 9px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border: 1px dashed var(--sf-line-hot);
+  color: var(--sf-mute);
+}
+.sr6-forge .slots .slot.taken {
+  border-style: solid;
+  border-color: var(--sf-cyan);
+  color: var(--sf-cyan);
+}
+.sr6-forge .fitted {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 3px 0 0 10px;
+  padding-left: 8px;
+  border-left: 2px solid var(--sf-line-hot);
+  font-size: 11.5px;
+}
+.sr6-forge .fitted .f-name { color: var(--sf-ink); }
+.sr6-forge .add-acc { display: flex; gap: 6px; margin-top: 5px; align-items: center; }
+.sr6-forge .add-acc select { max-width: 320px; }
+.sr6-forge .lvl { display: inline-flex; align-items: center; gap: 5px; margin-left: 8px; }
+.sr6-forge .lvl select { width: 62px; }

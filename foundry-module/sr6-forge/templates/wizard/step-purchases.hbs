@@ -39,7 +39,20 @@
   <div class="chosen-list">
     {{#each chosen}}
     <div class="chosen">
-      <span class="c-name">{{name}}</span>
+      <span class="c-name">{{name}}
+        {{#if ppText}}<span class="mt">{{ppText}}</span>{{/if}}
+        {{#if hasLevel}}
+        {{!-- leveled powers (Improved Reflexes 1/2/3) cost their PP per level --}}
+        <span class="lvl">
+          <label class="field-label">level</label>
+          <select data-change="powerLevel" data-index="{{index}}" data-current="{{level}}">
+            {{#each ../levels}}
+            <option value="{{this}}" {{#if (eq this ../level)}}selected{{/if}}>{{this}}</option>
+            {{/each}}
+          </select>
+        </span>
+        {{/if}}
+      </span>
       <button type="button" class="x" data-action="removePick" data-kind="{{../kind}}" data-uuid="{{uuid}}">✕</button>
     </div>
     {{/each}}
@@ -50,7 +63,8 @@
       <span class="nm">{{name}}</span>
       <span class="mt">{{meta}}</span>
       <button type="button" data-action="addPick" data-kind="{{../kind}}"
-              data-uuid="{{uuid}}" data-name="{{name}}" data-cost="{{cost}}">Learn</button>
+              data-uuid="{{uuid}}" data-name="{{name}}" data-genesis-id="{{genesisID}}"
+              data-cost="{{cost}}">{{#if ../isPower}}Take{{else}}Learn{{/if}}</button>
     </div>
     {{else}}
     <div class="browse-empty">Nothing matches.</div>
@@ -89,6 +103,7 @@
       <span class="nm">{{name}}</span>
       <span class="mt">{{price}}¥ · A{{avail}}{{#if essence}} · E{{essence}}{{/if}}</span>
       <button type="button" data-action="addPurchase" data-uuid="{{uuid}}" data-name="{{name}}"
+              data-genesis-id="{{genesisID}}" data-subtype="{{subtype}}"
               data-price="{{price}}" data-avail="{{avail}}" data-essence="{{essence}}"
               data-item-type="{{itemType}}" {{#if overCap}}disabled title="over availability cap"{{/if}}>Buy</button>
     </div>
@@ -101,9 +116,42 @@
 <h3>Owned ({{owned.length}}) — {{spentText}}</h3>
 <div class="chosen-list">
   {{#each owned}}
-  <div class="chosen">
+  <div class="chosen owned-item">
     <span class="c-name">{{name}}{{#if qty}} ×{{qty}}{{/if}}
       <span class="c-meta">{{price}}¥{{#if essence}} · ess {{essence}}{{/if}}</span>
+
+      {{#if hasSlots}}
+      {{!-- accessory mounts: what is fitted, and what will still fit --}}
+      <span class="slots">
+        {{#each slots}}<span class="slot {{#if taken}}taken{{/if}}">{{label}}</span>{{/each}}
+      </span>
+      {{#each accessories}}
+      <span class="fitted">
+        <span class="f-name">{{name}}</span>
+        <span class="mt">{{slotLabel}}{{#if price}} · {{price}}¥{{/if}}</span>
+        {{#if included}}<span class="mt">factory</span>
+        {{else}}
+        <button type="button" class="x" data-action="removeAccessory"
+                data-index="{{../index}}" data-uuid="{{uuid}}">✕</button>
+        {{/if}}
+      </span>
+      {{/each}}
+      {{#if freeSlots}}
+      <span class="add-acc">
+        <select data-acc-for="{{index}}">
+          <option value="">— fit an accessory —</option>
+          {{#each offers}}
+          <option value="{{uuid}}" data-genesis-id="{{genesisID}}" data-name="{{name}}"
+                  data-price="{{price}}" data-avail="{{avail}}" data-slot="{{slot}}">
+            {{name}} ({{slot}}, {{price}}¥)
+          </option>
+          {{/each}}
+        </select>
+        <button type="button" data-action="addAccessory" data-index="{{index}}"
+                data-from-select="{{index}}">Fit</button>
+      </span>
+      {{/if}}
+      {{/if}}
     </span>
     <button type="button" class="x" data-action="removePurchase" data-uuid="{{uuid}}">✕</button>
   </div>

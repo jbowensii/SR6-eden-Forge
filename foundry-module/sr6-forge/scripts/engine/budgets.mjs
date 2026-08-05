@@ -138,7 +138,12 @@ export function nuyenBudget(state, data, rules, provider) {
   const priceMods = data.metatypes?.[state.metatypeId]?.priceMods ?? {};
   const factor = 1 + (priceMods.EVERYTHING ?? 0);
   let spent = 0;
-  for (const p of state.purchases) spent += (p.price ?? 0) * (p.qty ?? 1);
+  for (const p of state.purchases) {
+    spent += (p.price ?? 0) * (p.qty ?? 1);
+    // fitted accessories are paid for too; factory-fitted ones are included in
+    // the host's price and carry 0
+    for (const a of p.accessories ?? []) spent += a.price ?? 0;
+  }
   spent *= factor;
   const ls = data.lifestyles?.[state.lifestyleId];
   if (ls) spent += ls.cost * (state.lifestyleMonths ?? 1);
@@ -160,8 +165,11 @@ export function powerPoints(state, data, rules, provider) {
   let max = 0;
   if (mor.powers && !mor.paysPowers) max = provider.magicRating(state);       // adept
   else if (mor.powers && mor.paysPowers) max = state.powerPointsBought ?? 0;  // mystic adept
+  // a leveled power costs `cost` power points PER LEVEL (Improved Reflexes at
+  // 1 PP/level is 1 / 2 / 3 PP at levels 1 / 2 / 3)
   const spent = state.powers.reduce((n, p) => n + (p.cost ?? 0) * (p.level ?? 1), 0);
-  return { max, spent, left: max - spent, cap: provider.magicRating(state) };
+  return { max, spent: Math.round(spent * 100) / 100,
+    left: Math.round((max - spent) * 100) / 100, cap: provider.magicRating(state) };
 }
 
 /** Core p68: Charisma x 6 points across Connection + Loyalty; neither rating

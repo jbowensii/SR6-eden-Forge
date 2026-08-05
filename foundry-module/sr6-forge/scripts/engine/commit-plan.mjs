@@ -47,6 +47,14 @@ export function buildCommitPlan(state, data, rules, provider, budgets) {
     embeddedFromPacks.push({ uuid: p.uuid, itemType: p.itemType,
       overrides: { ...(p.qty > 1 ? { "system.count": p.qty } : {}),
                    ...(p.rating ? { "system.rating": p.rating } : {}) } });
+    // Accessories fitted into this item's mount slots are their own items on
+    // the actor — a factory-fitted one came with the host and is not bought
+    // again, but it still has to exist so the sheet shows it.
+    for (const a of p.accessories ?? []) {
+      if (!a.uuid) continue;                      // factory items have no pack uuid
+      embeddedFromPacks.push({ uuid: a.uuid, itemType: "gear",
+        overrides: { "system.description": `Fitted to ${p.name} (${a.slot}).` } });
+    }
   }
   for (const sp of state.spells) embeddedFromPacks.push({ uuid: sp.uuid, itemType: "spell" });
   for (const pw of state.powers) {

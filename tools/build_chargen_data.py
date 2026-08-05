@@ -22,6 +22,9 @@ except Exception:
     pass
 
 from extractor.commlink6 import DEFAULT_JAR
+from extractor.gear_meta import (
+    build_gear_meta, english_data_files, parse_adept_powers,
+)
 from extractor.chargen_xml import (
     i18n_by_prefix, parse_contacts, parse_lifepath, parse_lifestyles,
     parse_mentor_spirits, MENTOR_BOOKS,
@@ -139,6 +142,18 @@ def build(jar: _P, out: _P) -> dict:
         lifepath.update(companion_lifepath())
         data["lifepathModules"] = lifepath
 
+        # Accessory mounting: hosts declare HOOK slots, accessories declare the
+        # slots they fit and which host subtypes accept them.
+        data["gearMounts"] = build_gear_meta(z)
+
+        # Adept powers: `cost` is power points PER LEVEL, so a leveled power
+        # (Improved Reflexes) is bought at rank 1..n.
+        powers: dict = {}
+        for b, cat in english_data_files(z, r"adeptpowers"):
+            powers.update(parse_adept_powers(read_category_trees(z, b, cat),
+                                             sub_i18n(px.get(b, {}), "power"), b))
+        data["adeptPowers"] = powers
+
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     return data
@@ -179,6 +194,9 @@ def main():
           f" | contacts: {len(d['contactArchetypes'])}"
           f" | contactTypes: {len(d['contactTypes'])}"
           f" | lifepath(EN): {len(d['lifepathModules'])}")
+    print(f"  gearMounts: {len(d['gearMounts'])}"
+          f" | adeptPowers: {len(d['adeptPowers'])}"
+          f" ({sum(1 for p in d['adeptPowers'].values() if p['hasLevel'])} leveled)")
 
 
 if __name__ == "__main__":

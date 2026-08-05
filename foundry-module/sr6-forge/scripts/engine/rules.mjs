@@ -157,6 +157,9 @@ export const VALIDATION_RULES = [
       const cap = creationSetting("maxAvailability", data, rules, state.rulesetId, state.optionalRules);
       for (const p of state.purchases) {
         if ((p.avail ?? 0) > cap) return { item: p.name ?? p.uuid, cap };
+        for (const a of p.accessories ?? []) {
+          if ((a.avail ?? 0) > cap) return { item: a.name ?? a.genesisID, cap };
+        }
       }
       return null;
     },

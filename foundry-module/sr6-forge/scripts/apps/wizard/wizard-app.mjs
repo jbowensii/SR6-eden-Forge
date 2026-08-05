@@ -44,10 +44,13 @@ const SHOP_TABS = [
   { id: "accessories", label: "Accessories", domain: "gear", types: ["ACCESSORY"] },
   { id: "armor",     label: "Armor",     domain: "gear", types: ["ARMOR", "ARMOR_ADDITION"] },
   { id: "matrix",    label: "Matrix",    domain: "gear", types: ["ELECTRONICS", "SOFTWARE", "CYBERDECK", "CODEMODS"] },
-  { id: "augments",  label: "Augments",  domain: "gear", types: ["CYBERWARE", "BIOWARE", "GENEWARE", "NANOWARE", "BIOLOGY"] },
-  { id: "gear",      label: "Gear",      domain: "gear", types: ["CHEMICALS", "MAGICAL", "SURVIVAL", "TOOLS"] },
+  { id: "cyberware", label: "Cyberware", domain: "gear", types: ["CYBERWARE"] },
+  { id: "bioware",   label: "Bioware",   domain: "gear", types: ["BIOWARE", "GENEWARE", "NANOWARE", "BIOLOGY"] },
+  { id: "gear",      label: "Gear",      domain: "gear", types: ["CHEMICALS", "SURVIVAL", "TOOLS"] },
   { id: "vehicles",  label: "Vehicles",  domain: "vehicles", types: null },
-  { id: "foci",      label: "Foci",      domain: "foci", types: null },
+  // magic goods (foci, reagents) are still nuyen purchases, unlike the Magic
+  // tab below which is the karma/power-point side
+  { id: "foci",      label: "Foci & Magical", domain: "foci", types: null, alsoGear: ["MAGICAL"] },
   { id: "magic",     label: "Magic",     magic: true },
   { id: "lifestyle", label: "Lifestyle & SIN", lifestyle: true },
 ];
@@ -91,6 +94,8 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
       addSin: SR6ForgeWizard.#onAddSin,
       removeSin: SR6ForgeWizard.#onRemoveSin,
       shopTab: SR6ForgeWizard.#onShopTab,
+      addAccessory: SR6ForgeWizard.#onAddAccessory,
+      removeAccessory: SR6ForgeWizard.#onRemoveAccessory,
       addModule: SR6ForgeWizard.#onAddModule,
       removeModule: SR6ForgeWizard.#onRemoveModule,
     },
@@ -503,10 +508,42 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
         const tabs = SHOP_TABS.map((t) => ({
           id: t.id, label: t.label, active: t.id === tabDef.id,
           enabled: t.magic ? !!(mor.spells || mor.powers || mor.resonance) : true,
+          title: t.magic && !(mor.spells || mor.powers || mor.resonance)
+            ? "This character has no Magic or Resonance path" : t.label,
         }));
         const cap = creationSetting("maxAvailability", data, rules, st.rulesetId, st.optionalRules);
+        const accessoryRows = await PackCatalog.index("gear");
+        const mounts = data.gearMounts ?? {};
+        // For each owned item: which of its mount slots are free, and which
+        // accessories in the library fit them (slot AND host-subtype must match)
+        const owned = st.purchases.map((pItem, index) => {
+          const hostMeta = mounts[pItem.genesisID] ?? {};
+          const hooks = hostMeta.hooks ?? [];
+          const used = new Set((pItem.accessories ?? []).map((a) => a.slot));
+          const free = hooks.filter((h) => !used.has(h));
+          const offers = free.length ? accessoryRows.filter((r) => {
+            const m = mounts[r.system?.genesisID];
+            if (!m?.fits?.some((f) => free.includes(f))) return false;
+            const allow = m.hostSubtypes;
+            return !allow?.length || allow.includes(pItem.subtype);
+          }).sort((a, b) => a.name.localeCompare(b.name)).slice(0, 60) : [];
+          return {
+            ...pItem, index,
+            slots: hooks.map((h) => ({ id: h, label: h.replaceAll("_", " ").toLowerCase(),
+              taken: used.has(h) })),
+            hasSlots: hooks.length > 0,
+            freeSlots: free.length,
+            accessories: (pItem.accessories ?? []).map((a) => ({
+              ...a, slotLabel: (a.slot || "").replaceAll("_", " ").toLowerCase() })),
+            offers: offers.map((r) => ({
+              uuid: r.uuid, name: r.name, genesisID: r.system?.genesisID,
+              price: r.system?.price ?? 0, avail: r.system?.avail ?? 0,
+              slot: (mounts[r.system?.genesisID]?.fits ?? []).find((f) => free.includes(f)),
+            })),
+          };
+        });
         const base = {
-          tabs, tabLabel: tabDef.label, owned: st.purchases,
+          tabs, tabLabel: tabDef.label, owned,
           spentText: `${budgets.nuyen.spent.toLocaleString()}¥ spent · ${budgets.nuyen.left.toLocaleString()}¥ left`,
           isMagicTab: !!tabDef.magic, isLifestyleTab: !!tabDef.lifestyle,
           query: q("shop"),
@@ -523,10 +560,29 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
             const rows = await PackCatalog.index(domain);
             const chosenList = { spell: st.spells, power: st.powers,
               complexform: st.complexForms, ritual: st.rituals }[kind];
-            kinds.push({ kind, label, chosen: chosenList,
+            const powerMeta = data.adeptPowers ?? {};
+            kinds.push({
+              kind, label, isPower: kind === "power",
+              levels: [1, 2, 3, 4, 5, 6],
+              chosen: chosenList.map((c, index) => {
+                const pm = powerMeta[c.genesisID] ?? {};
+                return { ...c, index,
+                  levelText: pm.hasLevel ? `level ${c.level ?? 1}` : "",
+                  hasLevel: !!pm.hasLevel,
+                  ppText: kind === "power"
+                    ? `${Math.round((c.cost ?? 0) * (c.level ?? 1) * 100) / 100} PP` : "" };
+              }),
               list: rows.filter(match("shop")).sort((a, b) => a.name.localeCompare(b.name)).slice(0, ROW_CAP)
-                .map((r) => ({ uuid: r.uuid, name: r.name, cost: r.system?.cost ?? 0,
-                  meta: kind === "power" ? `${r.system?.cost ?? 0} PP` : "" })) });
+                .map((r) => {
+                  const gid = r.system?.genesisID;
+                  const pm = powerMeta[gid] ?? {};
+                  // the packs carry no PP cost for adept powers — chargen-data
+                  // does, and it is per LEVEL for a leveled power
+                  const cost = kind === "power" ? (pm.cost ?? 0) : (r.system?.cost ?? 0);
+                  return { uuid: r.uuid, name: r.name, genesisID: gid, cost,
+                    meta: kind === "power"
+                      ? `${cost} PP${pm.hasLevel ? " / level" : ""}` : "" };
+                }) });
           }
           return { ...base, magicKinds: kinds };
         }
@@ -552,7 +608,10 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
           .slice(0, ROW_CAP)
           .map((r) => ({ uuid: r.uuid, name: r.name, price: r.system?.price ?? 0,
             avail: r.system?.avail ?? 0, essence: r.system?.essence ?? 0,
-            itemType: r.type, overCap: (r.system?.avail ?? 0) > cap }));
+            genesisID: r.system?.genesisID ?? "", subtype: r.system?.subtype ?? "",
+            itemType: r.type, overCap: (r.system?.avail ?? 0) > cap,
+            // does this item accept accessories at all?
+            mounts: (mounts[r.system?.genesisID]?.hooks ?? []).length }));
         return { ...base, list, listTotal: inTab.length,
           shown: list.length, truncated: Math.max(0, hits.length - ROW_CAP),
           subtypes: Object.entries(subCounts).sort((a, b) => a[0].localeCompare(b[0]))
@@ -738,6 +797,10 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
       case "lifestyle": e.spend({ kind: "lifestyle", id: el.value || null }); break;
       case "qualityFilter": this.ui.qualityFilter = el.value; break;
       case "shopSubtype": this.ui.shopSubtype = el.value; break;
+      case "powerLevel":
+        e.spend({ kind: "powerLevel", index: Number(el.dataset.index),
+          delta: Number(el.value) - Number(el.dataset.current ?? 1) });
+        break;
       case "moduleChoice": {
         const pick = e.state.lifepath[Number(el.dataset.index)];
         if (pick) (pick.choices ??= {})[Number(el.dataset.choice)] = el.value || null;
@@ -821,17 +884,38 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
   }
   static #onAddPurchase(_ev, t) {
     const d = t.dataset;
+    // genesisID + subtype are what the accessory rules match on
     this.#spend({ kind: "purchase", uuid: d.uuid, name: d.name, price: Number(d.price ?? 0),
       avail: Number(d.avail ?? 0), essence: Number(d.essence ?? 0),
+      genesisID: d.genesisId ?? null, subtype: d.subtype ?? null,
       itemType: d.itemType, stack: true }, "shop");
   }
   static #onRemovePurchase(_ev, t) { this.#spend({ kind: "purchase", uuid: t.dataset.uuid, remove: true }); }
   static #onAddPick(_ev, t) {
     const d = t.dataset;
-    this.#spend({ kind: d.kind, uuid: d.uuid, name: d.name, cost: Number(d.cost ?? 0) }, "shop");
+    this.#spend({ kind: d.kind, uuid: d.uuid, name: d.name,
+      genesisID: d.genesisId ?? null, cost: Number(d.cost ?? 0) }, "shop");
   }
   static #onRemovePick(_ev, t) {
     this.#spend({ kind: t.dataset.kind, uuid: t.dataset.uuid, remove: true });
+  }
+  static #onAddAccessory(_ev, t) {
+    const index = Number(t.dataset.index);
+    const sel = this.element.querySelector(`[data-acc-for="${index}"]`);
+    const opt = sel?.selectedOptions?.[0];
+    if (!opt?.value) {
+      ui.notifications.warn("SR6 Forge: pick an accessory to fit first.");
+      return;
+    }
+    const d = opt.dataset;
+    // slot comes from the offer: the first free hook both sides share
+    this.#spend({ kind: "accessory", index, uuid: opt.value,
+      genesisID: d.genesisId, name: d.name, slot: d.slot || null,
+      price: Number(d.price ?? 0), avail: Number(d.avail ?? 0) });
+  }
+  static #onRemoveAccessory(_ev, t) {
+    this.#spend({ kind: "accessory", index: Number(t.dataset.index),
+      uuid: t.dataset.uuid, remove: true });
   }
   static #onAddModule(_ev, t) {
     this.#spend({ kind: "lifemodule", id: t.dataset.id, stage: t.dataset.stage });
