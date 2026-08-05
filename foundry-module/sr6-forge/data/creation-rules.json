@@ -1,0 +1,24 @@
+{
+  "_note": "Character-creation constants. Every value with a 'verify' id is confirmed against the owned core rulebook / Companion PDFs in the Phase-4 verification pass before release — do not trust unverified numbers.",
+  "startingKarma": { "value": 50, "verify": "V-C1" },
+  "qualityPositiveKarmaCap": { "value": 20, "verify": "V-C2" },
+  "qualityNegativeKarmaCap": { "value": 20, "verify": "V-C2" },
+  "attributeStartingValue": { "value": 1 },
+  "oneAttributeAtMax": { "value": true, "includesEdge": false, "verify": "V-C3" },
+  "skillCreationCap": { "value": 6, "aptitudeCap": 7, "aptitudeQualityId": "aptitude", "verify": "V-C5" },
+  "knowledgePointsFormula": { "value": "log", "freeNativeLanguage": true, "verify": "V-C6" },
+  "contactPointsFormula": { "value": "cha*2", "verify": "V-C7" },
+  "karmaToNuyen": { "rate": 2000, "maxKarma": 10, "verify": "V-C8" },
+  "spellsAtCreation": { "karmaCost": 5, "freeSpells": 0, "verify": "V-C9" },
+  "complexFormsAtCreation": { "karmaCost": 5, "freeForms": 0, "verify": "V-C9" },
+  "mysticAdeptPowerPoints": { "karmaPerPoint": 5, "maxPoints": "mag", "verify": "V-C10" },
+  "adeptPowerPoints": { "formula": "mag" },
+  "aspectedPickOne": { "value": true, "options": ["sorcery", "conjuring", "enchanting"], "verify": "V-C11" },
+  "defaults": {
+    "maxAvailability": 6,
+    "maxKarmaRemain": 5,
+    "maxNuyenRemain": 5000,
+    "allowNegativeNuyen": false,
+    "verify": "V-C13 (core defaults; ruleset interpretations override via chargen-data rules)"
+  }
+}

@@ -1,0 +1,111 @@
+/** Build the commit plan: everything the actor-committer needs to create the
+ *  eden Player actor. RAW INPUTS ONLY — eden derives pools/monitors/essence. */
+import { attrRating, CORE_ATTRS } from "./budgets.mjs";
+
+export function buildCommitPlan(state, data, rules, provider, budgets) {
+  const mt = data.metatypes?.[state.metatypeId] ?? {};
+  const system = {
+    metatype: mt.name ?? state.metatypeId ?? "",
+    mortype: state.morId,
+    nuyen: Math.max(0, budgets.nuyen.left),
+    karma: Math.max(0, budgets.karma.left),
+    karma_total: rules.startingKarma.value,
+    attributes: {},
+    skills: {},
+  };
+  for (const k of CORE_ATTRS) {
+    system.attributes[k] = { base: attrRating(state, k, provider) };
+  }
+  const edge = attrRating(state, "edg", provider);
+  system.attributes.edg = { max: edge, current: edge };
+  const mor = data.morTypes?.[state.morId] ?? {};
+  if (mor.magic) system.attributes.mag = { base: attrRating(state, "mag", provider) };
+  if (mor.resonance) system.attributes.res = { base: attrRating(state, "res", provider) };
+
+  for (const [id, sk] of Object.entries(state.skills)) {
+    if (!(sk.points > 0)) continue;
+    system.skills[id] = { points: sk.points };
+    if (sk.spec) system.skills[id].specialization = sk.spec;
+    if (sk.expertise) system.skills[id].expertise = sk.expertise;
+  }
+
+  /* ---- items from compendia (resolved to uuids by the committer/catalog) ---- */
+  const embeddedFromPacks = [];
+  for (const q of state.qualities) {
+    embeddedFromPacks.push({
+      genesisID: q.genesisID, itemType: "quality",
+      overrides: {
+        ...(q.rating > 1 ? { "system.level": q.rating } : {}),
+        ...(q.choiceText ? { name: null /* filled by committer: "Name (choice)" */, choiceText: q.choiceText } : {}),
+      },
+    });
+  }
+  for (const p of state.purchases) {
+    embeddedFromPacks.push({ uuid: p.uuid, itemType: p.itemType,
+      overrides: { ...(p.qty > 1 ? { "system.count": p.qty } : {}),
+                   ...(p.rating ? { "system.rating": p.rating } : {}) } });
+  }
+  for (const sp of state.spells) embeddedFromPacks.push({ uuid: sp.uuid, itemType: "spell" });
+  for (const pw of state.powers) {
+    embeddedFromPacks.push({ uuid: pw.uuid, itemType: "adeptpower",
+      overrides: pw.level > 1 ? { "system.level": pw.level } : {} });
+  }
+  for (const cf of state.complexForms) embeddedFromPacks.push({ uuid: cf.uuid, itemType: "complexform" });
+  for (const r of state.rituals) embeddedFromPacks.push({ uuid: r.uuid, itemType: "ritual" });
+  for (const f of state.foci) embeddedFromPacks.push({ uuid: f.uuid, itemType: "focus" });
+
+  /* ---- synthetic items (no compendium source) ---- */
+  const syntheticItems = [];
+  for (const c of state.contacts) {
+    syntheticItems.push({
+      name: c.name || "Contact", type: "contact",
+      system: { rating: c.connection, loyalty: c.loyalty,
+                type: c.archetypeId ?? "", description: "" },
+    });
+  }
+  for (const sin of state.sins) {
+    syntheticItems.push({
+      name: sin.name, type: "sin",
+      system: { quality: String(sin.rating), description: "" },
+    });
+  }
+  if (state.lifestyleId) {
+    const ls = data.lifestyles?.[state.lifestyleId] ?? {};
+    syntheticItems.push({
+      name: ls.name ?? state.lifestyleId, type: "lifestyle",
+      system: { type: state.lifestyleId, cost: ls.cost ?? 0,
+                paid: state.lifestyleMonths ?? 1 },
+    });
+  }
+  for (const k of state.knowledge) {
+    syntheticItems.push({
+      name: k.name, type: "skill",
+      system: { genesisID: k.type, points: k.native ? 4 : 1 },
+    });
+  }
+
+  return {
+    actorData: {
+      name: state.name || "New Runner",
+      type: "Player",
+      system,
+      flags: {
+        "sr6-forge": {
+          metatypeId: state.metatypeId,
+          method: state.method,
+          rulesetId: state.rulesetId,
+          chargen: structuredClone(state),
+          ledger: [{
+            ts: Date.now(), phase: "creation", op: "create",
+            karma: rules.startingKarma.value - Math.max(0, budgets.karma.left),
+            nuyen: budgets.nuyen.max - Math.max(0, budgets.nuyen.left),
+            note: `Created via ${state.method} (${state.rulesetId})`,
+          }],
+        },
+      },
+    },
+    embeddedFromPacks,
+    syntheticItems,
+    effects: [],
+  };
+}
