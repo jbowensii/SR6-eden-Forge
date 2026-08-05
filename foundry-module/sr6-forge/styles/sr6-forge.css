@@ -298,9 +298,12 @@
 .sr6-forge .method-list { display: grid; gap: 10px; margin-top: 12px; }
 .sr6-forge .method-card {
   display: grid;                 /* beats Foundry's flex+center */
+  grid-template-columns: 100%;   /* single full-width track */
   gap: 4px;
   justify-items: start;
+  justify-content: start;        /* Foundry sets center — undo it */
   align-content: start;
+  text-align: left;
   width: 100%;
   text-align: left;
   padding: 13px 16px;
@@ -353,9 +356,12 @@
 }
 .sr6-forge .pick-card {
   display: grid;                 /* beats Foundry's flex+center */
+  grid-template-columns: 100%;   /* single full-width track */
   gap: 4px;
   justify-items: start;
+  justify-content: start;        /* Foundry sets center — undo it */
   align-content: start;
+  text-align: left;
   text-align: left;
   padding: 11px 13px;
   min-height: 78px;              /* even rows, content still free to grow */

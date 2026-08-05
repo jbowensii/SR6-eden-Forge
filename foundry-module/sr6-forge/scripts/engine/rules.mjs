@@ -1,7 +1,10 @@
 /** Declarative creation-validation rules. Each returns null (pass) or a params
  *  object (fail) — message keys live in lang/en.json as SR6FORGE.Validate.<id>.
  *  ctx = { state, data, rules, provider, budgets } */
-import { CORE_ATTRS, SPECIAL_ATTRS, attrRating, ruleConst } from "./budgets.mjs";
+import { CORE_ATTRS, SPECIAL_ATTRS, attrRating, qualityKarma, ruleConst } from "./budgets.mjs";
+
+/** Split of paid quality karma (free racial qualities excluded). */
+const qualitySplit = (state, data) => qualityKarma(state, data);
 
 export const VALIDATION_RULES = [
   {
@@ -112,27 +115,23 @@ export const VALIDATION_RULES = [
     },
   },
   {
-    id: "quality.posCap", severity: "error", step: "qualities",
+    // Core p67: "You can't select more than six total qualities at character
+    // creation, and the net bonus Karma cannot be more than 20." The cap is on
+    // the NET (negatives minus positives), not on each side separately.
+    id: "quality.netBonusCap", severity: "error", step: "qualities",
     check: ({ state, data, rules }) => {
-      let pos = 0;
-      for (const q of state.qualities) {
-        if (q.free) continue;
-        const meta = data.qualityMeta?.[q.genesisID];
-        if (meta?.positive) pos += (q.subOptionKarma ?? meta.karma) * (q.rating ?? 1);
-      }
-      return pos <= rules.qualityPositiveKarmaCap.value ? null : {};
+      const { pos, neg } = qualitySplit(state, data);
+      const net = neg - pos;
+      const cap = rules.qualityNetBonusKarmaCap.value;
+      return net <= cap ? null : { net, cap };
     },
   },
   {
-    id: "quality.negCap", severity: "error", step: "qualities",
-    check: ({ state, data, rules }) => {
-      let neg = 0;
-      for (const q of state.qualities) {
-        if (q.free) continue;
-        const meta = data.qualityMeta?.[q.genesisID];
-        if (meta && !meta.positive) neg += (q.subOptionKarma ?? meta.karma) * (q.rating ?? 1);
-      }
-      return neg <= rules.qualityNegativeKarmaCap.value ? null : {};
+    id: "quality.maxCount", severity: "error", step: "qualities",
+    check: ({ state, rules }) => {
+      const n = state.qualities.filter((q) => !q.free).length;   // racial are free
+      const cap = rules.qualityMaxCount.value;
+      return n <= cap ? null : { count: n, cap };
     },
   },
   {

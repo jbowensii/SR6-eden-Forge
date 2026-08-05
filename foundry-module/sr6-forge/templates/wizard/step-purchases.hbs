@@ -6,6 +6,21 @@
   {{/each}}
 </div>
 
+{{!-- one search bar for every tab (gear, magic, lifestyle) --}}
+{{#unless isLifestyleTab}}
+<div class="browser-head">
+  <input type="search" data-filter="shop" placeholder="Search {{tabLabel}}…" value="{{query}}" />
+  {{#if subtypes.length}}
+  <select data-change="shopSubtype">
+    <option value="">All subtypes ({{listTotal}})</option>
+    {{#each subtypes}}
+    <option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}} ({{count}})</option>
+    {{/each}}
+  </select>
+  {{/if}}
+</div>
+{{/unless}}
+
 {{#if isMagicTab}}
   {{#unless magicKinds.length}}
   <p class="hint">This character has no Magic or Resonance path — nothing to learn here.</p>
@@ -58,17 +73,6 @@
   </div>
 
 {{else}}
-  <div class="browser-head">
-    <input type="search" data-filter="shop" placeholder="Search {{tabLabel}}…" value="{{query}}" />
-    {{#if subtypes.length}}
-    <select data-change="shopSubtype">
-      <option value="">All subtypes</option>
-      {{#each subtypes}}
-      <option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}} ({{count}})</option>
-      {{/each}}
-    </select>
-    {{/if}}
-  </div>
   <div class="browse-list" data-filter-scope="shop">
     {{#each list}}
     <div class="row {{#if overCap}}over{{/if}}" data-filter-text="{{name}}"

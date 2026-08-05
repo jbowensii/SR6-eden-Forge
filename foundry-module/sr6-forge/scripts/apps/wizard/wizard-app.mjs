@@ -5,7 +5,7 @@
 import { MODULE_ID, SETTINGS, ACTOR_SKILLS } from "../../config.mjs";
 import { chargenData } from "../../main.mjs";
 import { ChargenEngine } from "../../engine/chargen-engine.mjs";
-import { ruleConst } from "../../engine/budgets.mjs";
+import { qualityKarma, ruleConst } from "../../engine/budgets.mjs";
 import { DraftStore } from "../../services/draft-store.mjs";
 import { PackCatalog } from "../../services/pack-catalog.mjs";
 import { commitCharacter } from "../../services/actor-committer.mjs";
@@ -304,10 +304,13 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
             genesisID: r.system?.genesisID ?? "",
             value: r.system?.value ?? 0, category: r.system?.category ?? "" }));
         const meta = data.qualityMeta ?? {};
+        const qk = qualityKarma(st, data);
         return {
           list, query: q("quality"), filter,
-          posCap: rules.qualityPositiveKarmaCap.value,
-          negCap: rules.qualityNegativeKarmaCap.value,
+          netCap: rules.qualityNetBonusKarmaCap.value,
+          maxCount: rules.qualityMaxCount.value,
+          paidCount: st.qualities.filter((x) => !x.free).length,
+          posTotal: qk.pos, negTotal: qk.neg, netBonus: qk.neg - qk.pos,
           taken: st.qualities.map((qq) => {
             const m = meta[qq.genesisID] ?? {};
             const positive = qq.positive ?? m.positive ?? true;
@@ -373,7 +376,7 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
           .map((r) => ({ uuid: r.uuid, name: r.name, price: r.system?.price ?? 0,
             avail: r.system?.avail ?? 0, essence: r.system?.essence ?? 0,
             itemType: r.type, overCap: (r.system?.avail ?? 0) > cap }));
-        return { ...base, list,
+        return { ...base, list, listTotal: inTab.length,
           subtypes: Object.entries(subCounts).sort((a, b) => a[0].localeCompare(b[0]))
             .map(([id, count]) => ({ id, count,
               label: id.replaceAll("_", " ").toLowerCase(), selected: sub === id })) };

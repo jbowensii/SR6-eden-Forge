@@ -1,8 +1,8 @@
 {
   "_note": "Character-creation constants. Every value with a 'verify' id is confirmed against the owned core rulebook / Companion PDFs in the Phase-4 verification pass before release — do not trust unverified numbers.",
   "startingKarma": { "value": 50, "verify": "V-C1" },
-  "qualityPositiveKarmaCap": { "value": 20, "verify": "V-C2" },
-  "qualityNegativeKarmaCap": { "value": 20, "verify": "V-C2" },
+  "qualityNetBonusKarmaCap": { "value": 20, "verified": "core rulebook p67 — 'the net bonus Karma cannot be more than 20'" },
+  "qualityMaxCount": { "value": 6, "verified": "core rulebook p67 — 'You can't select more than six total qualities at character creation' (free racial qualities excluded)" },
   "attributeStartingValue": { "value": 1 },
   "oneAttributeAtMax": { "value": true, "includesEdge": false, "verify": "V-C3" },
   "skillCreationCap": { "value": 6, "aptitudeCap": 7, "aptitudeQualityId": "aptitude", "verify": "V-C5" },

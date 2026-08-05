@@ -150,16 +150,41 @@ describe("qualities & karma", () => {
     expect(e.state.qualities.some((q) => q.genesisID === "thermographic_vision")).toBe(false);
   });
 
-  it("negative qualities add karma, positive spend it, caps enforced", () => {
+  it("negative qualities add karma and positive ones spend it", () => {
     const e = engineWith();
     e.setMetatype("human");
     e.spend({ kind: "quality", genesisID: "built_tough", rating: 4 });   // 4x4 = 16 karma
+    expect(e.budgets().karma.spent).toBe(16);
+  });
+
+  // Core p67: "You can't select more than six total qualities at character
+  // creation, and the net bonus Karma cannot be more than 20."
+  it("the quality cap is on NET bonus karma, not each side separately", () => {
+    const e = engineWith();
+    e.setMetatype("human");
+    const neg = (id, k) => e.spend({ kind: "quality", genesisID: id, name: id, positive: false, karma: k });
+    const pos = (id, k) => e.spend({ kind: "quality", genesisID: id, name: id, positive: true, karma: k });
+    // John's example: 30 gained, 10 spent -> net +20 = legal
+    pos("mentor_spirit", 10);
+    neg("honorbound", 10); neg("sinner", 8); neg("prejudiced", 8); neg("dependents", 4);
     const b = e.budgets();
-    expect(b.karma.spent).toBe(16);
-    e.spend({ kind: "quality", genesisID: "ambidextrous" });             // +4 => 20 (cap ok)
-    expect(e.validate().some((i) => i.id === "quality.posCap")).toBe(false);
-    e.spend({ kind: "quality", genesisID: "analytical_mind" });          // 3 more => over 20
-    expect(e.validate().some((i) => i.id === "quality.posCap")).toBe(true);
+    expect(b.karma.max).toBe(50 + 30);
+    expect(b.karma.spent).toBe(10);
+    expect(e.validate().some((i) => i.id === "quality.netBonusCap")).toBe(false);
+    // one more point of net bonus breaks it
+    neg("extra_flaw", 1);
+    expect(e.validate().some((i) => i.id === "quality.netBonusCap")).toBe(true);
+  });
+
+  it("no more than six selected qualities (racial ones are free)", () => {
+    const e = engineWith({ METATYPE: "A", ATTRIBUTE: "B", MAGIC: "E", SKILLS: "C", RESOURCES: "D" });
+    e.setMetatype("troll");                       // brings free racial qualities
+    for (let i = 0; i < 6; i++) {
+      e.spend({ kind: "quality", genesisID: `q${i}`, name: `q${i}`, positive: false, karma: 1 });
+    }
+    expect(e.validate().some((i) => i.id === "quality.maxCount")).toBe(false);
+    e.spend({ kind: "quality", genesisID: "q7", name: "q7", positive: false, karma: 1 });
+    expect(e.validate().some((i) => i.id === "quality.maxCount")).toBe(true);
   });
 
   it("negative qualities GRANT karma even when chargen-data has no metadata", () => {
