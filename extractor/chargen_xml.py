@@ -245,6 +245,20 @@ def parse_skills(trees: list[dict], i18n: dict) -> dict:
     return out
 
 
+def parse_rule_labels(z: zipfile.ZipFile) -> dict:
+    """Shadowrun6Rules.properties -> {RULE_CONST: label} — the optional-rule
+    switches Commlink6 exposes in its settings."""
+    path = "de/rpgframework/shadowrun6/Shadowrun6Rules.properties"
+    if path not in set(z.namelist()):
+        return {}
+    out = {}
+    for ln in decode_props(z.read(path)).splitlines():
+        m = re.match(r"^rule\.([a-z0-9_.]+)\s*=\s*(.*)$", ln.strip())
+        if m:
+            out[m.group(1).upper().replace(".", "_")] = m.group(2).strip()
+    return out
+
+
 def parse_rules(trees: list[dict]) -> dict:
     """rules.xml -> {interpretationId: {restrict[], set{RULE: value}}}."""
     def coerce(v: str):

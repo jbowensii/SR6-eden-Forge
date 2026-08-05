@@ -13,6 +13,7 @@ export const FLAGS = {
 export const SETTINGS = {
   DRAFTS: "drafts",                // { [draftId]: {name, updatedAt, step, engineState} }
   RULESET: "ruleset",              // rule interpretation id (core | srm | ...)
+  OPTIONAL_RULES: "optionalRules", // { RULE_CONST: boolean|number } overrides
 };
 
 /** Compendium index fields the wizard browse lists need (pushed, not replaced —

@@ -25,7 +25,7 @@ from extractor.commlink6 import DEFAULT_JAR
 from extractor.chargen_xml import (
     i18n_by_prefix, parse_contacts, parse_lifepath, parse_lifestyles,
     parse_magicreson, parse_metatypes, parse_priorities, parse_quality_meta,
-    parse_rules, parse_skills, read_category_trees, sub_i18n,
+    parse_rule_labels, parse_rules, parse_skills, read_category_trees, sub_i18n,
 )
 
 # (book, category, parser-key) — metatypes/qualities exist in several books
@@ -51,6 +51,7 @@ def build(jar: _P, out: _P) -> dict:
               {"core", "companion", "astral_ways", "hack_slash", "no_future"}}
 
         data["rules"] = parse_rules(read_category_trees(z, "core", "rules"))
+        data["ruleLabels"] = parse_rule_labels(z)
         data["priorities"] = parse_priorities(read_category_trees(z, "core", "priorities"))
 
         metatypes: dict = {}

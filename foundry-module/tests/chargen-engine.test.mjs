@@ -292,3 +292,81 @@ describe("commitPlan", () => {
     expect(e2.state.metatypeId).toBe("dwarf");
   });
 });
+
+describe("contact points (core p68: Charisma x 6, neither rating over Charisma)", () => {
+  /** John's test character: CHA 2 -> 12 points, three contacts at 2/2 = 12. */
+  function chaTwo() {
+    const e = engineWith();
+    e.setMetatype("human");
+    e.spend({ kind: "attribute", target: "cha", delta: 1 });   // 1 base + 1 = 2
+    return e;
+  }
+
+  it("grants Charisma x 6 points", () => {
+    const e = chaTwo();
+    expect(e.attrRating("cha")).toBe(2);
+    expect(e.budgets().contactPoints.max).toBe(12);
+    expect(e.budgets().contactPoints.ratingCap).toBe(2);
+  });
+
+  it("three 2/2 contacts spend the budget exactly and validate", () => {
+    const e = chaTwo();
+    for (const name of ["Fixer", "Doc", "Decker"]) {
+      e.spend({ kind: "contact", name, connection: 2, loyalty: 2 });
+    }
+    const b = e.budgets().contactPoints;
+    expect(b.spent).toBe(12);
+    expect(b.left).toBe(0);
+    const ids = e.validate().map((i) => i.id);
+    expect(ids).not.toContain("contact.budget");
+    expect(ids).not.toContain("contact.ratingCap");
+  });
+
+  it("flags a rating above Charisma", () => {
+    const e = chaTwo();
+    e.spend({ kind: "contact", name: "Mr. Johnson", connection: 3, loyalty: 1 });
+    expect(e.validate().map((i) => i.id)).toContain("contact.ratingCap");
+  });
+});
+
+describe("karma-bought ranks", () => {
+  it("charges 5 x new rating for attributes and 5 x new rank for skills", () => {
+    const e = engineWith();
+    e.setMetatype("human");
+    const before = e.budgets().karma.spent;
+    e.spend({ kind: "attribute", target: "log", pool: "karma", delta: 1 });   // 1 -> 2
+    expect(e.budgets().karma.spent - before).toBe(10);
+    e.spend({ kind: "skill", target: "firearms", pool: "karma", delta: 1 });  // 0 -> 1
+    expect(e.budgets().karma.spent - before).toBe(15);
+  });
+
+  it("karma ranks count toward the rank-6 creation cap and reach the actor", () => {
+    const e = engineWith();
+    e.setMetatype("human");
+    e.spend({ kind: "skill", target: "firearms", delta: 4 });
+    e.spend({ kind: "skill", target: "firearms", pool: "karma", delta: 2 });
+    expect(e.skillRank("firearms")).toBe(6);
+    expect(e.validate().map((i) => i.id)).not.toContain("skill.capSix");
+    expect(e.commitPlan().actorData.system.skills.firearms.points).toBe(6);
+    e.spend({ kind: "skill", target: "firearms", pool: "karma", delta: 1 });
+    expect(e.validate().map((i) => i.id)).toContain("skill.capSix");
+  });
+
+  it("karma ranks alone still allow a specialization", () => {
+    const e = engineWith();
+    e.setMetatype("human");
+    e.spend({ kind: "skill", target: "firearms", pool: "karma", delta: 1 });
+    expect(e.spend({ kind: "spec", target: "firearms", spec: "pistols" }).ok).toBe(true);
+  });
+});
+
+describe("optional-rule overrides", () => {
+  it("world overrides beat the ruleset interpretation", () => {
+    const e = engineWith();
+    e.setMetatype("human");
+    e.state.purchases.push({ uuid: "x", name: "Ares Alpha", price: 0, avail: 12, qty: 1 });
+    expect(e.validate().map((i) => i.id)).toContain("gear.availCap");
+    e.setOptionalRules({ CHARGEN_MAX_AVAILABILITY: 12 });
+    expect(e.validate().map((i) => i.id)).not.toContain("gear.availCap");
+  });
+});

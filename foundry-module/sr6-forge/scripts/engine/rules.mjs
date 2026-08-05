@@ -1,7 +1,7 @@
 /** Declarative creation-validation rules. Each returns null (pass) or a params
  *  object (fail) — message keys live in lang/en.json as SR6FORGE.Validate.<id>.
  *  ctx = { state, data, rules, provider, budgets } */
-import { CORE_ATTRS, SPECIAL_ATTRS, attrRating, qualityKarma, ruleConst } from "./budgets.mjs";
+import { CORE_ATTRS, SPECIAL_ATTRS, attrRating, qualityKarma, ruleConst, skillRank } from "./budgets.mjs";
 
 /** Split of paid quality karma (free racial qualities excluded). */
 const qualitySplit = (state, data) => qualityKarma(state, data);
@@ -66,7 +66,7 @@ export const VALIDATION_RULES = [
     check: ({ state, data, rules }) => {
       const maxima = data.metatypes?.[state.metatypeId]?.attributeMaxCreation ?? {};
       const onLowered = ruleConst("CHARGEN_ADJUSTMENT_ON_LOWERED_MAX",
-        data, rules, state.rulesetId) ?? false;
+        data, rules, state.rulesetId, state.optionalRules) ?? false;
       for (const k of CORE_ATTRS) {
         if (!(state.attributes[k]?.adjust > 0)) continue;
         const max = maxima[k] ?? 6;
@@ -90,8 +90,9 @@ export const VALIDATION_RULES = [
         : rules.skillCreationCap.value;
       let overCap = 0;
       for (const [id, s] of Object.entries(state.skills)) {
-        if ((s.points ?? 0) > cap) return { skill: id, cap };
-        if (hasAptitude && (s.points ?? 0) > rules.skillCreationCap.value) overCap += 1;
+        const rank = skillRank(s);        // skill points + karma-bought ranks
+        if (rank > cap) return { skill: id, cap };
+        if (hasAptitude && rank > rules.skillCreationCap.value) overCap += 1;
       }
       return overCap <= 1 ? null : { skill: "multiple", cap: rules.skillCreationCap.value };
     },
@@ -102,7 +103,7 @@ export const VALIDATION_RULES = [
       const unlocks = new Set(data.morTypes?.[state.morId]?.skillUnlocks ?? []);
       const aspectedPick = state.aspectedSkill;
       for (const [id, s] of Object.entries(state.skills)) {
-        if (!(s.points > 0)) continue;
+        if (!(skillRank(s) > 0)) continue;
         if (!data.skills?.[id]?.restricted) continue;
         if (unlocks.has(id)) {
           const mor = data.morTypes?.[state.morId];
@@ -141,14 +142,14 @@ export const VALIDATION_RULES = [
   {
     id: "nuyen.overspent", severity: "error", step: "purchases",
     check: ({ budgets, state, data, rules }) => {
-      const allowNeg = ruleConst("CHARGEN_NEGATIVE_NUYEN", data, rules, state.rulesetId);
+      const allowNeg = ruleConst("CHARGEN_NEGATIVE_NUYEN", data, rules, state.rulesetId, state.optionalRules);
       return budgets.nuyen.left >= 0 || allowNeg ? null : {};
     },
   },
   {
     id: "gear.availCap", severity: "error", step: "purchases",
     check: ({ state, data, rules }) => {
-      const cap = ruleConst("CHARGEN_MAX_AVAILABILITY", data, rules, state.rulesetId);
+      const cap = ruleConst("CHARGEN_MAX_AVAILABILITY", data, rules, state.rulesetId, state.optionalRules);
       for (const p of state.purchases) {
         if ((p.avail ?? 0) > cap) return { item: p.name ?? p.uuid, cap };
       }
@@ -179,16 +180,29 @@ export const VALIDATION_RULES = [
     check: ({ budgets }) => (budgets.contactPoints.left >= 0 ? null : {}),
   },
   {
+    // Core p68: neither Connection nor Loyalty may exceed Charisma at creation.
+    id: "contact.ratingCap", severity: "error", step: "contacts",
+    check: ({ state, budgets }) => {
+      const cap = budgets.contactPoints.ratingCap;
+      for (const c of state.contacts) {
+        if ((c.connection ?? 1) > cap || (c.loyalty ?? 1) > cap) {
+          return { name: c.name || "(unnamed)", cap };
+        }
+      }
+      return null;
+    },
+  },
+  {
     id: "leftover.karma", severity: "warning", step: "review",
     check: ({ budgets, state, data, rules }) => {
-      const cap = ruleConst("CHARGEN_MAX_KARMA_REMAIN", data, rules, state.rulesetId);
+      const cap = ruleConst("CHARGEN_MAX_KARMA_REMAIN", data, rules, state.rulesetId, state.optionalRules);
       return budgets.karma.left <= cap ? null : { cap };
     },
   },
   {
     id: "leftover.nuyen", severity: "warning", step: "review",
     check: ({ budgets, state, data, rules }) => {
-      const cap = ruleConst("CHARGEN_MAX_NUYEN_REMAIN", data, rules, state.rulesetId);
+      const cap = ruleConst("CHARGEN_MAX_NUYEN_REMAIN", data, rules, state.rulesetId, state.optionalRules);
       return budgets.nuyen.left <= cap ? null : { cap };
     },
   },

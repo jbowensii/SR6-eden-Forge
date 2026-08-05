@@ -25,13 +25,22 @@
 
 <h3>Available</h3>
 <div class="browser-head">
-  <input type="search" data-filter="quality" placeholder="Search qualities…" value="{{query}}" />
-  <select data-change="qualityFilter">
-    <option value="all" {{#if (eq filter "all")}}selected{{/if}}>All</option>
-    <option value="positive" {{#if (eq filter "positive")}}selected{{/if}}>Positive</option>
-    <option value="negative" {{#if (eq filter "negative")}}selected{{/if}}>Negative</option>
-  </select>
+  <label class="field grow">
+    <span class="field-label">Search</span>
+    <input type="search" data-filter="quality" placeholder="Search qualities by name…" value="{{query}}" />
+  </label>
+  <label class="field">
+    <span class="field-label">Kind</span>
+    <select data-change="qualityFilter">
+      <option value="all" {{#if (eq filter "all")}}selected{{/if}}>All</option>
+      <option value="positive" {{#if (eq filter "positive")}}selected{{/if}}>Positive</option>
+      <option value="negative" {{#if (eq filter "negative")}}selected{{/if}}>Negative</option>
+    </select>
+  </label>
 </div>
+{{#if truncated}}
+<p class="hint">Showing the first {{list.length}} of {{listTotal}} — {{truncated}} more match; narrow with search.</p>
+{{/if}}
 <div class="browse-list" data-filter-scope="quality">
   {{#each list}}
   <div class="row" data-filter-text="{{name}}"

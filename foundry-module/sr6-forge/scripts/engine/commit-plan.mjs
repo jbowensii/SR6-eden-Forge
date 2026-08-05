@@ -1,6 +1,6 @@
 /** Build the commit plan: everything the actor-committer needs to create the
  *  eden Player actor. RAW INPUTS ONLY — eden derives pools/monitors/essence. */
-import { attrRating, CORE_ATTRS } from "./budgets.mjs";
+import { attrRating, skillRank, CORE_ATTRS } from "./budgets.mjs";
 
 export function buildCommitPlan(state, data, rules, provider, budgets) {
   const mt = data.metatypes?.[state.metatypeId] ?? {};
@@ -23,8 +23,10 @@ export function buildCommitPlan(state, data, rules, provider, budgets) {
   if (mor.resonance) system.attributes.res = { base: attrRating(state, "res", provider) };
 
   for (const [id, sk] of Object.entries(state.skills)) {
-    if (!(sk.points > 0)) continue;
-    system.skills[id] = { points: sk.points };
+    // eden stores one rank per skill — free points and karma-bought ranks merge
+    const rank = skillRank(sk);
+    if (!(rank > 0)) continue;
+    system.skills[id] = { points: rank };
     if (sk.spec) system.skills[id].specialization = sk.spec;
     if (sk.expertise) system.skills[id].expertise = sk.expertise;
   }
@@ -61,7 +63,7 @@ export function buildCommitPlan(state, data, rules, provider, budgets) {
     syntheticItems.push({
       name: c.name || "Contact", type: "contact",
       system: { rating: c.connection, loyalty: c.loyalty,
-                type: c.archetypeId ?? "", description: "" },
+                type: c.archetype ?? c.archetypeId ?? "", description: "" },
     });
   }
   for (const sin of state.sins) {

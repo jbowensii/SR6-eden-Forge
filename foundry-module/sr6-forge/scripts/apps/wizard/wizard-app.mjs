@@ -26,7 +26,10 @@ const STEP_LABEL = {
 /** Shop tabs: which gear types belong where (organised like Commlink sections). */
 const SHOP_TABS = [
   { id: "weapons",   label: "Weapons",   domain: "gear", types: ["WEAPON_FIREARMS", "WEAPON_CLOSE_COMBAT", "WEAPON_RANGED", "WEAPON_SPECIAL", "WEAPON_VEHICLE"] },
-  { id: "ammo",      label: "Ammo & Mods", domain: "gear", types: ["AMMUNITION", "ACCESSORY"] },
+  { id: "ammo",      label: "Ammo",      domain: "gear", types: ["AMMUNITION"] },
+  // ACCESSORY is far more than weapon mods (armour, cyberlimb, vision,
+  // electronics), so it gets its own tab and leans on the category dropdown.
+  { id: "accessories", label: "Accessories", domain: "gear", types: ["ACCESSORY"] },
   { id: "armor",     label: "Armor",     domain: "gear", types: ["ARMOR", "ARMOR_ADDITION"] },
   { id: "matrix",    label: "Matrix",    domain: "gear", types: ["ELECTRONICS", "SOFTWARE", "CYBERDECK", "CODEMODS"] },
   { id: "augments",  label: "Augments",  domain: "gear", types: ["CYBERWARE", "BIOWARE", "GENEWARE", "NANOWARE", "BIOLOGY"] },
@@ -36,6 +39,9 @@ const SHOP_TABS = [
   { id: "magic",     label: "Magic",     magic: true },
   { id: "lifestyle", label: "Lifestyle & SIN", lifestyle: true },
 ];
+
+/** Rows rendered per browser list. The query narrows before this cap applies. */
+const ROW_CAP = 400;
 
 let rulesCache = null;
 async function creationRules() {
@@ -100,6 +106,9 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
         : new ChargenEngine(chargenData(), rules);
       if (draft?.step) this.step = draft.step;
       if (!draft) this.engine.setRuleset(game.settings.get(MODULE_ID, SETTINGS.RULESET));
+      // world optional-rule overrides always apply (they may have changed
+      // since a draft was saved)
+      this.engine.setOptionalRules(game.settings.get(MODULE_ID, SETTINGS.OPTIONAL_RULES));
     }
     const e = this.engine;
     const budgets = e.budgets();
@@ -161,6 +170,12 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
     const rules = await creationRules();
     const st = e.state;
     const q = (k) => (this.ui.query[k] ?? "");
+    // The rendered list is capped, so the query has to narrow the FULL set
+    // before the cap — a DOM-only filter can never reveal a row past the cap.
+    const match = (k) => {
+      const needle = q(k).trim().toLowerCase();
+      return needle ? (r) => (r.name ?? "").toLowerCase().includes(needle) : () => true;
+    };
 
     switch (step) {
       case "method": {
@@ -266,7 +281,8 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
           const rating = e.attrRating(k);
           return { key: k, label: k.toUpperCase(), rating, max,
             atMax: rating >= max, adjustable: max !== 6,
-            points: st.attributes[k].points, adjust: st.attributes[k].adjust };
+            points: st.attributes[k].points, adjust: st.attributes[k].adjust,
+            karma: st.attributes[k].karma ?? 0 };
         });
         const specials = [{ key: "edg", label: "EDGE", sub: `max ${maxima.edg ?? 6}` }];
         if (mor.magic) specials.push({ key: "mag", label: "MAGIC", sub: "from priority" });
@@ -275,31 +291,36 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
           s.rating = e.attrRating(s.key);
           s.adjust = st.attributes[s.key].adjust;
         }
-        return { rows, specials };
+        return { rows, specials,
+          karmaHint: `Karma ranks cost ${rules.karmaCosts.attributePerRank} x the new rating, per rank — ${budgets.karma.left} karma left.` };
       }
 
       case "skills": {
         const unlocks = new Set(data.morTypes?.[st.morId]?.skillUnlocks ?? []);
         const skills = ACTOR_SKILLS.map((id) => {
           const def = data.skills?.[id] ?? {};
-          const s = st.skills[id] ?? { points: 0, spec: null };
+          const s = st.skills[id] ?? { points: 0, karma: 0, spec: null };
           return { id, label: def.name ?? id, points: s.points ?? 0,
+            karma: s.karma ?? 0, rank: (s.points ?? 0) + (s.karma ?? 0),
             restricted: !!def.restricted, locked: !!def.restricted && !unlocks.has(id),
             specs: Object.entries(def.specializations ?? {})
               .map(([sid, sp]) => ({ id: sid, label: sp.name, selected: s.spec === sid }))
               .sort((a, b) => a.label.localeCompare(b.label)) };
         }).sort((a, b) => a.label.localeCompare(b.label));
         return { skills, query: q("skill"), knowledge: st.knowledge,
+          skillKarmaHint: `Ranks can also be bought with karma (${rules.karmaCosts.skillPerRank} x the new rank) — ${budgets.karma.left} karma left.`,
           knowledgeHint: `${budgets.knowledgePoints.left} of ${budgets.knowledgePoints.max} knowledge points left (free points equal your Logic; a native language is free).` };
       }
 
       case "qualities": {
         const rows = await PackCatalog.index("qualities");
         const filter = this.ui.qualityFilter;
-        const list = rows
+        const hits = rows
           .filter((r) => filter === "all" || (r.system?.category ?? "") === filter)
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .slice(0, 400)
+          .filter(match("quality"))
+          .sort((a, b) => a.name.localeCompare(b.name));
+        const list = hits
+          .slice(0, ROW_CAP)
           .map((r) => ({ uuid: r.uuid, name: r.name,
             genesisID: r.system?.genesisID ?? "",
             value: r.system?.value ?? 0, category: r.system?.category ?? "" }));
@@ -307,6 +328,7 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
         const qk = qualityKarma(st, data);
         return {
           list, query: q("quality"), filter,
+          listTotal: hits.length, truncated: Math.max(0, hits.length - ROW_CAP),
           netCap: rules.qualityNetBonusKarmaCap.value,
           maxCount: rules.qualityMaxCount.value,
           paidCount: st.qualities.filter((x) => !x.free).length,
@@ -329,7 +351,7 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
           id: t.id, label: t.label, active: t.id === tabDef.id,
           enabled: t.magic ? !!(mor.spells || mor.powers || mor.resonance) : true,
         }));
-        const cap = ruleConst("CHARGEN_MAX_AVAILABILITY", data, rules, st.rulesetId);
+        const cap = ruleConst("CHARGEN_MAX_AVAILABILITY", data, rules, st.rulesetId, st.optionalRules);
         const base = {
           tabs, tabLabel: tabDef.label, owned: st.purchases,
           spentText: `${budgets.nuyen.spent.toLocaleString()}¥ spent · ${budgets.nuyen.left.toLocaleString()}¥ left`,
@@ -349,7 +371,7 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
             const chosenList = { spell: st.spells, power: st.powers,
               complexform: st.complexForms, ritual: st.rituals }[kind];
             kinds.push({ kind, label, chosen: chosenList,
-              list: rows.sort((a, b) => a.name.localeCompare(b.name)).slice(0, 300)
+              list: rows.filter(match("shop")).sort((a, b) => a.name.localeCompare(b.name)).slice(0, ROW_CAP)
                 .map((r) => ({ uuid: r.uuid, name: r.name, cost: r.system?.cost ?? 0,
                   meta: kind === "power" ? `${r.system?.cost ?? 0} PP` : "" })) });
           }
@@ -369,14 +391,17 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
           subCounts[s] = (subCounts[s] ?? 0) + 1;
         }
         const sub = this.ui.shopSubtype;
-        const list = inTab
+        const hits = inTab
           .filter((r) => !sub || (r.system?.subtype ?? "—") === sub)
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .slice(0, 400)
+          .filter(match("shop"))
+          .sort((a, b) => a.name.localeCompare(b.name));
+        const list = hits
+          .slice(0, ROW_CAP)
           .map((r) => ({ uuid: r.uuid, name: r.name, price: r.system?.price ?? 0,
             avail: r.system?.avail ?? 0, essence: r.system?.essence ?? 0,
             itemType: r.type, overCap: (r.system?.avail ?? 0) > cap }));
         return { ...base, list, listTotal: inTab.length,
+          shown: list.length, truncated: Math.max(0, hits.length - ROW_CAP),
           subtypes: Object.entries(subCounts).sort((a, b) => a[0].localeCompare(b[0]))
             .map(([id, count]) => ({ id, count,
               label: id.replaceAll("_", " ").toLowerCase(), selected: sub === id })) };
@@ -385,9 +410,15 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
       case "contacts":
         return {
           contacts: st.contacts,
-          contactHint: `${budgets.contactPoints.left} of ${budgets.contactPoints.max} contact points left (Connection + Loyalty).`,
+          contactHint: `Charisma x 6 = ${budgets.contactPoints.max} contact points (Connection + Loyalty), `
+            + `${budgets.contactPoints.left} left. At creation neither rating may exceed `
+            + `Charisma (${budgets.contactPoints.ratingCap}).`,
+          ratingCap: budgets.contactPoints.ratingCap,
+          // an archetype is a label, not a fixed list — the datalist suggests the
+          // book's archetypes but any text is accepted
           archetypes: Object.entries(data.contactArchetypes ?? {})
-            .map(([id, a]) => ({ id, name: a.name })),
+            .map(([id, a]) => ({ id, name: a.name }))
+            .sort((a, b) => a.name.localeCompare(b.name)),
         };
 
       case "review": {
@@ -432,7 +463,12 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
       const key = input.dataset.filter;
       input.addEventListener("input", () => {
         this.ui.query[key] = input.value;
-        this.#applyFilter(root, key, input.value);
+        this.#applyFilter(root, key, input.value);   // instant, no focus loss
+        clearTimeout(this._filterTimer);
+        this._filterTimer = setTimeout(() => {       // then re-cap the full set
+          this._focusFilter = key;
+          this.render();
+        }, 350);
       });
       if (this.ui.query[key]) this.#applyFilter(root, key, this.ui.query[key]);
     }
@@ -558,8 +594,9 @@ export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
       case "contactField": {
         const i = Number(el.dataset.index);
         const f = el.dataset.field;
-        const v = (f === "name" || f === "archetypeId") ? el.value : Number(el.value);
-        e.spend({ kind: "contact", index: i, patch: { [f]: v } });
+        const text = f === "name" || f === "archetype";
+        e.spend({ kind: "contact", index: i, patch: { [f]: text ? el.value : Number(el.value) } });
+        if (text) { this.#autosave(); return; }    // typing must not re-render
         break;
       }
       default: return;

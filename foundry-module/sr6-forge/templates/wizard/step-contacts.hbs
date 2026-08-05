@@ -1,5 +1,9 @@
 <h2>Contacts</h2>
 <p>{{contactHint}}</p>
+{{!-- archetype is a label, not a fixed list: the datalist only suggests --}}
+<datalist id="sf-archetypes">
+  {{#each archetypes}}<option value="{{name}}"></option>{{/each}}
+</datalist>
 <table class="data">
   <thead><tr><th>Name</th><th>Archetype</th><th style="width:66px">Conn</th><th style="width:66px">Loyal</th><th></th></tr></thead>
   <tbody>
@@ -7,17 +11,12 @@
     <tr>
       <td><input type="text" value="{{name}}" placeholder="Contact name"
                  data-change="contactField" data-index="{{@index}}" data-field="name" /></td>
-      <td>
-        <select data-change="contactField" data-index="{{@index}}" data-field="archetypeId">
-          <option value="">—</option>
-          {{#each ../archetypes}}
-          <option value="{{id}}" {{#if (eq id ../archetypeId)}}selected{{/if}}>{{name}}</option>
-          {{/each}}
-        </select>
-      </td>
-      <td><input type="number" min="1" max="6" value="{{connection}}"
+      <td><input type="text" list="sf-archetypes" value="{{archetype}}"
+                 placeholder="Pick or type an archetype"
+                 data-change="contactField" data-index="{{@index}}" data-field="archetype" /></td>
+      <td><input type="number" min="1" max="{{../ratingCap}}" value="{{connection}}"
                  data-change="contactField" data-index="{{@index}}" data-field="connection" /></td>
-      <td><input type="number" min="1" max="6" value="{{loyalty}}"
+      <td><input type="number" min="1" max="{{../ratingCap}}" value="{{loyalty}}"
                  data-change="contactField" data-index="{{@index}}" data-field="loyalty" /></td>
       <td><button type="button" class="x" data-action="removeContact" data-index="{{@index}}">✕</button></td>
     </tr>

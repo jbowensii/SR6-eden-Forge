@@ -15,6 +15,9 @@ Hooks.once("init", () => {
   game.settings.register(MODULE_ID, SETTINGS.DRAFTS, {
     scope: "world", config: false, type: Object, default: {},
   });
+  game.settings.register(MODULE_ID, SETTINGS.OPTIONAL_RULES, {
+    scope: "world", config: false, type: Object, default: {},
+  });
   game.settings.register(MODULE_ID, SETTINGS.RULESET, {
     name: "SR6FORGE.Settings.Ruleset",
     hint: "SR6FORGE.Settings.RulesetHint",
@@ -54,6 +57,10 @@ Hooks.once("ready", async () => {
     openWizard: async (draftId) => {
       const { SR6ForgeWizard } = await import("./apps/wizard/wizard-app.mjs");
       return new SR6ForgeWizard(draftId ? { draftId } : {}).render({ force: true });
+    },
+    openOptions: async () => {
+      const { SR6ForgeOptions } = await import("./apps/options-app.mjs");
+      return new SR6ForgeOptions().render({ force: true });
     },
     openAdvancement: async (actor) => {
       const { SR6AdvancementApp } = await import("./apps/advancement/advancement-app.mjs");

@@ -15,6 +15,7 @@ export class SR6ForgeLauncher extends HandlebarsApplicationMixin(ApplicationV2) 
       newChar: SR6ForgeLauncher.#onNew,
       resume: SR6ForgeLauncher.#onResume,
       deleteDraft: SR6ForgeLauncher.#onDelete,
+      options: SR6ForgeLauncher.#onOptions,
     },
   };
 
@@ -42,6 +43,11 @@ export class SR6ForgeLauncher extends HandlebarsApplicationMixin(ApplicationV2) 
     const draftId = target.dataset.draftId;
     await this.close();
     new SR6ForgeWizard({ draftId }).render({ force: true });
+  }
+
+  static async #onOptions() {
+    const { SR6ForgeOptions } = await import("./options-app.mjs");
+    new SR6ForgeOptions().render({ force: true });
   }
 
   static async #onDelete(_ev, target) {

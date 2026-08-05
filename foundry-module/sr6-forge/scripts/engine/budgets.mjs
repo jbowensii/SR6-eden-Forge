@@ -5,7 +5,9 @@ export const CORE_ATTRS = ["bod", "agi", "rea", "str", "wil", "log", "int", "cha
 export const SPECIAL_ATTRS = ["edg", "mag", "res"];
 
 /** Effective creation rule value: ruleset interpretation overrides defaults. */
-export function ruleConst(name, data, rules, rulesetId) {
+export function ruleConst(name, data, rules, rulesetId, overrides = null) {
+  // world-level optional-rule overrides beat the interpretation defaults
+  if (overrides && name in overrides) return overrides[name];
   const set = data.rules?.[rulesetId]?.set ?? {};
   if (name in set) return set[name];
   const d = rules.defaults;
@@ -37,10 +39,27 @@ export function adjustmentPointsSpent(state) {
     .reduce((n, k) => n + (state.attributes[k]?.adjust ?? 0), 0);
 }
 
+/** Effective rank of a skill entry: free skill points plus karma-bought ranks. */
+export function skillRank(entry) {
+  return (entry?.points ?? 0) + (entry?.karma ?? 0);
+}
+
 export function skillPointsSpent(state) {
   let n = 0;
   for (const s of Object.values(state.skills)) {
     n += (s.points ?? 0) + (s.spec ? 1 : 0);      // specialization costs 1 skill point at creation
+  }
+  return n;
+}
+
+/** Karma for ranks bought with karma instead of skill points. Core p68: 5 x new
+ *  rank, paid per rank, so the karma ranks are the TOP ranks of the skill. */
+export function skillKarmaSpent(state, rules) {
+  const per = rules.karmaCosts?.skillPerRank ?? 5;
+  let n = 0;
+  for (const s of Object.values(state.skills)) {
+    const top = skillRank(s);
+    for (let i = 0; i < (s.karma ?? 0); i++) n += (top - i) * per;
   }
   return n;
 }
@@ -69,17 +88,19 @@ export function karmaBudget(state, data, rules, provider) {
   const cfCost = Math.max(0, state.complexForms.length - rules.complexFormsAtCreation.freeForms)
     * rules.complexFormsAtCreation.karmaCost;
   const ppCost = (state.powerPointsBought ?? 0) * rules.mysticAdeptPowerPoints.karmaPerPoint;
+  const perRank = rules.karmaCosts?.attributePerRank ?? 5;
   const attrKarma = [...CORE_ATTRS, ...SPECIAL_ATTRS]
     .reduce((n, k) => {
       const a = state.attributes[k] ?? {};
       let cost = 0;
       // karma raises during creation cost new-rating x5, applied per step
       const upto = attrRating(state, k, provider);
-      for (let i = 0; i < (a.karma ?? 0); i++) cost += (upto - i) * 5;
+      for (let i = 0; i < (a.karma ?? 0); i++) cost += (upto - i) * perRank;
       return n + cost;
     }, 0);
+  const skillKarma = skillKarmaSpent(state, rules);
   const metaKarma = data.metatypes?.[state.metatypeId]?.karma ?? 0;
-  const spent = q.pos + spellCost + cfCost + ppCost + attrKarma + metaKarma
+  const spent = q.pos + spellCost + cfCost + ppCost + attrKarma + skillKarma + metaKarma
     + (state.conversions.karmaToNuyen ?? 0);
   return { max: start + q.neg, spent, left: start + q.neg - spent };
 }
@@ -111,12 +132,14 @@ export function powerPoints(state, data, rules, provider) {
   return { max, spent, left: max - spent };
 }
 
+/** Core p68: Charisma x 6 points across Connection + Loyalty; neither rating
+ *  may exceed Charisma at creation. */
 export function contactPoints(state, rules, provider) {
   const cha = attrRating(state, "cha", provider);
-  const formula = rules.contactPointsFormula.value;
-  const max = formula === "cha*3" ? cha * 3 : cha * 2;
+  const mult = Number(String(rules.contactPointsFormula.value).split("*")[1] ?? 6);
+  const max = cha * mult;
   const spent = state.contacts.reduce((n, c) => n + (c.connection ?? 1) + (c.loyalty ?? 1), 0);
-  return { max, spent, left: max - spent };
+  return { max, spent, left: max - spent, ratingCap: cha };
 }
 
 export function knowledgePoints(state, rules, provider) {

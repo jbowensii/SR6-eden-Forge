@@ -2,7 +2,7 @@
  *  creation-rules and (optionally) a pack catalog are injected, so the whole
  *  engine unit-tests in plain node. The wizard renders budgets()/validate()
  *  and calls the mutators; commitPlan() emits everything the committer needs. */
-import { allBudgets, attrRating, CORE_ATTRS, SPECIAL_ATTRS } from "./budgets.mjs";
+import { allBudgets, attrRating, skillRank, CORE_ATTRS, SPECIAL_ATTRS } from "./budgets.mjs";
 import { buildCommitPlan } from "./commit-plan.mjs";
 import { makeProvider } from "./providers.mjs";
 import { runValidation } from "./rules.mjs";
@@ -17,6 +17,7 @@ function blankAttributes() {
 export function blankState(method = "priority", rulesetId = "core") {
   return {
     method, rulesetId,
+    optionalRules: {},              // world overrides of CHARGEN_* constants
     name: "",
     priorities: { METATYPE: null, ATTRIBUTE: null, MAGIC: null, SKILLS: null, RESOURCES: null },
     metatypeId: null,
@@ -28,7 +29,7 @@ export function blankState(method = "priority", rulesetId = "core") {
     qualities: [],                  // {genesisID, rating, choiceText, subOptionKarma, free, positive}
     spells: [], powers: [], complexForms: [], rituals: [], foci: [],
     purchases: [],                  // {uuid, name, price, avail, essence, qty, rating}
-    contacts: [],                   // {name, archetypeId, connection, loyalty}
+    contacts: [],                   // {name, archetype (free text), connection, loyalty}
     lifestyleId: null, lifestyleMonths: 1,
     sins: [],                       // {name, rating(1-4? VERIFY), licenses[]}
     powerPointsBought: 0,
@@ -61,6 +62,9 @@ export class ChargenEngine {
   }
 
   setRuleset(id) { this.state.rulesetId = id; }
+
+  /** World-level optional-rule overrides (see apps/options-app.mjs). */
+  setOptionalRules(overrides) { this.state.optionalRules = { ...(overrides ?? {}) }; }
 
   setPriority(column, letter) {
     this.state.priorities[column] = letter;
@@ -113,16 +117,18 @@ export class ChargenEngine {
         return { ok: true };
       }
       case "skill": {
-        const sk = s.skills[op.target] ?? (s.skills[op.target] = { points: 0, spec: null, expertise: null });
-        const next = (sk.points ?? 0) + (op.delta ?? 1);
+        const sk = s.skills[op.target]
+          ?? (s.skills[op.target] = { points: 0, karma: 0, spec: null, expertise: null });
+        const field = op.pool === "karma" ? "karma" : "points";     // points | karma
+        const next = (sk[field] ?? 0) + (op.delta ?? 1);
         if (next < 0) return { ok: false, reason: "below-zero" };
-        sk.points = next;
-        if (next === 0) { sk.spec = null; sk.expertise = null; }
+        sk[field] = next;
+        if (!(sk.points > 0) && !(sk.karma > 0)) { sk.spec = null; sk.expertise = null; }
         return { ok: true };
       }
       case "spec": {
         const sk = s.skills[op.target];
-        if (!sk || sk.points < 1) return { ok: false, reason: "skill-untrained" };
+        if (!sk || skillRank(sk) < 1) return { ok: false, reason: "skill-untrained" };
         sk.spec = op.spec ?? null;
         return { ok: true };
       }
@@ -184,7 +190,7 @@ export class ChargenEngine {
       case "contact": {
         if (op.remove) { s.contacts.splice(op.index, 1); return { ok: true }; }
         if (op.index != null) { Object.assign(s.contacts[op.index], op.patch); return { ok: true }; }
-        s.contacts.push({ name: op.name ?? "", archetypeId: op.archetypeId ?? null,
+        s.contacts.push({ name: op.name ?? "", archetype: op.archetype ?? "",
           connection: op.connection ?? 1, loyalty: op.loyalty ?? 1 });
         return { ok: true };
       }
@@ -227,6 +233,8 @@ export class ChargenEngine {
   budgets() { return allBudgets(this.state, this.data, this.rules, this.provider); }
 
   attrRating(key) { return attrRating(this.state, key, this.provider); }
+
+  skillRank(id) { return skillRank(this.state.skills[id]); }
 
   validate() {
     return runValidation({
