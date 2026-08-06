@@ -11,7 +11,7 @@
 <div class="browser-head">
   <label class="field grow">
     <span class="field-label">Search</span>
-    <input type="search" data-filter="shop" placeholder="Search {{tabLabel}} by name…" value="{{query}}" />
+    <input type="search" data-filter="shop" placeholder="Search all gear by name…" value="{{query}}" />
   </label>
   {{#if subtypes.length}}
   <label class="field">
@@ -25,8 +25,12 @@
   </label>
   {{/if}}
 </div>
+{{#if searchedAll}}
+<p class="hint">Searching every category — {{listTotal}} match{{#unless (eq listTotal 1)}}es{{/unless}}.
+  Clear the search to browse this tab on its own.</p>
+{{/if}}
 {{#if truncated}}
-<p class="hint">Showing the first {{shown}} of {{listTotal}} — {{truncated}} more match; narrow with search or a category.</p>
+<p class="hint">Showing the first {{shown}} of {{listTotal}} — {{truncated}} more match; narrow your search.</p>
 {{/if}}
 {{/unless}}
 
@@ -127,7 +131,7 @@
         {{!-- tell the user BEFORE they buy that this thing takes accessories --}}
         {{#if mounts}}<span class="mount-badge" title="accepts accessories — fit them from the Owned list below">⛓ {{mounts}}</span>{{/if}}
       </span>
-      <span class="mt">{{price}}¥ · A{{avail}}{{#if essence}} · E{{essence}}{{/if}}{{#if ratedFrom}} · rating {{ratedFrom}}{{/if}}</span>
+      <span class="mt">{{#if where}}<span class="where">{{where}}</span> · {{/if}}{{price}}¥ · A{{avail}}{{#if essence}} · E{{essence}}{{/if}}{{#if ratedFrom}} · rating {{ratedFrom}}{{/if}}</span>
       <button type="button" data-action="addPurchase" data-uuid="{{uuid}}" data-name="{{name}}"
               data-catalog-id="{{catalogId}}" data-subtype="{{subtype}}"
               data-sr6forge="{{json sr6forge}}"

@@ -661,7 +661,15 @@
 .sr6-forge .chosen .x:hover { border-color: var(--sf-red); background: rgba(255,93,93,.12); }
 
 /* ------------------------------------------------------------ drafts ----- */
-.sr6-forge-launcher .draft-list { display: grid; gap: 6px; margin: 8px 0; }
+.sr6-forge-launcher .draft-list {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0;
+  /* drafts are unbounded — without a ceiling the list grows past the window
+     and the last ones become unreachable */
+  max-height: 46vh;
+  overflow-y: auto;
+}
 .sr6-forge-launcher .draft {
   display: grid;
   grid-template-columns: 1fr auto auto;
@@ -780,3 +788,12 @@
 .sr6-forge .pack-row .b-sub { display: block; color: var(--sf-mute); font-size: 10.5px; }
 .sr6-forge .pack-row .b-price { font-family: var(--sf-mono); white-space: nowrap; }
 .sr6-forge .pack-row .b-ess { color: var(--sf-red); }
+
+/* Origin tag on a cross-category search hit: the search sweeps every domain,
+   so a result has to say which tab it would normally live under. */
+.sr6-forge .row .mt .where {
+  color: var(--sf-cyan);
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: .08em;
+}

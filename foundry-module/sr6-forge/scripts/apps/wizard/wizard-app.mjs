@@ -82,6 +82,20 @@ const PACK_GROUPS = {
 /** Rows rendered per browser list. The query narrows before this cap applies. */
 const ROW_CAP = 400;
 
+/** Every compendium domain a nuyen purchase can come from. A search sweeps all
+ *  of them, so a name only has to be spelled right, not filed correctly. */
+const SEARCH_DOMAINS = ["gear", "vehicles", "foci"];
+
+/** Which shop tab an item would normally sit under — shown beside a result so
+ *  a cross-category hit still says where it came from. */
+function tabLabelFor(row) {
+  const type = row.system?.type;
+  const hit = SHOP_TABS.find((t) => t.types?.includes(type));
+  if (hit) return hit.label;
+  if (type) return type.replaceAll("_", " ").toLowerCase();
+  return "";
+}
+
 /** One line saying what a PACK actually contains. */
 function packSummary(pack) {
   const rows = pack.contents ?? [];
@@ -725,14 +739,33 @@ export class SR6ForgeWizard extends RememberPosition(
           return { ...base, isPacksTab: true, packGroups: groups,
             packCount: all.length };
         }
-        const rows = await PackCatalog.index(tabDef.domain);
-        const inTab = rows.filter((r) => !tabDef.types || tabDef.types.includes(r.system?.type));
+        // A search means "find me this thing", not "find me this thing filed
+        // under the tab I happen to be looking at" — a runner searching
+        // "goggles" should not have to guess whether they live under Gear,
+        // Accessories or Electronics. So while a query is present the tab and
+        // category filters step aside and every purchasable domain is searched.
+        const searching = !!(this.ui.query?.shop ?? "").trim();
+        let inTab;
+        if (searching) {
+          const seen = new Set();
+          inTab = [];
+          for (const d of SEARCH_DOMAINS) {
+            for (const r of await PackCatalog.index(d)) {
+              if (seen.has(r.uuid)) continue;      // foci/gear overlap
+              seen.add(r.uuid);
+              inTab.push(r);
+            }
+          }
+        } else {
+          inTab = (await PackCatalog.index(tabDef.domain))
+            .filter((r) => !tabDef.types || tabDef.types.includes(r.system?.type));
+        }
         const subCounts = {};
         for (const r of inTab) {
           const s = r.system?.subtype || "—";
           subCounts[s] = (subCounts[s] ?? 0) + 1;
         }
-        const sub = this.ui.shopSubtype;
+        const sub = searching ? "" : this.ui.shopSubtype;
         const hits = inTab
           .filter((r) => !sub || (r.system?.subtype ?? "—") === sub)
           .filter(match("shop"))
@@ -756,13 +789,23 @@ export class SR6ForgeWizard extends RememberPosition(
                 price: v.price, avail: v.avail, essence: v.essence,
                 ratedFrom: `${rs[0]}-${onItem?.maxRating ?? rs.at(-1)}` };
             })(),
+            // where this result would normally live, so a cross-category hit
+            // is not a mystery
+            where: searching ? tabLabelFor(r) : "",
             // does this item accept accessories at all?
             mounts: (mounts[catalogIdOf(r)]?.hooks ?? []).length }));
-        return { ...base, list, listTotal: inTab.length,
+        return { ...base, list,
+          searchedAll: searching,
+          // the honest denominator is what matched, not the size of everything
+          // that was swept
+          listTotal: hits.length,
           shown: list.length, truncated: Math.max(0, hits.length - ROW_CAP),
-          subtypes: Object.entries(subCounts).sort((a, b) => a[0].localeCompare(b[0]))
-            .map(([id, count]) => ({ id, count,
-              label: id.replaceAll("_", " ").toLowerCase(), selected: sub === id })) };
+          // the category dropdown belongs to a browsed tab; while searching
+          // across everything it would only narrow away the point
+          subtypes: searching ? []
+            : Object.entries(subCounts).sort((a, b) => a[0].localeCompare(b[0]))
+              .map(([id, count]) => ({ id, count,
+                label: id.replaceAll("_", " ").toLowerCase(), selected: sub === id })) };
       }
 
       case "contacts":
