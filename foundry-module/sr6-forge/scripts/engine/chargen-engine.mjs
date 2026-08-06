@@ -36,6 +36,7 @@ export function blankState(method = "priority", rulesetId = "core") {
                                     //  accessories:[{uuid,catalogId,name,price,avail,slot}]}
     contacts: [],                   // {name, archetype (free text), connection, loyalty}
     lifestyleId: null, lifestyleMonths: 1,
+    lifestyleFromPack: null,        // set when a PACK supplied the lifestyle
     sins: [],                       // {name, rating(1-4? VERIFY), licenses[]}
     powerPointsBought: 0,
     conversions: { karmaToNuyen: 0 },
@@ -221,6 +222,80 @@ export class ChargenEngine {
             .filter((e) => e.included)
             .map((e) => ({ catalogId: e.ref, name: e.ref.replaceAll("_", " "),
               slot: e.slot || "INTERNAL", price: 0, avail: 0, included: true })) });
+        return { ok: true };
+      }
+      /* A Companion PACK (6WC p47+). The pack's own price replaces the sum of
+       * its parts — that discount is the reason to buy one — so it enters as a
+       * SINGLE purchase carrying the whole price and essence cost, and its
+       * contents ride along as zero-priced lines. Commlink6 sells them the
+       * same way, from its gear page.
+       *
+       * Contents are not all gear: a pack can hand over a fake SIN, licences
+       * for it, and a month of lifestyle, so those land in the state fields
+       * that already model them rather than becoming pretend gear. */
+      case "pack": {
+        const pack = this.data.packs?.[op.catalogId];
+        if (!pack) return { ok: false, reason: "unknown-pack" };
+        if (op.remove) {
+          const i = s.purchases.findIndex(
+            (p) => p.packId === op.catalogId && p.isPack);
+          if (i < 0) return { ok: false, reason: "not-owned" };
+          const [gone] = s.purchases.splice(i, 1);
+          // take back exactly what this pack granted, and nothing else
+          s.purchases = s.purchases.filter((p) => p.fromPack !== gone.packInstance);
+          s.sins = s.sins.filter((x) => x.fromPack !== gone.packInstance);
+          if (s.lifestyleFromPack === gone.packInstance) {
+            s.lifestyleId = null;
+            s.lifestyleFromPack = null;
+          }
+          return { ok: true };
+        }
+        if (s.purchases.some((p) => p.isPack && p.packId === op.catalogId)) {
+          return { ok: false, reason: "already-owned" };
+        }
+        // distinguishes two copies of different packs when removing one
+        const instance = `pack-${op.catalogId}-${s.purchases.length}`;
+        s.purchases.push({
+          uuid: op.uuid ?? null, name: op.name ?? pack.name ?? op.catalogId,
+          price: pack.price ?? 0, avail: 0, essence: pack.essence ?? 0,
+          qty: 1, rating: null, itemType: "pack", catalogId: op.catalogId,
+          subtype: pack.subtype ?? null, sr6forge: null, accessories: [],
+          isPack: true, packId: op.catalogId, packInstance: instance,
+        });
+        for (const row of pack.contents ?? []) {
+          if (row.kind === "sin") {
+            s.sins.push({ name: `Fake SIN (${row.level ?? "pack"})`,
+              rating: row.rating ?? 1, licenses: [], fromPack: instance });
+          } else if (row.kind === "license") {
+            // attach to the SIN this pack just granted, else the newest one
+            const sin = [...s.sins].reverse()
+              .find((x) => x.fromPack === instance) ?? s.sins[s.sins.length - 1];
+            for (let i = 0; i < (row.qty ?? 1); i++) {
+              sin?.licenses.push({ name: "Fake licence", rating: row.rating ?? 1,
+                fromPack: instance });
+            }
+          } else if (row.kind === "lifestyle") {
+            // never silently replace a lifestyle the player chose themselves
+            if (!s.lifestyleId) {
+              s.lifestyleId = row.ref;
+              s.lifestyleMonths = 1;
+              s.lifestyleFromPack = instance;
+            }
+          } else {
+            s.purchases.push({
+              uuid: null, name: (row.ref ?? "?").replaceAll("_", " "),
+              // the pack price already covers these
+              price: 0, avail: 0, essence: 0,
+              qty: row.qty ?? 1, rating: row.rating ?? null, itemType: "gear",
+              catalogId: row.ref, subtype: null, sr6forge: null,
+              grade: row.grade ?? null, variant: row.variant ?? null,
+              note: row.text ?? null, fromPack: instance,
+              accessories: (row.embeds ?? []).map((e) => ({
+                catalogId: e.ref, name: (e.ref ?? "?").replaceAll("_", " "),
+                slot: e.hook || "INTERNAL", price: 0, avail: 0, included: true })),
+            });
+          }
+        }
         return { ok: true };
       }
       case "accessory": {

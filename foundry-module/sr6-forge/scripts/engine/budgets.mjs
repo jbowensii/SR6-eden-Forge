@@ -204,6 +204,9 @@ export function karmaBudget(state, data, rules, provider) {
   // Power points are a split of the priority Magic, not a karma purchase.
   const ppCost = 0;
   const perRank = rules.karmaCosts?.attributePerRank ?? 5;
+  // per-attribute, so the review can say WHICH attribute ate the karma —
+  // a raise near the top of the range costs several times one near the bottom
+  const attrDetail = [];
   const attrKarma = [...CORE_ATTRS, ...SPECIAL_ATTRS]
     .reduce((n, k) => {
       const a = state.attributes[k] ?? {};
@@ -211,6 +214,7 @@ export function karmaBudget(state, data, rules, provider) {
       // karma raises during creation cost new-rating x5, applied per step
       const upto = attrRating(state, k, provider);
       for (let i = 0; i < (a.karma ?? 0); i++) cost += (upto - i) * perRank;
+      if (cost) attrDetail.push({ key: k, ranks: a.karma, from: upto - a.karma, to: upto, cost });
       return n + cost;
     }, 0);
   const skillKarma = skillKarmaSpent(state, rules);
@@ -219,7 +223,27 @@ export function karmaBudget(state, data, rules, provider) {
   const morKarma = provider.morKarma?.(state) ?? 0;
   const spent = q.pos + spellCost + cfCost + ppCost + attrKarma + skillKarma
     + metaKarma + morKarma + (state.conversions.karmaToNuyen ?? 0);
-  return { max: start + q.neg, spent, left: start + q.neg - spent };
+
+  const breakdown = [];
+  const add = (key, label, amount, sign = "spend") => {
+    if (amount) breakdown.push({ key, label, amount, sign });
+  };
+  add("qualityNeg", "Negative qualities", q.neg, "gain");
+  for (const d of attrDetail) {
+    add(`attr:${d.key}`,
+      `${d.key.toUpperCase()} ${d.from} → ${d.to} (${d.ranks} rank${d.ranks === 1 ? "" : "s"} by karma)`,
+      d.cost);
+  }
+  add("skills", "Skills raised with karma", skillKarma);
+  add("qualityPos", "Positive qualities", q.pos);
+  add("spells", "Spells / rituals beyond the free ones", spellCost);
+  add("complexForms", "Complex forms beyond the free ones", cfCost);
+  add("metatype", "Metatype karma cost", metaKarma);
+  add("mor", "Magic / Resonance path", morKarma);
+  add("toNuyen", "Converted to nuyen", state.conversions.karmaToNuyen ?? 0);
+
+  return { max: start + q.neg, spent, left: start + q.neg - spent,
+    base: start, fromQualities: q.neg, breakdown };
 }
 
 /** Core p274: "Fake SIN 4(I) Rating x 2,500¥" / "Fake license 4(I) Rating x 200¥". */
@@ -243,6 +267,11 @@ export function nuyenBudget(state, data, rules, provider) {
 
   let gear = 0;
   for (const p of state.purchases) {
+    // A PACK's own line carries the price of the whole bundle, so its contents
+    // must not be priced again. They cannot simply be left at price 0 either:
+    // they keep their catalogId, and ratedValues would happily find the real
+    // price in gearRatings and charge it a second time.
+    if (p.fromPack) continue;
     gear += ratedValues(p, data).price * (p.qty ?? 1);
     // fitted accessories are paid for too; factory-fitted ones are included in
     // the host's price and carry 0
@@ -256,7 +285,7 @@ export function nuyenBudget(state, data, rules, provider) {
       amount: Math.round(gear) });
   }
 
-  const ls = data.lifestyles?.[state.lifestyleId];
+  const ls = state.lifestyleFromPack ? null : data.lifestyles?.[state.lifestyleId];
   if (ls) {
     const months = state.lifestyleMonths ?? 1;
     const cost = ls.cost * months;
@@ -269,6 +298,7 @@ export function nuyenBudget(state, data, rules, provider) {
   }
 
   for (const s of state.sins) {
+    if (s.fromPack) continue;          // covered by the pack's own price
     // a license may be a bare name or a rated object; an unrated one is Rating 1
     const licenses = (s.licenses ?? [])
       .reduce((n, l) => n + (typeof l === "object" ? (l.rating ?? 1) : 1)
@@ -287,8 +317,10 @@ export function nuyenBudget(state, data, rules, provider) {
 }
 
 export function essenceUsed(state, data) {
+  // as with price: an augmentation PACK states one ESSENCECOST for the bundle,
+  // so its contents' own essence must not be counted on top
   return state.purchases.reduce(
-    (n, p) => n + ratedValues(p, data).essence * (p.qty ?? 1), 0);
+    (n, p) => (p.fromPack ? n : n + ratedValues(p, data).essence * (p.qty ?? 1)), 0);
 }
 
 /**

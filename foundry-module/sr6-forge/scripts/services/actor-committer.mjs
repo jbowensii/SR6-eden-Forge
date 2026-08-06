@@ -16,6 +16,10 @@ import { PackCatalog } from "./pack-catalog.mjs";
 
 const QUALITY_DOMAINS = ["qualities"];
 
+/** Where to look for a grant that names a catalog id but carries no uuid —
+ *  PACK contents are recipes referencing gear by id, so they resolve here. */
+const GRANT_DOMAINS = ["qualities", "gear", "vehicles", "foci", "spells", "adept_powers"];
+
 async function resolveGrantDocs(plan) {
   const itemData = [];
   for (const grant of plan.embeddedFromPacks) {
@@ -23,7 +27,9 @@ async function resolveGrantDocs(plan) {
     if (grant.uuid) {
       doc = await fromUuid(grant.uuid);
     } else if (grant.catalogId) {
-      const row = await PackCatalog.findByCatalogId(grant.catalogId, QUALITY_DOMAINS);
+      // a quality grant knows its domain; a PACK's contents do not, so widen
+      const domains = grant.itemType === "quality" ? QUALITY_DOMAINS : GRANT_DOMAINS;
+      const row = await PackCatalog.findByCatalogId(grant.catalogId, domains);
       if (row) doc = await fromUuid(row.uuid);
     }
     if (!doc) {

@@ -1238,3 +1238,100 @@ describe("removing a quality", () => {
     }
   });
 });
+
+describe("Companion gear PACKs", () => {
+  function rich() {
+    const e = engineWith({ METATYPE: "D", ATTRIBUTE: "C", MAGIC: "E", SKILLS: "D", RESOURCES: "A" });
+    e.setMetatype("human");
+    return e;
+  }
+
+  it("ships the English packs and skips the German ones", () => {
+    expect(Object.keys(data.packs).length).toBe(177);          // 289 total, 112 lang="de"
+    expect(data.packs.starterpack.price).toBe(25000);
+  });
+
+  it("charges the bundle price, not the sum of the parts", () => {
+    const e = rich();
+    e.spend({ kind: "pack", catalogId: "starterpack" });
+    // one line for the pack itself...
+    const packLine = e.state.purchases.filter((p) => p.isPack);
+    expect(packLine).toHaveLength(1);
+    expect(e.budgets().nuyen.spent).toBe(25000);
+  });
+
+  it("does not re-price contents that carry a real catalogId", () => {
+    // the regression that matters: contents keep their catalogId, so a naive
+    // implementation finds their real price in gearRatings and charges twice
+    const e = rich();
+    e.spend({ kind: "pack", catalogId: "starterpack" });
+    const contents = e.state.purchases.filter((p) => p.fromPack);
+    expect(contents.length).toBeGreaterThan(5);
+    expect(contents.some((p) => p.catalogId && data.gearRatings[p.catalogId])).toBe(true);
+    expect(e.budgets().nuyen.spent).toBe(25000);
+  });
+
+  it("counts an augmentation pack's essence once, from the pack", () => {
+    const e = rich();
+    e.spend({ kind: "pack", catalogId: "pack_hacker_a" });
+    expect(e.budgets().essence.spent).toBeCloseTo(data.packs.pack_hacker_a.essence, 2);
+  });
+
+  it("grants the SIN, its licences and the lifestyle, not just gear", () => {
+    const e = rich();
+    e.spend({ kind: "pack", catalogId: "starterpack" });
+    expect(e.state.sins).toHaveLength(1);
+    expect(e.state.sins[0].rating).toBe(4);                    // SUPERFICIALLY_PLAUSIBLE
+    expect(e.state.sins[0].licenses).toHaveLength(2);
+    expect(e.state.lifestyleId).toBe("low");
+  });
+
+  it("will not overwrite a lifestyle the player already chose", () => {
+    const e = rich();
+    e.spend({ kind: "lifestyle", id: "high", months: 1 });
+    e.spend({ kind: "pack", catalogId: "starterpack" });
+    expect(e.state.lifestyleId).toBe("high");
+  });
+
+  it("removes cleanly, taking its contents with it", () => {
+    const e = rich();
+    e.spend({ kind: "purchase", uuid: "u1", name: "Own gear", price: 500 });
+    e.spend({ kind: "pack", catalogId: "starterpack" });
+    expect(e.spend({ kind: "pack", catalogId: "starterpack", remove: true }).ok).toBe(true);
+    expect(e.state.purchases).toHaveLength(1);                 // the player's own item survives
+    expect(e.state.purchases[0].uuid).toBe("u1");
+    expect(e.state.sins).toHaveLength(0);
+    expect(e.state.lifestyleId).toBe(null);
+    expect(e.budgets().nuyen.spent).toBe(500);
+  });
+
+  it("flattens a pack that contains another pack", () => {
+    // pack_hacker_a lists pack_cyberprograms among its contents
+    const refs = data.packs.pack_hacker_a.contents.map((r) => r.ref);
+    expect(refs).not.toContain("pack_cyberprograms");
+    expect(refs).toContain("exploit");
+  });
+
+  it("refuses an unknown pack and a duplicate", () => {
+    const e = rich();
+    expect(e.spend({ kind: "pack", catalogId: "nope" }).ok).toBe(false);
+    e.spend({ kind: "pack", catalogId: "starterpack" });
+    expect(e.spend({ kind: "pack", catalogId: "starterpack" }).reason).toBe("already-owned");
+  });
+});
+
+describe("committing a PACK", () => {
+  it("plans the contents as items, not the pack receipt", () => {
+    const e = engineWith({ METATYPE: "D", ATTRIBUTE: "C", MAGIC: "E", SKILLS: "D", RESOURCES: "A" });
+    e.setMetatype("human");
+    e.spend({ kind: "pack", catalogId: "starterpack" });
+    const plan = e.commitPlan();
+    // the pack itself is a receipt; only real gear should reach the sheet
+    expect(plan.embeddedFromPacks.some((g) => g.catalogId === "starterpack")).toBe(false);
+    expect(plan.embeddedFromPacks.some((g) => g.catalogId === "respirator")).toBe(true);
+    // contents carry no uuid, so the committer must have a catalogId to use
+    const respirator = plan.embeddedFromPacks.find((g) => g.catalogId === "respirator");
+    expect(respirator.uuid).toBeFalsy();
+    expect(respirator.catalogId).toBe("respirator");
+  });
+});

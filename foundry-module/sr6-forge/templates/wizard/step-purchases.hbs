@@ -72,6 +72,29 @@
   </div>
   {{/each}}
 
+{{else if isPacksTab}}
+  <p class="hint">Sixth World Companion PACKs — a curated kit for one price,
+    which is lower than buying the parts separately. Buying one adds everything
+    it contains; removing it takes all of that back.</p>
+  {{#each packGroups}}
+  <h3>{{label}}</h3>
+  <div class="browse-list">
+    {{#each packs}}
+    <div class="browse-row pack-row {{#if owned}}owned{{/if}}">
+      <span class="b-name">{{name}}
+        <span class="b-sub">{{summary}}{{#if page}} · 6WC p{{page}}{{/if}}</span>
+      </span>
+      <span class="b-price">{{price}}¥{{#if essence}}<span class="b-ess"> · {{essence}} ess</span>{{/if}}</span>
+      {{#if owned}}
+      <button type="button" data-action="removePack" data-pack="{{id}}" title="{{description}}">Remove</button>
+      {{else}}
+      <button type="button" data-action="addPack" data-pack="{{id}}" title="{{description}}">Buy</button>
+      {{/if}}
+    </div>
+    {{/each}}
+  </div>
+  {{/each}}
+
 {{else if isLifestyleTab}}
   <h3>Lifestyle</h3>
   <select data-change="lifestyle">

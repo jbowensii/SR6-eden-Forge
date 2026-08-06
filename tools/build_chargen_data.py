@@ -26,6 +26,7 @@ from extractor.gear_meta import (
     build_gear_meta, build_item_meta, build_item_ratings, english_data_files,
     parse_adept_powers,
 )
+from extractor.packs_xml import parse_packs
 from extractor.chargen_xml import (
     i18n_by_prefix, parse_contacts, parse_lifepath, parse_lifestyles,
     parse_mentor_spirits, MENTOR_BOOKS,
@@ -162,6 +163,10 @@ def build(jar: _P, out: _P) -> dict:
             powers.update(parse_adept_powers(read_category_trees(z, b, cat),
                                              sub_i18n(px.get(b, {}), "power"), b))
         data["adeptPowers"] = powers
+
+        # Companion gear PACKs: pre-built bundles bought as one purchase at one
+        # price. English only -- 112 of the 289 are lang="de".
+        data["packs"] = parse_packs(z, sub_i18n(px.get("companion", {}), "item"))
 
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")

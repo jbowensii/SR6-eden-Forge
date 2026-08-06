@@ -12,6 +12,29 @@
   <button type="button" class="down" data-action="adj" data-kind="karma2nuyen" data-delta="-1">−</button>
 </div>
 
+<h3>Where the karma went</h3>
+<table class="data nuyen-ledger">
+  <tbody>
+    <tr><th>Customization karma</th><td class="num">{{fmt karma.base}}</td></tr>
+    {{#each karma.breakdown}}
+    <tr>
+      <th>{{label}}</th>
+      <td class="num {{#if (eq sign "gain")}}plus{{else}}minus{{/if}}">
+        {{#if (eq sign "gain")}}+{{else}}−{{/if}}{{fmt amount}}
+      </td>
+    </tr>
+    {{else}}
+    <tr><th class="hint" colspan="2">Nothing spent yet.</th></tr>
+    {{/each}}
+    <tr class="total {{#if karma.over}}over{{/if}}">
+      <th>Remaining</th><td class="num">{{fmt karma.left}}</td>
+    </tr>
+  </tbody>
+</table>
+<p class="hint">Core p67 Step Four: 50 karma, plus whatever negative qualities
+  earn back. A karma rank costs 5 × the <em>new</em> rating, so the same rank
+  bought late costs far more than one bought early.</p>
+
 <h3>Where the nuyen went</h3>
 <table class="data nuyen-ledger">
   <tbody>

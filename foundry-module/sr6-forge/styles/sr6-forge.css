@@ -769,3 +769,14 @@
   color: #fff;
 }
 .sr6-forge .nuyen-ledger tr.total.over td { color: var(--sf-red); }
+
+/* Companion PACKs: one price for a curated kit. The contents summary matters
+   more than the name when comparing two packs, so it gets real weight. */
+.sr6-forge .pack-row { align-items: flex-start; }
+.sr6-forge .pack-row.owned {
+  border-left: 2px solid var(--sf-green);
+  background: rgba(90,212,138,.06);
+}
+.sr6-forge .pack-row .b-sub { display: block; color: var(--sf-mute); font-size: 10.5px; }
+.sr6-forge .pack-row .b-price { font-family: var(--sf-mono); white-space: nowrap; }
+.sr6-forge .pack-row .b-ess { color: var(--sf-red); }

@@ -24,7 +24,7 @@ const STEPS = ["method", "priority", "metatype", "magic", "attributes",
  *  mundane goods, implants, and the magical/resonant side. Each renders the
  *  same template with its own subset of tabs. */
 const STEP_TABS = {
-  gear:    ["weapons", "ammo", "accessories", "armor", "matrix", "gear",
+  gear:    ["packs", "weapons", "ammo", "accessories", "armor", "matrix", "gear",
             "vehicles", "lifestyle"],
   augments: ["cyberware", "bioware"],
   powers:  ["magic", "foci"],
@@ -65,10 +65,39 @@ const SHOP_TABS = [
   { id: "foci",      label: "Foci & Magical", domain: "foci", types: null, alsoGear: ["MAGICAL"] },
   { id: "magic",     label: "Magic",     magic: true },
   { id: "lifestyle", label: "Lifestyle & SIN", lifestyle: true },
+  // Companion bundles: one price for a curated kit. Not a compendium domain —
+  // they live in chargen-data, because a pack is a recipe, not an item.
+  { id: "packs",     label: "PACKs",     packs: true },
 ];
+
+/** PACK subtype -> the heading it sits under in the PACKs tab. */
+const PACK_GROUPS = {
+  PACK_COMPLETE: "Complete kits",
+  PACK_AUGMENT: "Augmentation",
+  PACK_WEAPON: "Weapons",
+  PACK_VEHICLE: "Vehicles",
+  PACK_OTHER: "Other",
+};
 
 /** Rows rendered per browser list. The query narrows before this cap applies. */
 const ROW_CAP = 400;
+
+/** One line saying what a PACK actually contains. */
+function packSummary(pack) {
+  const rows = pack.contents ?? [];
+  const gear = rows.filter((r) => r.kind === "gear")
+    .reduce((n, r) => n + (r.qty ?? 1), 0);
+  const bits = [];
+  if (gear) bits.push(`${gear} item${gear === 1 ? "" : "s"}`);
+  const sins = rows.filter((r) => r.kind === "sin").length;
+  if (sins) bits.push(`${sins} fake SIN${sins === 1 ? "" : "s"}`);
+  const lic = rows.filter((r) => r.kind === "license")
+    .reduce((n, r) => n + (r.qty ?? 1), 0);
+  if (lic) bits.push(`${lic} licence${lic === 1 ? "" : "s"}`);
+  const life = rows.find((r) => r.kind === "lifestyle");
+  if (life) bits.push(`${life.ref} lifestyle`);
+  return bits.join(" · ");
+}
 
 let rulesCache = null;
 async function creationRules() {
@@ -106,6 +135,8 @@ export class SR6ForgeWizard extends RememberPosition(
       removeKnowledge: SR6ForgeWizard.#onRemoveKnowledge,
       addSin: SR6ForgeWizard.#onAddSin,
       removeSin: SR6ForgeWizard.#onRemoveSin,
+      addPack: SR6ForgeWizard.#onAddPack,
+      removePack: SR6ForgeWizard.#onRemovePack,
       shopTab: SR6ForgeWizard.#onShopTab,
       addAccessory: SR6ForgeWizard.#onAddAccessory,
       removeAccessory: SR6ForgeWizard.#onRemoveAccessory,
@@ -208,7 +239,14 @@ export class SR6ForgeWizard extends RememberPosition(
       mk("ADJ", b.adjustmentPoints, "Adjustment points"),
       mk("SKILL", b.skillPoints, "Skill points"),
       mk("KNOW", b.knowledgePoints, "Knowledge points"),
-      mk("KARMA", b.karma, "Karma"),
+      { k: "KARMA", v: b.karma.left, m: b.karma.max,
+        title: [
+          `Customization karma: ${b.karma.base}`,
+          ...(b.karma.breakdown ?? []).map((x) =>
+            `${x.sign === "gain" ? "+" : "−"}${x.amount}  ${x.label}`),
+          `Remaining: ${b.karma.left}`,
+        ].join("\n"),
+        cls: b.karma.left < 0 ? "over" : (b.karma.left === 0 ? "good" : "") },
       { k: "NUYEN", v: `${b.nuyen.left.toLocaleString()}¥`, m: null,
         // gear is not the only drain — spell out lifestyle and SINs, or a
         // character who bought nothing looks overdrawn for no visible reason
@@ -660,6 +698,27 @@ export class SR6ForgeWizard extends RememberPosition(
               .map(([id, l]) => ({ id, ...l, selected: id === st.lifestyleId })),
             sins: st.sins, sinRatings: [1, 2, 3, 4] };
         }
+        if (tabDef.packs) {
+          const q = (this.ui.query?.shop ?? "").trim().toLowerCase();
+          const ownedIds = new Set(st.purchases.filter((p) => p.isPack).map((p) => p.packId));
+          const all = Object.values(data.packs ?? {})
+            .filter((p) => !q || (p.name ?? p.id).toLowerCase().includes(q))
+            .sort((a, b) => (a.name ?? a.id).localeCompare(b.name ?? b.id));
+          const groups = Object.entries(PACK_GROUPS).map(([subtype, label]) => ({
+            label,
+            packs: all.filter((p) => p.subtype === subtype).map((p) => ({
+              id: p.id, name: p.name ?? p.id, price: (p.price ?? 0).toLocaleString(),
+              essence: p.essence ? p.essence.toFixed(2) : null,
+              page: p.page, description: p.description,
+              owned: ownedIds.has(p.id),
+              // a plain-language contents list; the counts are what a buyer
+              // actually wants to compare between packs
+              summary: packSummary(p),
+            })),
+          })).filter((g) => g.packs.length);
+          return { ...base, isPacksTab: true, packGroups: groups,
+            packCount: all.length };
+        }
         const rows = await PackCatalog.index(tabDef.domain);
         const inTab = rows.filter((r) => !tabDef.types || tabDef.types.includes(r.system?.type));
         const subCounts = {};
@@ -723,6 +782,7 @@ export class SR6ForgeWizard extends RememberPosition(
           name: st.name, converted: st.conversions.karmaToNuyen,
           convRate: rules.karmaToNuyen.rate, convMax: rules.karmaToNuyen.maxKarma,
           nuyen: { ...budgets.nuyen, over: budgets.nuyen.left < 0 },
+          karma: { ...budgets.karma, over: budgets.karma.left < 0 },
           issues,
           summary: {
             metatype: mt?.name ?? "—", mor: data.morTypes?.[st.morId]?.name ?? "—",
@@ -1035,6 +1095,13 @@ export class SR6ForgeWizard extends RememberPosition(
   static #onRemoveKnowledge(_ev, t) { this.#spend({ kind: "knowledge", index: Number(t.dataset.index), remove: true }); }
   static #onAddSin(_ev, t) { this.#spend({ kind: "sin", rating: Number(t.dataset.rating ?? 1) }); }
   static #onRemoveSin(_ev, t) { this.#spend({ kind: "sin", index: Number(t.dataset.index), remove: true }); }
+
+  /** Buy a Companion PACK: one price, and its whole contents come with it. */
+  static #onAddPack(_ev, t) { this.#spend({ kind: "pack", catalogId: t.dataset.pack }); }
+
+  static #onRemovePack(_ev, t) {
+    this.#spend({ kind: "pack", catalogId: t.dataset.pack, remove: true });
+  }
   /** Changing rail step clears the per-tab filters, which belong to the tab. */
   #resetShopFilters() { this.ui.shopSubtype = ""; this.ui.query.shop = ""; }
 

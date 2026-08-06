@@ -44,7 +44,10 @@ export function buildCommitPlan(state, data, rules, provider, budgets) {
     });
   }
   for (const p of state.purchases) {
-    embeddedFromPacks.push({ uuid: p.uuid, itemType: p.itemType,
+    // The PACK line is a receipt, not a thing: its contents are the items that
+    // belong on the sheet, and they are already in this list.
+    if (p.isPack) continue;
+    embeddedFromPacks.push({ uuid: p.uuid, catalogId: p.catalogId, itemType: p.itemType,
       overrides: { ...(p.qty > 1 ? { "system.count": p.qty } : {}),
                    ...(p.rating ? { "system.rating": p.rating } : {}) } });
     // Accessories fitted into this item's mount slots are their own items on
