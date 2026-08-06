@@ -1,6 +1,10 @@
 /** Build the commit plan: everything the actor-committer needs to create the
  *  eden Player actor. RAW INPUTS ONLY — eden derives pools/monitors/essence. */
 import { attrRating, skillRank, CORE_ATTRS } from "./budgets.mjs";
+// config.mjs is the one place that names eden's catalog field; importing it
+// here keeps that boundary intact and costs nothing — it pulls in no Foundry
+// globals, so this module still unit-tests in plain node.
+import { setCatalogId } from "../config.mjs";
 
 export function buildCommitPlan(state, data, rules, provider, budgets) {
   const mt = data.metatypes?.[state.metatypeId] ?? {};
@@ -120,9 +124,13 @@ export function buildCommitPlan(state, data, rules, provider, budgets) {
     });
   }
   for (const k of state.knowledge) {
+    // Eden keys an item's localisation and icon off `<type>.<catalogId>` in
+    // preCreateItem, so a knowledge skill written with a bare `catalogId`
+    // arrives with eden's field empty and is looked up as "skill." — set it
+    // through the boundary helper, which knows the real field name.
     syntheticItems.push({
       name: k.name, type: "skill",
-      system: { catalogId: k.type, points: k.native ? 4 : (k.points ?? 1) },
+      system: setCatalogId({ points: k.native ? 4 : (k.points ?? 1) }, k.type),
     });
   }
 

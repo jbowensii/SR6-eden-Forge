@@ -1618,3 +1618,21 @@ describe("qualities that hand something over", () => {
     expect(e.budgets().nuyen.spent).toBe(before);        // free with the quality
   });
 });
+
+describe("knowledge skills reach eden with its own catalog field", () => {
+  it("writes the field eden actually reads, not a lookalike", async () => {
+    // Eden keys localisation and icons off `<type>.<catalogId>` in
+    // preCreateItem. A bare `system.catalogId` is not that field, so the
+    // skill arrived looked up as "skill." with nothing after it.
+    const { EDEN_CATALOG_FIELD } = await import("../sr6-forge/scripts/config.mjs");
+    const field = EDEN_CATALOG_FIELD.split(".").pop();
+
+    const e = engineWith();
+    e.setMetatype("human");
+    e.spend({ kind: "knowledge", name: "Catholic Church", type: "knowledge", points: 1 });
+    const item = e.commitPlan().syntheticItems.find((i) => i.name === "Catholic Church");
+    expect(item).toBeTruthy();
+    expect(item.system[field]).toBe("knowledge");
+    expect(item.system.catalogId).toBeUndefined();
+  });
+});

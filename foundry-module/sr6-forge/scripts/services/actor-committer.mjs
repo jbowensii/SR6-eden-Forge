@@ -11,7 +11,7 @@
  *  localized text.
  *
  *  Rollback deletes the actor on any failure. */
-import { MODULE_ID, FLAGS } from "../config.mjs";
+import { MODULE_ID, FLAGS, LOG_PREFIX } from "../config.mjs";
 import { PackCatalog } from "./pack-catalog.mjs";
 
 const QUALITY_DOMAINS = ["qualities"];
@@ -33,7 +33,7 @@ async function resolveGrantDocs(plan) {
       if (row) doc = await fromUuid(row.uuid);
     }
     if (!doc) {
-      console.warn(`sr6-forge | grant not found`, grant);
+      console.warn(`${LOG_PREFIX} grant not found`, grant);
       continue;
     }
     const obj = doc.toObject();
@@ -72,7 +72,7 @@ export async function commitCharacter(plan, { engineState = null } = {}) {
     if (plan.effects?.length) await actor.createEmbeddedDocuments("ActiveEffect", plan.effects);
     return actor;
   } catch (err) {
-    console.error("sr6-forge | commit failed, rolling back", err);
+    console.error(`${LOG_PREFIX} commit failed, rolling back`, err);
     await actor.delete();
     throw err;
   }

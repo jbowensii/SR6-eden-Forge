@@ -1,7 +1,41 @@
-/** SR6 Forge — entry point. Registers settings, loads chargen-data.json,
- *  extends compendium index fields, exposes the module API, and adds the
- *  launcher button to the Actors directory. */
-import { MODULE_ID, SETTINGS, EXTRA_INDEX_FIELDS } from "./config.mjs";
+/* -------------------------------------------- */
+/*  SR6 Forge — Foundry VTT Initialization       */
+/* -------------------------------------------- */
+
+/**
+ * SR6 Forge — character generation and karma advancement for Shadowrun 6th
+ * World on Foundry VTT.
+ *
+ * Entry point: registers settings, loads chargen-data.json, extends the
+ * compendium index fields, exposes the module API and adds the launcher to the
+ * Actors directory.
+ *
+ * ## Acknowledgements
+ *
+ * **shadowrun6-eden** — the Shadowrun 6 system this module is built on, by
+ * Stefan Prelle and contributors (https://github.com/Prelle/shadowrun6-eden).
+ * Eden does the real work: it owns the actor and item data models and derives
+ * every computed value at runtime — attribute pools, condition monitors,
+ * essence from ware. SR6 Forge deliberately writes only raw inputs and lets
+ * eden derive the rest, which is why a character built here behaves exactly
+ * like one built by hand on an eden sheet. This module reads eden's schema and
+ * conventions; it never modifies the system.
+ *
+ * **Commlink6 / Genesis** — the Java character generator by Stefan Prelle
+ * (https://www.rpgframework.de), whose data files describe the Sixth World in
+ * a structured form and whose editor established the workflow this wizard
+ * follows. Where the printed rules are ambiguous, Commlink6's own declarations
+ * settled the question — counted accessory mounts, quality grants, fake SIN
+ * quality levels and the per-attribute point pools were all read from its data
+ * rather than guessed. The stable per-item identifiers our compendia share
+ * with eden originate there.
+ *
+ * Shadowrun is a registered trademark of The Topps Company, Inc. Game content
+ * belongs to Catalyst Game Labs. This module ships rules logic only; the game
+ * data it reads is generated locally from books the user owns and is not
+ * distributed with it.
+ */
+import { MODULE_ID, SETTINGS, EXTRA_INDEX_FIELDS, LOG_PREFIX } from "./config.mjs";
 // Static so it can back the settings menu registered during "init". The cycle
 // with this file is safe: options-app only calls chargenData() at render time,
 // and function declarations hoist.
@@ -92,11 +126,11 @@ Hooks.once("ready", async () => {
   try {
     const resp = await fetch(`modules/${MODULE_ID}/data/chargen-data.json`);
     state.chargenData = await resp.json();
-    console.log(`${MODULE_ID} | chargen-data loaded:`,
+    console.log(`${LOG_PREFIX} chargen-data loaded:`,
       Object.keys(state.chargenData.metatypes ?? {}).length, "metatypes,",
       Object.keys(state.chargenData.skills ?? {}).length, "skills");
   } catch (err) {
-    console.error(`${MODULE_ID} | failed to load chargen-data.json`, err);
+    console.error(`${LOG_PREFIX} failed to load chargen-data.json`, err);
     ui.notifications?.error("SR6 Forge: chargen-data.json missing — rebuild the module.");
   }
 
@@ -131,7 +165,7 @@ Hooks.on("quenchReady", async (quench) => {
     const { registerQuenchBatches } = await import("./tests/quench-batches.mjs");
     registerQuenchBatches(quench);
   } catch (err) {
-    console.error(`${MODULE_ID} | failed to register Quench batches`, err);
+    console.error(`${LOG_PREFIX} failed to register Quench batches`, err);
   }
 });
 

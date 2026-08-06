@@ -10,7 +10,7 @@
  *  Stored client-scoped: window geometry is a personal preference, and two
  *  people sharing a world should not fight over it.
  */
-import { MODULE_ID, SETTINGS } from "../config.mjs";
+import { MODULE_ID, SETTINGS, LOG_PREFIX } from "../config.mjs";
 
 /** How long to wait after the last move/resize before writing. */
 const SAVE_DELAY_MS = 400;
@@ -78,7 +78,7 @@ export function RememberPosition(Base, key) {
       try {
         await game.settings.set(MODULE_ID, SETTINGS.WINDOW_STATE, all);
       } catch (err) {
-        console.warn(`${MODULE_ID} | could not save window position`, err);
+        console.warn(`${LOG_PREFIX} could not save window position`, err);
       }
     }
   };

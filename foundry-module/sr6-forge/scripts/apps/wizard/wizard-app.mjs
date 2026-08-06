@@ -2,7 +2,7 @@
  *  The engine owns all state; this renders budgets/validation and forwards
  *  actions. Layout mirrors Commlink6's editor: nav rail | working pane |
  *  detail pane, with available/chosen lists per section. */
-import { MODULE_ID, SETTINGS, ACTOR_SKILLS, catalogIdOf } from "../../config.mjs";
+import { MODULE_ID, SETTINGS, ACTOR_SKILLS, catalogIdOf, LOG_PREFIX } from "../../config.mjs";
 import { chargenData } from "../../main.mjs";
 import { ChargenEngine } from "../../engine/chargen-engine.mjs";
 import { POINT_BUY, LIFEPATH_ADULT_COUNT } from "../../engine/providers.mjs";
@@ -1008,7 +1008,7 @@ export class SR6ForgeWizard extends RememberPosition(
           det = { name: doc.name, meta: doc.type,
             stats, description: sys.description || "<em>No description in the source data.</em>" };
         }
-      } catch (err) { console.warn("sr6-forge | detail fetch failed", err); }
+      } catch (err) { console.warn(`${LOG_PREFIX} detail fetch failed`, err); }
     }
     if (!det) return;
     this._detailCache.set(cacheKey, det);

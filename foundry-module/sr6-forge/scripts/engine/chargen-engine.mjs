@@ -38,7 +38,9 @@ export function blankState(method = "priority", rulesetId = "core") {
     contacts: [],                   // {name, archetype (free text), connection, loyalty}
     lifestyleId: null, lifestyleMonths: 1,
     lifestyleFromPack: null,        // set when a PACK supplied the lifestyle
-    sins: [],                       // {name, rating(1-4? VERIFY), licenses[]}
+    // {id, kind:"real"|"fake", name, rating(1-6, fake only), licenses[],
+    //  fromQuality} — a runner is SINless unless SINner grants a real one
+    sins: [],
     powerPointsBought: 0,
     conversions: { karmaToNuyen: 0 },
     log: [],

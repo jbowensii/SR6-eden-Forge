@@ -17,6 +17,10 @@ export const FLAG_SCOPE = MODULE_ID;
  */
 export const EDEN_CATALOG_FIELD = "system.genesisID";
 
+/** Console tag, mirroring the system's own "SR6E |" so a mixed log is
+ *  readable at a glance and ours is filterable on its own. */
+export const LOG_PREFIX = "SR6F |";
+
 /** The stable catalog id of a compendium row or item document. */
 export function catalogIdOf(docOrRow) {
   return docOrRow?.system?.genesisID ?? null;
