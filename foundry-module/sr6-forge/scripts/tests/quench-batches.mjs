@@ -6,8 +6,11 @@
  *  whether shadowrun6-eden derives the stats we expect from the raw inputs we
  *  write. Every batch that creates a document deletes it again in teardown.
  *
- *  Enable the Quench module and open its window, or run from the console:
- *      quench.runBatch("sr6-forge.commit")
+ *  Enable the Quench module and open its window, or run from the console —
+ *  note the method is runBatches (plural) and takes a glob:
+ *
+ *      quench.runBatches("sr6-forge.*")        every batch here
+ *      quench.runBatches("sr6-forge.commit")   just the commit path
  */
 import { MODULE_ID, SETTINGS, ACTOR_SKILLS } from "../config.mjs";
 import { chargenData } from "../main.mjs";
