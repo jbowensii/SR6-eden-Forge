@@ -104,7 +104,7 @@
         {{!-- tell the user BEFORE they buy that this thing takes accessories --}}
         {{#if mounts}}<span class="mount-badge" title="accepts accessories — fit them from the Owned list below">⛓ {{mounts}}</span>{{/if}}
       </span>
-      <span class="mt">{{price}}¥ · A{{avail}}{{#if essence}} · E{{essence}}{{/if}}</span>
+      <span class="mt">{{price}}¥ · A{{avail}}{{#if essence}} · E{{essence}}{{/if}}{{#if ratedFrom}} · rating {{ratedFrom}}{{/if}}</span>
       <button type="button" data-action="addPurchase" data-uuid="{{uuid}}" data-name="{{name}}"
               data-genesis-id="{{genesisID}}" data-subtype="{{subtype}}"
               data-price="{{price}}" data-avail="{{avail}}" data-essence="{{essence}}"
@@ -124,6 +124,17 @@
   <div class="chosen owned-item">
     <span class="c-name">{{name}}{{#if qty}} ×{{qty}}{{/if}}
       <span class="c-meta">{{price}}¥{{#if essence}} · ess {{essence}}{{/if}}</span>
+      {{#if ratings}}
+      {{!-- rated gear prices per rating, so the rating is a live choice --}}
+      <span class="rating-pick">
+        <span class="field-label">rating</span>
+        <select data-change="itemRating" data-index="{{index}}">
+          {{#each ratingOptions}}
+          <option value="{{n}}" {{#if selected}}selected{{/if}}>{{n}}</option>
+          {{/each}}
+        </select>
+      </span>
+      {{/if}}
 
       {{#if hasSlots}}
       {{!-- accessory mounts: what is fitted, and what will still fit --}}

@@ -23,7 +23,7 @@ except Exception:
 
 from extractor.commlink6 import DEFAULT_JAR
 from extractor.gear_meta import (
-    build_gear_meta, english_data_files, parse_adept_powers,
+    build_gear_meta, build_item_ratings, english_data_files, parse_adept_powers,
 )
 from extractor.chargen_xml import (
     i18n_by_prefix, parse_contacts, parse_lifepath, parse_lifestyles,
@@ -146,6 +146,10 @@ def build(jar: _P, out: _P) -> dict:
         # slots they fit and which host subtypes accept them.
         data["gearMounts"] = build_gear_meta(z)
 
+        # Rated gear (Wired Reflexes 1-4, ...) prices per rating rather than
+        # flat, so the rating range and the price/avail/essence rules ship too.
+        data["gearRatings"] = build_item_ratings(z)
+
         # Adept powers: `cost` is power points PER LEVEL, so a leveled power
         # (Improved Reflexes) is bought at rank 1..n.
         powers: dict = {}
@@ -194,6 +198,7 @@ def main():
           f" | contacts: {len(d['contactArchetypes'])}"
           f" | contactTypes: {len(d['contactTypes'])}"
           f" | lifepath(EN): {len(d['lifepathModules'])}")
+    print(f"  gearRatings: {len(d['gearRatings'])}")
     print(f"  gearMounts: {len(d['gearMounts'])}"
           f" | adeptPowers: {len(d['adeptPowers'])}"
           f" ({sum(1 for p in d['adeptPowers'].values() if p['hasLevel'])} leveled)")

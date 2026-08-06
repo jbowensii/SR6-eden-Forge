@@ -1,7 +1,7 @@
 /** Declarative creation-validation rules. Each returns null (pass) or a params
  *  object (fail) — message keys live in lang/en.json as SR6FORGE.Validate.<id>.
  *  ctx = { state, data, rules, provider, budgets } */
-import { CORE_ATTRS, SPECIAL_ATTRS, attrRating, qualityKarma, creationSetting, skillRank } from "./budgets.mjs";
+import { CORE_ATTRS, SPECIAL_ATTRS, attrRating, qualityKarma, creationSetting, skillRank, ratedValues } from "./budgets.mjs";
 import { POINT_BUY, LIFEPATH_ADULT_COUNT } from "./providers.mjs";
 
 /** Split of paid quality karma (free racial qualities excluded). */
@@ -156,9 +156,24 @@ export const VALIDATION_RULES = [
     check: ({ state, data, rules }) => {
       const cap = creationSetting("maxAvailability", data, rules, state.rulesetId, state.optionalRules);
       for (const p of state.purchases) {
-        if ((p.avail ?? 0) > cap) return { item: p.name ?? p.uuid, cap };
+        // a rated item's availability rises with its rating
+        if (ratedValues(p, data).avail > cap) return { item: p.name ?? p.uuid, cap };
         for (const a of p.accessories ?? []) {
           if ((a.avail ?? 0) > cap) return { item: a.name ?? a.genesisID, cap };
+        }
+      }
+      return null;
+    },
+  },
+  {
+    id: "gear.ratingRange", severity: "error", step: "gear",
+    check: ({ state, data }) => {
+      for (const p of state.purchases) {
+        const meta = data.gearRatings?.[p.genesisID];
+        if (!meta?.ratings?.length) continue;
+        const r = p.rating ?? meta.ratings[0];
+        if (!meta.ratings.includes(r)) {
+          return { item: p.name ?? p.uuid, max: meta.maxRating };
         }
       }
       return null;

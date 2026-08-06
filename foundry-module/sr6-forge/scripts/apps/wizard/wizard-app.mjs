@@ -6,7 +6,7 @@ import { MODULE_ID, SETTINGS, ACTOR_SKILLS } from "../../config.mjs";
 import { chargenData } from "../../main.mjs";
 import { ChargenEngine } from "../../engine/chargen-engine.mjs";
 import { POINT_BUY, LIFEPATH_ADULT_COUNT } from "../../engine/providers.mjs";
-import { qualityKarma, creationSetting, augmentBonus } from "../../engine/budgets.mjs";
+import { qualityKarma, creationSetting, augmentBonus, ratedValues } from "../../engine/budgets.mjs";
 import { DraftStore } from "../../services/draft-store.mjs";
 import { PackCatalog } from "../../services/pack-catalog.mjs";
 import { commitCharacter } from "../../services/actor-committer.mjs";
@@ -580,8 +580,15 @@ export class SR6ForgeWizard extends RememberPosition(
             const allow = m.hostSubtypes;
             return !allow?.length || allow.includes(pItem.subtype);
           }).sort((a, b) => a.name.localeCompare(b.name)).slice(0, 60) : [];
+          const rm = data.gearRatings?.[pItem.genesisID];
+          const rv = ratedValues(pItem, data);
           return {
             ...pItem, index,
+            price: rv.price, essence: rv.essence, avail: rv.avail,
+            ratings: rm?.ratings ?? null,
+            rating: rv.rating,
+            ratingOptions: (rm?.ratings ?? []).map((n) => ({
+              n, selected: n === rv.rating })),
             slots: hooks.map((h) => ({ id: h, label: h.replaceAll("_", " ").toLowerCase(),
               taken: used.has(h) })),
             hasSlots: hooks.length > 0,
@@ -663,6 +670,15 @@ export class SR6ForgeWizard extends RememberPosition(
             avail: r.system?.avail ?? 0, essence: r.system?.essence ?? 0,
             genesisID: r.system?.genesisID ?? "", subtype: r.system?.subtype ?? "",
             itemType: r.type, overCap: (r.system?.avail ?? 0) > cap,
+            // rated gear has no flat price: quote it at its lowest rating
+            ...(() => {
+              const rm = data.gearRatings?.[r.system?.genesisID];
+              if (!rm?.ratings?.length) return {};
+              const v = ratedValues({ genesisID: r.system?.genesisID }, data, rm.ratings[0]);
+              return { ratings: rm.ratings, maxRating: rm.maxRating,
+                price: v.price, avail: v.avail, essence: v.essence,
+                ratedFrom: `${rm.ratings[0]}-${rm.maxRating}` };
+            })(),
             // does this item accept accessories at all?
             mounts: (mounts[r.system?.genesisID]?.hooks ?? []).length }));
         return { ...base, list, listTotal: inTab.length,
@@ -855,6 +871,11 @@ export class SR6ForgeWizard extends RememberPosition(
       case "lifestyle": e.spend({ kind: "lifestyle", id: el.value || null }); break;
       case "qualityFilter": this.ui.qualityFilter = el.value; break;
       case "shopSubtype": this.ui.shopSubtype = el.value; break;
+      case "itemRating": {
+        const p = e.state.purchases[Number(el.dataset.index)];
+        if (p) p.rating = Number(el.value);
+        break;
+      }
       case "powerLevel":
         e.spend({ kind: "powerLevel", index: Number(el.dataset.index),
           delta: Number(el.value) - Number(el.dataset.current ?? 1) });

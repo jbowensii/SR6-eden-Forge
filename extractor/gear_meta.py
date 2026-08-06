@@ -230,3 +230,97 @@ def build_gear_meta(z: zipfile.ZipFile) -> dict:
     for book, cat in english_data_files(z, r"(gear|weapon|armor|vehicle|drone|cyber|bio|nano|gene|accessor|electronic|software|tool|survival|chemical|magical|ammo).*"):
         mounts.update(parse_item_mounts(read_category_trees(z, book, cat)))
     return mounts
+
+
+# --------------------------------------------------------------------------- #
+# rated items: rating range, and price / availability / essence per rating
+# --------------------------------------------------------------------------- #
+#: "$RATING*95000", "0.1*$RATING", "$RATING" or a plain number. Nothing else
+#: appears in the English data, so a tiny evaluator beats a general one.
+_MUL_RIGHT = re.compile(r"^\$RATING\s*\*\s*([\d.]+)$", re.I)
+_MUL_LEFT = re.compile(r"^([\d.]+)\s*\*\s*\$RATING$", re.I)
+
+
+def _scaled(value: str) -> dict | None:
+    """A rating-dependent value -> {perRating} / {flat}; None if not numeric."""
+    v = (value or "").strip()
+    if not v:
+        return None
+    if v.upper() == "$RATING":
+        return {"perRating": 1}
+    m = _MUL_RIGHT.match(v) or _MUL_LEFT.match(v)
+    if m:
+        return {"perRating": float(m.group(1))}
+    try:
+        return {"flat": float(v)}
+    except ValueError:
+        return None                      # e.g. an availability code like "3L"
+
+
+def parse_item_ratings(trees: list[dict]) -> dict:
+    """One data file -> {genesisID: {ratings[], maxRating, price, avail, essence}}.
+
+    Rated gear does not carry a flat price: Wired Reflexes costs 40,000 at
+    rating 1 and 450,000 at rating 4, expressed either as a lookup table
+    (``<attrdef id="PRICE" value="$RATING" table="40000,150000,..."/>``) or a
+    formula (``value="$RATING*95000"``). Essence comes from a third place again,
+    ``<usage mode="IMPLANTED" value="$RATING*0.5"/>``.
+
+    Without this the merge stored 0, so rated cyberware and bioware were free
+    and cost no Essence.
+    """
+    out: dict = {}
+    for t in trees:
+        if t["tag"] != "item":
+            continue
+        gid = t["attrs"].get("id")
+        if not gid:
+            continue
+
+        ratings: list[int] = []
+        for ch in _children(_first(t, "choices") or {"children": []}, "choice"):
+            a = ch["attrs"]
+            if a.get("ref") == "RATING" and a.get("options"):
+                for part in a["options"].split(","):
+                    part = part.strip()
+                    if part.isdigit():
+                        ratings.append(int(part))
+        if not ratings:
+            continue                     # not a rated item
+
+        rec: dict = {"ratings": sorted(set(ratings)),
+                     "maxRating": max(ratings)}
+
+        for ad in _children(t, "attrdef"):
+            a = ad["attrs"]
+            key = {"PRICE": "price", "AVAILABILITY": "avail",
+                   "ESSENCECOST": "essence"}.get(a.get("id", ""))
+            if not key:
+                continue
+            if a.get("table"):
+                # one entry per rating, in rating order
+                rec[key] = {"table": [x.strip() for x in a["table"].split(",")]}
+            else:
+                scaled = _scaled(a.get("value", ""))
+                if scaled:
+                    rec[key] = scaled
+                elif a.get("value"):
+                    rec[key] = {"literal": a["value"].strip()}
+
+        # essence for implants lives on <usage>, not an attrdef
+        for u in _children(t, "usage"):
+            if u["attrs"].get("mode") == "IMPLANTED" and u["attrs"].get("value"):
+                scaled = _scaled(u["attrs"]["value"])
+                if scaled:
+                    rec.setdefault("essence", scaled)
+
+        out[gid] = rec
+    return out
+
+
+def build_item_ratings(z: zipfile.ZipFile) -> dict:
+    """Rating metadata for every English data file that has any."""
+    out: dict = {}
+    for book, cat in english_data_files(z):
+        out.update(parse_item_ratings(read_category_trees(z, book, cat)))
+    return out

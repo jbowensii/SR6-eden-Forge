@@ -746,3 +746,6 @@
 
 /* augmented attribute rating, Commlink-style "4 (6)" */
 .sr6-forge .attr-cell .a-val .aug { color: var(--sf-cyan); font-size: .78em; }
+
+.sr6-forge .rating-pick { display: inline-flex; align-items: center; gap: 5px; margin-left: 8px; }
+.sr6-forge .rating-pick select { width: 58px; }

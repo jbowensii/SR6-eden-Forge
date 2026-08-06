@@ -67,6 +67,39 @@ export function augmentedRating(state, key, provider, data) {
   return attrRating(state, key, provider) + augmentBonus(state, key, data);
 }
 
+/**
+ * Resolve a rated item's price / availability / essence at a given rating.
+ *
+ * Rated gear carries no flat price — Wired Reflexes is 40,000 at rating 1 and
+ * 450,000 at rating 4 — so it arrives as either a per-rating lookup table or a
+ * per-rating multiplier. Anything without rating metadata falls through to the
+ * flat value already on the item.
+ *
+ * @returns {{price:number, avail:number, essence:number, rating:number}}
+ */
+export function ratedValues(item, data, rating = null) {
+  const meta = data.gearRatings?.[item.genesisID];
+  const r = rating ?? item.rating ?? meta?.ratings?.[0] ?? 1;
+  const pick = (spec, fallback) => {
+    if (!spec) return fallback;
+    if (spec.table) {
+      // tables are in rating order, so rating 1 is index 0
+      const raw = spec.table[Math.max(0, r - 1)] ?? spec.table.at(-1);
+      const n = parseFloat(String(raw));
+      return Number.isFinite(n) ? n : fallback;
+    }
+    if (spec.perRating != null) return spec.perRating * r;
+    if (spec.flat != null) return spec.flat;
+    return fallback;
+  };
+  return {
+    rating: r,
+    price: pick(meta?.price, item.price ?? 0),
+    avail: pick(meta?.avail, item.avail ?? 0),
+    essence: pick(meta?.essence, item.essence ?? 0),
+  };
+}
+
 export function attributePointsSpent(state) {
   return CORE_ATTRS.reduce((n, k) => n + (state.attributes[k]?.points ?? 0), 0);
 }
@@ -176,7 +209,7 @@ export function nuyenBudget(state, data, rules, provider) {
   const factor = 1 + (priceMods.EVERYTHING ?? 0);
   let spent = 0;
   for (const p of state.purchases) {
-    spent += (p.price ?? 0) * (p.qty ?? 1);
+    spent += ratedValues(p, data).price * (p.qty ?? 1);
     // fitted accessories are paid for too; factory-fitted ones are included in
     // the host's price and carry 0
     for (const a of p.accessories ?? []) spent += a.price ?? 0;
@@ -188,8 +221,9 @@ export function nuyenBudget(state, data, rules, provider) {
   return { max: base + conv, spent: Math.round(spent), left: Math.round(base + conv - spent) };
 }
 
-export function essenceUsed(state) {
-  return state.purchases.reduce((n, p) => n + (p.essence ?? 0) * (p.qty ?? 1), 0);
+export function essenceUsed(state, data) {
+  return state.purchases.reduce(
+    (n, p) => n + ratedValues(p, data).essence * (p.qty ?? 1), 0);
 }
 
 /**
@@ -242,7 +276,10 @@ export function allBudgets(state, data, rules, provider) {
     skillPoints: { max: sp, spent: skillPointsSpent(state), left: sp - skillPointsSpent(state) },
     karma: karmaBudget(state, data, rules, provider),
     nuyen: nuyenBudget(state, data, rules, provider),
-    essence: { max: 6, spent: essenceUsed(state), left: 6 - essenceUsed(state) },
+    essence: (() => {
+      const used = Math.round(essenceUsed(state, data) * 100) / 100;
+      return { max: 6, spent: used, left: Math.round((6 - used) * 100) / 100 };
+    })(),
     powerPoints: powerPoints(state, data, rules, provider),
     spellSlots: (() => {
       const max = freeSpellSlots(state, data, provider);

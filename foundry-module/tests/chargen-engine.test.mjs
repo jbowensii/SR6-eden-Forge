@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { ChargenEngine, blankState } from "../sr6-forge/scripts/engine/chargen-engine.mjs";
 import { LIFEPATH_OPENING } from "../sr6-forge/scripts/engine/providers.mjs";
-import { augmentBonus, augmentedRating } from "../sr6-forge/scripts/engine/budgets.mjs";
+import { augmentBonus, augmentedRating, ratedValues } from "../sr6-forge/scripts/engine/budgets.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const data = JSON.parse(readFileSync(join(here, "..", "..", "export", "chargen-data.json"), "utf8"));
@@ -986,5 +986,68 @@ describe("knowledge skills cost 3 karma, not 5 x rank", () => {
     e.spend({ kind: "skill", target: "firearms", pool: "karma", delta: 1 });
     const activeCost = e.budgets().karma.spent;               // 5 x rank 1
     expect(activeCost).toBeGreaterThan(rules.karmaCosts.knowledgeSkill);
+  });
+});
+
+describe("rated gear prices by rating", () => {
+  // Rated items carry no flat price; the merge stored 0, so cyberware and
+  // bioware were free and cost no Essence.
+  function bought(genesisID, rating) {
+    const e = engineWith();
+    e.setMetatype("human");
+    e.spend({ kind: "purchase", uuid: `Item.${genesisID}`, name: genesisID,
+      genesisID, rating });
+    return e;
+  }
+
+  it("reads Wired Reflexes' price table straight from the book values", () => {
+    const meta = data.gearRatings.wired_reflexes;
+    expect(meta.ratings).toEqual([1, 2, 3, 4]);
+    expect(meta.maxRating).toBe(4);
+    expect(ratedValues({ genesisID: "wired_reflexes" }, data, 1).price).toBe(40000);
+    expect(ratedValues({ genesisID: "wired_reflexes" }, data, 4).price).toBe(450000);
+  });
+
+  it("charges the rating's price, not zero", () => {
+    expect(bought("wired_reflexes", 1).budgets().nuyen.spent).toBe(40000);
+    expect(bought("wired_reflexes", 3).budgets().nuyen.spent).toBe(250000);
+  });
+
+  it("costs Essence scaled by rating", () => {
+    // wired reflexes: 1 Essence per rating
+    expect(bought("wired_reflexes", 1).budgets().essence.spent).toBe(1);
+    expect(bought("wired_reflexes", 3).budgets().essence.spent).toBe(3);
+  });
+
+  it("handles a formula as well as a table", () => {
+    // synaptic booster: $RATING*95000, essence $RATING*0.5
+    expect(ratedValues({ genesisID: "synaptic_booster" }, data, 2).price).toBe(190000);
+    expect(ratedValues({ genesisID: "synaptic_booster" }, data, 2).essence).toBe(1);
+  });
+
+  it("raises availability with the rating, and flags going over the cap", () => {
+    // wired reflexes availability table is 3L,3L,4L,6L against a cap of 6
+    expect(ratedValues({ genesisID: "wired_reflexes" }, data, 1).avail).toBe(3);
+    expect(ratedValues({ genesisID: "wired_reflexes" }, data, 4).avail).toBe(6);
+    expect(bought("wired_reflexes", 4).validate().map((i) => i.id))
+      .not.toContain("gear.availCap");
+  });
+
+  it("rejects a rating the item does not offer", () => {
+    const e = bought("synaptic_booster", 5);        // it only goes to 3
+    expect(e.validate().map((i) => i.id)).toContain("gear.ratingRange");
+  });
+
+  it("leaves unrated gear on its flat price", () => {
+    const e = engineWith();
+    e.setMetatype("human");
+    e.spend({ kind: "purchase", uuid: "Item.x", name: "Plain Thing",
+      genesisID: "not_a_rated_item", price: 500, avail: 2, essence: 0 });
+    expect(e.budgets().nuyen.spent).toBe(500);
+  });
+
+  it("essence drives the augmented Reaction too", () => {
+    const e = bought("wired_reflexes", 3);
+    expect(augmentBonus(e.state, "rea", data)).toBe(3);
   });
 });
