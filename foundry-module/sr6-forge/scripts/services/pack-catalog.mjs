@@ -31,7 +31,7 @@ export const PackCatalog = {
       if (d !== domain) continue;
       if (!cache.has(pack.collection)) {
         // explicit dotted paths only — getIndex merges these with the pack's
-        // configured indexFields (which already include system.genesisID)
+        // configured indexFields (which already include eden's catalog field)
         const idx = await pack.getIndex({ fields: EXTRA_INDEX_FIELDS });
         cache.set(pack.collection, idx.contents.map((r) => ({
           ...r, uuid: `Compendium.${pack.collection}.Item.${r._id}`,
@@ -42,11 +42,11 @@ export const PackCatalog = {
     return rows;
   },
 
-  /** Find one index row by genesisID across the given domain(s). */
-  async findByGenesisId(genesisID, domains = ["qualities"]) {
+  /** Find one index row by catalogId across the given domain(s). */
+  async findByCatalogId(catalogId, domains = ["qualities"]) {
     for (const d of domains) {
       const rows = await this.index(d);
-      const hit = rows.find((r) => r.system?.genesisID === genesisID);
+      const hit = rows.find((r) => catalogIdOf(r) === catalogId);
       if (hit) return hit;
     }
     return null;

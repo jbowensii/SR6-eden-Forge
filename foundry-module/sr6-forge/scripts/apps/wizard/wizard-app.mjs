@@ -524,7 +524,7 @@ export class SR6ForgeWizard extends RememberPosition(
         const list = hits
           .slice(0, ROW_CAP)
           .map((r) => ({ uuid: r.uuid, name: r.name,
-            genesisID: r.system?.genesisID ?? "",
+            catalogId: catalogIdOf(r) ?? "",
             value: r.system?.value ?? 0, category: r.system?.category ?? "" }));
         const meta = data.qualityMeta ?? {};
         const qk = qualityKarma(st, data);
@@ -536,13 +536,13 @@ export class SR6ForgeWizard extends RememberPosition(
           paidCount: st.qualities.filter((x) => !x.free).length,
           posTotal: qk.pos, negTotal: qk.neg, netBonus: qk.neg - qk.pos,
           taken: st.qualities.map((qq) => {
-            const m = meta[qq.genesisID] ?? {};
+            const m = meta[qq.catalogId] ?? {};
             const positive = qq.positive ?? m.positive ?? true;
             // A draft stores the name as it was when the quality was picked, so
             // a later correction (Sinner -> SINner) would never reach it. The
             // live pack row wins whenever we can still find it.
-            const live = rows.find((r) => r.system?.genesisID === qq.genesisID);
-            return { ...qq, name: live?.name ?? qq.name ?? qq.genesisID,
+            const live = rows.find((r) => catalogIdOf(r) === qq.catalogId);
+            return { ...qq, name: live?.name ?? qq.name ?? qq.catalogId,
               karma: Math.abs(qq.subOptionKarma ?? qq.karma ?? m.karma ?? 0) * (qq.rating ?? 1),
               sign: positive ? "−" : "+",
               note: qq.note ?? "" };
@@ -570,17 +570,17 @@ export class SR6ForgeWizard extends RememberPosition(
         // For each owned item: which of its mount slots are free, and which
         // accessories in the library fit them (slot AND host-subtype must match)
         const owned = st.purchases.map((pItem, index) => {
-          const hostMeta = mounts[pItem.genesisID] ?? {};
+          const hostMeta = mounts[pItem.catalogId] ?? {};
           const hooks = hostMeta.hooks ?? [];
           const used = new Set((pItem.accessories ?? []).map((a) => a.slot));
           const free = hooks.filter((h) => !used.has(h));
           const offers = free.length ? accessoryRows.filter((r) => {
-            const m = mounts[r.system?.genesisID];
+            const m = mounts[catalogIdOf(r)];
             if (!m?.fits?.some((f) => free.includes(f))) return false;
             const allow = m.hostSubtypes;
             return !allow?.length || allow.includes(pItem.subtype);
           }).sort((a, b) => a.name.localeCompare(b.name)).slice(0, 60) : [];
-          const rm = data.gearRatings?.[pItem.genesisID];
+          const rm = data.gearRatings?.[pItem.catalogId];
           const rv = ratedValues(pItem, data);
           return {
             ...pItem, index,
@@ -596,9 +596,9 @@ export class SR6ForgeWizard extends RememberPosition(
             accessories: (pItem.accessories ?? []).map((a) => ({
               ...a, slotLabel: (a.slot || "").replaceAll("_", " ").toLowerCase() })),
             offers: offers.map((r) => ({
-              uuid: r.uuid, name: r.name, genesisID: r.system?.genesisID,
+              uuid: r.uuid, name: r.name, catalogId: catalogIdOf(r),
               price: r.system?.price ?? 0, avail: r.system?.avail ?? 0,
-              slot: (mounts[r.system?.genesisID]?.fits ?? []).find((f) => free.includes(f)),
+              slot: (mounts[catalogIdOf(r)]?.fits ?? []).find((f) => free.includes(f)),
             })),
           };
         });
@@ -625,7 +625,7 @@ export class SR6ForgeWizard extends RememberPosition(
               kind, label, isPower: kind === "power",
               levels: [1, 2, 3, 4, 5, 6],
               chosen: chosenList.map((c, index) => {
-                const pm = powerMeta[c.genesisID] ?? {};
+                const pm = powerMeta[c.catalogId] ?? {};
                 return { ...c, index,
                   levelText: pm.hasLevel ? `level ${c.level ?? 1}` : "",
                   hasLevel: !!pm.hasLevel,
@@ -634,12 +634,12 @@ export class SR6ForgeWizard extends RememberPosition(
               }),
               list: rows.filter(match("shop")).sort((a, b) => a.name.localeCompare(b.name)).slice(0, ROW_CAP)
                 .map((r) => {
-                  const gid = r.system?.genesisID;
+                  const gid = catalogIdOf(r);
                   const pm = powerMeta[gid] ?? {};
                   // the packs carry no PP cost for adept powers — chargen-data
                   // does, and it is per LEVEL for a leveled power
                   const cost = kind === "power" ? (pm.cost ?? 0) : (r.system?.cost ?? 0);
-                  return { uuid: r.uuid, name: r.name, genesisID: gid, cost,
+                  return { uuid: r.uuid, name: r.name, catalogId: gid, cost,
                     meta: kind === "power"
                       ? `${cost} PP${pm.hasLevel ? " / level" : ""}` : "" };
                 }) });
@@ -668,23 +668,23 @@ export class SR6ForgeWizard extends RememberPosition(
           .slice(0, ROW_CAP)
           .map((r) => ({ uuid: r.uuid, name: r.name, price: r.system?.price ?? 0,
             avail: r.system?.avail ?? 0, essence: r.system?.essence ?? 0,
-            genesisID: r.system?.genesisID ?? "", subtype: r.system?.subtype ?? "",
+            catalogId: catalogIdOf(r) ?? "", subtype: r.system?.subtype ?? "",
             sr6forge: r.system?.sr6forge ?? null,
             itemType: r.type, overCap: (r.system?.avail ?? 0) > cap,
             // rated gear has no flat price: quote it at its lowest rating,
             // reading the tables off the item first
             ...(() => {
               const onItem = r.system?.sr6forge;
-              const rs = onItem?.ratings ?? data.gearRatings?.[r.system?.genesisID]?.ratings;
+              const rs = onItem?.ratings ?? data.gearRatings?.[catalogIdOf(r)]?.ratings;
               if (!rs?.length) return {};
               const v = ratedValues(
-                { genesisID: r.system?.genesisID, sr6forge: onItem }, data, rs[0]);
+                { catalogId: catalogIdOf(r), sr6forge: onItem }, data, rs[0]);
               return { ratings: rs, maxRating: onItem?.maxRating ?? rs.at(-1),
                 price: v.price, avail: v.avail, essence: v.essence,
                 ratedFrom: `${rs[0]}-${onItem?.maxRating ?? rs.at(-1)}` };
             })(),
             // does this item accept accessories at all?
-            mounts: (mounts[r.system?.genesisID]?.hooks ?? []).length }));
+            mounts: (mounts[catalogIdOf(r)]?.hooks ?? []).length }));
         return { ...base, list, listTotal: inTab.length,
           shown: list.length, truncated: Math.max(0, hits.length - ROW_CAP),
           subtypes: Object.entries(subCounts).sort((a, b) => a[0].localeCompare(b[0]))
@@ -719,7 +719,7 @@ export class SR6ForgeWizard extends RememberPosition(
             metatype: mt?.name ?? "—", mor: data.morTypes?.[st.morId]?.name ?? "—",
             method: st.method, ruleset: st.rulesetId, attrs,
             skills: trained.length ? trained.map(([k, s]) => `${data.skills?.[k]?.name ?? k} ${s.points}`).join(", ") : "none",
-            qualities: st.qualities.length ? st.qualities.map((x) => x.name ?? x.genesisID).join(", ") : "none",
+            qualities: st.qualities.length ? st.qualities.map((x) => x.name ?? x.catalogId).join(", ") : "none",
             gear: `${st.purchases.length} items · lifestyle ${st.lifestyleId ?? "none"} · ${st.sins.length} SIN(s)`,
             magic: `${st.spells.length} spells · ${st.powers.length} powers · ${st.complexForms.length} forms`,
             contacts: st.contacts.length ? st.contacts.map((c) => `${c.name || "?"} ${c.connection}/${c.loyalty}`).join(", ") : "none",
@@ -890,7 +890,7 @@ export class SR6ForgeWizard extends RememberPosition(
         break;
       }
       case "qualityNote": {
-        const q = e.state.qualities.find((x) => x.genesisID === el.dataset.genesisId);
+        const q = e.state.qualities.find((x) => x.catalogId === el.dataset.catalogId);
         if (q) q.note = el.value;
         return;                                   // no re-render while typing
       }
@@ -959,29 +959,29 @@ export class SR6ForgeWizard extends RememberPosition(
     const d = t.dataset;
     // category/karma come from the pack row: chargen-data's qualityMeta only
     // covers the books we parsed, so it cannot be the sole source of truth.
-    this.#spend({ kind: "quality", genesisID: d.genesisId, name: d.name,
+    this.#spend({ kind: "quality", catalogId: d.catalogId, name: d.name,
       positive: d.category !== "negative", karma: Math.abs(Number(d.value ?? 0)) }, "quality");
   }
   static #onRemoveQuality(_ev, t) {
-    this.#spend({ kind: "quality", genesisID: t.dataset.genesisId, remove: true });
+    this.#spend({ kind: "quality", catalogId: t.dataset.catalogId, remove: true });
   }
   static #onAddPurchase(_ev, t) {
     const d = t.dataset;
-    // genesisID + subtype are what the accessory rules match on
+    // catalogId + subtype are what the accessory rules match on
     // the row carries the item's pricing tables as JSON so the purchase can be
     // re-costed later without consulting chargen-data
     let sr6forge = null;
     try { sr6forge = d.sr6forge ? JSON.parse(d.sr6forge) : null; } catch { /* ignore */ }
     this.#spend({ kind: "purchase", uuid: d.uuid, name: d.name, price: Number(d.price ?? 0),
       avail: Number(d.avail ?? 0), essence: Number(d.essence ?? 0),
-      genesisID: d.genesisId ?? null, subtype: d.subtype ?? null, sr6forge,
+      catalogId: d.catalogId ?? null, subtype: d.subtype ?? null, sr6forge,
       itemType: d.itemType, stack: true }, "shop");
   }
   static #onRemovePurchase(_ev, t) { this.#spend({ kind: "purchase", uuid: t.dataset.uuid, remove: true }); }
   static #onAddPick(_ev, t) {
     const d = t.dataset;
     this.#spend({ kind: d.kind, uuid: d.uuid, name: d.name,
-      genesisID: d.genesisId ?? null, cost: Number(d.cost ?? 0) }, "shop");
+      catalogId: d.catalogId ?? null, cost: Number(d.cost ?? 0) }, "shop");
   }
   static #onRemovePick(_ev, t) {
     this.#spend({ kind: t.dataset.kind, uuid: t.dataset.uuid, remove: true });
@@ -997,7 +997,7 @@ export class SR6ForgeWizard extends RememberPosition(
     const d = opt.dataset;
     // slot comes from the offer: the first free hook both sides share
     this.#spend({ kind: "accessory", index, uuid: opt.value,
-      genesisID: d.genesisId, name: d.name, slot: d.slot || null,
+      catalogId: d.catalogId, name: d.name, slot: d.slot || null,
       price: Number(d.price ?? 0), avail: Number(d.avail ?? 0) });
   }
   static #onRemoveAccessory(_ev, t) {

@@ -35,7 +35,7 @@ export function buildCommitPlan(state, data, rules, provider, budgets) {
   const embeddedFromPacks = [];
   for (const q of state.qualities) {
     embeddedFromPacks.push({
-      genesisID: q.genesisID, itemType: "quality",
+      catalogId: q.catalogId, itemType: "quality",
       overrides: {
         ...(q.rating > 1 ? { "system.level": q.rating } : {}),
         ...(q.note ? { "system.explain": q.note } : {}),
@@ -91,7 +91,7 @@ export function buildCommitPlan(state, data, rules, provider, budgets) {
   for (const k of state.knowledge) {
     syntheticItems.push({
       name: k.name, type: "skill",
-      system: { genesisID: k.type, points: k.native ? 4 : (k.points ?? 1) },
+      system: { catalogId: k.type, points: k.native ? 4 : (k.points ?? 1) },
     });
   }
 

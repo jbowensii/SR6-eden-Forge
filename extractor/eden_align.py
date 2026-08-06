@@ -18,6 +18,8 @@ def _num(s, default=0):
 
 
 def _base(s):
+    # "genesisID" is eden's own field name, kept verbatim on the wire;
+    # everything in our code calls this the catalog id
     return {"genesisID": s.get("genesisID", ""), "description": s.get("description", ""),
             "product": s.get("product", ""), "page": s.get("page", 0)}
 

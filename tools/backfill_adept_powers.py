@@ -1,6 +1,6 @@
-"""Restore adept powers the item merge dropped to a genesisID collision.
+"""Restore adept powers the item merge dropped to a catalog_id collision.
 
-`merge_commlink6.py` keys items by genesisID across the whole library, so when
+`merge_commlink6.py` keys items by catalog_id across the whole library, so when
 the same id exists in two domains only one survives. Shadowrun has several of
 these by design — Mystic Armor, Combat Sense and Starlight Sight are each both
 a spell and an adept power — and in every case the spell won and the power
@@ -89,7 +89,7 @@ def main() -> None:
                 "qaStatus": "extracted",
                 "extractorVersion": "commlink6-1.14.0",
                 "restoredBy": "backfill_adept_powers",
-                "reason": "dropped by a cross-domain genesisID collision",
+                "reason": "dropped by a cross-domain catalog_id collision",
             },
         })
         added.append(f"{p['name']} ({pid}, {p['cost']} PP"

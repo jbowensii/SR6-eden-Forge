@@ -13,7 +13,7 @@ NUM = {"type": "number"}
 INT = {"type": "integer", "minimum": 0}
 BOOL = {"type": "boolean"}
 
-COMMON = {  # genesis-template + provenance fields every item may carry
+COMMON = {  # eden catalog-template + provenance fields every item may carry
     "category": STR, "subtype": STR, "description": STR,
     "product": STR, "page": INT, "genesisID": STR,
 }

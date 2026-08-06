@@ -88,6 +88,18 @@ export function registerQuenchBatches(quench) {
         }
       });
 
+      it("keeps the upstream catalog field behind its one boundary", async function () {
+        // eden owns `system.genesisID`; our code calls it catalogId and reads
+        // it through catalogIdOf(). This checks the plumbing still resolves.
+        const { catalogIdOf, EDEN_CATALOG_FIELD } = await import(`../config.mjs`);
+        assert.equal(EDEN_CATALOG_FIELD, "system.genesisID",
+          "eden's field name must not be changed — eden is never modified");
+        const rows = await PackCatalog.index("qualities");
+        const withId = rows.filter((r) => catalogIdOf(r));
+        assert.isAbove(withId.length, rows.length * 0.9,
+          "catalogIdOf() no longer resolves eden's field");
+      });
+
       it("pushes the index fields the browse lists need", function () {
         for (const f of ["system.type", "system.price", "system.avail"]) {
           assert.include(CONFIG.Item.compendiumIndexFields, f, `${f} not indexed`);
@@ -136,10 +148,10 @@ export function registerQuenchBatches(quench) {
         assert.deepEqual(orphans, [], `gear types with no shop tab: ${orphans.join(", ")}`);
       });
 
-      it("carries eden's genesisID so items match across compendia", async function () {
+      it("carries eden's catalogId so items match across compendia", async function () {
         const rows = await PackCatalog.index("qualities");
-        const withId = rows.filter((r) => r.system?.genesisID);
-        assert.isAbove(withId.length, rows.length * 0.9, "most qualities should carry a genesisID");
+        const withId = rows.filter((r) => catalogIdOf(r));
+        assert.isAbove(withId.length, rows.length * 0.9, "most qualities should carry a catalogId");
       });
     });
   }, { displayName: "SR6 Forge: Compendium Packs" });

@@ -2,9 +2,35 @@
 export const MODULE_ID = "sr6-forge";
 export const FLAG_SCOPE = MODULE_ID;
 
+/**
+ * The one place the upstream field name appears.
+ *
+ * shadowrun6-eden stores a stable cross-compendium identifier on every item at
+ * `system.genesisID` — its own schema (template.json declares an Item template
+ * called "genesis"), its own compendium index field, and the key its item
+ * localization and importer match on. We cannot rename it without breaking
+ * eden, and eden is never modified by this project.
+ *
+ * So it is quarantined here. Everywhere else in this codebase the concept is
+ * called `catalogId`, and code reads it through `catalogIdOf()` rather than
+ * naming the field.
+ */
+export const EDEN_CATALOG_FIELD = "system.genesisID";
+
+/** The stable catalog id of a compendium row or item document. */
+export function catalogIdOf(docOrRow) {
+  return docOrRow?.system?.genesisID ?? null;
+}
+
+/** Set the catalog id on an item's system data, in eden's expected field. */
+export function setCatalogId(systemData, id) {
+  systemData.genesisID = id;
+  return systemData;
+}
+
 /** Flag keys on the created actor. */
 export const FLAGS = {
-  METATYPE_ID: "metatypeId",       // stable cl6 metatype id ("dwarf")
+  METATYPE_ID: "metatypeId",       // stable metatype id ("dwarf")
   CHARGEN: "chargen",              // frozen engine-state snapshot at commit
   LEDGER: "ledger",                // advancement ledger (append-only array)
 };
@@ -18,7 +44,7 @@ export const SETTINGS = {
 };
 
 /** Compendium index fields the wizard browse lists need (pushed, not replaced —
- *  eden already indexes name/type/system.genesisID). */
+ *  eden already indexes name/type and its own catalog field). */
 export const EXTRA_INDEX_FIELDS = [
   "system.type", "system.subtype", "system.price", "system.avail",
   "system.value", "system.category", "system.essence", "system.rating",

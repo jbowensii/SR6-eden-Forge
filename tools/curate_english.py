@@ -3,13 +3,13 @@
 Two passes, both reversible and neither of which touches an item's name:
 
 1. **Hide German-sourced items.** The Commlink6 merge pulled in entries whose
-   genesisID appears *only* in a German-language sourcebook (Lofwyr, the SOTA
+   catalog_id appears *only* in a German-language sourcebook (Lofwyr, the SOTA
    series, Kechibi, ...). This project imports English books only, so those are
    flagged ``meta.hidden`` — the same mechanism the exporter already honours —
    rather than deleted, so nothing is lost if they are ever wanted.
 
 2. **Backfill descriptions.** Where an item has no description and Commlink6's
-   *English* bundle has one for its genesisID, copy it in.
+   *English* bundle has one for its catalog_id, copy it in.
 
 Names are deliberately left alone. The jar's English names are sometimes worse
 than ours — it has "Sinner" for SINner, a mojibake "Real World Na?vet?", and a
@@ -44,8 +44,8 @@ _ID = re.compile(rb'\bid="([^"]+)"')
 _I18N = re.compile(r"^([A-Za-z_]+)\.([A-Za-z0-9_.\-]+?)(\.desc)?\s*=\s*(.*)$")
 
 
-def genesis_owners(z: zipfile.ZipFile) -> dict[str, set[str]]:
-    """genesisID -> the set of books whose data files define it."""
+def catalog_owners(z: zipfile.ZipFile) -> dict[str, set[str]]:
+    """catalog_id -> the set of books whose data files define it."""
     owner: dict[str, set[str]] = collections.defaultdict(set)
     for n in z.namelist():
         m = re.match(r"de/rpgframework/shadowrun6/data/([^/]+)/data/([^/]+)\.xml$", n)
@@ -57,7 +57,7 @@ def genesis_owners(z: zipfile.ZipFile) -> dict[str, set[str]]:
 
 
 def english_descriptions(z: zipfile.ZipFile) -> dict[str, str]:
-    """genesisID -> English description, from the non-German i18n bundles."""
+    """catalog_id -> English description, from the non-German i18n bundles."""
     out: dict[str, str] = {}
     for n in z.namelist():
         m = re.match(r"de/rpgframework/shadowrun6/data/([^/]+)/i18n/\1\.properties$", n)
@@ -89,7 +89,7 @@ def data_files(root: pathlib.Path):
 
 def curate(jar: pathlib.Path, root: pathlib.Path, apply: bool) -> dict:
     with zipfile.ZipFile(jar) as z:
-        owner = genesis_owners(z)
+        owner = catalog_owners(z)
         descs = english_descriptions(z)
 
     stats = collections.Counter()

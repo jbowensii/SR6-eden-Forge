@@ -146,16 +146,16 @@ describe("qualities & karma", () => {
   it("racial qualities are free and survive metatype swap", () => {
     const e = engineWith({ METATYPE: "A", ATTRIBUTE: "B", MAGIC: "E", SKILLS: "C", RESOURCES: "D" });
     e.setMetatype("troll");
-    expect(e.state.qualities.some((q) => q.genesisID === "thermographic_vision" && q.free)).toBe(true);
+    expect(e.state.qualities.some((q) => q.catalogId === "thermographic_vision" && q.free)).toBe(true);
     expect(e.budgets().karma.spent).toBe(0);
     e.setMetatype("elf");
-    expect(e.state.qualities.some((q) => q.genesisID === "thermographic_vision")).toBe(false);
+    expect(e.state.qualities.some((q) => q.catalogId === "thermographic_vision")).toBe(false);
   });
 
   it("negative qualities add karma and positive ones spend it", () => {
     const e = engineWith();
     e.setMetatype("human");
-    e.spend({ kind: "quality", genesisID: "built_tough", rating: 4 });   // 4x4 = 16 karma
+    e.spend({ kind: "quality", catalogId: "built_tough", rating: 4 });   // 4x4 = 16 karma
     expect(e.budgets().karma.spent).toBe(16);
   });
 
@@ -164,8 +164,8 @@ describe("qualities & karma", () => {
   it("the quality cap is on NET bonus karma, not each side separately", () => {
     const e = engineWith();
     e.setMetatype("human");
-    const neg = (id, k) => e.spend({ kind: "quality", genesisID: id, name: id, positive: false, karma: k });
-    const pos = (id, k) => e.spend({ kind: "quality", genesisID: id, name: id, positive: true, karma: k });
+    const neg = (id, k) => e.spend({ kind: "quality", catalogId: id, name: id, positive: false, karma: k });
+    const pos = (id, k) => e.spend({ kind: "quality", catalogId: id, name: id, positive: true, karma: k });
     // John's example: 30 gained, 10 spent -> net +20 = legal
     pos("mentor_spirit", 10);
     neg("honorbound", 10); neg("sinner", 8); neg("prejudiced", 8); neg("dependents", 4);
@@ -182,10 +182,10 @@ describe("qualities & karma", () => {
     const e = engineWith({ METATYPE: "A", ATTRIBUTE: "B", MAGIC: "E", SKILLS: "C", RESOURCES: "D" });
     e.setMetatype("troll");                       // brings free racial qualities
     for (let i = 0; i < 6; i++) {
-      e.spend({ kind: "quality", genesisID: `q${i}`, name: `q${i}`, positive: false, karma: 1 });
+      e.spend({ kind: "quality", catalogId: `q${i}`, name: `q${i}`, positive: false, karma: 1 });
     }
     expect(e.validate().some((i) => i.id === "quality.maxCount")).toBe(false);
-    e.spend({ kind: "quality", genesisID: "q7", name: "q7", positive: false, karma: 1 });
+    e.spend({ kind: "quality", catalogId: "q7", name: "q7", positive: false, karma: 1 });
     expect(e.validate().some((i) => i.id === "quality.maxCount")).toBe(true);
   });
 
@@ -195,7 +195,7 @@ describe("qualities & karma", () => {
     const e = engineWith();
     e.setMetatype("human");
     const before = e.budgets().karma;
-    e.spend({ kind: "quality", genesisID: "not_in_chargen_data_xyz",
+    e.spend({ kind: "quality", catalogId: "not_in_chargen_data_xyz",
       name: "Made-up Flaw", positive: false, karma: 20 });
     const after = e.budgets().karma;
     expect(after.max).toBe(before.max + 20);      // budget grew
@@ -206,7 +206,7 @@ describe("qualities & karma", () => {
   it("positive qualities still cost karma when unknown to chargen-data", () => {
     const e = engineWith();
     e.setMetatype("human");
-    e.spend({ kind: "quality", genesisID: "unknown_boon", name: "Boon",
+    e.spend({ kind: "quality", catalogId: "unknown_boon", name: "Boon",
       positive: true, karma: 7 });
     expect(e.budgets().karma.spent).toBe(7);
   });
@@ -657,7 +657,7 @@ describe("quality karma signs (core p67)", () => {
     const e = engineWith();
     e.setMetatype("human");
     for (const [name, karma, positive] of list) {
-      e.spend({ kind: "quality", genesisID: name, name, karma, positive });
+      e.spend({ kind: "quality", catalogId: name, name, karma, positive });
     }
     return e;
   }
@@ -709,7 +709,7 @@ describe("quality karma signs (core p67)", () => {
     expect(meta.positive).toBe(true);
     const e = engineWith();
     e.setMetatype("human");
-    e.spend({ kind: "quality", genesisID: "bear", name: "Bear" });
+    e.spend({ kind: "quality", catalogId: "bear", name: "Bear" });
     expect(e.budgets().karma.spent).toBe(10);         // costs, never pays
   });
 });
@@ -721,11 +721,11 @@ describe("accessory mounting", () => {
     const e = engineWith();
     e.setMetatype("human");
     e.spend({ kind: "purchase", uuid: "Item.pred", name: "Ares Predator VI",
-      genesisID: "ares_predator_vi", subtype: "PISTOLS_HEAVY", price: 750, avail: 2 });
+      catalogId: "ares_predator_vi", subtype: "PISTOLS_HEAVY", price: 750, avail: 2 });
     return e;
   }
   const fit = (e, over = {}) => e.spend({
-    kind: "accessory", index: 0, uuid: "Item.sil", genesisID: "silencer",
+    kind: "accessory", index: 0, uuid: "Item.sil", catalogId: "silencer",
     name: "Silencer", price: 500, avail: 4, ...over,
   });
 
@@ -738,7 +738,7 @@ describe("accessory mounting", () => {
     const e = armed();
     const before = e.budgets().nuyen.spent;
     expect(fit(e).ok).toBe(true);
-    const acc = e.state.purchases[0].accessories.find((a) => a.genesisID === "silencer");
+    const acc = e.state.purchases[0].accessories.find((a) => a.catalogId === "silencer");
     expect(acc.slot).toBe("BARREL");
     expect(e.budgets().nuyen.spent).toBe(before + 500);
   });
@@ -756,7 +756,7 @@ describe("accessory mounting", () => {
     e.setMetatype("human");
     // a sword has no business taking a silencer
     e.spend({ kind: "purchase", uuid: "Item.sword", name: "Katana",
-      genesisID: "katana", subtype: "BLADES", price: 350, avail: 4 });
+      catalogId: "katana", subtype: "BLADES", price: 350, avail: 4 });
     const r = fit(e);
     expect(r.ok).toBe(false);
     expect(["no-compatible-slot", "host-lacks-slot", "subtype-not-allowed"])
@@ -767,7 +767,7 @@ describe("accessory mounting", () => {
     const e = armed();
     const fitted = e.state.purchases[0].accessories;
     // the Predator ships with a smartgun system and variable ammo
-    expect(fitted.some((a) => a.genesisID === "smartgun_system")).toBe(true);
+    expect(fitted.some((a) => a.catalogId === "smartgun_system")).toBe(true);
     expect(fitted.every((a) => a.price === 0)).toBe(true);
     const r = e.spend({ kind: "accessory", index: 0, remove: true,
       uuid: fitted[0].uuid });
@@ -800,7 +800,7 @@ describe("adept powers", () => {
   it("charges the power's cost, not zero", () => {
     const e = adept();
     e.spend({ kind: "power", uuid: "Item.ip", name: "Improved Reflexes",
-      genesisID: "improved_reflexes" });
+      catalogId: "improved_reflexes" });
     const per = data.adeptPowers.improved_reflexes.cost;
     expect(e.budgets().powerPoints.spent).toBe(per);
   });
@@ -808,7 +808,7 @@ describe("adept powers", () => {
   it("multiplies the cost by the level", () => {
     const e = adept();
     e.spend({ kind: "power", uuid: "Item.ip", name: "Improved Reflexes",
-      genesisID: "improved_reflexes" });
+      catalogId: "improved_reflexes" });
     const per = data.adeptPowers.improved_reflexes.cost;
     e.spend({ kind: "powerLevel", index: 0, delta: 2 });      // level 3
     expect(e.state.powers[0].level).toBe(3);
@@ -818,7 +818,7 @@ describe("adept powers", () => {
   it("refuses levels on a power that has none", () => {
     const e = adept();
     e.spend({ kind: "power", uuid: "Item.ap", name: "Astral Perception",
-      genesisID: "astral_perception" });
+      catalogId: "astral_perception" });
     const r = e.spend({ kind: "powerLevel", index: 0, delta: 1 });
     expect(r.ok).toBe(false);
     expect(r.reason).toBe("power-has-no-levels");
@@ -826,7 +826,7 @@ describe("adept powers", () => {
 
   it("lets a multi power be taken more than once, others not", () => {
     const e = adept();
-    const take = (gid, uuid) => e.spend({ kind: "power", uuid, name: gid, genesisID: gid });
+    const take = (gid, uuid) => e.spend({ kind: "power", uuid, name: gid, catalogId: gid });
     expect(take("attribute_boost", "Item.ab1").ok).toBe(true);   // multi="yes"
     expect(take("attribute_boost", "Item.ab1").ok).toBe(true);
     expect(take("astral_perception", "Item.ap").ok).toBe(true);
@@ -838,7 +838,7 @@ describe("adept powers", () => {
     const max = e.budgets().powerPoints.max;
     for (let i = 0; i < max + 2; i++) {
       e.spend({ kind: "power", uuid: `Item.x${i}`, name: "Killing Hands",
-        genesisID: "improved_reflexes", cost: 1 });
+        catalogId: "improved_reflexes", cost: 1 });
     }
     expect(e.budgets().powerPoints.left).toBeLessThan(0);
     expect(e.validate().map((i) => i.id)).toContain("adept.ppBudget");
@@ -853,7 +853,7 @@ describe("leveled powers are bought per level", () => {
     e.setMetatype("human");
     e.setMagicPath("adept");
     const take = () => e.spend({ kind: "power", uuid: "Item.ir",
-      name: "Improved Reflexes", genesisID: "improved_reflexes" });
+      name: "Improved Reflexes", catalogId: "improved_reflexes" });
 
     expect(take().ok).toBe(true);
     expect(e.state.powers[0].level).toBe(1);
@@ -872,7 +872,7 @@ describe("leveled powers are bought per level", () => {
     e.setMetatype("human");
     e.setMagicPath("adept");
     const take = () => e.spend({ kind: "power", uuid: "Item.ap",
-      name: "Astral Perception", genesisID: "astral_perception" });
+      name: "Astral Perception", catalogId: "astral_perception" });
     expect(take().ok).toBe(true);
     const again = take();
     expect(again.ok).toBe(false);
@@ -880,7 +880,7 @@ describe("leveled powers are bought per level", () => {
   });
 
   it("Mystic Armor is available as a power, not only as a spell", () => {
-    // it exists as both; a genesisID collision had dropped the power
+    // it exists as both; a catalogId collision had dropped the power
     expect(data.adeptPowers.mystic_armor).toBeTruthy();
     expect(data.adeptPowers.mystic_armor.hasLevel).toBe(true);
   });
@@ -933,7 +933,7 @@ describe("augmented ratings and power caps", () => {
     expect(data.adeptPowers.improved_reflexes.maxLevel).toBe(4);
     const e = adept();
     const take = () => e.spend({ kind: "power", uuid: "Item.ir",
-      name: "Improved Reflexes", genesisID: "improved_reflexes" });
+      name: "Improved Reflexes", catalogId: "improved_reflexes" });
     for (let i = 0; i < 4; i++) expect(take().ok).toBe(true);
     expect(e.state.powers[0].level).toBe(4);
     const fifth = take();
@@ -945,7 +945,7 @@ describe("augmented ratings and power caps", () => {
     const e = adept();
     const natural = e.attrRating("rea");
     e.spend({ kind: "power", uuid: "Item.ir", name: "Improved Reflexes",
-      genesisID: "improved_reflexes" });
+      catalogId: "improved_reflexes" });
     expect(augmentBonus(e.state, "rea", data)).toBe(1);      // +1 per level
     e.spend({ kind: "powerLevel", index: 0, delta: 2 });      // level 3
     expect(augmentBonus(e.state, "rea", data)).toBe(3);
@@ -957,7 +957,7 @@ describe("augmented ratings and power caps", () => {
     const e = engineWith();
     e.setMetatype("human");
     e.spend({ kind: "purchase", uuid: "Item.wr", name: "Wired Reflexes",
-      genesisID: "wired_reflexes", price: 150000, avail: 3, rating: 2 });
+      catalogId: "wired_reflexes", price: 150000, avail: 3, rating: 2 });
     expect(data.gearMounts.wired_reflexes.bonuses.rea.perRating).toBe(1);
     expect(augmentBonus(e.state, "rea", data)).toBe(2);       // rating 2 -> +2
   });
@@ -992,11 +992,11 @@ describe("knowledge skills cost 3 karma, not 5 x rank", () => {
 describe("rated gear prices by rating", () => {
   // Rated items carry no flat price; the merge stored 0, so cyberware and
   // bioware were free and cost no Essence.
-  function bought(genesisID, rating) {
+  function bought(catalogId, rating) {
     const e = engineWith();
     e.setMetatype("human");
-    e.spend({ kind: "purchase", uuid: `Item.${genesisID}`, name: genesisID,
-      genesisID, rating });
+    e.spend({ kind: "purchase", uuid: `Item.${catalogId}`, name: catalogId,
+      catalogId, rating });
     return e;
   }
 
@@ -1004,8 +1004,8 @@ describe("rated gear prices by rating", () => {
     const meta = data.gearRatings.wired_reflexes;
     expect(meta.ratings).toEqual([1, 2, 3, 4]);
     expect(meta.maxRating).toBe(4);
-    expect(ratedValues({ genesisID: "wired_reflexes" }, data, 1).price).toBe(40000);
-    expect(ratedValues({ genesisID: "wired_reflexes" }, data, 4).price).toBe(450000);
+    expect(ratedValues({ catalogId: "wired_reflexes" }, data, 1).price).toBe(40000);
+    expect(ratedValues({ catalogId: "wired_reflexes" }, data, 4).price).toBe(450000);
   });
 
   it("charges the rating's price, not zero", () => {
@@ -1021,14 +1021,14 @@ describe("rated gear prices by rating", () => {
 
   it("handles a formula as well as a table", () => {
     // synaptic booster: $RATING*95000, essence $RATING*0.5
-    expect(ratedValues({ genesisID: "synaptic_booster" }, data, 2).price).toBe(190000);
-    expect(ratedValues({ genesisID: "synaptic_booster" }, data, 2).essence).toBe(1);
+    expect(ratedValues({ catalogId: "synaptic_booster" }, data, 2).price).toBe(190000);
+    expect(ratedValues({ catalogId: "synaptic_booster" }, data, 2).essence).toBe(1);
   });
 
   it("raises availability with the rating, and flags going over the cap", () => {
     // wired reflexes availability table is 3L,3L,4L,6L against a cap of 6
-    expect(ratedValues({ genesisID: "wired_reflexes" }, data, 1).avail).toBe(3);
-    expect(ratedValues({ genesisID: "wired_reflexes" }, data, 4).avail).toBe(6);
+    expect(ratedValues({ catalogId: "wired_reflexes" }, data, 1).avail).toBe(3);
+    expect(ratedValues({ catalogId: "wired_reflexes" }, data, 4).avail).toBe(6);
     expect(bought("wired_reflexes", 4).validate().map((i) => i.id))
       .not.toContain("gear.availCap");
   });
@@ -1042,7 +1042,7 @@ describe("rated gear prices by rating", () => {
     const e = engineWith();
     e.setMetatype("human");
     e.spend({ kind: "purchase", uuid: "Item.x", name: "Plain Thing",
-      genesisID: "not_a_rated_item", price: 500, avail: 2, essence: 0 });
+      catalogId: "not_a_rated_item", price: 500, avail: 2, essence: 0 });
     expect(e.budgets().nuyen.spent).toBe(500);
   });
 
@@ -1057,7 +1057,7 @@ describe("pricing works from the item alone", () => {
   // WITHOUT chargen-data, so custom or homebrew gear prices correctly and the
   // two sources can never drift.
   const onItem = {
-    genesisID: "some_homebrew_ware",
+    catalogId: "some_homebrew_ware",
     sr6forge: {
       ratings: [1, 2, 3], maxRating: 3,
       priceByRating: [1000, 4000, 9000],
@@ -1082,18 +1082,18 @@ describe("pricing works from the item alone", () => {
   });
 
   it("still falls back to chargen-data for an item carrying nothing", () => {
-    expect(ratedValues({ genesisID: "wired_reflexes" }, data, 3).price).toBe(250000);
+    expect(ratedValues({ catalogId: "wired_reflexes" }, data, 3).price).toBe(250000);
   });
 
   it("falls back to the flat price for unrated gear either way", () => {
-    expect(ratedValues({ genesisID: "nope", price: 250, avail: 1 }, {}, 1).price).toBe(250);
+    expect(ratedValues({ catalogId: "nope", price: 250, avail: 1 }, {}, 1).price).toBe(250);
   });
 
   it("a purchase keeps its tables, so a reopened draft re-costs itself", () => {
     const e = engineWith();
     e.setMetatype("human");
     e.spend({ kind: "purchase", uuid: "Item.hb", name: "Homebrew Ware",
-      genesisID: onItem.genesisID, sr6forge: onItem.sr6forge, rating: 3 });
+      catalogId: onItem.catalogId, sr6forge: onItem.sr6forge, rating: 3 });
     // round-trip through the draft, then cost it with NO chargen-data
     const draft = e.toDraft();
     const revived = ChargenEngine.fromDraft(draft, { gearRatings: {} }, rules);

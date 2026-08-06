@@ -56,7 +56,7 @@ Hooks.once("init", () => {
 
 /**
  * The wizard's browse lists need price/avail/type indexed on top of eden's
- * `["name", "type", "system.genesisID"]`.
+ * eden's own three index fields (see EDEN_CATALOG_FIELD in config.mjs).
  *
  * Eden *assigns* that array in its own `init` rather than appending, so any
  * field pushed before it is discarded. Today we win on ordering — the server

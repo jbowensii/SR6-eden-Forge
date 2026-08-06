@@ -45,17 +45,17 @@ export function attrRating(state, key, provider) {
 export function augmentBonus(state, key, data) {
   let total = 0;
   for (const pw of state.powers ?? []) {
-    const b = data.adeptPowers?.[pw.genesisID]?.bonuses?.[key];
+    const b = data.adeptPowers?.[pw.catalogId]?.bonuses?.[key];
     if (!b) continue;
     total += (b.flat ?? 0) + (b.perLevel ?? 0) * (pw.level ?? 1);
   }
   for (const p of state.purchases ?? []) {
-    const b = data.gearMounts?.[p.genesisID]?.bonuses?.[key];
+    const b = data.gearMounts?.[p.catalogId]?.bonuses?.[key];
     if (!b) continue;
     const rating = p.rating ?? 1;
     total += ((b.flat ?? 0) + (b.perRating ?? 0) * rating) * (p.qty ?? 1);
     for (const a of p.accessories ?? []) {
-      const ab = data.gearMounts?.[a.genesisID]?.bonuses?.[key];
+      const ab = data.gearMounts?.[a.catalogId]?.bonuses?.[key];
       if (ab) total += (ab.flat ?? 0) + (ab.perRating ?? 0) * (a.rating ?? 1);
     }
   }
@@ -79,14 +79,14 @@ export function augmentedRating(state, key, provider, data) {
  * Sources, most authoritative first:
  *   1. `item.sr6forge` — carried by the item, so a custom or homebrew entry
  *      prices correctly with no central table to maintain
- *   2. `data.gearRatings` — the extracted fallback, keyed by genesisID
+ *   2. `data.gearRatings` — the extracted fallback, keyed by catalogId
  *   3. the item's own flat price/avail/essence, for unrated gear
  *
  * @returns {{price:number, avail:number, essence:number, rating:number}}
  */
 export function ratedValues(item, data, rating = null) {
   const onItem = item.sr6forge ?? null;
-  const fromData = data?.gearRatings?.[item.genesisID] ?? null;
+  const fromData = data?.gearRatings?.[item.catalogId] ?? null;
   const ratings = onItem?.ratings ?? fromData?.ratings ?? null;
   const r = rating ?? item.rating ?? ratings?.[0] ?? 1;
 
@@ -166,7 +166,7 @@ export function qualityKarma(state, data) {
   let pos = 0, neg = 0;
   for (const q of state.qualities) {
     if (q.free) continue;                          // racial qualities are free
-    const meta = data.qualityMeta?.[q.genesisID];
+    const meta = data.qualityMeta?.[q.catalogId];
     const per = q.subOptionKarma ?? q.karma ?? meta?.karma ?? 0;
     const total = Math.abs(per) * (q.rating ?? 1);
     const positive = q.positive ?? meta?.positive ?? true;

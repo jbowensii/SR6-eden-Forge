@@ -337,7 +337,7 @@ def parse_rules(trees: list[dict]) -> dict:
 
 
 def parse_quality_meta(trees: list[dict], book: str) -> dict:
-    """qualities*.xml -> {genesisID: {karma, positive, max, multi, subOptions{}, raw}}."""
+    """qualities*.xml -> {catalog_id: {karma, positive, max, multi, subOptions{}, raw}}."""
     out: dict = {}
     for t in trees:
         if t["tag"] != "quality":

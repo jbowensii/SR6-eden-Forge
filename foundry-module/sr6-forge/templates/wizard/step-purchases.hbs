@@ -63,7 +63,7 @@
       <span class="nm">{{name}}</span>
       <span class="mt">{{meta}}</span>
       <button type="button" data-action="addPick" data-kind="{{../kind}}"
-              data-uuid="{{uuid}}" data-name="{{name}}" data-genesis-id="{{genesisID}}"
+              data-uuid="{{uuid}}" data-name="{{name}}" data-catalog-id="{{catalogId}}"
               data-cost="{{cost}}">{{#if ../isPower}}Take{{else}}Learn{{/if}}</button>
     </div>
     {{else}}
@@ -106,7 +106,7 @@
       </span>
       <span class="mt">{{price}}¥ · A{{avail}}{{#if essence}} · E{{essence}}{{/if}}{{#if ratedFrom}} · rating {{ratedFrom}}{{/if}}</span>
       <button type="button" data-action="addPurchase" data-uuid="{{uuid}}" data-name="{{name}}"
-              data-genesis-id="{{genesisID}}" data-subtype="{{subtype}}"
+              data-catalog-id="{{catalogId}}" data-subtype="{{subtype}}"
               data-sr6forge="{{json sr6forge}}"
               data-price="{{price}}" data-avail="{{avail}}" data-essence="{{essence}}"
               data-item-type="{{itemType}}" {{#if overCap}}disabled title="over availability cap"{{/if}}>Buy</button>
@@ -158,7 +158,7 @@
         <select data-acc-for="{{index}}">
           <option value="">— fit an accessory —</option>
           {{#each offers}}
-          <option value="{{uuid}}" data-genesis-id="{{genesisID}}" data-name="{{name}}"
+          <option value="{{uuid}}" data-catalog-id="{{catalogId}}" data-name="{{name}}"
                   data-price="{{price}}" data-avail="{{avail}}" data-slot="{{slot}}">
             {{name}} ({{slot}}, {{price}}¥)
           </option>

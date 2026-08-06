@@ -90,7 +90,7 @@ export const VALIDATION_RULES = [
     id: "skill.capSix", severity: "error", step: "skills",
     check: ({ state, rules }) => {
       const hasAptitude = state.qualities.some(
-        (q) => q.genesisID === rules.skillCreationCap.aptitudeQualityId);
+        (q) => q.catalogId === rules.skillCreationCap.aptitudeQualityId);
       const cap = hasAptitude ? rules.skillCreationCap.aptitudeCap
         : rules.skillCreationCap.value;
       let overCap = 0;
@@ -159,7 +159,7 @@ export const VALIDATION_RULES = [
         // a rated item's availability rises with its rating
         if (ratedValues(p, data).avail > cap) return { item: p.name ?? p.uuid, cap };
         for (const a of p.accessories ?? []) {
-          if ((a.avail ?? 0) > cap) return { item: a.name ?? a.genesisID, cap };
+          if ((a.avail ?? 0) > cap) return { item: a.name ?? a.catalogId, cap };
         }
       }
       return null;
@@ -169,7 +169,7 @@ export const VALIDATION_RULES = [
     id: "gear.ratingRange", severity: "error", step: "gear",
     check: ({ state, data }) => {
       for (const p of state.purchases) {
-        const meta = data.gearRatings?.[p.genesisID];
+        const meta = data.gearRatings?.[p.catalogId];
         if (!meta?.ratings?.length) continue;
         const r = p.rating ?? meta.ratings[0];
         if (!meta.ratings.includes(r)) {

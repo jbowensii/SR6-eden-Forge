@@ -60,7 +60,7 @@ def _first(tree: dict, tag: str) -> dict | None:
 
 
 def parse_item_mounts(trees: list[dict]) -> dict:
-    """One data file -> {genesisID: {hooks[], fits[], hostSubtypes[], embedded[]}}.
+    """One data file -> {catalog_id: {hooks[], fits[], hostSubtypes[], embedded[]}}.
 
     Only entries that actually say something about mounting are returned, so
     the result stays small enough to ship in chargen-data.
@@ -258,7 +258,7 @@ def _scaled(value: str) -> dict | None:
 
 
 def parse_item_ratings(trees: list[dict]) -> dict:
-    """One data file -> {genesisID: {ratings[], maxRating, price, avail, essence}}.
+    """One data file -> {catalog_id: {ratings[], maxRating, price, avail, essence}}.
 
     Rated gear does not carry a flat price: Wired Reflexes costs 40,000 at
     rating 1 and 450,000 at rating 4, expressed either as a lookup table
@@ -356,7 +356,7 @@ _STAT_BLOCKS = {
 
 
 def parse_item_full(trees: list[dict], book: str, category: str) -> dict:
-    """Everything Commlink6 stores about an item, keyed by genesisID.
+    """Everything Commlink6 stores about an item, keyed by catalog_id.
 
     The item merge flattens each entry to a handful of scalars, which loses the
     rating range, the pack size, the usage/capacity rules, prerequisites,

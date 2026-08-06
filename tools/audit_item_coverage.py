@@ -36,7 +36,7 @@ CHARGEN = pathlib.Path("export/chargen-data.json")
 
 #: item XML attribute -> where it ends up
 ATTR_HOME = {
-    "id": "genesisID on the item",
+    "id": "catalog_id on the item",
     "type": "system.type / itemMeta.itemType",
     "subtype": "system.subtype / itemMeta.subtype",
     "price": "system.price (flat) or gearRatings.price (per rating)",

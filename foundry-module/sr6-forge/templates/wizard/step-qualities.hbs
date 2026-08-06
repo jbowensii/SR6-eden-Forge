@@ -13,11 +13,11 @@
       <span class="c-meta">{{#if free}}racial · free{{else}}{{sign}}{{karma}} karma{{/if}}{{#if rating}} · rating {{rating}}{{/if}}</span>
     </span>
     {{#unless free}}
-    <button type="button" class="x" data-action="removeQuality" data-genesis-id="{{genesisID}}">✕</button>
+    <button type="button" class="x" data-action="removeQuality" data-catalog-id="{{catalogId}}">✕</button>
     {{/unless}}
     {{#unless free}}
     <input class="note-input" type="text" placeholder="Specifics (e.g. Allergy: peanuts, severe)"
-           value="{{note}}" data-change="qualityNote" data-genesis-id="{{genesisID}}" />
+           value="{{note}}" data-change="qualityNote" data-catalog-id="{{catalogId}}" />
     {{/unless}}
   </div>
   {{/each}}
@@ -47,7 +47,7 @@
        data-detail-kind="uuid" data-detail-id="{{uuid}}">
     <span class="nm">{{name}}</span>
     <span class="mt">{{category}} · {{value}}</span>
-    <button type="button" data-action="addQuality" data-genesis-id="{{genesisID}}" data-name="{{name}}"
+    <button type="button" data-action="addQuality" data-catalog-id="{{catalogId}}" data-name="{{name}}"
             data-category="{{category}}" data-value="{{value}}">Add</button>
   </div>
   {{else}}

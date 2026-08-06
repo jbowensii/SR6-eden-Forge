@@ -7,7 +7,7 @@
  *  Items go through createEmbeddedDocuments rather than being stuffed into the
  *  actor's creation data, so eden's `preCreateItem` hook runs on each one — it
  *  swaps in the system icon for the item's type and, when a translation exists
- *  for `<type>.<genesisID>`, replaces the name and description with eden's
+ *  for `<type>.<catalogId>`, replaces the name and description with eden's
  *  localized text.
  *
  *  Rollback deletes the actor on any failure. */
@@ -22,8 +22,8 @@ async function resolveGrantDocs(plan) {
     let doc = null;
     if (grant.uuid) {
       doc = await fromUuid(grant.uuid);
-    } else if (grant.genesisID) {
-      const row = await PackCatalog.findByGenesisId(grant.genesisID, QUALITY_DOMAINS);
+    } else if (grant.catalogId) {
+      const row = await PackCatalog.findByCatalogId(grant.catalogId, QUALITY_DOMAINS);
       if (row) doc = await fromUuid(row.uuid);
     }
     if (!doc) {

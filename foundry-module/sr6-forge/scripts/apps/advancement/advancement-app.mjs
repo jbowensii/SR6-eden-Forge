@@ -86,7 +86,7 @@ export class SR6AdvancementApp extends RememberPosition(
     if (mor.magic || mor.resonance) {
       magic.push({ ...price({ kind: "initiate" }), kind: "initiate" });
       // what this character may still learn, minus what they already know
-      const known = new Set(actor.items.map((i) => i.system?.genesisID).filter(Boolean));
+      const known = new Set(actor.items.map((i) => catalogIdOf(i)).filter(Boolean));
       for (const [op, domain, label, allowed] of [
         ["learnSpell", "spells", "Spells", mor.spells],
         ["learnRitual", "rituals", "Rituals", mor.spells],
@@ -98,7 +98,7 @@ export class SR6AdvancementApp extends RememberPosition(
           op, label,
           cost: price({ kind: op, name: label }).karma,
           list: rows
-            .filter((r) => !known.has(r.system?.genesisID))
+            .filter((r) => !known.has(catalogIdOf(r)))
             .sort((a, b) => a.name.localeCompare(b.name))
             .slice(0, 300)
             .map((r) => ({ uuid: r.uuid, name: r.name })),

@@ -30,10 +30,10 @@ export function blankState(method = "priority", rulesetId = "core") {
     attributes: blankAttributes(),
     skills: {},                     // id -> {points, spec, expertise}
     knowledge: [],                  // {name, type:"knowledge"|"language", native}
-    qualities: [],                  // {genesisID, rating, choiceText, subOptionKarma, free, positive}
+    qualities: [],                  // {catalogId, rating, choiceText, subOptionKarma, free, positive}
     spells: [], powers: [], complexForms: [], rituals: [], foci: [],
     purchases: [],                  // {uuid, name, price, avail, essence, qty, rating,
-                                    //  accessories:[{uuid,genesisID,name,price,avail,slot}]}
+                                    //  accessories:[{uuid,catalogId,name,price,avail,slot}]}
     contacts: [],                   // {name, archetype (free text), connection, loyalty}
     lifestyleId: null, lifestyleMonths: 1,
     sins: [],                       // {name, rating(1-4? VERIFY), licenses[]}
@@ -92,7 +92,7 @@ export class ChargenEngine {
     const mt = this.data.metatypes?.[id];
     for (const gid of mt?.racialQualityIds ?? []) {
       this.state.qualities.push({
-        genesisID: gid, rating: mt.naturalRatings?.[gid] ?? 1, free: true,
+        catalogId: gid, rating: mt.naturalRatings?.[gid] ?? 1, free: true,
       });
     }
   }
@@ -139,16 +139,16 @@ export class ChargenEngine {
       }
       case "quality": {
         if (op.remove) {
-          const i = s.qualities.findIndex((q) => q.genesisID === op.genesisID && !q.free);
+          const i = s.qualities.findIndex((q) => q.catalogId === op.catalogId && !q.free);
           if (i < 0) return { ok: false, reason: "not-taken" };
           s.qualities.splice(i, 1);
           return { ok: true };
         }
-        const meta = this.data.qualityMeta?.[op.genesisID];
-        const already = s.qualities.filter((q) => q.genesisID === op.genesisID);
+        const meta = this.data.qualityMeta?.[op.catalogId];
+        const already = s.qualities.filter((q) => q.catalogId === op.catalogId);
         if (already.length && !meta?.multi) return { ok: false, reason: "already-taken" };
         s.qualities.push({
-          genesisID: op.genesisID, name: op.name ?? op.genesisID, rating: op.rating ?? 1,
+          catalogId: op.catalogId, name: op.name ?? op.catalogId, rating: op.rating ?? 1,
           choiceText: op.choiceText ?? null, subOptionKarma: op.subOptionKarma ?? null,
           // caller-supplied values (from the pack row) win: qualityMeta only
           // covers the books we parsed, so it is a fallback, not the authority.
@@ -171,14 +171,14 @@ export class ChargenEngine {
         else s.purchases.push({ uuid: op.uuid, name: op.name, price: op.price ?? 0,
           avail: op.avail ?? 0, essence: op.essence ?? 0, qty: 1, rating: op.rating ?? null,
           itemType: op.itemType ?? "gear",
-          genesisID: op.genesisID ?? null, subtype: op.subtype ?? null,
+          catalogId: op.catalogId ?? null, subtype: op.subtype ?? null,
           // the item's own pricing tables travel with the purchase, so a draft
           // reopened later re-costs from the item rather than a lookup file
           sr6forge: op.sr6forge ?? null,
           // factory-fitted accessories occupy their slot and cost nothing extra
-          accessories: (this.data.gearMounts?.[op.genesisID]?.embedded ?? [])
+          accessories: (this.data.gearMounts?.[op.catalogId]?.embedded ?? [])
             .filter((e) => e.included)
-            .map((e) => ({ genesisID: e.ref, name: e.ref.replaceAll("_", " "),
+            .map((e) => ({ catalogId: e.ref, name: e.ref.replaceAll("_", " "),
               slot: e.slot || "INTERNAL", price: 0, avail: 0, included: true })) });
         return { ok: true };
       }
@@ -194,8 +194,8 @@ export class ChargenEngine {
           return { ok: true };
         }
         const mounts = this.data.gearMounts ?? {};
-        const hostMeta = mounts[host.genesisID] ?? {};
-        const accMeta = mounts[op.genesisID] ?? {};
+        const hostMeta = mounts[host.catalogId] ?? {};
+        const accMeta = mounts[op.catalogId] ?? {};
         const hooks = hostMeta.hooks ?? [];
         // pick the slot: the caller's, else the first slot both sides share
         const slot = op.slot
@@ -210,7 +210,7 @@ export class ChargenEngine {
           return { ok: false, reason: "subtype-not-allowed" };
         }
         host.accessories.push({
-          uuid: op.uuid, genesisID: op.genesisID, name: op.name,
+          uuid: op.uuid, catalogId: op.catalogId, name: op.name,
           price: op.price ?? 0, avail: op.avail ?? 0, slot, included: false,
         });
         return { ok: true };
@@ -218,7 +218,7 @@ export class ChargenEngine {
       case "powerLevel": {
         const pw = s.powers[Number(op.index)];
         if (!pw) return { ok: false, reason: "unknown-power" };
-        const meta = this.data.adeptPowers?.[pw.genesisID] ?? {};
+        const meta = this.data.adeptPowers?.[pw.catalogId] ?? {};
         if (!meta.hasLevel) return { ok: false, reason: "power-has-no-levels" };
         const next = (pw.level ?? 1) + (op.delta ?? 1);
         if (next < 1) return { ok: false, reason: "minimum-level-1" };
@@ -238,7 +238,7 @@ export class ChargenEngine {
           return { ok: true };
         }
         const meta = op.kind === "power"
-          ? (this.data.adeptPowers?.[op.genesisID] ?? {}) : {};
+          ? (this.data.adeptPowers?.[op.catalogId] ?? {}) : {};
         const existing = list.find((x) => x.uuid === op.uuid);
         if (existing) {
           // A leveled power is bought per level — Improved Reflexes at 1 PP a
@@ -256,7 +256,7 @@ export class ChargenEngine {
           if (!meta.multi) return { ok: false, reason: "duplicate" };
         }
         list.push({
-          uuid: op.uuid, name: op.name, genesisID: op.genesisID ?? null,
+          uuid: op.uuid, name: op.name, catalogId: op.catalogId ?? null,
           cost: op.cost ?? meta.cost ?? 0,
           level: op.level ?? 1,
           hasLevel: meta.hasLevel ?? false,
