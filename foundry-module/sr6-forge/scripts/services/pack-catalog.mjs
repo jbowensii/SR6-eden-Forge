@@ -1,7 +1,7 @@
 /** Compendium catalog: cached indices over every sr6-forge-* data-module pack,
  *  keyed by domain (pack name suffix). Browse lists render from index rows;
  *  full documents are fetched only on add. */
-import { DATA_PACKAGE_PREFIX, EXTRA_INDEX_FIELDS } from "../config.mjs";
+import { DATA_PACKAGE_PREFIX, EXTRA_INDEX_FIELDS, catalogIdOf } from "../config.mjs";
 
 const cache = new Map();          // packCollection -> index (Array of rows)
 

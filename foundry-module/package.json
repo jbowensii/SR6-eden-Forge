@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "vitest run"
+    "test": "node check-imports.mjs && vitest run",
+    "check:imports": "node check-imports.mjs"
   },
   "devDependencies": {
     "vitest": "^2.1.0"

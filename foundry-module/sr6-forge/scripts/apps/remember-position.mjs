@@ -71,7 +71,9 @@ export function RememberPosition(Base, key) {
       }
       if (!Object.keys(geometry).length) return;
       const all = foundry.utils.deepClone(readAll());
-      if (foundry.utils.objectsEqual(all[key] ?? {}, geometry)) return;   // no-op write
+      // foundry.utils.equals since v14; objectsEqual is deprecated
+      const same = foundry.utils.equals ?? foundry.utils.objectsEqual;
+      if (same(all[key] ?? {}, geometry)) return;                        // no-op write
       all[key] = geometry;
       try {
         await game.settings.set(MODULE_ID, SETTINGS.WINDOW_STATE, all);

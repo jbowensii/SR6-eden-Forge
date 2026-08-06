@@ -5,7 +5,7 @@
  *  written as one actor.update plus one ledger entry, so undo can replay the
  *  captured `before` values.
  */
-import { MODULE_ID, ACTOR_SKILLS } from "../../config.mjs";
+import { MODULE_ID, ACTOR_SKILLS, catalogIdOf } from "../../config.mjs";
 import { chargenData } from "../../main.mjs";
 import { preview, applyPatch, undoPatch, snapshot } from "../../engine/advancement-engine.mjs";
 import { Ledger } from "../../services/ledger.mjs";

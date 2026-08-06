@@ -2,7 +2,7 @@
  *  The engine owns all state; this renders budgets/validation and forwards
  *  actions. Layout mirrors Commlink6's editor: nav rail | working pane |
  *  detail pane, with available/chosen lists per section. */
-import { MODULE_ID, SETTINGS, ACTOR_SKILLS } from "../../config.mjs";
+import { MODULE_ID, SETTINGS, ACTOR_SKILLS, catalogIdOf } from "../../config.mjs";
 import { chargenData } from "../../main.mjs";
 import { ChargenEngine } from "../../engine/chargen-engine.mjs";
 import { POINT_BUY, LIFEPATH_ADULT_COUNT } from "../../engine/providers.mjs";

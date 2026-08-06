@@ -12,7 +12,7 @@
  *      quench.runBatches("sr6-forge.*")        every batch here
  *      quench.runBatches("sr6-forge.commit")   just the commit path
  */
-import { MODULE_ID, SETTINGS, ACTOR_SKILLS } from "../config.mjs";
+import { MODULE_ID, SETTINGS, ACTOR_SKILLS, catalogIdOf } from "../config.mjs";
 import { chargenData } from "../main.mjs";
 import { ChargenEngine, blankState } from "../engine/chargen-engine.mjs";
 import { freeSpellSlots } from "../engine/budgets.mjs";
@@ -94,7 +94,7 @@ export function registerQuenchBatches(quench) {
       it("keeps the upstream catalog field behind its one boundary", async function () {
         // eden owns `system.genesisID`; our code calls it catalogId and reads
         // it through catalogIdOf(). This checks the plumbing still resolves.
-        const { catalogIdOf, EDEN_CATALOG_FIELD } = await import(`../config.mjs`);
+        const { EDEN_CATALOG_FIELD } = await import(`../config.mjs`);
         assert.equal(EDEN_CATALOG_FIELD, "system.genesisID",
           "eden's field name must not be changed — eden is never modified");
         const rows = await PackCatalog.index("qualities");
@@ -294,6 +294,7 @@ export function registerQuenchBatches(quench) {
       it("applies, logs and reverses a purchase exactly", async function () {
         const rules = await rulesPromise;
         const before = snapshot(actor);
+        const ledgerBefore = Ledger.entries(actor).length;
         const pv = preview({ kind: "raiseAttribute", target: "bod" },
           before, rules, { data: chargenData() });
 
@@ -308,7 +309,9 @@ export function registerQuenchBatches(quench) {
 
         assert.equal(actor.system.attributes.bod.base, 5);
         assert.equal(actor.system.karma, before.karma - pv.karma);
-        assert.equal(Ledger.entries(actor).length, 1);
+        // a delta, not an absolute: the actor may carry entries from an
+        // earlier purchase, and what is under test is that append adds ONE
+        assert.equal(Ledger.entries(actor).length, ledgerBefore + 1);
 
         const entry = await Ledger.popLast(actor);
         await actor.update({
@@ -317,7 +320,8 @@ export function registerQuenchBatches(quench) {
         });
         assert.equal(actor.system.attributes.bod.base, 4, "undo did not restore the attribute");
         assert.equal(actor.system.karma, before.karma, "undo did not refund the karma");
-        assert.equal(Ledger.entries(actor).length, 0);
+        assert.equal(Ledger.entries(actor).length, ledgerBefore,
+          "undo did not remove exactly the entry it added");
       });
     });
   }, { displayName: "SR6 Forge: Advancement" });
