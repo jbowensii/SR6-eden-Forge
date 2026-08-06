@@ -23,7 +23,8 @@ except Exception:
 
 from extractor.commlink6 import DEFAULT_JAR
 from extractor.gear_meta import (
-    build_gear_meta, build_item_ratings, english_data_files, parse_adept_powers,
+    build_gear_meta, build_item_meta, build_item_ratings, english_data_files,
+    parse_adept_powers,
 )
 from extractor.chargen_xml import (
     i18n_by_prefix, parse_contacts, parse_lifepath, parse_lifestyles,
@@ -150,6 +151,10 @@ def build(jar: _P, out: _P) -> dict:
         # flat, so the rating range and the price/avail/essence rules ship too.
         data["gearRatings"] = build_item_ratings(z)
 
+        # Everything else Commlink6 stores per item: pack size, usage and
+        # capacity, flags, prerequisites, variants, bundled gear, stat blocks.
+        data["itemMeta"] = build_item_meta(z)
+
         # Adept powers: `cost` is power points PER LEVEL, so a leveled power
         # (Improved Reflexes) is bought at rank 1..n.
         powers: dict = {}
@@ -198,7 +203,7 @@ def main():
           f" | contacts: {len(d['contactArchetypes'])}"
           f" | contactTypes: {len(d['contactTypes'])}"
           f" | lifepath(EN): {len(d['lifepathModules'])}")
-    print(f"  gearRatings: {len(d['gearRatings'])}")
+    print(f"  gearRatings: {len(d['gearRatings'])} | itemMeta: {len(d['itemMeta'])}")
     print(f"  gearMounts: {len(d['gearMounts'])}"
           f" | adeptPowers: {len(d['adeptPowers'])}"
           f" ({sum(1 for p in d['adeptPowers'].values() if p['hasLevel'])} leveled)")

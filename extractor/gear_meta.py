@@ -324,3 +324,141 @@ def build_item_ratings(z: zipfile.ZipFile) -> dict:
     for book, cat in english_data_files(z):
         out.update(parse_item_ratings(read_category_trees(z, book, cat)))
     return out
+
+
+# --------------------------------------------------------------------------- #
+# complete per-item metadata
+# --------------------------------------------------------------------------- #
+#: Item-level XML attributes worth keeping, and the name we store them under.
+_ITEM_ATTRS = {
+    "count": "count",          # units per purchase (ammo boxes, doses)
+    "units": "units",          # what those units are
+    "modonly": "modOnly",      # only usable as a modification, never alone
+    "reqVariant": "requiresVariant",
+    "cost": "upkeep",          # vehicles: running cost
+}
+
+#: Stat-block children and the fields we lift off them verbatim. The attribute
+#: names are Commlink6's own abbreviations, confirmed by surveying the data —
+#: guessing them silently produced empty stat blocks.
+_STAT_BLOCKS = {
+    "weapon": ("skill", "spec", "dmg", "attack", "ammo", "mode", "wild"),
+    "armor": ("rating", "social", "add", "dr"),
+    # bod/arm/pil/sen = body, armour, pilot, sensor; han = handling,
+    # acc = acceleration, spdi = speed interval, tspd = top speed, sea = seats
+    "vehicle": ("bod", "arm", "pil", "sen", "han", "acc", "spdi", "tspd",
+                "sea", "type"),
+    "ammo": ("blast", "gz", "close", "near"),
+    # devrat = device rating; a/s/d/f = attack, sleaze, data processing, firewall
+    "matrix": ("devrat", "programs", "a", "s", "d", "f"),
+    "alchemy": ("spell", "trigger"),
+}
+
+
+def parse_item_full(trees: list[dict], book: str, category: str) -> dict:
+    """Everything Commlink6 stores about an item, keyed by genesisID.
+
+    The item merge flattens each entry to a handful of scalars, which loses the
+    rating range, the pack size, the usage/capacity rules, prerequisites,
+    variants and flags. This keeps the lot so nothing has to be re-derived from
+    the jar later.
+    """
+    out: dict = {}
+    for t in trees:
+        if t["tag"] != "item":
+            continue
+        a = t["attrs"]
+        gid = a.get("id")
+        if not gid:
+            continue
+
+        rec: dict = {"book": book, "category": category,
+                     "itemType": a.get("type", ""), "subtype": a.get("subtype", "")}
+
+        for src, dest in _ITEM_ATTRS.items():
+            if a.get(src) not in (None, ""):
+                v = a[src]
+                rec[dest] = (int(v) if str(v).isdigit()
+                             else (True if v == "true" else v))
+
+        # stat blocks, kept under their own key
+        for tag, fields in _STAT_BLOCKS.items():
+            blk = _first(t, tag)
+            if not blk:
+                continue
+            stats = {f: blk["attrs"][f] for f in fields if blk["attrs"].get(f)}
+            if stats:
+                rec[tag] = stats
+
+        # flags (AUGMENTATION marks something that costs Essence)
+        flags = _first(t, "flags")
+        if flags:
+            fl = [c["text"] for c in flags.get("children", []) if c.get("text")]
+            if fl:
+                rec["flags"] = fl
+
+        # usage: how it is worn/implanted and what capacity it consumes
+        usages = []
+        for u in _children(t, "usage"):
+            ua = u["attrs"]
+            if ua.get("mode") or ua.get("value") or ua.get("slot"):
+                usages.append({k: ua[k] for k in ("mode", "value", "slot")
+                               if ua.get(k)})
+        if usages:
+            rec["usage"] = usages
+
+        # non-rating choices the buyer must make (attribute pick, sense, ...)
+        choices = []
+        for ch in _children(_first(t, "choices") or {"children": []}, "choice"):
+            ca = ch["attrs"]
+            if ca.get("ref") == "RATING":
+                continue                       # covered by parse_item_ratings
+            if ca.get("options"):
+                choices.append({"type": ca.get("type", ""), "ref": ca.get("ref", ""),
+                                "options": [o.strip() for o in ca["options"].split(",")]})
+        if choices:
+            rec["choices"] = choices
+
+        # prerequisites
+        reqs = []
+        for r in (_first(t, "requires") or {"children": []}).get("children", []):
+            stack = [r]
+            while stack:
+                n = stack.pop()
+                na = n.get("attrs", {})
+                if na.get("ref"):
+                    reqs.append({"tag": n["tag"], "type": na.get("type", ""),
+                                 "ref": na["ref"], "value": na.get("value", "")})
+                stack.extend(n.get("children", []))
+        if reqs:
+            rec["requires"] = reqs
+
+        # named variants (used/alphaware, internal smartgun, ...)
+        variants = {}
+        for v in _children(t, "variant"):
+            vid = v["attrs"].get("id", "")
+            vrec = {}
+            for ad in _children(v, "attrdef"):
+                if ad["attrs"].get("id") and ad["attrs"].get("value"):
+                    vrec[ad["attrs"]["id"].lower()] = ad["attrs"]["value"]
+            if vrec:
+                variants[vid] = vrec
+        if variants:
+            rec["variants"] = variants
+
+        # gear that comes bundled with it
+        gd = [g["attrs"]["ref"] for g in _children(t, "geardef")
+              if g["attrs"].get("ref")]
+        if gd:
+            rec["includedGear"] = gd
+
+        out[gid] = rec
+    return out
+
+
+def build_item_meta(z: zipfile.ZipFile) -> dict:
+    """Complete item metadata across every English data file."""
+    out: dict = {}
+    for book, cat in english_data_files(z):
+        out.update(parse_item_full(read_category_trees(z, book, cat), book, cat))
+    return out
