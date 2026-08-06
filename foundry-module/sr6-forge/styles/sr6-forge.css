@@ -850,3 +850,10 @@
 .sr6-forge .add-sin { align-items: flex-end; }
 /* mount chip tally */
 .sr6-forge .slot .s-tally { opacity: .75; margin-left: 4px; }
+
+/* Draft storage location picker in the options app. */
+.sr6-forge .draft-folder {
+  display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap;
+  margin: 6px 0 12px;
+}
+.sr6-forge .draft-folder .field.grow { flex: 1 1 240px; }

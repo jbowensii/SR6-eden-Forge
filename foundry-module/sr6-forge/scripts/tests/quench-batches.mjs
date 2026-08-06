@@ -18,6 +18,7 @@ import { ChargenEngine, blankState } from "../engine/chargen-engine.mjs";
 import { freeSpellSlots } from "../engine/budgets.mjs";
 import { preview, snapshot } from "../engine/advancement-engine.mjs";
 import { PackCatalog } from "../services/pack-catalog.mjs";
+import { DraftStore, draftBackend, DRAFT_FILE } from "../services/draft-store.mjs";
 import { commitCharacter } from "../services/actor-committer.mjs";
 import { Ledger } from "../services/ledger.mjs";
 
@@ -429,4 +430,79 @@ export function registerQuenchBatches(quench) {
       });
     });
   }, { displayName: "SR6 Forge: Creation Rules" });
+
+  quench.registerBatch("sr6-forge.drafts", (context) => {
+    const { describe, it, assert, before, after } = context;
+
+    describe("where unfinished characters are saved", function () {
+      const FOLDER = "sr6-forge-quench-drafts";
+      let original;
+
+      before(async function () {
+        original = game.settings.get(MODULE_ID, SETTINGS.DRAFT_FOLDER) ?? "";
+      });
+
+      after(async function () {
+        // put the world back exactly as it was, whichever way the test ended
+        await DraftStore.relocate(original);
+      });
+
+      it("defaults to the world settings database", function () {
+        assert.equal(draftBackend(), original ? "file" : "world",
+          "backend must follow the folder setting");
+      });
+
+      it("round-trips a draft through whichever backend is active", async function () {
+        const id = `quench-${foundry.utils.randomID()}`;
+        await DraftStore.save(id, { name: "Quench Runner", step: "review",
+          engineState: { method: "priority", name: "Quench Runner" } });
+        const back = await DraftStore.load(id);
+        assert.ok(back, "draft was not saved");
+        assert.equal(back.name, "Quench Runner");
+        await DraftStore.delete(id);
+        assert.equal(await DraftStore.load(id), null, "draft was not deleted");
+      });
+
+      it("MOVES drafts to a folder rather than copying them", async function () {
+        const id = `quench-${foundry.utils.randomID()}`;
+        await DraftStore.save(id, { name: "Mover", step: "gear",
+          engineState: { method: "priority", name: "Mover" } });
+
+        await DraftStore.relocate(FOLDER);
+        assert.equal(draftBackend(), "file", "backend did not switch to the folder");
+
+        // present at the destination...
+        const moved = await DraftStore.load(id);
+        assert.ok(moved, "draft did not arrive in the folder");
+        assert.equal(moved.name, "Mover");
+
+        // ...and gone from the world setting, so there is only ever one copy
+        const leftBehind = game.settings.get(MODULE_ID, SETTINGS.DRAFTS) ?? {};
+        assert.equal(Object.keys(leftBehind).length, 0,
+          "the world setting still holds drafts after the move");
+
+        // and it really is a readable file
+        const res = await fetch(`${FOLDER}/${DRAFT_FILE}?t=${Date.now()}`);
+        assert.ok(res.ok, "the drafts file is not readable");
+        const doc = await res.json();
+        assert.ok(doc[id], "the file does not contain the draft");
+
+        await DraftStore.delete(id);
+      });
+
+      it("moves them back when the folder is cleared", async function () {
+        const id = `quench-${foundry.utils.randomID()}`;
+        await DraftStore.relocate(FOLDER);
+        await DraftStore.save(id, { name: "Returner", step: "skills",
+          engineState: { method: "priority", name: "Returner" } });
+
+        await DraftStore.relocate("");
+        assert.equal(draftBackend(), "world");
+        const back = await DraftStore.load(id);
+        assert.ok(back, "draft did not come back to the world setting");
+        assert.equal(back.name, "Returner");
+        await DraftStore.delete(id);
+      });
+    });
+  }, { displayName: "SR6 Forge: Draft Storage" });
 }

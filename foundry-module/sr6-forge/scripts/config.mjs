@@ -40,7 +40,8 @@ export const SETTINGS = {
   DRAFTS: "drafts",                // { [draftId]: {name, updatedAt, step, engineState} }
   RULESET: "ruleset",              // rule interpretation id (core | srm | ...)
   OPTIONAL_RULES: "optionalRules", // { settingName: boolean|number } overrides
-  WINDOW_STATE: "windowState",     // client-scoped {key: {width,height,left,top}}
+  WINDOW_STATE: "windowState",
+  DRAFT_FOLDER: "draftFolder",     // client-scoped {key: {width,height,left,top}}
 };
 
 /**

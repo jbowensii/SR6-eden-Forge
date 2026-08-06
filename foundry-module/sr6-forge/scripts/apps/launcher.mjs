@@ -26,7 +26,7 @@ export class SR6ForgeLauncher extends RememberPosition(
 
   async _prepareContext() {
     return {
-      drafts: DraftStore.list().map((d) => ({
+      drafts: (await DraftStore.list()).map((d) => ({
         id: d.id,
         name: d.name || "Unnamed runner",
         step: d.step ?? "method",

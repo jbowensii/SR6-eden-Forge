@@ -188,7 +188,7 @@ export class SR6ForgeWizard extends RememberPosition(
   async _prepareContext() {
     if (!this.engine) {
       const rules = await creationRules();
-      const draft = this.options.draftId ? DraftStore.load(this.options.draftId) : null;
+      const draft = this.options.draftId ? await DraftStore.load(this.options.draftId) : null;
       this.engine = draft
         ? ChargenEngine.fromDraft(draft.engineState, chargenData(), rules)
         : new ChargenEngine(chargenData(), rules);

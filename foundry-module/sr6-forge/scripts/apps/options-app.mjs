@@ -3,6 +3,7 @@
  *  interpretation. Stored world-scoped so every new character inherits them. */
 import { MODULE_ID, SETTINGS, OWN_RULES } from "../config.mjs";
 import { chargenData } from "../main.mjs";
+import { DraftStore, DRAFT_FILE, draftBackend } from "../services/draft-store.mjs";
 
 import { RememberPosition } from "./remember-position.mjs";
 
@@ -71,6 +72,9 @@ export class SR6ForgeOptions extends RememberPosition(
       });
     return {
       rows, rulesetId,
+      draftFolder: game.settings.get(MODULE_ID, SETTINGS.DRAFT_FOLDER) ?? "",
+      draftFile: DRAFT_FILE,
+      draftsInFolder: draftBackend() === "file",
       rulesets: Object.keys(data.rules ?? {}).filter((r) => !r.endsWith("_de"))
         .map((id) => ({ id, selected: id === rulesetId,
           name: { core: "Core Rulebook", core_seattle: "Standard (Seattle)",

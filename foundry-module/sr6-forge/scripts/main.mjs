@@ -22,6 +22,13 @@ Hooks.once("init", () => {
   game.settings.register(MODULE_ID, SETTINGS.OPTIONAL_RULES, {
     scope: "world", config: false, type: Object, default: {},
   });
+  // Empty = keep drafts in the world settings database (the default, and what
+  // every existing world already uses). Set a path and they move to a readable
+  // JSON file there instead. Changed through the options app, which performs
+  // the move — writing this setting directly relocates nothing.
+  game.settings.register(MODULE_ID, SETTINGS.DRAFT_FOLDER, {
+    scope: "world", config: false, type: String, default: "",
+  });
   // Window geometry is a per-user preference, not a world rule.
   game.settings.register(MODULE_ID, SETTINGS.WINDOW_STATE, {
     scope: "client", config: false, type: Object, default: {},

@@ -50,6 +50,27 @@
   </div>
   {{/if}}
 
+  <h3>Where unfinished characters are saved</h3>
+  <p class="hint">
+    {{#if draftsInFolder}}
+    Drafts are kept in <code>{{draftFolder}}/{{draftFile}}</code> — a plain JSON
+    file you can read, back up or copy into another world.
+    {{else}}
+    Drafts are kept in this world's settings database. That is reliable and is
+    backed up with the world, but it is not readable and does not travel to
+    other worlds.
+    {{/if}}
+    Set a folder to move them there; clear it to move them back. The drafts are
+    moved, never copied, so there is only ever one set.
+  </p>
+  <div class="draft-folder">
+    <label class="field grow"><span class="field-label">Folder (leave empty for the world database)</span>
+      <input type="text" name="draftFolder" value="{{draftFolder}}"
+             placeholder="e.g. sr6-forge/drafts" /></label>
+    <button type="button" data-action="pickDraftFolder">Browse…</button>
+    <button type="button" data-action="applyDraftFolder">Move drafts</button>
+  </div>
+
   <div class="wizard-nav">
     <span class="spacer"></span>
     <button type="button" class="primary" data-action="closeOptions">Done</button>
