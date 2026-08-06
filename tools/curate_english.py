@@ -30,13 +30,9 @@ import zipfile
 DEFAULT_JAR = pathlib.Path(
     r"C:\Users\johnb\CommLink6\app\stable\commlink6-1.14.0-complete.jar")
 
-#: Books published in German. Their content is deliberately out of scope.
-GERMAN_BOOKS = {
-    "de_alpen", "de_berlin2080", "de_bundeswehr", "de_feuerlaeufer", "de_other",
-    "de_piraten", "de_revierbericht", "de_sota2081", "de_sota2082",
-    "de_sota2083", "de_westphalen", "kechibi", "lofwyr", "emerald",
-    "power_plays", "shadow_cast", "slip_streams", "collapsing_now",
-}
+#: Books published in German. Defined once in extractor.ownership, which is
+#: also where the Commlink6 import gate reads it.
+from extractor.ownership import GERMAN_BOOKS  # noqa: E402
 
 HIDDEN_REASON = "german-only source book"
 

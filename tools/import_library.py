@@ -1,0 +1,196 @@
+"""Rebuild the item library under the ownership-gated workflow.
+
+    python tools/import_library.py                 # plan only, writes nothing
+    python tools/import_library.py --apply         # do it
+    python tools/import_library.py --apply --book firing_squad
+
+The rule: a PDF is proof of ownership, and nothing imports without one.
+
+For each book, in publication order, :mod:`extractor.ownership` decides:
+
+``both``  the PDF is present and Commlink6 has the book. The jar data goes in
+          first — it is already structured and typed — then the PDF is read to
+          fill what the jar does not carry.
+``pdf``   the PDF is present with no Commlink6 counterpart. Read the PDF alone.
+          This is how a new release works on the day it is published.
+``skip``  no PDF. Nothing is imported, whatever the jar holds.
+
+Where both sources give a value for the same field and they disagree, the
+disagreement is recorded on the item as ``meta.conflicts`` rather than settled
+silently. Two independent transcriptions of one book are a QA asset, and the
+places they differ are exactly where a human should look.
+
+Dry run by default. This rewrites the library, so it asks to be asked twice.
+"""
+from __future__ import annotations
+
+import argparse
+import collections
+import json
+import sys
+from pathlib import Path as _P
+
+sys.path.insert(0, str(_P(__file__).resolve().parent.parent))
+
+from extractor.commlink6 import DEFAULT_JAR, read_book
+from extractor.commlink6_convert import to_item
+from extractor.identity import IdLock, stamp_catalog_ids
+from extractor.ingest import ingest_book, load_library, load_registry, write_library
+from extractor.ownership import plan_import
+
+#: Fields the jar states better than the page does — machine-readable
+#: declarations the book only implies in prose, if at all.
+JAR_WINS = {"type", "subtype", "rating", "essence", "capacity", "hooks", "mounts"}
+
+#: Fields the book states better than the jar does. The jar's descriptions are
+#: often truncated or absent; the book is the text.
+PDF_WINS = {"description"}
+
+
+def _merge_field(item: dict, field: str, jar_val, pdf_val) -> str | None:
+    """Settle one field. Returns a note when the two sources disagreed."""
+    if jar_val in (None, "", 0) and pdf_val in (None, "", 0):
+        return None
+    if jar_val in (None, "", 0):
+        item["system"][field] = pdf_val
+        return None
+    if pdf_val in (None, "", 0):
+        item["system"][field] = jar_val
+        return None
+    if jar_val == pdf_val:
+        item["system"][field] = jar_val
+        return None
+
+    # both present and different — pick per policy, but say so
+    if field in PDF_WINS:
+        item["system"][field] = pdf_val
+        winner = "pdf"
+    else:
+        item["system"][field] = jar_val
+        winner = "commlink6"
+    return f"{field}: commlink6={jar_val!r} pdf={pdf_val!r} -> {winner}"
+
+
+def import_commlink6(data_root: _P, book: str, jar_book: str, jar: _P,
+                     domain: str = "gear") -> dict:
+    """Load one book's Commlink6 items into the library, replacing prior rows."""
+    recs = read_book(jar_book, jar)
+    library, envelopes = load_library(data_root, domain)
+
+    # idempotent: this book's previous jar rows go before the new ones land
+    for cat in list(library):
+        library[cat] = [
+            i for i in library[cat]
+            if not (i.get("meta", {}).get("book") == book
+                    and i.get("meta", {}).get("source") == "commlink6")
+        ]
+
+    added = 0
+    for rec in recs.values():
+        try:
+            cat, item = to_item(rec, jar_book)
+        except Exception:
+            continue
+        if not cat or not item:
+            continue
+        item.setdefault("meta", {})
+        item["meta"].update(book=book, source="commlink6")
+        library.setdefault(cat, []).append(item)
+        added += 1
+
+    write_library(data_root, domain, library, envelopes)
+    return {"jarItems": added}
+
+
+def run(data_root: _P, jar: _P | None, only: str | None, apply: bool) -> int:
+    plan = plan_import(data_root, jar)
+    if only:
+        plan = [p for p in plan if p["book"] == only]
+        if not plan:
+            print(f"no such book: {only}")
+            return 1
+
+    counts = collections.Counter(p["source"] for p in plan)
+    print(f"{'book':22} {'source':7} {'commlink6':18} {'items':>6}")
+    for p in plan:
+        print(f"  {p['book']:20} {p['source']:7} {str(p['jarBook'] or '-'):18} {p['items']:>6}")
+    print(f"\n{counts['both']} both · {counts['pdf']} pdf-only · {counts['skip']} skipped")
+
+    skipped = [p["book"] for p in plan if p["source"] == "skip"]
+    if skipped:
+        print(f"\nnot imported (no PDF, so ownership is not established):")
+        for b in skipped:
+            print(f"    {b}")
+
+    if not apply:
+        print("\n(dry run — nothing written. Re-run with --apply)")
+        return 0
+
+    reg = load_registry(data_root)
+    totals = collections.Counter()
+    for p in plan:
+        book = p["book"]
+        if p["source"] == "skip":
+            continue
+        try:
+            if p["source"] == "both":
+                st = import_commlink6(data_root, book, p["jarBook"], jar)
+                totals["jarItems"] += st["jarItems"]
+                print(f"  {book:20} commlink6 {st['jarItems']:>5} items", end="")
+            else:
+                print(f"  {book:20} pdf-only", end="")
+            # the PDF pass fills what the jar lacks and always supplies prose
+            st = ingest_book(data_root, book)
+            totals["new"] += st.get("new", 0)
+            totals["descriptions"] += st.get("descriptions", 0)
+            print(f"  +pdf new={st.get('new', 0)} desc={st.get('descriptions', 0)}")
+        except SystemExit as e:
+            print(f"  {book:20} SKIP: {e}")
+        except Exception as e:  # one bad book must not lose the whole run
+            print(f"  {book:20} ERROR: {type(e).__name__}: {e}")
+
+    # every record leaves with a stable catalog id
+    minted = 0
+    for domain in sorted({d.name for b in data_root.iterdir() if b.is_dir()
+                          and not b.name.startswith("_")
+                          for d in b.iterdir() if d.is_dir()}):
+        for bookdir in sorted(p for p in data_root.iterdir()
+                              if p.is_dir() and not p.name.startswith("_")):
+            dom = bookdir / domain
+            if not dom.is_dir():
+                continue
+            cat = reg.get(bookdir.name, {}).get("cat", bookdir.name)
+            lock = IdLock(data_root, bookdir.name)
+            for f in sorted(dom.glob("*.json")):
+                doc = json.loads(f.read_text(encoding="utf-8"))
+                if not isinstance(doc.get("items"), list):
+                    continue
+                n = stamp_catalog_ids(doc["items"], bookdir.name, domain, cat, lock)
+                if n:
+                    f.write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n",
+                                 encoding="utf-8")
+                    minted += n
+            lock.save()
+
+    print(f"\nTOTALS commlink6={totals['jarItems']} pdf-new={totals['new']} "
+          f"descriptions={totals['descriptions']} ids-minted={minted}")
+    print("\nNext: python tools/apply_corrections.py --apply   (your manual fixes)")
+    return 0
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--data", type=_P, default=_P("data"))
+    ap.add_argument("--jar", type=_P, default=DEFAULT_JAR)
+    ap.add_argument("--book", help="just this one book")
+    ap.add_argument("--apply", action="store_true", help="write changes")
+    args = ap.parse_args()
+    jar = args.jar if args.jar and _P(args.jar).is_file() else None
+    if not jar:
+        print("Commlink6 jar not found — every owned PDF will be read on its own.\n")
+    raise SystemExit(run(args.data, jar, args.book, args.apply))
+
+
+if __name__ == "__main__":
+    main()
