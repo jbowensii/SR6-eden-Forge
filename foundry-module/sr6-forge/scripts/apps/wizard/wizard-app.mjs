@@ -80,6 +80,10 @@ const PACK_GROUPS = {
   PACK_OTHER: "Other",
 };
 
+/** Commlink6 writes 99 where a mount has no practical limit (41 items, all
+ *  commlinks and their kin). Treated as "unlimited" rather than drawn 99 times. */
+const UNLIMITED_MOUNTS = 99;
+
 /** Rows rendered per browser list. The query narrows before this cap applies. */
 const ROW_CAP = 400;
 
@@ -151,6 +155,8 @@ export class SR6ForgeWizard extends RememberPosition(
       addSin: SR6ForgeWizard.#onAddSin,
       removeSin: SR6ForgeWizard.#onRemoveSin,
       addCustomItem: SR6ForgeWizard.#onAddCustomItem,
+      addLicense: SR6ForgeWizard.#onAddLicense,
+      removeLicense: SR6ForgeWizard.#onRemoveLicense,
       addPack: SR6ForgeWizard.#onAddPack,
       removePack: SR6ForgeWizard.#onRemovePack,
       shopTab: SR6ForgeWizard.#onShopTab,
@@ -667,12 +673,20 @@ export class SR6ForgeWizard extends RememberPosition(
             rating: rv.rating,
             ratingOptions: (rm?.ratings ?? []).map((n) => ({
               n, selected: n === rv.rating })),
-            // one chip per physical mount, so three OPTICAL slots draw three
-            slots: Object.entries(cap).flatMap(([h, n]) =>
-              Array.from({ length: n }, (_, i) => ({
-                id: h, label: h.replaceAll("_", " ").toLowerCase(),
-                taken: i < (usedCount[h] ?? 0) }))),
+            // ONE chip per mount type carrying its tally. Drawing a chip per
+            // physical slot buries the item under 99 identical labels when a
+            // commlink says "as many accessories as you like".
+            slots: Object.entries(cap).map(([h, n]) => {
+              const used = usedCount[h] ?? 0;
+              const unlimited = n >= UNLIMITED_MOUNTS;
+              return { id: h, label: h.replaceAll("_", " ").toLowerCase(),
+                used, total: n, unlimited,
+                tally: unlimited ? `${used} fitted` : `${used}/${n}`,
+                taken: !unlimited && used >= n };
+            }),
             hasSlots: totalSlots > 0,
+            // an unlimited mount makes an aggregate "x of y free" meaningless
+            countedSlots: Object.values(cap).every((n) => n < UNLIMITED_MOUNTS),
             freeSlots: freeCount,
             totalSlots,
             // only worth showing when it is actually a stack
@@ -731,10 +745,23 @@ export class SR6ForgeWizard extends RememberPosition(
           return { ...base, magicKinds: kinds };
         }
         if (tabDef.lifestyle) {
+          const SIN_PER_RATING = 2500;
+          const LIC_PER_RATING = 200;
           return { ...base,
             lifestyles: Object.entries(data.lifestyles ?? {})
               .map(([id, l]) => ({ id, ...l, selected: id === st.lifestyleId })),
-            sins: st.sins, sinRatings: [1, 2, 3, 4] };
+            sins: st.sins.map((x, index) => ({
+              ...x, index,
+              isReal: x.kind === "real",
+              cost: (x.kind === "real" ? 0 : (x.rating ?? 1) * SIN_PER_RATING).toLocaleString(),
+              licenses: (x.licenses ?? []).map((l) => {
+                const lic = typeof l === "object" ? l : { name: String(l), rating: 1 };
+                return { ...lic, cost: ((lic.rating ?? 1) * LIC_PER_RATING).toLocaleString() };
+              }),
+            })),
+            // core p274: fake SINs and fake licences both run 1-6
+            sinRatings: [1, 2, 3, 4, 5, 6],
+            licenceRatings: [1, 2, 3, 4, 5, 6] };
         }
         if (tabDef.packs) {
           const q = (this.ui.query?.shop ?? "").trim().toLowerCase();
@@ -1011,6 +1038,11 @@ export class SR6ForgeWizard extends RememberPosition(
       case "spec": e.spend({ kind: "spec", target: el.dataset.skill, spec: el.value || null }); break;
       case "aspected": e.setMagicPath(e.state.morId, { aspectedSkill: el.value || null }); break;
       case "lifestyle": e.spend({ kind: "lifestyle", id: el.value || null }); break;
+      // the name a SIN is registered under — an alias for a fake, the legal
+      // name for a real one
+      case "sinName":
+        e.spend({ kind: "sin", index: Number(el.dataset.index), rename: el.value });
+        break;
       case "qualityFilter": this.ui.qualityFilter = el.value; break;
       case "shopSubtype": this.ui.shopSubtype = el.value; break;
       case "itemRating": {
@@ -1162,7 +1194,29 @@ export class SR6ForgeWizard extends RememberPosition(
       native: !!root.querySelector("[name=knowledge-native]")?.checked });
   }
   static #onRemoveKnowledge(_ev, t) { this.#spend({ kind: "knowledge", index: Number(t.dataset.index), remove: true }); }
-  static #onAddSin(_ev, t) { this.#spend({ kind: "sin", rating: Number(t.dataset.rating ?? 1) }); }
+  static #onAddSin() {
+    const root = this.element;
+    const name = root.querySelector('[data-new-sin="name"]')?.value?.trim() ?? "";
+    const rating = Number(root.querySelector('[data-new-sin="rating"]')?.value) || 1;
+    this.#spend({ kind: "sin", sinKind: "fake", name, rating });
+    const el = root.querySelector('[data-new-sin="name"]');
+    if (el) el.value = "";
+  }
+
+  static #onAddLicense(_ev, t) {
+    const index = Number(t.dataset.index);
+    const root = this.element;
+    const name = root.querySelector(`[data-lic-name="${index}"]`)?.value?.trim() ?? "";
+    const rating = Number(root.querySelector(`[data-lic-rating="${index}"]`)?.value) || 1;
+    this.#spend({ kind: "license", index, name, rating });
+    const el = root.querySelector(`[data-lic-name="${index}"]`);
+    if (el) el.value = "";
+  }
+
+  static #onRemoveLicense(_ev, t) {
+    this.#spend({ kind: "license", index: Number(t.dataset.index),
+      licenseIndex: Number(t.dataset.licenseIndex), remove: true });
+  }
   static #onRemoveSin(_ev, t) { this.#spend({ kind: "sin", index: Number(t.dataset.index), remove: true }); }
 
   /** Buy a Companion PACK: one price, and its whole contents come with it. */
@@ -1210,11 +1264,37 @@ export class SR6ForgeWizard extends RememberPosition(
     if (this.engine.validate().some((i) => i.severity === "error")) {
       return ui.notifications.error("SR6 Forge: resolve all errors before creating the character.");
     }
+    // Publishing used to delete the draft outright. Keeping it is often what
+    // you want — to build a variant, or to come back and re-run the same
+    // character after a rules change — so ask rather than decide.
+    const keep = await foundry.applications.api.DialogV2.wait({
+      window: { title: "SR6 Forge — Create Character" },
+      content: `<p>Create <strong>${foundry.utils.escapeHTML(this.engine.state.name || "this runner")}</strong> as an actor.</p>
+        <p>Keep the unfinished draft as well? It stays in the launcher so you can
+        revisit or fork this build later.</p>`,
+      buttons: [
+        { action: "keep", label: "Create & keep draft", default: true },
+        { action: "discard", label: "Create & discard draft" },
+        { action: "cancel", label: "Cancel" },
+      ],
+      rejectClose: false,
+    });
+    if (!keep || keep === "cancel") return;
+
     try {
       const actor = await commitCharacter(this.engine.commitPlan(),
         { engineState: this.engine.toDraft() });
-      await DraftStore.delete(this.draftId);
-      ui.notifications.info(`SR6 Forge: ${actor.name} created.`);
+      if (keep === "keep") {
+        // save the final state, so resuming shows the character as published
+        await DraftStore.save(this.draftId, {
+          name: this.engine.state.name, step: this.step,
+          engineState: this.engine.toDraft(),
+        });
+      } else {
+        await DraftStore.delete(this.draftId);
+      }
+      ui.notifications.info(`SR6 Forge: ${actor.name} created${
+        keep === "keep" ? " — draft kept" : ""}.`);
       await this.close();
       actor.sheet?.render(true);
     } catch (err) {

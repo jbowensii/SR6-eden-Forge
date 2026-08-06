@@ -1518,3 +1518,103 @@ describe("custom items", () => {
     expect(plan.embeddedFromPacks.some((g) => g.uuid === null && !g.catalogId)).toBe(false);
   });
 });
+
+describe("SINs and licences", () => {
+  function runner() {
+    const e = engineWith({ METATYPE: "D", ATTRIBUTE: "C", MAGIC: "E", SKILLS: "D", RESOURCES: "A" });
+    e.setMetatype("human");
+    return e;
+  }
+
+  it("starts SINless", () => {
+    expect(runner().state.sins).toHaveLength(0);
+  });
+
+  it("prices a fake SIN at rating x 2,500 (core p274)", () => {
+    const e = runner();
+    e.spend({ kind: "sin", sinKind: "fake", name: "Joe Chummer", rating: 4 });
+    expect(e.budgets().nuyen.spent).toBe(10000);
+  });
+
+  it("prices a licence at rating x 200 and assigns it to that SIN", () => {
+    const e = runner();
+    e.spend({ kind: "sin", sinKind: "fake", name: "Joe Chummer", rating: 4 });
+    e.spend({ kind: "license", index: 0, name: "Firearms", rating: 4 });
+    expect(e.state.sins[0].licenses[0]).toEqual({ name: "Firearms", rating: 4 });
+    expect(e.budgets().nuyen.spent).toBe(10000 + 800);
+  });
+
+  it("will not let a licence out-rate its SIN (core p274)", () => {
+    const e = runner();
+    e.spend({ kind: "sin", sinKind: "fake", rating: 2 });
+    e.spend({ kind: "license", index: 0, name: "Driving", rating: 6 });
+    expect(e.state.sins[0].licenses[0].rating).toBe(2);
+  });
+
+  it("accepts ratings up to 6, not 4", () => {
+    const e = runner();
+    e.spend({ kind: "sin", sinKind: "fake", rating: 6 });
+    expect(e.state.sins[0].rating).toBe(6);
+    expect(e.budgets().nuyen.spent).toBe(15000);
+  });
+
+  it("keeps the alias the player typed", () => {
+    const e = runner();
+    e.spend({ kind: "sin", sinKind: "fake", name: "Fr. Michael Doyle", rating: 3 });
+    e.spend({ kind: "sin", index: 0, rename: "Fr. M. Doyle" });
+    expect(e.state.sins[0].name).toBe("Fr. M. Doyle");
+  });
+});
+
+describe("qualities that hand something over", () => {
+  function runner() {
+    const e = engineWith({ METATYPE: "D", ATTRIBUTE: "C", MAGIC: "E", SKILLS: "D", RESOURCES: "A" });
+    e.setMetatype("human");
+    return e;
+  }
+
+  it("gives SINner a real SIN, free", () => {
+    const e = runner();
+    const before = e.budgets().nuyen.spent;
+    e.spend({ kind: "quality", catalogId: "sinner", positive: false, karma: 8 });
+    const real = e.state.sins.find((x) => x.kind === "real");
+    expect(real).toBeTruthy();
+    expect(real.fromQuality).toBe("sinner");
+    expect(e.budgets().nuyen.spent).toBe(before);        // the karma paid for it
+  });
+
+  it("takes the real SIN back when SINner is dropped", () => {
+    const e = runner();
+    e.spend({ kind: "quality", catalogId: "sinner", positive: false, karma: 8 });
+    e.spend({ kind: "quality", catalogId: "sinner", remove: true });
+    expect(e.state.sins.filter((x) => x.kind === "real")).toHaveLength(0);
+  });
+
+  it("will not let you delete a SIN the quality granted", () => {
+    const e = runner();
+    e.spend({ kind: "quality", catalogId: "sinner", positive: false, karma: 8 });
+    const i = e.state.sins.findIndex((x) => x.fromQuality === "sinner");
+    expect(e.spend({ kind: "sin", index: i, remove: true }).reason).toBe("granted-by-quality");
+  });
+
+  it("hands out the sub-qualities a parent grants", () => {
+    // Shifter declares four: dual natured, supernatural recovery, shift, allergy
+    expect(data.qualityMeta.shifter.grants.quality).toContain("shifter_dual_natured");
+    const e = runner();
+    e.spend({ kind: "quality", catalogId: "shifter", positive: true, karma: 0 });
+    const granted = e.state.qualities.filter((q) => q.fromQuality === "shifter");
+    expect(granted.length).toBe(4);
+    // free, so they neither cost karma nor count against the six-quality cap
+    expect(granted.every((q) => q.free && !q.karma)).toBe(true);
+  });
+
+  it("grants natural weapons as free gear", () => {
+    expect(data.qualityMeta.fangs.grants.gear).toEqual(["metagenetic_fangs"]);
+    const e = runner();
+    const before = e.budgets().nuyen.spent;
+    e.spend({ kind: "quality", catalogId: "fangs", positive: true, karma: 4 });
+    const kit = e.state.purchases.find((p) => p.fromQuality === "fangs");
+    expect(kit).toBeTruthy();
+    expect(e.budgets().nuyen.spent).toBe(before);        // free with the quality
+  });
+});

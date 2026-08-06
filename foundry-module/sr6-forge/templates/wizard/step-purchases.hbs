@@ -107,19 +107,57 @@
     <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}} — {{cost}}¥/month</option>
     {{/each}}
   </select>
-  <h3>SINs &amp; Licenses</h3>
-  <div class="chosen-list">
+  <h3>SINs &amp; Licences</h3>
+  <p class="hint">Runners are SINless unless they take the SINner quality, which
+    grants a real SIN (core p273). Fake SINs cost rating × 2,500¥ and fake
+    licences rating × 200¥; each licence belongs to one SIN and cannot out-rate
+    it (core p274). Give each SIN the name it is registered under.</p>
+  <div class="sin-list">
     {{#each sins}}
-    <div class="chosen">
-      <span class="c-name">{{name}} <span class="c-meta">rating {{rating}}</span></span>
-      <button type="button" class="x" data-action="removeSin" data-index="{{@index}}">✕</button>
+    <div class="sin-card {{#if isReal}}real{{/if}}">
+      <div class="sin-head">
+        <span class="sin-kind">{{#if isReal}}REAL SIN{{else}}FAKE SIN R{{rating}}{{/if}}</span>
+        <input type="text" class="sin-name" data-change="sinName" data-index="{{index}}"
+               value="{{name}}" placeholder="{{#if isReal}}Legal name{{else}}Alias on this SIN{{/if}}" />
+        <span class="sin-cost">{{cost}}¥</span>
+        {{#if fromQuality}}
+        <span class="mt" title="granted by the SINner quality — drop the quality to remove it">from quality</span>
+        {{else}}
+        <button type="button" class="x" data-action="removeSin" data-index="{{index}}">✕</button>
+        {{/if}}
+      </div>
+      <div class="sin-lic">
+        {{#each licenses}}
+        <span class="fitted">
+          <span class="f-name">{{name}}</span>
+          <span class="mt">R{{rating}} · {{cost}}¥</span>
+          <button type="button" class="x" data-action="removeLicense"
+                  data-index="{{../index}}" data-license-index="{{@index}}">✕</button>
+        </span>
+        {{/each}}
+        <span class="add-lic">
+          <input type="text" data-lic-name="{{index}}" placeholder="Licence (e.g. firearms)" />
+          <select data-lic-rating="{{index}}">
+            {{#each ../../licenceRatings}}
+            <option value="{{this}}">R{{this}}</option>
+            {{/each}}
+          </select>
+          <button type="button" data-action="addLicense" data-index="{{index}}">+ Licence</button>
+        </span>
+      </div>
     </div>
+    {{else}}
+    <p class="hint">No SIN. Legal life is difficult without one.</p>
     {{/each}}
   </div>
-  <div class="browser-head">
-    {{#each sinRatings}}
-    <button type="button" data-action="addSin" data-rating="{{this}}">+ Fake SIN R{{this}}</button>
-    {{/each}}
+  <div class="browser-head add-sin">
+    <label class="field grow"><span class="field-label">New fake SIN</span>
+      <input type="text" data-new-sin="name" placeholder="Alias" /></label>
+    <label class="field"><span class="field-label">Rating</span>
+      <select data-new-sin="rating">
+        {{#each sinRatings}}<option value="{{this}}">R{{this}} — {{this}}×2,500¥</option>{{/each}}
+      </select></label>
+    <button type="button" data-action="addSin">+ Add fake SIN</button>
   </div>
 
 {{else}}
@@ -148,12 +186,11 @@
 {{#unless isPacksTab}}
 {{#unless isMagicTab}}
 <h3>Custom item</h3>
-<p class="hint">Anything the books do not cover — a priest's kit, a family
-  heirloom, a gamemaster's prop. You set the price; it is spent like any other
-  purchase and arrives on the sheet as ordinary gear.</p>
+<p class="hint">Anything the books do not cover. You set the price; it is spent
+  like any other purchase and arrives on the sheet as ordinary gear.</p>
 <div class="custom-item">
   <label class="field grow"><span class="field-label">Name</span>
-    <input type="text" data-custom="name" placeholder="Priest's kit" /></label>
+    <input type="text" data-custom="name" placeholder="Custom item" /></label>
   <label class="field"><span class="field-label">Price ¥</span>
     <input type="number" data-custom="price" min="0" step="5" placeholder="0" /></label>
   <label class="field"><span class="field-label">Avail</span>
@@ -191,8 +228,10 @@
       {{#if hasSlots}}
       {{!-- accessory mounts: what is fitted, and what will still fit --}}
       <span class="slots">
-        <span class="slot-count">{{freeSlots}} of {{totalSlots}} hardpoints free</span>
-        {{#each slots}}<span class="slot {{#if taken}}taken{{/if}}">{{label}}</span>{{/each}}
+        {{#if countedSlots}}<span class="slot-count">{{freeSlots}} of {{totalSlots}} hardpoints free</span>{{/if}}
+        {{#each slots}}<span class="slot {{#if taken}}taken{{/if}}"
+          title="{{#if unlimited}}no practical limit{{else}}{{used}} of {{total}} used{{/if}}">{{label}}
+          <span class="s-tally">{{#if unlimited}}∞{{else}}{{tally}}{{/if}}</span></span>{{/each}}
       </span>
       {{#each accessories}}
       <span class="fitted">

@@ -336,6 +336,20 @@ def parse_rules(trees: list[dict]) -> dict:
     return out
 
 
+#: (tag, type) -> what the quality hands over. Only entries that create a
+#: *thing* are listed; ATTRIBUTE/SKILL/RULE modifiers are handled elsewhere as
+#: bonuses, and CHOICE refs are a prompt rather than a fixed grant.
+GRANT_KINDS = {
+    ("itemmod", "SIN"): "sin",
+    ("itemmod", "QUALITY"): "quality",
+    ("itemmod", "GEAR"): "gear",
+    ("itemmod", "CRITTER_POWER"): "critterPower",
+    ("itemmod", "METAECHO"): "echo",
+    # NOT allowmod: that is permission to learn something, not a gift of it.
+    # `sourceror` allowing the Hyperthreading complex form does not hand it over.
+}
+
+
 def parse_quality_meta(trees: list[dict], book: str) -> dict:
     """qualities*.xml -> {catalog_id: {karma, positive, max, multi, subOptions{}, raw}}."""
     out: dict = {}
@@ -352,7 +366,26 @@ def parse_quality_meta(trees: list[dict], book: str) -> dict:
                     sub[so["attrs"].get("id")] = {"karma": _int(so["attrs"].get("cost"))}
             if ch["tag"] == "subOption":       # some files put subOption directly
                 sub[ch["attrs"].get("id")] = {"karma": _int(ch["attrs"].get("cost"))}
+        # Things a quality HANDS OVER, as opposed to the modifiers it applies.
+        # SINner declares <itemmod type="SIN" ref="REAL_SIN"/>; Shifter hands
+        # out four further qualities; the metagenetic ones grant natural
+        # weapons as gear. Read the declarations rather than naming qualities
+        # in code, so a new book works without a change here.
+        grants: dict = {}
+        for mods in t.get("children", []):
+            if mods["tag"] != "modifications":
+                continue
+            for m in mods.get("children", []):
+                ma = m.get("attrs", {})
+                kind = GRANT_KINDS.get((m["tag"], ma.get("type")))
+                ref = ma.get("ref")
+                if not kind or not ref or ref.startswith("CHOICE"):
+                    continue
+                grants.setdefault(kind, [])
+                if ref not in grants[kind]:
+                    grants[kind].append(ref)
         out[a["id"]] = {
+            **({"grants": grants} if grants else {}),
             "karma": _int(a.get("karma")),
             "positive": a.get("pos") == "true",
             "type": a.get("type", "NORMAL"),

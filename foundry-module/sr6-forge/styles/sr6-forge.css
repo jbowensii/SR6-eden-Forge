@@ -820,3 +820,33 @@
 }
 .sr6-forge .custom-item .field { min-width: 74px; }
 .sr6-forge .custom-item .field.grow { flex: 1 1 180px; }
+
+/* SIN cards: a real SIN (from the SINner quality) and any forged ones, each
+   with the licences assigned to it. */
+.sr6-forge .sin-list { display: grid; gap: 8px; margin: 6px 0 10px; }
+.sr6-forge .sin-card {
+  border: 1px solid var(--sf-line);
+  background: var(--sf-panel);
+  padding: 8px 10px;
+}
+.sr6-forge .sin-card.real { border-left: 2px solid var(--sf-green); }
+.sr6-forge .sin-head { display: flex; gap: 8px; align-items: center; }
+.sr6-forge .sin-kind {
+  font-family: var(--sf-mono);
+  font-size: 9.5px;
+  letter-spacing: .08em;
+  color: var(--sf-cyan);
+  white-space: nowrap;
+}
+.sr6-forge .sin-card.real .sin-kind { color: var(--sf-green); }
+.sr6-forge .sin-name { flex: 1 1 auto; min-width: 120px; }
+.sr6-forge .sin-cost { font-family: var(--sf-mono); color: var(--sf-mute); }
+.sr6-forge .sin-lic {
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  margin-top: 6px; padding-top: 6px; border-top: 1px dotted var(--sf-line);
+}
+.sr6-forge .add-lic { display: flex; gap: 4px; align-items: center; }
+.sr6-forge .add-lic input { width: 160px; }
+.sr6-forge .add-sin { align-items: flex-end; }
+/* mount chip tally */
+.sr6-forge .slot .s-tally { opacity: .75; margin-left: 4px; }

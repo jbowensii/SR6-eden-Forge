@@ -96,9 +96,19 @@ export function buildCommitPlan(state, data, rules, provider, budgets) {
     });
   }
   for (const sin of state.sins) {
+    const lic = (sin.licenses ?? []).map((l) =>
+      (typeof l === "object" ? `${l.name} (R${l.rating ?? 1})` : String(l)));
     syntheticItems.push({
-      name: sin.name, type: "sin",
-      system: { quality: String(sin.rating), description: "" },
+      name: sin.name || (sin.kind === "real" ? "Real SIN" : "Fake SIN"), type: "sin",
+      system: {
+        // eden stores the SIN's quality rating; a real SIN has no forged
+        // rating, so it records as 6 — nothing verifies better than the truth
+        quality: String(sin.kind === "real" ? 6 : (sin.rating ?? 1)),
+        description: [
+          sin.kind === "real" ? "Real SIN." : `Fake SIN, rating ${sin.rating ?? 1}.`,
+          lic.length ? `Licences: ${lic.join(", ")}.` : "",
+        ].filter(Boolean).join(" "),
+      },
     });
   }
   if (state.lifestyleId) {

@@ -125,6 +125,7 @@ export class ChargenEngine {
     this.catalog = catalog;
     this.state = migrateState(state ?? blankState(), chargenData);
     this.provider = makeProvider(this.state.method, chargenData);
+    this.#syncQualityGrants();
   }
 
   /**
@@ -138,6 +139,75 @@ export class ChargenEngine {
     const gm = this.data.gearMounts?.[op.catalogId] ?? {};
     return !((gm.hooks ?? []).length || Object.keys(gm.hookCapacity ?? {}).length);
   }
+
+  /**
+   * Keep quality-granted SINs in step with the qualities held.
+   *
+   * SINner declares `<itemmod type="SIN" ref="REAL_SIN"/>`, so the quality is
+   * what makes a runner SINned (core p273). The SIN is created when the
+   * quality is taken and withdrawn when it is dropped; anything the player
+   * typed into it — the legal name — survives a round trip because the entry
+   * is matched on the granting quality, not rebuilt blindly.
+   */
+  /**
+   * Keep everything a quality HANDS OVER in step with the qualities held.
+   *
+   * Some qualities give you a thing rather than a modifier, and declare it in
+   * their own data: SINner grants `<itemmod type="SIN" ref="REAL_SIN"/>`,
+   * Shifter grants four further qualities, and the metagenetic ones grant
+   * natural weapons as gear. All of it is reconciled here — created when the
+   * parent is taken, withdrawn when it is dropped — so nothing has to name a
+   * quality in code.
+   *
+   * Granted things are free: their cost sat in the parent's karma price.
+   */
+  #syncQualityGrants() {
+    const s = this.state;
+    s.sins ??= [];
+    s.purchases ??= [];
+
+    // parent quality -> what it hands over (only qualities actually held)
+    const held = s.qualities.filter((q) => !q.fromQuality);
+    const grants = held
+      .map((q) => [q.catalogId, this.data.qualityMeta?.[q.catalogId]?.grants])
+      .filter(([, g]) => g);
+    const parents = new Set(grants.map(([cid]) => cid));
+
+    // withdraw anything whose parent is gone
+    s.sins = s.sins.filter((x) => !x.fromQuality || parents.has(x.fromQuality));
+    s.purchases = s.purchases.filter((p) => !p.fromQuality || parents.has(p.fromQuality));
+    s.qualities = s.qualities.filter((q) => !q.fromQuality || parents.has(q.fromQuality));
+
+    for (const [cid, g] of grants) {
+      for (const ref of g.sin ?? []) {
+        if (s.sins.some((x) => x.fromQuality === cid)) continue;
+        s.sins.push({
+          id: `sin-${cid}`, kind: ref === "REAL_SIN" ? "real" : "fake",
+          name: ref === "REAL_SIN" ? "Real SIN" : "Fake SIN",
+          rating: ref === "REAL_SIN" ? null : 1, licenses: [], fromQuality: cid,
+        });
+      }
+      for (const ref of g.quality ?? []) {
+        if (s.qualities.some((q) => q.catalogId === ref && q.fromQuality === cid)) continue;
+        const meta = this.data.qualityMeta?.[ref] ?? {};
+        s.qualities.push({
+          catalogId: ref, name: ref.replaceAll("_", " "), rating: 1,
+          positive: meta.positive ?? false, karma: 0, free: true,
+          fromQuality: cid, note: "",
+        });
+      }
+      for (const ref of g.gear ?? []) {
+        if (s.purchases.some((p) => p.catalogId === ref && p.fromQuality === cid)) continue;
+        s.purchases.push({
+          uuid: null, catalogId: ref, name: ref.replaceAll("_", " "),
+          price: 0, avail: 0, essence: 0, qty: 1, rating: null,
+          itemType: "gear", gearType: null, subtype: null,
+          sr6forge: null, accessories: [], fromQuality: cid,
+        });
+      }
+    }
+  }
+
 
   /* ---------- persistence ---------- */
   toDraft() { return structuredClone(this.state); }
@@ -237,6 +307,7 @@ export class ChargenEngine {
           }
           if (i < 0) return { ok: false, reason: "not-taken" };
           s.qualities.splice(i, 1);
+          this.#syncQualityGrants();
           return { ok: true };
         }
         const meta = this.data.qualityMeta?.[op.catalogId];
@@ -251,6 +322,7 @@ export class ChargenEngine {
           karma: op.karma ?? meta?.karma ?? 0,
           note: "", free: false,
         });
+        this.#syncQualityGrants();
         return { ok: true };
       }
       case "purchase": {
@@ -488,9 +560,53 @@ export class ChargenEngine {
         return { ok: true };
       }
       case "lifestyle": { s.lifestyleId = op.id; s.lifestyleMonths = op.months ?? 1; return { ok: true }; }
+      /* SINs. A runner is SINless by default and holds a real SIN only via the
+       * SINner quality (core p273); everything else is forged. Fake SINs and
+       * fake licences both run rating 1-6, at 2,500¥ and 200¥ per rating, and
+       * every licence is assigned to one SIN whose rating it may not exceed
+       * (core p274). */
       case "sin": {
-        if (op.remove) { s.sins.splice(op.index, 1); return { ok: true }; }
-        s.sins.push({ name: op.name ?? "Fake SIN", rating: op.rating ?? 1, licenses: [] });
+        if (op.remove) {
+          const sin = s.sins[Number(op.index)];
+          if (!sin) return { ok: false, reason: "unknown-sin" };
+          // the real SIN belongs to the quality that granted it
+          if (sin.fromQuality) return { ok: false, reason: "granted-by-quality" };
+          s.sins.splice(Number(op.index), 1);
+          return { ok: true };
+        }
+        if (op.rename !== undefined) {
+          const sin = s.sins[Number(op.index)];
+          if (!sin) return { ok: false, reason: "unknown-sin" };
+          sin.name = op.rename;
+          return { ok: true };
+        }
+        const kind = op.sinKind === "real" ? "real" : "fake";
+        const rating = kind === "real" ? null
+          : Math.min(6, Math.max(1, Number(op.rating) || 1));
+        s.sins.push({
+          id: `sin-${s.sins.length}-${(op.name ?? "").slice(0, 8)}`,
+          kind, name: op.name || (kind === "real" ? "Real SIN" : "Fake SIN"),
+          rating, licenses: [],
+        });
+        return { ok: true };
+      }
+      case "license": {
+        const sin = s.sins[Number(op.index)];
+        if (!sin) return { ok: false, reason: "unknown-sin" };
+        sin.licenses ??= [];
+        if (op.remove) {
+          if (sin.licenses[Number(op.licenseIndex)] === undefined) {
+            return { ok: false, reason: "no-such-licence" };
+          }
+          sin.licenses.splice(Number(op.licenseIndex), 1);
+          return { ok: true };
+        }
+        let rating = Math.min(6, Math.max(1, Number(op.rating) || 1));
+        // core p274: "License ratings cannot exceed the rating of the fake SIN
+        // to which they are attached" — clamp rather than reject, so the player
+        // gets the licence they asked for at the best rating it can legally be
+        if (sin.kind !== "real" && rating > (sin.rating ?? 1)) rating = sin.rating ?? 1;
+        sin.licenses.push({ name: op.name || "Fake licence", rating });
         return { ok: true };
       }
       case "karma2nuyen": {

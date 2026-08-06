@@ -315,7 +315,11 @@ export function nuyenBudget(state, data, rules, provider) {
     // must not be priced again. They cannot simply be left at price 0 either:
     // they keep their catalogId, and ratedValues would happily find the real
     // price in gearRatings and charge it a second time.
-    if (p.fromPack) continue;
+    // A PACK's contents and a quality's granted gear are both already paid
+    // for — by the bundle price and by the parent's karma respectively. They
+    // cannot just be left at price 0 either: they keep their catalogId, and
+    // ratedValues would find the real price in gearRatings and charge it.
+    if (p.fromPack || p.fromQuality) continue;
     gear += ratedValues(p, data).price * (p.qty ?? 1);
     // fitted accessories are paid for too; factory-fitted ones are included in
     // the host's price and carry 0
@@ -347,11 +351,18 @@ export function nuyenBudget(state, data, rules, provider) {
     const licenses = (s.licenses ?? [])
       .reduce((n, l) => n + (typeof l === "object" ? (l.rating ?? 1) : 1)
         * FAKE_LICENSE_PER_RATING, 0);
-    const cost = (s.rating ?? 1) * FAKE_SIN_PER_RATING + licenses;
+    // A real SIN is not bought — it comes with the SINner quality, whose price
+    // was paid in karma (core p273: runners "have a SIN only if they have the
+    // SINner quality"). Its licences are still an expense.
+    const sinCost = s.kind === "real" ? 0 : (s.rating ?? 1) * FAKE_SIN_PER_RATING;
+    const cost = sinCost + licenses;
+    if (!cost) continue;
     spent += cost;
+    const n = (s.licenses ?? []).length;
     breakdown.push({ key: "sin", step: "purchases",
-      label: `${s.name || "Fake SIN"} (rating ${s.rating ?? 1}${
-        (s.licenses ?? []).length ? `, ${s.licenses.length} license${s.licenses.length === 1 ? "" : "s"}` : ""})`,
+      label: `${s.name || (s.kind === "real" ? "Real SIN" : "Fake SIN")}${
+        s.kind === "real" ? "" : ` (rating ${s.rating ?? 1})`}${
+        n ? ` · ${n} licence${n === 1 ? "" : "s"}` : ""}`,
       amount: cost });
   }
 
@@ -364,7 +375,8 @@ export function essenceUsed(state, data) {
   // as with price: an augmentation PACK states one ESSENCECOST for the bundle,
   // so its contents' own essence must not be counted on top
   return state.purchases.reduce(
-    (n, p) => (p.fromPack ? n : n + ratedValues(p, data).essence * (p.qty ?? 1)), 0);
+    (n, p) => ((p.fromPack || p.fromQuality)
+      ? n : n + ratedValues(p, data).essence * (p.qty ?? 1)), 0);
 }
 
 /**
