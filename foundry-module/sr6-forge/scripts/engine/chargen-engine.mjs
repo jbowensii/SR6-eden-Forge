@@ -219,6 +219,9 @@ export class ChargenEngine {
         if (!meta.hasLevel) return { ok: false, reason: "power-has-no-levels" };
         const next = (pw.level ?? 1) + (op.delta ?? 1);
         if (next < 1) return { ok: false, reason: "minimum-level-1" };
+        if (meta.maxLevel && next > meta.maxLevel) {
+          return { ok: false, reason: `max-level-${meta.maxLevel}` };
+        }
         pw.level = next;
         return { ok: true };
       }
@@ -239,7 +242,9 @@ export class ChargenEngine {
           // level is taken up to three times — so taking it again raises the
           // level rather than being rejected as a duplicate.
           if (meta.hasLevel) {
-            const cap = meta.maxLevel ?? 6;
+            // per-power cap where the book states one ("The maximum level of
+            // this power is 4", core p158); otherwise the PP budget is the limit
+            const cap = meta.maxLevel ?? 99;
             if ((existing.level ?? 1) >= cap) return { ok: false, reason: "at-max-level" };
             existing.level = (existing.level ?? 1) + 1;
             return { ok: true, level: existing.level };

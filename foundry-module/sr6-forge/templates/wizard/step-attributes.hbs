@@ -2,13 +2,14 @@
 <p>Attribute points raise the eight core attributes. Adjustment points go to Edge,
 Magic/Resonance and metatype-adjusted attributes only.</p>
 <p class="hint">{{karmaHint}}</p>
+{{#if augmentNote}}<p class="hint">{{augmentNote}}</p>{{/if}}
 
 <h3>Core</h3>
 <div class="attr-grid">
   {{#each rows}}
   <div class="attr-cell {{#if atMax}}at-max{{/if}}">
     <span class="a-name">{{label}}</span>
-    <span class="a-val">{{rating}}</span>
+    <span class="a-val">{{rating}}{{#if hasBonus}} <span class="aug">({{augmented}})</span>{{/if}}</span>
     <span class="a-max">max {{max}}</span>
     <div class="attr-pools">
       <div class="stepper">
@@ -45,7 +46,7 @@ Magic/Resonance and metatype-adjusted attributes only.</p>
   {{#each specials}}
   <div class="attr-cell">
     <span class="a-name">{{label}}</span>
-    <span class="a-val">{{rating}}</span>
+    <span class="a-val">{{rating}}{{#if hasBonus}} <span class="aug">({{augmented}})</span>{{/if}}</span>
     <span class="a-max">{{sub}}</span>
     <div class="stepper">
       <button type="button" class="up" data-action="adj" data-kind="attribute" data-pool="adjust"

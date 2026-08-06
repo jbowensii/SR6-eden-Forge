@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { ChargenEngine, blankState } from "../sr6-forge/scripts/engine/chargen-engine.mjs";
 import { LIFEPATH_OPENING } from "../sr6-forge/scripts/engine/providers.mjs";
+import { augmentBonus, augmentedRating } from "../sr6-forge/scripts/engine/budgets.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const data = JSON.parse(readFileSync(join(here, "..", "..", "export", "chargen-data.json"), "utf8"));
@@ -900,13 +901,13 @@ describe("knowledge skills bought with karma", () => {
     expect(e.budgets().karma.spent).toBe(0);
   });
 
-  it("charges karma for a karma-bought rank at 5 x the new rank", () => {
+  it("charges the flat 3 karma the book gives, not 5 x rank", () => {
     const e = withKnowledge();
     const before = e.budgets().karma.spent;
     e.spend({ kind: "knowledgeRank", target: 0, pool: "karma", delta: 1 });
     expect(e.state.knowledge[0].karma).toBe(1);
-    // rank 1 free + 1 karma rank = top rank 2, so 2 x 5
-    expect(e.budgets().karma.spent).toBe(before + 10);
+    // core p69: "New Knowledge skills cost 3 Karma"
+    expect(e.budgets().karma.spent).toBe(before + rules.karmaCosts.knowledgeSkill);
     // and it does not consume a free knowledge point
     expect(e.budgets().knowledgePoints.spent).toBe(1);
   });
@@ -915,5 +916,75 @@ describe("knowledge skills bought with karma", () => {
     const e = withKnowledge();
     const r = e.spend({ kind: "knowledgeRank", target: 0, pool: "karma", delta: -1 });
     expect(r.ok).toBe(false);
+  });
+});
+
+describe("augmented ratings and power caps", () => {
+  function adept() {
+    const e = engineWith({ METATYPE: "D", ATTRIBUTE: "B", MAGIC: "A",
+      SKILLS: "C", RESOURCES: "E" });
+    e.setMetatype("human");
+    e.setMagicPath("adept");
+    return e;
+  }
+
+  it("caps Improved Reflexes at 4 — the book states it", () => {
+    // core p158: "The maximum level of this power is 4"
+    expect(data.adeptPowers.improved_reflexes.maxLevel).toBe(4);
+    const e = adept();
+    const take = () => e.spend({ kind: "power", uuid: "Item.ir",
+      name: "Improved Reflexes", genesisID: "improved_reflexes" });
+    for (let i = 0; i < 4; i++) expect(take().ok).toBe(true);
+    expect(e.state.powers[0].level).toBe(4);
+    const fifth = take();
+    expect(fifth.ok).toBe(false);
+    expect(fifth.reason).toBe("at-max-level");
+  });
+
+  it("shows the adept power's bonus as an augmented rating", () => {
+    const e = adept();
+    const natural = e.attrRating("rea");
+    e.spend({ kind: "power", uuid: "Item.ir", name: "Improved Reflexes",
+      genesisID: "improved_reflexes" });
+    expect(augmentBonus(e.state, "rea", data)).toBe(1);      // +1 per level
+    e.spend({ kind: "powerLevel", index: 0, delta: 2 });      // level 3
+    expect(augmentBonus(e.state, "rea", data)).toBe(3);
+    expect(augmentedRating(e.state, "rea", e.provider, data)).toBe(natural + 3);
+    expect(e.attrRating("rea")).toBe(natural);                // natural unchanged
+  });
+
+  it("scales rating-based ware by its rating", () => {
+    const e = engineWith();
+    e.setMetatype("human");
+    e.spend({ kind: "purchase", uuid: "Item.wr", name: "Wired Reflexes",
+      genesisID: "wired_reflexes", price: 150000, avail: 3, rating: 2 });
+    expect(data.gearMounts.wired_reflexes.bonuses.rea.perRating).toBe(1);
+    expect(augmentBonus(e.state, "rea", data)).toBe(2);       // rating 2 -> +2
+  });
+
+  it("leaves attributes with no augmentation alone", () => {
+    const e = adept();
+    expect(augmentBonus(e.state, "cha", data)).toBe(0);
+  });
+});
+
+describe("knowledge skills cost 3 karma, not 5 x rank", () => {
+  it("charges the flat rate the book gives", () => {
+    // core p69: "New Knowledge skills cost 3 Karma"
+    expect(rules.karmaCosts.knowledgeSkill).toBe(3);
+    const e = engineWith();
+    e.setMetatype("human");
+    e.spend({ kind: "knowledge", name: "Gang Politics", type: "knowledge" });
+    const before = e.budgets().karma.spent;
+    e.spend({ kind: "knowledgeRank", target: 0, pool: "karma", delta: 1 });
+    expect(e.budgets().karma.spent).toBe(before + 3);
+  });
+
+  it("is cheaper than an active skill rank", () => {
+    const e = engineWith();
+    e.setMetatype("human");
+    e.spend({ kind: "skill", target: "firearms", pool: "karma", delta: 1 });
+    const activeCost = e.budgets().karma.spent;               // 5 x rank 1
+    expect(activeCost).toBeGreaterThan(rules.karmaCosts.knowledgeSkill);
   });
 });

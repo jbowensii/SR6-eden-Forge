@@ -35,6 +35,38 @@ export function attrRating(state, key, provider) {
   return base + (a.points ?? 0) + (a.adjust ?? 0) + (a.karma ?? 0);
 }
 
+/**
+ * Total augmentation bonus to one attribute from adept powers and ware.
+ *
+ * Commlink6 shows these as "4 (6)" — the natural rating with the augmented one
+ * beside it — and eden keeps them apart too (`base` vs `mod`). A leveled power
+ * multiplies its bonus by the level; rating-based ware by its rating.
+ */
+export function augmentBonus(state, key, data) {
+  let total = 0;
+  for (const pw of state.powers ?? []) {
+    const b = data.adeptPowers?.[pw.genesisID]?.bonuses?.[key];
+    if (!b) continue;
+    total += (b.flat ?? 0) + (b.perLevel ?? 0) * (pw.level ?? 1);
+  }
+  for (const p of state.purchases ?? []) {
+    const b = data.gearMounts?.[p.genesisID]?.bonuses?.[key];
+    if (!b) continue;
+    const rating = p.rating ?? 1;
+    total += ((b.flat ?? 0) + (b.perRating ?? 0) * rating) * (p.qty ?? 1);
+    for (const a of p.accessories ?? []) {
+      const ab = data.gearMounts?.[a.genesisID]?.bonuses?.[key];
+      if (ab) total += (ab.flat ?? 0) + (ab.perRating ?? 0) * (a.rating ?? 1);
+    }
+  }
+  return total;
+}
+
+/** Natural rating plus augmentations — what the character actually rolls. */
+export function augmentedRating(state, key, provider, data) {
+  return attrRating(state, key, provider) + augmentBonus(state, key, data);
+}
+
 export function attributePointsSpent(state) {
   return CORE_ATTRS.reduce((n, k) => n + (state.attributes[k]?.points ?? 0), 0);
 }
@@ -59,7 +91,7 @@ export function skillPointsSpent(state) {
 
 /** Karma for ranks bought with karma instead of skill points. Core p68: 5 x new
  *  rank, paid per rank, so the karma ranks are the TOP ranks of the skill.
- *  Knowledge and language ranks are priced the same way. */
+ *  Knowledge and language skills are a flat rate instead — see below. */
 export function skillKarmaSpent(state, rules) {
   const per = rules.karmaCosts?.skillPerRank ?? 5;
   let n = 0;
@@ -67,10 +99,10 @@ export function skillKarmaSpent(state, rules) {
     const top = skillRank(s);
     for (let i = 0; i < (s.karma ?? 0); i++) n += (top - i) * per;
   }
-  for (const k of state.knowledge ?? []) {
-    const top = (k.points ?? 1) + (k.karma ?? 0);
-    for (let i = 0; i < (k.karma ?? 0); i++) n += (top - i) * per;
-  }
+  // Core p69: "New Knowledge skills cost 3 Karma" — a flat rate, cheaper than
+  // the 5 x new rank an active skill costs.
+  const knowPer = rules.karmaCosts?.knowledgeSkill ?? 3;
+  for (const k of state.knowledge ?? []) n += (k.karma ?? 0) * knowPer;
   return n;
 }
 

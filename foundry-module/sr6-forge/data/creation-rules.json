@@ -87,7 +87,9 @@
     "initiationBase": 10,
     "initiationPerLevel": 1,
     "positiveQualityMultiplier": 2,
-    "removeNegativeQualityMultiplier": 2
+    "removeNegativeQualityMultiplier": 2,
+    "knowledgeSkill": 3,
+    "_verifiedKnowledge": "core rulebook p69 — 'New Knowledge skills cost 3 Karma' (a flat rate, unlike active skills at 5 x new rank)"
   },
   "defaults": {
     "_note": "Fallbacks when neither a world override nor the selected rule interpretation supplies a value. Names match the setting vocabulary in extractor/chargen_xml.py RULE_SETTING_NAMES.",

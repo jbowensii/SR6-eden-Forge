@@ -6,7 +6,7 @@ import { MODULE_ID, SETTINGS, ACTOR_SKILLS } from "../../config.mjs";
 import { chargenData } from "../../main.mjs";
 import { ChargenEngine } from "../../engine/chargen-engine.mjs";
 import { POINT_BUY, LIFEPATH_ADULT_COUNT } from "../../engine/providers.mjs";
-import { qualityKarma, creationSetting } from "../../engine/budgets.mjs";
+import { qualityKarma, creationSetting, augmentBonus } from "../../engine/budgets.mjs";
 import { DraftStore } from "../../services/draft-store.mjs";
 import { PackCatalog } from "../../services/pack-catalog.mjs";
 import { commitCharacter } from "../../services/actor-committer.mjs";
@@ -139,7 +139,15 @@ export class SR6ForgeWizard extends RememberPosition(
       this.engine = draft
         ? ChargenEngine.fromDraft(draft.engineState, chargenData(), rules)
         : new ChargenEngine(chargenData(), rules);
-      if (draft?.step) this.step = draft.step;
+      if (draft?.step) {
+        this.step = draft.step;
+        // a resumed character has already passed through the earlier steps —
+        // tick them immediately instead of waiting for the user to revisit
+        for (const st of STEPS) {
+          this.visited.add(st);
+          if (st === draft.step) break;
+        }
+      }
       if (!draft) this.engine.setRuleset(game.settings.get(MODULE_ID, SETTINGS.RULESET));
       // world optional-rule overrides always apply (they may have changed
       // since a draft was saved)
@@ -461,7 +469,10 @@ export class SR6ForgeWizard extends RememberPosition(
         const rows = ["bod", "agi", "rea", "str", "wil", "log", "int", "cha"].map((k) => {
           const max = maxima[k] ?? 6;
           const rating = e.attrRating(k);
+          // ware and adept powers show as "4 (6)" — natural, then augmented
+          const bonus = augmentBonus(st, k, data);
           return { key: k, label: k.toUpperCase(), rating, max,
+            bonus, augmented: rating + bonus, hasBonus: bonus !== 0,
             atMax: rating >= max, adjustable: max !== 6,
             points: st.attributes[k].points, adjust: st.attributes[k].adjust,
             karma: st.attributes[k].karma ?? 0 };
@@ -469,12 +480,17 @@ export class SR6ForgeWizard extends RememberPosition(
         const specials = [{ key: "edg", label: "EDGE", sub: `max ${maxima.edg ?? 6}` }];
         if (mor.magic) specials.push({ key: "mag", label: "MAGIC", sub: "from priority" });
         if (mor.resonance) specials.push({ key: "res", label: "RESONANCE", sub: "from priority" });
-        for (const s of specials) {
-          s.rating = e.attrRating(s.key);
-          s.adjust = st.attributes[s.key].adjust;
+        for (const sp of specials) {
+          sp.rating = e.attrRating(sp.key);
+          sp.adjust = st.attributes[sp.key].adjust;
+          const b = augmentBonus(st, sp.key, data);
+          sp.bonus = b; sp.augmented = sp.rating + b; sp.hasBonus = b !== 0;
         }
         return { rows, specials,
-          karmaHint: `Karma ranks cost ${rules.karmaCosts.attributePerRank} x the new rating, per rank — ${budgets.karma.left} karma left.` };
+          karmaHint: `Karma ranks cost ${rules.karmaCosts.attributePerRank} x the new rating, per rank — ${budgets.karma.left} karma left.`,
+          augmentNote: rows.some((r) => r.hasBonus) || specials.some((r) => r.hasBonus)
+            ? "A value in parentheses is the augmented rating from ware and adept powers."
+            : null };
       }
 
       case "skills": {
@@ -723,7 +739,12 @@ export class SR6ForgeWizard extends RememberPosition(
     }
     if (this._focusFilter) {
       const el = root.querySelector(`[data-filter="${this._focusFilter}"]`);
-      if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+      if (el) {
+        // preventScroll matters: the filter sits at the top of the step, and a
+        // plain focus() scrolls it into view, yanking the pane up
+        el.focus({ preventScroll: true });
+        el.setSelectionRange(el.value.length, el.value.length);
+      }
       this._focusFilter = null;
     }
 
@@ -907,7 +928,7 @@ export class SR6ForgeWizard extends RememberPosition(
     const d = t.dataset;
     const op = { kind: d.kind, target: d.target, delta: Number(d.delta ?? 1) };
     if (d.pool) op.pool = d.pool;
-    this.#spend(op, d.kind === "skill" ? "skill" : null);
+    this.#spend(op);
   }
   static #onAddQuality(_ev, t) {
     const d = t.dataset;

@@ -109,8 +109,11 @@ def parse_item_mounts(trees: list[dict]) -> dict:
             if vslots:
                 variants[v["attrs"].get("id", "")] = vslots
 
-        if hooks or fits or embedded or host_subtypes:
+        bonuses = attribute_bonuses(t)
+        if hooks or fits or embedded or host_subtypes or bonuses:
             rec = {}
+            if bonuses:
+                rec["bonuses"] = bonuses
             if hooks:
                 rec["hooks"] = sorted(set(hooks))
             if fits:
@@ -122,6 +125,61 @@ def parse_item_mounts(trees: list[dict]) -> dict:
             if variants:
                 rec["variantSlots"] = variants
             out[gid] = rec
+    return out
+
+
+#: Commlink6 attribute refs -> eden attribute ids.
+_ATTR = {
+    "BODY": "bod", "AGILITY": "agi", "REACTION": "rea", "STRENGTH": "str",
+    "WILLPOWER": "wil", "LOGIC": "log", "INTUITION": "int", "CHARISMA": "cha",
+    "EDGE": "edg", "MAGIC": "mag", "RESONANCE": "res",
+}
+
+
+def attribute_bonuses(tree: dict) -> dict:
+    """Flat attribute bonuses an item or power confers.
+
+    Three shapes appear in the data:
+
+    * ``value="1"``       a flat bonus
+    * ``value="$LEVEL"``  scales with an adept power's level
+    * ``value="$RATING"`` scales with the item's rating (Wired Reflexes 1-4)
+
+    The scaling ones are recorded as ``perLevel`` / ``perRating`` so the caller
+    multiplies by whatever the character actually bought.
+    """
+    out: dict = {}
+    stack = list(tree.get("children", []))
+    while stack:
+        n = stack.pop()
+        a = n.get("attrs", {})
+        if n["tag"] == "valmod" and a.get("type") == "ATTRIBUTE":
+            code = _ATTR.get((a.get("ref") or "").upper())
+            raw = str(a.get("value", "")).strip().upper()
+            if code:
+                if raw in ("$LEVEL", "LEVEL"):
+                    out.setdefault(code, {})["perLevel"] = 1
+                elif raw in ("$RATING", "RATING"):
+                    out.setdefault(code, {})["perRating"] = 1
+                else:
+                    try:
+                        out.setdefault(code, {})["flat"] = int(float(raw))
+                    except ValueError:
+                        pass
+        stack.extend(n.get("children", []))
+    return out
+
+
+def _scale_for_level(bonuses: dict, has_level: bool) -> dict:
+    """On a leveled power a flat bonus applies per level (core p158)."""
+    if not has_level:
+        return bonuses
+    out = {}
+    for code, b in bonuses.items():
+        if "flat" in b and "perLevel" not in b:
+            out[code] = {"perLevel": b["flat"]}
+        else:
+            out[code] = b
     return out
 
 
@@ -145,12 +203,21 @@ def parse_adept_powers(trees: list[dict], i18n: dict, book: str) -> dict:
             cost = float(a.get("cost", 0))
         except (TypeError, ValueError):
             cost = 0.0
+        try:
+            max_level = int(a["max"]) if a.get("max") else None
+        except ValueError:
+            max_level = None
         out[pid] = {
             "name": text.get("name") or pid.replace("_", " ").title(),
             "cost": cost,
             "hasLevel": a.get("hasLevel") == "true",
+            # per-power cap, e.g. Improved Reflexes: "The maximum level of this
+            # power is 4" (core p158)
+            "maxLevel": max_level,
             "multi": a.get("multi") in ("yes", "true"),
             "action": a.get("act", ""),
+            "bonuses": _scale_for_level(attribute_bonuses(t),
+                                        a.get("hasLevel") == "true"),
             "book": book,
             "page": text.get("page", ""),
         }

@@ -743,3 +743,6 @@
   color: var(--sf-cyan);
   border: 1px solid var(--sf-line-hot);
 }
+
+/* augmented attribute rating, Commlink-style "4 (6)" */
+.sr6-forge .attr-cell .a-val .aug { color: var(--sf-cyan); font-size: .78em; }
