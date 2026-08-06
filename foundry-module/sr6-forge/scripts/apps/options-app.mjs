@@ -1,7 +1,7 @@
-/** Optional-rules configuration — the same switches Commlink6 exposes
- *  (Shadowrun6Rules.properties), applied on top of the selected rule
+/** Optional-rules configuration — the switches the upstream data exposes,
+ *  plus this project's own (OWN_RULES), applied on top of the selected rule
  *  interpretation. Stored world-scoped so every new character inherits them. */
-import { MODULE_ID, SETTINGS } from "../config.mjs";
+import { MODULE_ID, SETTINGS, OWN_RULES } from "../config.mjs";
 import { chargenData } from "../main.mjs";
 
 import { RememberPosition } from "./remember-position.mjs";
@@ -14,6 +14,11 @@ const NUMERIC_SETTINGS = new Set([
   "maxTranshumanGrade", "maxAnimalismGrade", "sumToTenTarget",
   "maxKarmaRemaining", "maxNuyenRemaining",
 ]);
+
+const ownRuleLabels = () =>
+  Object.fromEntries(Object.entries(OWN_RULES).map(([k, v]) => [k, v.label]));
+const ownRuleDefaults = () =>
+  Object.fromEntries(Object.entries(OWN_RULES).map(([k, v]) => [k, v.default]));
 
 export class SR6ForgeOptions extends RememberPosition(
   HandlebarsApplicationMixin(ApplicationV2), "options") {
@@ -35,7 +40,7 @@ export class SR6ForgeOptions extends RememberPosition(
     const data = chargenData();
     const base = data.rules?.[rulesetId]?.settings ?? {};
     const over = game.settings.get(MODULE_ID, SETTINGS.OPTIONAL_RULES) ?? {};
-    return { ...base, ...over };
+    return { ...ownRuleDefaults(), ...base, ...over };
   }
 
   async _prepareContext() {
@@ -49,9 +54,9 @@ export class SR6ForgeOptions extends RememberPosition(
         unavailable: "chargen-data.json is not loaded — rebuild and redeploy the module." };
     }
     const rulesetId = game.settings.get(MODULE_ID, SETTINGS.RULESET);
-    const base = data.rules?.[rulesetId]?.settings ?? {};
+    const base = { ...ownRuleDefaults(), ...(data.rules?.[rulesetId]?.settings ?? {}) };
     const over = game.settings.get(MODULE_ID, SETTINGS.OPTIONAL_RULES) ?? {};
-    const labels = data.ruleLabels ?? {};
+    const labels = { ...(data.ruleLabels ?? {}), ...ownRuleLabels() };
     const rows = Object.entries(labels).sort((a, b) => a[1].localeCompare(b[1]))
       .map(([key, label]) => {
         const dflt = base[key];

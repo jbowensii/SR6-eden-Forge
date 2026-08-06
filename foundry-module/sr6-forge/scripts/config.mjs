@@ -43,6 +43,19 @@ export const SETTINGS = {
   WINDOW_STATE: "windowState",     // client-scoped {key: {width,height,left,top}}
 };
 
+/**
+ * Optional rules this project adds on top of the ones the upstream data
+ * defines. They are keyed and stored exactly like the imported ones, so the
+ * options screen and the override store treat both alike; only the label and
+ * default live here, because no upstream ruleset declares them.
+ */
+export const OWN_RULES = {
+  allowNuyenToKarma: {
+    label: "Allow nuyen → karma in downtime (6WC p154)",
+    default: false,
+  },
+};
+
 /** Compendium index fields the wizard browse lists need (pushed, not replaced —
  *  eden already indexes name/type and its own catalog field). */
 export const EXTRA_INDEX_FIELDS = [

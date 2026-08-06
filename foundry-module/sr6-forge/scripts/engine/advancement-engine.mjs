@@ -161,6 +161,27 @@ export function preview(op, snap, rules, { data = null } = {}) {
         patch: { "system.nuyen": snap.nuyen + nuyen } };
     }
 
+    /* Companion p154, "Working for the People" — the reverse trade. This is an
+     * OPTIONAL downtime rule, not a creation one: the core book only ever lets
+     * karma flow to nuyen (p67). Each karma costs a week of downtime, which the
+     * table cannot track, so the note records the time owed for the GM. */
+    case "nuyenToKarma": {
+      const rule = rules.nuyenToKarma ?? {};
+      if (!rule.enabled) return deny("optional-rule-off");
+      const karma = op.karma ?? 1;
+      const rate = rule.rate ?? 2000;
+      const nuyen = karma * rate;
+      if (nuyen > snap.nuyen) return { ...deny("not-enough-nuyen"),
+        label: `Convert ${nuyen.toLocaleString()}¥ to ${karma} karma` };
+      return { ...op, ok: true, reason: null,
+        label: `Convert ${nuyen.toLocaleString()}¥ to ${karma} karma`,
+        // negative spend: applyPatch subtracts, so this credits karma
+        karma: -karma, nuyen: -nuyen,
+        from: snap.karma, to: snap.karma + karma,
+        note: `${karma} week${karma === 1 ? "" : "s"} of downtime`,
+        patch: { "system.nuyen": snap.nuyen - nuyen } };
+    }
+
     default:
       return deny(`unknown-op:${op.kind}`);
   }

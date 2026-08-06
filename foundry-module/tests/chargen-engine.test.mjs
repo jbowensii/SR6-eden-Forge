@@ -1101,3 +1101,58 @@ describe("pricing works from the item alone", () => {
     expect(revived.budgets().essence.spent).toBe(1.5);
   });
 });
+
+describe("nuyen breakdown — gear is not the only drain", () => {
+  /** Reproduces a real report: Priority E resources, no gear bought at all,
+   *  yet the budget showed roughly -4,000¥ with nothing on screen to explain
+   *  it. The money was a lifestyle and a fake SIN. */
+  function priest() {
+    const e = engineWith({ METATYPE: "D", ATTRIBUTE: "B", MAGIC: "A", SKILLS: "C", RESOURCES: "E" });
+    e.setMetatype("human");
+    return e;
+  }
+
+  it("starts a Priority E character with the table's 8,000 nuyen", () => {
+    expect(priest().budgets().nuyen.max).toBe(8000);
+  });
+
+  it("charges a lifestyle and a fake SIN, and says so", () => {
+    const e = priest();
+    e.spend({ kind: "lifestyle", id: "low", months: 1 });
+    e.spend({ kind: "sin", name: "Fake SIN", rating: 4 });
+    const n = e.budgets().nuyen;
+
+    expect(e.state.purchases).toHaveLength(0);       // no gear at all
+    expect(n.spent).toBe(12000);                     // 2,000 lifestyle + 10,000 SIN
+    expect(n.left).toBe(-4000);
+
+    // the whole point: the overdraft has to be explicable from the budget
+    const labels = n.breakdown.map((b) => b.label).join(" | ");
+    expect(n.breakdown).toHaveLength(2);
+    expect(labels).toMatch(/Low lifestyle/i);
+    expect(labels).toMatch(/rating 4/i);
+    expect(n.breakdown.reduce((s, b) => s + b.amount, 0)).toBe(n.spent);
+  });
+
+  it("prices a fake SIN at rating x 2,500 (core p274)", () => {
+    for (const rating of [1, 2, 3, 4]) {
+      const e = priest();
+      e.spend({ kind: "sin", name: "Fake SIN", rating });
+      expect(e.budgets().nuyen.spent).toBe(rating * 2500);
+    }
+  });
+
+  it("charges for fake licenses at rating x 200 (core p274)", () => {
+    const e = priest();
+    e.spend({ kind: "sin", name: "Fake SIN", rating: 1 });
+    e.state.sins[0].licenses = [{ name: "driver's license", rating: 3 }, "concealed carry"];
+    // 2,500 SIN + 600 rated license + 200 for the unrated one
+    expect(e.budgets().nuyen.spent).toBe(3300);
+  });
+
+  it("reports an empty breakdown when nothing has been bought", () => {
+    const n = priest().budgets().nuyen;
+    expect(n.breakdown).toEqual([]);
+    expect(n.left).toBe(n.max);
+  });
+});

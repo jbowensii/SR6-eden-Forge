@@ -222,23 +222,68 @@ export function karmaBudget(state, data, rules, provider) {
   return { max: start + q.neg, spent, left: start + q.neg - spent };
 }
 
+/** Core p274: "Fake SIN 4(I) Rating x 2,500¥" / "Fake license 4(I) Rating x 200¥". */
+export const FAKE_SIN_PER_RATING = 2500;
+export const FAKE_LICENSE_PER_RATING = 200;
+
+/**
+ * Nuyen at creation.
+ *
+ * Returns a `breakdown` alongside the totals because gear is NOT the only
+ * thing that costs money — a lifestyle and any fake SINs come out of the same
+ * pool, and a character who has bought no gear at all can still be deep in the
+ * red. Without an itemised list that reads as a bug in the budget.
+ */
 export function nuyenBudget(state, data, rules, provider) {
   const base = provider.nuyen(state);
-  const conv = (state.conversions.karmaToNuyen ?? 0) * rules.karmaToNuyen.rate;
+  const conv = (state.conversions.karmaToNuyen ?? 0) * (rules.karmaToNuyen?.rate ?? 2000);
   const priceMods = data.metatypes?.[state.metatypeId]?.priceMods ?? {};
   const factor = 1 + (priceMods.EVERYTHING ?? 0);
-  let spent = 0;
+  const breakdown = [];
+
+  let gear = 0;
   for (const p of state.purchases) {
-    spent += ratedValues(p, data).price * (p.qty ?? 1);
+    gear += ratedValues(p, data).price * (p.qty ?? 1);
     // fitted accessories are paid for too; factory-fitted ones are included in
     // the host's price and carry 0
-    for (const a of p.accessories ?? []) spent += a.price ?? 0;
+    for (const a of p.accessories ?? []) gear += a.price ?? 0;
   }
-  spent *= factor;
+  gear *= factor;
+  let spent = gear;
+  if (gear) {
+    breakdown.push({ key: "gear", step: "purchases",
+      label: `Gear (${state.purchases.length} item${state.purchases.length === 1 ? "" : "s"})`,
+      amount: Math.round(gear) });
+  }
+
   const ls = data.lifestyles?.[state.lifestyleId];
-  if (ls) spent += ls.cost * (state.lifestyleMonths ?? 1);
-  for (const s of state.sins) spent += (s.rating ?? 1) * 2500;   // fake SIN pricing (VERIFY V-C12b)
-  return { max: base + conv, spent: Math.round(spent), left: Math.round(base + conv - spent) };
+  if (ls) {
+    const months = state.lifestyleMonths ?? 1;
+    const cost = ls.cost * months;
+    spent += cost;
+    if (cost) {
+      breakdown.push({ key: "lifestyle", step: "purchases",
+        label: `${ls.name} lifestyle x ${months} month${months === 1 ? "" : "s"}`,
+        amount: cost });
+    }
+  }
+
+  for (const s of state.sins) {
+    // a license may be a bare name or a rated object; an unrated one is Rating 1
+    const licenses = (s.licenses ?? [])
+      .reduce((n, l) => n + (typeof l === "object" ? (l.rating ?? 1) : 1)
+        * FAKE_LICENSE_PER_RATING, 0);
+    const cost = (s.rating ?? 1) * FAKE_SIN_PER_RATING + licenses;
+    spent += cost;
+    breakdown.push({ key: "sin", step: "purchases",
+      label: `${s.name || "Fake SIN"} (rating ${s.rating ?? 1}${
+        (s.licenses ?? []).length ? `, ${s.licenses.length} license${s.licenses.length === 1 ? "" : "s"}` : ""})`,
+      amount: cost });
+  }
+
+  return { max: base + conv, spent: Math.round(spent),
+    left: Math.round(base + conv - spent),
+    base, converted: conv, breakdown };
 }
 
 export function essenceUsed(state, data) {

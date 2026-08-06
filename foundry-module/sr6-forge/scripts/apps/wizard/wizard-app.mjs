@@ -210,7 +210,15 @@ export class SR6ForgeWizard extends RememberPosition(
       mk("KNOW", b.knowledgePoints, "Knowledge points"),
       mk("KARMA", b.karma, "Karma"),
       { k: "NUYEN", v: `${b.nuyen.left.toLocaleString()}¥`, m: null,
-        title: "Nuyen", cls: b.nuyen.left < 0 ? "over" : "" },
+        // gear is not the only drain — spell out lifestyle and SINs, or a
+        // character who bought nothing looks overdrawn for no visible reason
+        title: [
+          `Starting nuyen: ${(b.nuyen.base ?? 0).toLocaleString()}¥`,
+          ...(b.nuyen.converted ? [`Karma converted: +${b.nuyen.converted.toLocaleString()}¥`] : []),
+          ...(b.nuyen.breakdown ?? []).map((x) => `${x.label}: −${x.amount.toLocaleString()}¥`),
+          `Remaining: ${b.nuyen.left.toLocaleString()}¥`,
+        ].join("\n"),
+        cls: b.nuyen.left < 0 ? "over" : "" },
       { k: "ESS", v: b.essence.left.toFixed(2), m: null, title: "Essence",
         cls: b.essence.left <= 0 ? "over" : "" },
       mk("PP", b.powerPoints, "Power points", false),
@@ -714,6 +722,7 @@ export class SR6ForgeWizard extends RememberPosition(
         return {
           name: st.name, converted: st.conversions.karmaToNuyen,
           convRate: rules.karmaToNuyen.rate, convMax: rules.karmaToNuyen.maxKarma,
+          nuyen: { ...budgets.nuyen, over: budgets.nuyen.left < 0 },
           issues,
           summary: {
             metatype: mt?.name ?? "—", mor: data.morTypes?.[st.morId]?.name ?? "—",

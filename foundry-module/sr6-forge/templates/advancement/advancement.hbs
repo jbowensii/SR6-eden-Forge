@@ -36,6 +36,20 @@
     <button type="button" data-action="buy" data-op="karmaToNuyen" data-karma="1">Convert 1 karma</button>
     <button type="button" data-action="buy" data-op="karmaToNuyen" data-karma="5">Convert 5 karma</button>
   </div>
+
+  {{#if reverse.enabled}}
+  <h3>Nuyen to karma</h3>
+  <p class="hint">{{reverse.label}} — {{reverse.rate}}¥ per karma, one week of
+    downtime each (6WC p154, "Working for the People").</p>
+  <div class="browser-head">
+    <button type="button" data-action="buy" data-op="nuyenToKarma" data-karma="1">Convert 1 karma</button>
+    <button type="button" data-action="buy" data-op="nuyenToKarma" data-karma="5">Convert 5 karma</button>
+  </div>
+  {{else}}
+  <p class="hint">Nuyen can also be traded back for karma, but only under the
+    optional downtime rule (6WC p154) — enable
+    <em>“Allow nuyen → karma in downtime”</em> in Optional Rules.</p>
+  {{/if}}
   {{/if}}
 
   {{#if (eq tab "skills")}}

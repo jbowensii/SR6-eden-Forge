@@ -12,6 +12,24 @@
   <button type="button" class="down" data-action="adj" data-kind="karma2nuyen" data-delta="-1">−</button>
 </div>
 
+<h3>Where the nuyen went</h3>
+<table class="data nuyen-ledger">
+  <tbody>
+    <tr><th>Starting nuyen</th><td class="num">{{fmt nuyen.base}}¥</td></tr>
+    {{#if nuyen.converted}}
+    <tr><th>Karma converted</th><td class="num plus">+{{fmt nuyen.converted}}¥</td></tr>
+    {{/if}}
+    {{#each nuyen.breakdown}}
+    <tr><th>{{label}}</th><td class="num minus">−{{fmt amount}}¥</td></tr>
+    {{else}}
+    <tr><th class="hint" colspan="2">Nothing spent yet.</th></tr>
+    {{/each}}
+    <tr class="total {{#if nuyen.over}}over{{/if}}">
+      <th>Remaining</th><td class="num">{{fmt nuyen.left}}¥</td>
+    </tr>
+  </tbody>
+</table>
+
 <h3>Summary</h3>
 <table class="data">
   <tbody>

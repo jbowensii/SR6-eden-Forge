@@ -5,7 +5,8 @@
  *  written as one actor.update plus one ledger entry, so undo can replay the
  *  captured `before` values.
  */
-import { MODULE_ID, ACTOR_SKILLS, catalogIdOf } from "../../config.mjs";
+import { MODULE_ID, SETTINGS, ACTOR_SKILLS, catalogIdOf } from "../../config.mjs";
+import { SR6ForgeOptions } from "../options-app.mjs";
 import { chargenData } from "../../main.mjs";
 import { preview, applyPatch, undoPatch, snapshot } from "../../engine/advancement-engine.mjs";
 import { Ledger } from "../../services/ledger.mjs";
@@ -19,9 +20,19 @@ const TPL = (n) => `modules/${MODULE_ID}/templates/advancement/${n}.hbs`;
 const CORE_ATTRS = ["bod", "agi", "rea", "str", "wil", "log", "int", "cha"];
 
 let rulesCache = null;
+/**
+ * The shipped rules, with the world's optional-rule switches folded in.
+ *
+ * The cache holds the file as shipped; the overlay is rebuilt each call so
+ * flipping a switch takes effect on the next render rather than after a reload.
+ */
 async function creationRules() {
   if (!rulesCache) rulesCache = await (await fetch(`modules/${MODULE_ID}/data/creation-rules.json`)).json();
-  return rulesCache;
+  const opts = SR6ForgeOptions.effective(game.settings.get(MODULE_ID, SETTINGS.RULESET));
+  return {
+    ...rulesCache,
+    nuyenToKarma: { ...rulesCache.nuyenToKarma, enabled: !!opts.allowNuyenToKarma },
+  };
 }
 
 export class SR6AdvancementApp extends RememberPosition(
@@ -121,6 +132,9 @@ export class SR6AdvancementApp extends RememberPosition(
       attributes, skills, magic, learnable,
       convertRate: rules.karmaToNuyen.rate,
       convert: price({ kind: "karmaToNuyen", karma: 1 }),
+      reverse: { enabled: !!rules.nuyenToKarma?.enabled,
+        rate: (rules.nuyenToKarma?.rate ?? 2000).toLocaleString(),
+        label: price({ kind: "nuyenToKarma", karma: 1 }).label },
       ledger: Ledger.entries(actor).map((e, i, all) => ({
         ...e, last: i === all.length - 1,
       })).reverse(),
@@ -196,7 +210,7 @@ export class SR6AdvancementApp extends RememberPosition(
       if (!value) { ui.notifications.warn("SR6 Forge: pick a specialization first."); return; }
       op.value = value;
     }
-    if (d.op === "karmaToNuyen") op.karma = Number(d.karma ?? 1);
+    if (d.op === "karmaToNuyen" || d.op === "nuyenToKarma") op.karma = Number(d.karma ?? 1);
     if (d.uuid) op.uuid = d.uuid;
     await this.#purchase(op);
   }

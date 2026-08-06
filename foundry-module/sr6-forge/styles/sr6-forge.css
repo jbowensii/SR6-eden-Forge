@@ -749,3 +749,23 @@
 
 .sr6-forge .rating-pick { display: inline-flex; align-items: center; gap: 5px; margin-left: 8px; }
 .sr6-forge .rating-pick select { width: 58px; }
+
+/* Nuyen ledger on the review step. A character can go overdrawn on a lifestyle
+   and a fake SIN without buying a single piece of gear, so the review itemises
+   every drain rather than showing a bare negative total. */
+.sr6-forge table.data.nuyen-ledger { max-width: 460px; }
+.sr6-forge .nuyen-ledger td.num {
+  font-family: var(--sf-mono);
+  text-align: right;
+  white-space: nowrap;
+}
+.sr6-forge .nuyen-ledger td.minus { color: var(--sf-red); }
+.sr6-forge .nuyen-ledger td.plus  { color: var(--sf-green); }
+.sr6-forge .nuyen-ledger tr.total th,
+.sr6-forge .nuyen-ledger tr.total td {
+  border-top: 1px solid var(--sf-line-hot);
+  border-bottom: none;
+  font-weight: 700;
+  color: #fff;
+}
+.sr6-forge .nuyen-ledger tr.total.over td { color: var(--sf-red); }

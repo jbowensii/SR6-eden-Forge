@@ -129,3 +129,41 @@ describe("apply and undo", () => {
     expect(back["system.karma"]).toBe(50);
   });
 });
+
+describe("nuyen to karma — 6WC p154 'Working for the People'", () => {
+  const on = { ...rules, nuyenToKarma: { ...rules.nuyenToKarma, enabled: true } };
+
+  it("is refused while the optional rule is off", () => {
+    // the core book only ever moves karma TO nuyen (p67); the reverse is an
+    // optional downtime rule, so it must not be available by default
+    expect(rules.nuyenToKarma.enabled).toBe(false);
+    const pv = preview({ kind: "nuyenToKarma", karma: 1 }, snap(actor()), rules, { data });
+    expect(pv.ok).toBe(false);
+    expect(pv.reason).toBe("optional-rule-off");
+  });
+
+  it("trades 2,000 nuyen for 1 karma once enabled", () => {
+    const s = snap(actor({ karma: 10 }));            // the stand-in holds 5,000¥
+    const pv = preview({ kind: "nuyenToKarma", karma: 1 }, s, on, { data });
+    expect(pv.ok).toBe(true);
+    expect(pv.patch["system.nuyen"]).toBe(3000);
+    expect(applyPatch(pv, s)["system.karma"]).toBe(11);   // credited, not spent
+  });
+
+  it("will not spend nuyen the character does not have", () => {
+    const pv = preview({ kind: "nuyenToKarma", karma: 4 }, snap(actor()), on, { data });
+    expect(pv.ok).toBe(false);                       // 8,000¥ needed, 5,000¥ held
+    expect(pv.reason).toBe("not-enough-nuyen");
+  });
+
+  it("reverses exactly, karma and nuyen both", () => {
+    const s = snap(actor({ karma: 10 }));
+    const pv = preview({ kind: "nuyenToKarma", karma: 2 }, s, on, { data });
+    const after = { ...s, karma: applyPatch(pv, s)["system.karma"], nuyen: pv.patch["system.nuyen"] };
+    expect(after.karma).toBe(12);
+    expect(after.nuyen).toBe(1000);
+    const back = undoPatch({ before: { "system.nuyen": s.nuyen }, karma: pv.karma }, after);
+    expect(back["system.karma"]).toBe(10);
+    expect(back["system.nuyen"]).toBe(5000);
+  });
+});

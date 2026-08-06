@@ -52,6 +52,11 @@ Hooks.once("init", () => {
   // tables on the item, and the shop row has to hand them to the click handler.
   Handlebars.registerHelper("json", (v) =>
     new Handlebars.SafeString(foundry.utils.escapeHTML(JSON.stringify(v ?? null))));
+
+  // Thousands separators for nuyen. Handlebars stringifies numbers raw, and
+  // "12000" beside "8000" is much harder to reconcile than "12,000" vs "8,000".
+  Handlebars.registerHelper("fmt", (v) =>
+    typeof v === "number" ? v.toLocaleString() : (v ?? ""));
 });
 
 /**
