@@ -11,6 +11,8 @@ import { preview, applyPatch, undoPatch, snapshot } from "../../engine/advanceme
 import { Ledger } from "../../services/ledger.mjs";
 import { PackCatalog } from "../../services/pack-catalog.mjs";
 
+import { RememberPosition } from "../remember-position.mjs";
+
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const TPL = (n) => `modules/${MODULE_ID}/templates/advancement/${n}.hbs`;
 
@@ -22,7 +24,8 @@ async function creationRules() {
   return rulesCache;
 }
 
-export class SR6AdvancementApp extends HandlebarsApplicationMixin(ApplicationV2) {
+export class SR6AdvancementApp extends RememberPosition(
+  HandlebarsApplicationMixin(ApplicationV2), "advancement") {
   static DEFAULT_OPTIONS = {
     id: "sr6-forge-advancement",
     classes: ["sr6-forge"],

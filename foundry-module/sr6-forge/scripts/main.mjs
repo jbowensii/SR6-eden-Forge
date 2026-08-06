@@ -22,6 +22,10 @@ Hooks.once("init", () => {
   game.settings.register(MODULE_ID, SETTINGS.OPTIONAL_RULES, {
     scope: "world", config: false, type: Object, default: {},
   });
+  // Window geometry is a per-user preference, not a world rule.
+  game.settings.register(MODULE_ID, SETTINGS.WINDOW_STATE, {
+    scope: "client", config: false, type: Object, default: {},
+  });
   // config:false — the interpretation dropdown lives in the options app, so
   // Foundry's settings pane and the launcher's gear open the same one screen
   // rather than offering two half-configurations.

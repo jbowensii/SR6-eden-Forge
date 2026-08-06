@@ -281,6 +281,59 @@ export function registerQuenchBatches(quench) {
     });
   }, { displayName: "SR6 Forge: Advancement" });
 
+  /* ------------------------------------------------------- window memory */
+  quench.registerBatch(`${MODULE_ID}.windows`, (context) => {
+    const { describe, it, assert, after } = context;
+    let saved = null;
+
+    describe("remembering window geometry", function () {
+      after(async function () {
+        if (saved !== null) await game.settings.set(MODULE_ID, SETTINGS.WINDOW_STATE, saved);
+      });
+
+      it("registers a client-scoped store", function () {
+        const cfg = game.settings.settings.get(`${MODULE_ID}.${SETTINGS.WINDOW_STATE}`);
+        assert.ok(cfg, "windowState setting missing");
+        assert.equal(cfg.scope, "client", "geometry is a per-user preference");
+      });
+
+      it("every window class loads — catches a broken import path", async function () {
+        // node --check validates syntax but not module resolution, so a wrong
+        // relative path only shows up here
+        const mods = await Promise.all([
+          import(`../apps/wizard/wizard-app.mjs`),
+          import(`../apps/advancement/advancement-app.mjs`),
+          import(`../apps/options-app.mjs`),
+          import(`../apps/launcher.mjs`),
+        ]);
+        assert.isFunction(mods[0].SR6ForgeWizard);
+        assert.isFunction(mods[1].SR6AdvancementApp);
+        assert.isFunction(mods[2].SR6ForgeOptions);
+        assert.isFunction(mods[3].SR6ForgeLauncher);
+      });
+
+      it("reopens a window at the size it was left", async function () {
+        saved = foundry.utils.deepClone(game.settings.get(MODULE_ID, SETTINGS.WINDOW_STATE) ?? {});
+        const { SR6ForgeOptions } = await import(`../apps/options-app.mjs`);
+
+        const first = new SR6ForgeOptions();
+        await first.render({ force: true });
+        await first.setPosition({ width: 733, height: 521 });
+        await first.close();
+
+        const store = game.settings.get(MODULE_ID, SETTINGS.WINDOW_STATE);
+        assert.equal(store.options?.width, 733, "width was not remembered");
+        assert.equal(store.options?.height, 521, "height was not remembered");
+
+        // a fresh instance must pick the remembered size up before it renders
+        const second = new SR6ForgeOptions();
+        assert.equal(second.options.position.width, 733);
+        assert.equal(second.options.position.height, 521);
+        await second.close();
+      });
+    });
+  }, { displayName: "SR6 Forge: Window Memory" });
+
   /* --------------------------------------------------------------- engine */
   quench.registerBatch(`${MODULE_ID}.rules`, (context) => {
     const { describe, it, assert } = context;

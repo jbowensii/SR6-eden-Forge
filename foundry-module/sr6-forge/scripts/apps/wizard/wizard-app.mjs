@@ -11,6 +11,8 @@ import { DraftStore } from "../../services/draft-store.mjs";
 import { PackCatalog } from "../../services/pack-catalog.mjs";
 import { commitCharacter } from "../../services/actor-committer.mjs";
 
+import { RememberPosition } from "../remember-position.mjs";
+
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const TPL = (n) => `modules/${MODULE_ID}/templates/wizard/${n}.hbs`;
 const renderTpl = (p, d) => foundry.applications.handlebars.renderTemplate(p, d);
@@ -64,7 +66,8 @@ async function creationRules() {
   return rulesCache;
 }
 
-export class SR6ForgeWizard extends HandlebarsApplicationMixin(ApplicationV2) {
+export class SR6ForgeWizard extends RememberPosition(
+  HandlebarsApplicationMixin(ApplicationV2), "wizard") {
   static DEFAULT_OPTIONS = {
     id: "sr6-forge-wizard",
     classes: ["sr6-forge"],

@@ -13,7 +13,8 @@ export const FLAGS = {
 export const SETTINGS = {
   DRAFTS: "drafts",                // { [draftId]: {name, updatedAt, step, engineState} }
   RULESET: "ruleset",              // rule interpretation id (core | srm | ...)
-  OPTIONAL_RULES: "optionalRules", // { RULE_CONST: boolean|number } overrides
+  OPTIONAL_RULES: "optionalRules", // { settingName: boolean|number } overrides
+  WINDOW_STATE: "windowState",     // client-scoped {key: {width,height,left,top}}
 };
 
 /** Compendium index fields the wizard browse lists need (pushed, not replaced —

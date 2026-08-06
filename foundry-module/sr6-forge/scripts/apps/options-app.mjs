@@ -4,6 +4,8 @@
 import { MODULE_ID, SETTINGS } from "../config.mjs";
 import { chargenData } from "../main.mjs";
 
+import { RememberPosition } from "./remember-position.mjs";
+
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
 /** Creation settings that take a number rather than a yes/no. */
@@ -13,7 +15,8 @@ const NUMERIC_SETTINGS = new Set([
   "maxKarmaRemaining", "maxNuyenRemaining",
 ]);
 
-export class SR6ForgeOptions extends HandlebarsApplicationMixin(ApplicationV2) {
+export class SR6ForgeOptions extends RememberPosition(
+  HandlebarsApplicationMixin(ApplicationV2), "options") {
   static DEFAULT_OPTIONS = {
     id: "sr6-forge-options",
     classes: ["sr6-forge"],

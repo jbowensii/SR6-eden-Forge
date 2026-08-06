@@ -3,9 +3,12 @@
 import { MODULE_ID } from "../config.mjs";
 import { DraftStore } from "../services/draft-store.mjs";
 
+import { RememberPosition } from "./remember-position.mjs";
+
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-export class SR6ForgeLauncher extends HandlebarsApplicationMixin(ApplicationV2) {
+export class SR6ForgeLauncher extends RememberPosition(
+  HandlebarsApplicationMixin(ApplicationV2), "launcher") {
   static DEFAULT_OPTIONS = {
     id: "sr6-forge-launcher",
     classes: ["sr6-forge", "sr6-forge-launcher"],
