@@ -13,11 +13,13 @@
       <span class="c-meta">{{#if free}}racial · free{{else}}{{sign}}{{karma}} karma{{/if}}{{#if rating}} · rating {{rating}}{{/if}}</span>
     </span>
     {{#unless free}}
-    <button type="button" class="x" data-action="removeQuality" data-catalog-id="{{catalogId}}">✕</button>
+    <button type="button" class="x" data-action="removeQuality"
+            data-catalog-id="{{catalogId}}" data-index="{{@index}}">✕</button>
     {{/unless}}
     {{#unless free}}
     <input class="note-input" type="text" placeholder="Specifics (e.g. Allergy: peanuts, severe)"
-           value="{{note}}" data-change="qualityNote" data-catalog-id="{{catalogId}}" />
+           value="{{note}}" data-change="qualityNote"
+           data-catalog-id="{{catalogId}}" data-index="{{@index}}" />
     {{/unless}}
   </div>
   {{/each}}

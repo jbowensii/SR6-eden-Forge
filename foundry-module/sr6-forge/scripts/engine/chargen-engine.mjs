@@ -43,12 +43,45 @@ export function blankState(method = "priority", rulesetId = "core") {
   };
 }
 
+/** State collections whose entries are keyed by a catalog id. */
+const CATALOG_KEYED = ["qualities", "spells", "powers", "complexForms", "rituals",
+  "foci", "purchases", "knowledge", "contacts"];
+
+/**
+ * Bring a saved draft up to the current state shape.
+ *
+ * Drafts written before the catalog-id rename key their entries `genesisID`.
+ * Nothing reads that name any more, so such a draft silently loses every
+ * lookup that depends on it: qualities price at 0 Karma because their metadata
+ * cannot be found, and they cannot be removed because the remove action
+ * matches on an id that is now undefined. Renaming the key in place repairs
+ * both and keeps whatever the player typed alongside it.
+ *
+ * @param {object} state  mutated in place and returned
+ */
+export function migrateState(state) {
+  if (!state) return state;
+  for (const key of CATALOG_KEYED) {
+    for (const entry of state[key] ?? []) {
+      if (entry?.genesisID !== undefined) {
+        entry.catalogId ??= entry.genesisID;
+        delete entry.genesisID;
+      }
+      // accessories carry their own catalog id
+      for (const a of entry?.accessories ?? []) {
+        if (a?.genesisID !== undefined) { a.catalogId ??= a.genesisID; delete a.genesisID; }
+      }
+    }
+  }
+  return state;
+}
+
 export class ChargenEngine {
   constructor(chargenData, creationRules, { state = null, catalog = null } = {}) {
     this.data = chargenData;
     this.rules = creationRules;
     this.catalog = catalog;
-    this.state = state ?? blankState();
+    this.state = migrateState(state ?? blankState());
     this.provider = makeProvider(this.state.method, chargenData);
   }
 
@@ -139,7 +172,15 @@ export class ChargenEngine {
       }
       case "quality": {
         if (op.remove) {
-          const i = s.qualities.findIndex((q) => q.catalogId === op.catalogId && !q.free);
+          let i = op.catalogId
+            ? s.qualities.findIndex((q) => q.catalogId === op.catalogId && !q.free)
+            : -1;
+          // fall back to position, so an entry with no usable id is still
+          // removable rather than stuck on the sheet forever
+          if (i < 0 && Number.isInteger(op.index)
+              && s.qualities[op.index] && !s.qualities[op.index].free) {
+            i = op.index;
+          }
           if (i < 0) return { ok: false, reason: "not-taken" };
           s.qualities.splice(i, 1);
           return { ok: true };

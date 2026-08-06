@@ -3,9 +3,9 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { ChargenEngine, blankState } from "../sr6-forge/scripts/engine/chargen-engine.mjs";
+import { ChargenEngine, blankState, migrateState } from "../sr6-forge/scripts/engine/chargen-engine.mjs";
 import { LIFEPATH_OPENING } from "../sr6-forge/scripts/engine/providers.mjs";
-import { augmentBonus, augmentedRating, ratedValues } from "../sr6-forge/scripts/engine/budgets.mjs";
+import { augmentBonus, augmentedRating, ratedValues, qualityKarma } from "../sr6-forge/scripts/engine/budgets.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const data = JSON.parse(readFileSync(join(here, "..", "..", "export", "chargen-data.json"), "utf8"));
@@ -1154,5 +1154,87 @@ describe("nuyen breakdown — gear is not the only drain", () => {
     const n = priest().budgets().nuyen;
     expect(n.breakdown).toEqual([]);
     expect(n.left).toBe(n.max);
+  });
+});
+
+describe("draft migration — drafts written before the catalog-id rename", () => {
+  /** A draft as saved by the older build: entries keyed `genesisID`. */
+  function oldDraft() {
+    const st = blankState();
+    st.method = "priority";
+    st.metatypeId = "human";
+    st.qualities = [
+      { genesisID: "mentor_spirit", rating: 1, positive: true, free: false },
+      { genesisID: "honorbound", rating: 1, positive: false, free: false },
+      { genesisID: "sinner", rating: 1, positive: false, free: false },
+      { genesisID: "prejudiced", rating: 1, positive: false, free: false },
+      { genesisID: "dependents", rating: 1, positive: false, free: false },
+    ];
+    st.powers = [{ genesisID: "improved_reflexes", name: "Improved Reflexes", cost: 1, level: 3 }];
+    return st;
+  }
+
+  it("renames the key so metadata resolves again", () => {
+    const st = migrateState(oldDraft());
+    expect(st.qualities.map((q) => q.catalogId)).toEqual(
+      ["mentor_spirit", "honorbound", "sinner", "prejudiced", "dependents"]);
+    expect(st.qualities.every((q) => q.genesisID === undefined)).toBe(true);
+    expect(st.powers[0].catalogId).toBe("improved_reflexes");
+  });
+
+  it("credits the negative qualities that used to price at zero", () => {
+    // the reported symptom: every quality resolved to 0 karma, so four
+    // negative qualities earned nothing
+    const before = qualityKarma(oldDraft(), data);
+    expect(before).toEqual({ pos: 0, neg: 0 });
+
+    const after = qualityKarma(migrateState(oldDraft()), data);
+    expect(after.neg).toBe(30);                    // 10 + 8 + 8 + 4
+    expect(after.pos).toBe(10);                    // mentor spirit
+    expect(after.neg - after.pos).toBe(20);        // the missing 20 karma
+  });
+
+  it("migrates automatically when an engine is built from the draft", () => {
+    const e = new ChargenEngine(data, rules, { state: oldDraft() });
+    expect(e.state.qualities[0].catalogId).toBe("mentor_spirit");
+  });
+
+  it("leaves a current draft untouched", () => {
+    const st = blankState();
+    st.qualities = [{ catalogId: "honorbound", rating: 1, positive: false, free: false }];
+    expect(migrateState(structuredClone(st))).toEqual(st);
+  });
+});
+
+describe("removing a quality", () => {
+  function withQualities() {
+    const e = engineWith();
+    e.setMetatype("human");
+    e.spend({ kind: "quality", catalogId: "honorbound", positive: false, karma: 10 });
+    return e;
+  }
+
+  it("removes by catalog id", () => {
+    const e = withQualities();
+    expect(e.spend({ kind: "quality", catalogId: "honorbound", remove: true }).ok).toBe(true);
+    expect(e.state.qualities.filter((q) => !q.free)).toHaveLength(0);
+  });
+
+  it("removes by position when the id is missing", () => {
+    // guards the reported "cannot remove it in the UI" case: the button sends
+    // an empty id for a row whose catalogId never survived
+    const e = withQualities();
+    const i = e.state.qualities.findIndex((q) => !q.free);
+    delete e.state.qualities[i].catalogId;
+    expect(e.spend({ kind: "quality", catalogId: "", index: i, remove: true }).ok).toBe(true);
+    expect(e.state.qualities.filter((q) => !q.free)).toHaveLength(0);
+  });
+
+  it("still refuses to remove a free racial quality", () => {
+    const e = withQualities();
+    const free = e.state.qualities.findIndex((q) => q.free);
+    if (free >= 0) {
+      expect(e.spend({ kind: "quality", catalogId: "", index: free, remove: true }).ok).toBe(false);
+    }
   });
 });

@@ -972,7 +972,10 @@ export class SR6ForgeWizard extends RememberPosition(
       positive: d.category !== "negative", karma: Math.abs(Number(d.value ?? 0)) }, "quality");
   }
   static #onRemoveQuality(_ev, t) {
-    this.#spend({ kind: "quality", catalogId: t.dataset.catalogId, remove: true });
+    // the index is the fallback: a row whose catalog id is missing must still
+    // be removable, or the player is stuck with it
+    this.#spend({ kind: "quality", catalogId: t.dataset.catalogId,
+      index: Number(t.dataset.index), remove: true });
   }
   static #onAddPurchase(_ev, t) {
     const d = t.dataset;
