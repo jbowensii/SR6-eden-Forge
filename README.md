@@ -1,167 +1,204 @@
-# SR6-eden-Forge
+# SR6 Forge
 
-A local pipeline that turns Shadowrun 6th World book PDFs into reviewed, structured
-game data and packages it as compendium modules for the
-[shadowrun6-eden](https://github.com/yjeroen/foundry-shadowrun6-eden) Foundry VTT system.
+**Turn the Shadowrun books on your shelf into a live Foundry VTT library — then roll characters against it in minutes.**
 
-**This repository contains tooling only. It contains no Shadowrun game content.**
+[![License: MIT](https://img.shields.io/badge/license-MIT-00d4c8.svg)](LICENSE)
+![Foundry v14](https://img.shields.io/badge/Foundry-v14-c4183c.svg)
+![System: shadowrun6-eden](https://img.shields.io/badge/system-shadowrun6--eden%204.0%2B-1b1f2a.svg)
 
-## What it does
+---
 
-```
-PDF (you own it) ──► extractor ──► data/*.json ──► review web app ──► Foundry module
-                                       ▲                │
-                                       └── validator ◄──┘
-```
+Rolling a runner by hand is an hour of arithmetic before anyone touches a die. Priority columns, adjustment points, karma at five times the *new* rating, essence bleeding out of every implant, availability caps, the nuyen you forgot to convert. Get one number wrong on the Attributes page and you find out three steps later, at the gear table, with no idea which number it was.
 
-1. **Extract** — a standalone Python CLI reads gear tables from book PDFs you own
-   and emits schema-conformant JSON. No AI required at runtime.
-2. **Validate** — a standalone checker enforces the JSON Schemas plus domain sanity
-   rules (damage codes, attack-rating arrays, price/availability plausibility).
-3. **Review** — a local Node web app (Express + React) for browsing, editing, and
-   QA-ing every item, with a live preview of the exact Foundry document JSON.
-4. **Export** — approved items are compiled into LevelDB compendium packs with the
-   official `@foundryvtt/foundryvtt-cli`, producing an installable module for your
-   own Foundry server.
+Two halves fix that, and you need both.
 
-## Content policy
+| | | |
+|---|---|---|
+| **Part 1** | **The Catalog Builder** | Reads your PDFs, extracts the tables, lets you correct and illustrate every entry, and compiles the **Shadowrun 6th World Catalog** — a Foundry compendium built on your machine |
+| **Part 2** | **SR6 Forge** | The character generator that shops from that catalog, and the karma ledger that keeps running long after creation |
 
-Shadowrun is © The Topps Company, Inc.; Catalyst Game Labs publishes SR6 under license.
-Extracted game data is **never committed to this repository and never distributed**.
-The `data/` and `export/` directories are gitignored; they exist only on machines
-belonging to someone who owns the source books. This project is a personal-use tool,
-in the same spirit as a character generator's user-supplied data directory.
+They are separate on purpose. Part 1 handles content that isn't ours to give away. Part 2 is rules logic, and that we hand out freely.
 
-## Repository layout
+---
 
-| Path         | Purpose                                                        | In git? |
-| ------------ | -------------------------------------------------------------- | :-----: |
-| `schemas/`   | JSON Schemas, one per content domain (gear, npcs, spells, ...) | yes     |
-| `extractor/` | Standalone PDF → JSON CLI (Python)                             | yes     |
-| `validator/` | Standalone schema + sanity checker (Python)                    | yes     |
-| `site/`      | Review/edit web app (Node: Express + React)                    | yes     |
-| `docs/`      | Design docs, per-book extraction notes                         | yes     |
-| `data/`      | Extracted game data (book → domain → category)                 | **no**  |
-| `export/`    | Built Foundry modules                                          | **no**  |
+## Your PDFs are the licence
 
-## Target versions
+**This repository contains no game data. None. Not one weapon, not one spell.**
 
-| Component            | Version  |
-| -------------------- | -------- |
-| Foundry VTT          | v13      |
-| shadowrun6-eden      | 3.3.x    |
-| Python (extractor)   | 3.12+    |
-| Node (site/export)   | 20+      |
+The pipeline reads the books **you already bought**. The PDF on your drive is what entitles you to the data the extractor produces from it — that is the whole arrangement, and it is why nothing is bundled here. No PDF, no data. Buy the books.
 
-## Using the extractor
+Shadowrun is a registered trademark of The Topps Company, Inc.; Catalyst Game Labs publishes the Sixth World under licence. `data/`, `export/` and every PDF are gitignored, and `git log` will confirm they were never committed — not buried in an old commit, never there at all. The handful of sample files under `examples/` and `site/shared/` each carry an explicit `_notice`; the "Example Autopistol" is invented, and exists only to show a record's shape.
 
-```bash
-# one-time: cache normalized page text from YOUR pdf (never committed)
-python -m extractor dump --pdf "path/to/corebook.pdf" --book corebook --pages 245-304
+**Do not redistribute what comes out the far end.** It is the books, in another format.
 
-# parse the cache into data/corebook/gear/*.json
-python -m extractor parse --book corebook --domain gear
-```
+---
 
-**Enrichment** (writeups + artwork, all output stays in gitignored `data/`):
+# Part 1 — The Catalog Builder
 
-```bash
-# add --columns to dump: caches column-ordered text for the passes below
-python -m extractor dump --pdf "…" --book corebook --pages 245-304 --columns
+### What you need
 
-# attribute per-item prose writeups into system.description (skips items
-# that already have one; --force overwrites)
-python -m extractor enrich --book corebook --domain gear --pages 245-304
+| | |
+|---|---|
+| **The PDFs** | Core Rulebook, Sixth World Companion, and whatever supplements you own. Required. |
+| **Python 3.11+** | `pip install -r requirements.txt` |
+| **Node 20+** | for the review app and the pack compiler |
+| **Commlink6** *(optional)* | the Java generator from [rpgframework.de](https://rpgframework.de) |
 
-# extract item artwork as alpha PNGs; confident matches are named
-# data/_assets/<book>/<item_id>.png and wired to the item; ambiguous ones
-# land in data/_assets/<book>/_inbox/ for manual assignment in the app
-python -m extractor images --pdf "…" --book corebook --domain gear --pages 245-304
-```
+## Reading the books
 
-No AI involved at runtime. Parser profiles live in `extractor/profiles/`
-(`corebook_gear.py` covers the Core Rulebook's 21 gear categories, 463 items).
-To extract a new book, write a profile module: a list of `TableSpec`s (page,
-header regex, column layout). Corrections for rows the PDF layout mangles
-(`RENAMES`/`EXCLUDE`/`OVERRIDES`/`MANUAL_ITEMS`) reference real book content,
-so they live in gitignored `data/_fixes/<book>_<domain>_fixes.py`; the parser
-loads them automatically and fails loudly on stale correction keys. See
-[docs/extraction-notes-corebook.md](docs/extraction-notes-corebook.md) for the
-quirks catalog.
+The extractor is the part that matters, because the books are the only complete source. **Commlink6 has been slow to pick up newer releases**, and a rules engine that can only see what someone else has already transcribed will always trail the shelf. This one reads the shelf directly.
 
-## Using the review app
+That is harder than it sounds. A Shadowrun page is a designed artefact, not a database dump: three columns that break for a sidebar, tables with no ruled lines, headers that only differ from body text by a point and a half, dual damage codes, ranges printed as five numbers in a row that mean five different things.
 
-Requires Node 20+.
+So the extractor works the way a person reads a page, and there is a module for each part of that:
+
+- **Layout first** — `columns.py`, `textcols.py` and `segment.py` recover the column structure, then `toc.py` and `hierarchy.py` rebuild the section tree, so an item lands under the right heading and carries its real page number.
+- **Tables by geometry** — `xtable.py` and `rowengine.py` read columns by x-position rather than by whitespace, which is what makes an unruled stat block parse at all.
+- **Typography as meaning** — `spell_layout.py` and `lifepath_pdf.py` identify records by font metrics: a 17.8pt Sans line is a module header, 13pt is a label, that particular bullet glyph starts a benefit. It is how the Companion's life modules were recovered when nothing else had them.
+- **Domain readers** — separate passes for gear, weapons, armour, vehicles, spells, rituals, adept powers, qualities, critters, spirits, contacts, lifestyles, toxins and drugs. Each knows its own table shape.
+- **Repair and inference** — `demangle.py` fixes ligatures and OCR damage, `normalize.py` regularises units and codes, `subtype_infer.py` and `autodetect.py` classify what the page left implicit, `words.py` and `glossary.py` catch the rest.
+- **Prose too** — `describe.py` and `writeups.py` pull the flavour text, so an item arrives with its description rather than a bare stat line.
+- **Art** — `images_extract.py` lifts illustrations off the page and `icon_match.py` pairs items with icons.
+- **Alignment** — `eden_align.py` and `eden_codes.py` translate everything into the type and subtype vocabulary the Foundry system already speaks.
+
+### Where Commlink6 helps
+
+If you have it installed, the pipeline reads it too — not for the content, but for the **structure the printed page leaves implicit**:
+
+- **Counted mounts.** Glasses declare `<valmod type="HOOK" ref="OPTICAL" value="$RATING"/>` — rating *is* how many accessories fit. The book never says so; 290 items depend on it.
+- **What a quality hands over.** SINner declares `<itemmod type="SIN" ref="REAL_SIN"/>`; Shifter hands out four more qualities. Twenty-six qualities grant something, each saying so in its own data.
+- **PACKs** — the Companion's pre-built kits with their true contents, 177 of them.
+- **Orderings you would guess wrong.** Fake SIN quality levels run *rough match 2, good match 3, superficially plausible 4*.
+
+Without Commlink6 you still get a full catalog from the PDFs. With it, those mechanisms are read from a declaration instead of inferred. Where the two ever disagree on a rule, **the book wins** — every rules constant is cited to a page.
+
+## Correcting it: the review app
+
+No extractor is perfect on a designed page, and you should never ship data you haven't looked at. So the pipeline's centre of gravity is a **local web app**, not a command line.
 
 ```bash
-cd site
-npm install          # once
-npm run build        # build the UI
-npm run serve        # http://localhost:8347
+cd site && npm install && npm run serve     # http://localhost:8347
 ```
 
-Browse categories in the sidebar, click a row to edit (fields, QA status,
-description, image), Save writes the JSON file and shows the exact Foundry
-document the item will export as. "Validate all" runs the Python validator
-(`FORGE_PYTHON` overrides the interpreter; defaults to the repo `.venv`, then
-`python3`). For UI development: `npm run dev` (Vite on :5173, proxying `/api`).
+Express and React, running only on your machine. From it you can:
 
-**Source references**: every item carries its book + printed page (`meta`),
-shown in the table and exported into the Foundry document (`system.product`,
-`system.page`). Create `data/books.json` (local-only) to name your books and
-wire up "Open PDF" jumps to the item's page:
+- **Browse everything** by book, domain and category, with search and filters
+- **Edit any field** — fix a price the OCR fumbled, correct a damage code, retype a mangled name
+- **Write and repair descriptions**, including the flavour text pulled off the page
+- **Assign icons and artwork** — search a local icon library, pull illustrations lifted from the book, crop and background-strip renders, and preview them exactly as the sheet will show them
+- **See the real output** — the exact Foundry document JSON an item will become, live beside the record
+- **Mark QA status**, so nothing reaches a character sheet before a human has approved it
+- **Apply bulk corrections** from a correction file, and re-run them after a re-extract
 
-```json
-{ "corebook": { "title": "Sixth World Core Rulebook", "pdf": "C:/path/to/your.pdf" } }
-```
+**The website builds the module.** When the data looks right, export from the app (or `node site/scripts/build_module.mjs --deploy`) and it compiles the approved records into LevelDB compendium packs with the official `@foundryvtt/foundryvtt-cli`, writes the manifest, and drops the finished module into your Foundry `Data/modules`.
 
-**Item images**: drop files under `data/_assets/<book>/…` and set an item's
-Image field to the relative path (e.g. `corebook/predator.webp`). The editor
-previews it and the export bundles it into the module's `icons/` folder.
-Paths starting `icons/`, `systems/`, or `modules/` pass through to Foundry
-core/system art unchanged.
+That module is the **Shadowrun 6th World Catalog**. Enable it in your world and Part 2 has shelves to shop from.
 
-## Exporting a module
+### The short version
 
 ```bash
-node site/scripts/export.mjs --book corebook --status approved
-# or --status reviewed|all while QA is in progress; --version x.y.z to bump
+pip install -r requirements.txt
+python tools/ingest_all.py            # PDFs -> data/<book>/<domain>/*.json
+python tools/build_chargen_data.py    # rules tables and mechanisms
+cd site && npm run serve              # review, correct, illustrate, export
 ```
 
-(Or the "Export" button in the review app — exports the selected category's
-book/domain.) Output: `export/sr6-forge-<book>/` with `module.json` and a
-LevelDB compendium pack. **Install**: copy that folder into your Foundry
-server's `Data/modules/`, restart/refresh, enable the module in your
-shadowrun6-eden world, and the items appear under the Compendium tab.
-Re-exports overwrite in place with stable document ids. The built module
-contains game data — **never distribute it**; `export/` is gitignored.
+---
 
-## Using the validator
+# Part 2 — SR6 Forge (the module)
+
+The character generator. Install from a release; it carries no game data.
+
+### Install
+
+In Foundry: **Add-on Modules → Install Module**, paste:
+
+```
+https://github.com/jbowensii/SR6-eden-Forge/releases/latest/download/module.json
+```
+
+| Requires | |
+|---|---|
+| **Foundry VTT** | v14 |
+| **shadowrun6-eden** | 4.0.0+ — [yjeroen/foundry-shadowrun6-eden](https://github.com/yjeroen/foundry-shadowrun6-eden) |
+| **Shadowrun 6th World Catalog** | built by Part 1. Foundry won't block you without it, but the wizard opens onto empty shelves and says so. |
+
+### What it does
+
+**Five ways to build a runner** — Priority, Sum-to-Ten, Point Buy, Karma, and the Companion's Life Path. One engine, a different budget provider on top of each.
+
+**It shows the maths.** Every budget is itemised. Karma doesn't just say *85 spent* — it names the raise:
+
+```
+Customization karma            50
+ +30  Negative qualities
+ −25  STR 1 → 3 (2 ranks by karma)
+ −35  WIL 2 → 4 (2 ranks by karma)
+ −10  Positive qualities
+ −15  Spells beyond the free ones
+ −10  Converted to nuyen
+────
+  −5  remaining
+```
+
+Because a rank costs five times the *new* rating, and that is where budgets quietly die.
+
+**It knows the fiddly rules**, and cites them:
+
+- Mystic adepts split priority Magic between power points and spells (core p67) — spend it all on powers and your spells cost karma
+- Fake SIN rating × 2,500¥; fake licence rating × 200¥, assigned to one SIN and never out-rating it (core p274)
+- Contact points are Charisma × 6, neither rating above Charisma at creation (core p68)
+- Six qualities maximum, net bonus karma capped at 20 (core p67)
+- Availability caps, essence floors, one-attribute-at-maximum
+
+**The system does the derivation.** SR6 Forge writes raw inputs only — attribute bases, skill ranks, embedded items, nuyen. Pools, condition monitors and essence are computed by shadowrun6-eden at runtime, exactly as for a character built by hand. That is the architecture, and there is a test named after it.
+
+**Karma advancement** continues after creation: raise attributes and skills, buy qualities, learn spells, initiate, convert karma to nuyen. Every purchase lands in an append-only ledger with a strict undo.
+
+**Homebrew fits.** Anything the books don't cover goes in as a custom item at a price you set.
+
+### Rule interpretations
+
+Tables disagree. Set yours in **⚙ Optional Rules**: Core Rulebook, Standard (Seattle), Shadowrun Missions or House Rules, with per-switch overrides on top. The engine reads the interpretation rather than hardcoding one.
+
+---
+
+## Layout
+
+| Path | Part | What |
+|---|---|---|
+| `extractor/`, `tools/` | 1 | PDF readers, layout and table engines, domain passes, jar readers |
+| `schemas/`, `validator/` | 1 | JSON Schemas and the sanity checker |
+| `site/` | 1 | Review app, pack compiler, deploy scripts |
+| `foundry-module/sr6-forge/` | 2 | The module: engine, wizard, advancement, services |
+| `data/`, `export/` | — | **Gitignored.** Your books, your machine. |
+
+## Testing
 
 ```bash
-pip install -r requirements-dev.txt
-python -m validator data/corebook     # validate your local data
-python -m validator examples          # validate the committed format examples
-pytest                                # run the test suite
+python -m pytest -q                       # 211  extraction and rules data
+cd foundry-module && npm test             # 173  engine, budgets, commit plan
+cd site && npm test                       #  43  export and API
 ```
 
-Every data file must pass two layers: its domain JSON Schema
-(`schemas/<domain>.schema.json`) and the domain sanity rules
-(duplicate ids, damage-code format, weapon required fields,
-plausibility bounds, path/envelope agreement).
+Inside Foundry, with [Quench](https://foundryvtt.com/packages/quench) enabled:
 
-## Status
+```js
+quench.runBatches("sr6-forge.*")
+```
 
-- [x] Gear schema (`schemas/gear.schema.json`) + shared defs (`schemas/common.schema.json`)
-- [x] Validator CLI: `python -m validator <path>` — schema pass + sanity pass
-- [x] Format examples: `examples/corebook/gear/` (synthetic items only)
-- [x] Extractor CLI: `python -m extractor` (dump + parse), AI-free at runtime
-- [x] Core Rulebook gear dataset: 463 items / 21 categories (local only, never committed)
-- [x] Review web app: `site/` — browse/edit/QA + live Foundry-doc preview + validate
-- [x] Module export: CLI + app button → `export/sr6-forge-<book>/` (LevelDB pack, module.json)
+Seven batches covering what only exists in a live world — that eden derives the pools from what we wrote, that our data survives document creation, that every window class loads.
 
-**The first slice is complete**: Core Rulebook gear flows PDF → extract →
-validate → review → installable shadowrun6-eden module. Next up: more books
-(Firing Squad, Body Shop, Double Clutch, …) and new domains (npcs, spells).
+## Credits
 
-See [docs/design.md](docs/design.md) for the full architecture.
+**[shadowrun6-eden](https://github.com/yjeroen/foundry-shadowrun6-eden)** — Yeroon, with Stefan & Anja Prelle. The system this is built on. It owns the data models and derives every computed value, which is why SR6 Forge writes raw inputs and gets out of the way.
+
+**Commlink6 / Genesis** — Stefan Prelle, [rpgframework.de](https://rpgframework.de). The Java generator whose data settles what the printed page leaves implicit, and whose editor set the workflow this wizard follows.
+
+Shadowrun is a registered trademark of The Topps Company, Inc. Game content © Catalyst Game Labs. This project is unaffiliated with either, and ships neither.
+
+## Licence
+
+[MIT](LICENSE) — the code, verbatim, so tooling reads it correctly.
+[NOTICE](NOTICE) — what that licence does *not* cover. The data was never
+ours to license, and isn't here.

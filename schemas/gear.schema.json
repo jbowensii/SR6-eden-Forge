@@ -25,6 +25,10 @@
       "items": {
         "$ref": "#/$defs/gearItem"
       }
+    },
+    "_notice": {
+      "type": "string",
+      "description": "Optional provenance/licensing notice. Used on the sample files in examples/ to state that they contain no copyrighted content."
     }
   },
   "$defs": {

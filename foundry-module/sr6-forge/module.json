@@ -1,11 +1,12 @@
 {
   "id": "sr6-forge",
   "title": "SR6 Forge — Character Generation & Advancement",
-  "description": "Shadowrun 6e character generation (Priority, Sum-to-Ten, Point-Buy, Karma, Lifepath) and karma advancement for the shadowrun6-eden system. Personal-use build — not for distribution.",
+  "description": "Full character generation and karma advancement for Shadowrun 6th World on the shadowrun6-eden system. Five creation methods (Priority, Sum-to-Ten, Point Buy, Karma, Life Path), itemised budgets, and an append-only advancement ledger.",
   "version": "0.4.0",
   "compatibility": {
-    "minimum": "13",
-    "verified": "14"
+    "minimum": "14",
+    "verified": "14.365",
+    "maximum": "14"
   },
   "authors": [
     {
@@ -35,11 +36,11 @@
         }
       }
     ],
-    "requires": [
+    "recommends": [
       {
         "id": "sr6-forge-corebook",
         "type": "module",
-        "reason": "Compendium packs (gear, spells, qualities, ...) that the chargen wizard draws from.",
+        "reason": "Shadowrun 6th World Catalog — the compendium the wizard shops from. Build it from books you own with the catalog builder in this repository; it is not distributed.",
         "compatibility": {}
       }
     ]
@@ -57,5 +58,11 @@
         "lang"
       ]
     }
-  }
+  },
+  "manifest": "https://github.com/jbowensii/SR6-eden-Forge/releases/latest/download/module.json",
+  "download": "https://github.com/jbowensii/SR6-eden-Forge/releases/latest/download/sr6-forge.zip",
+  "url": "https://github.com/jbowensii/SR6-eden-Forge",
+  "readme": "https://github.com/jbowensii/SR6-eden-Forge#readme",
+  "license": "https://github.com/jbowensii/SR6-eden-Forge/blob/main/LICENSE",
+  "bugs": "https://github.com/jbowensii/SR6-eden-Forge/issues"
 }

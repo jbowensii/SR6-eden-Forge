@@ -1,0 +1,19 @@
+# NOTICE
+
+The MIT licence in LICENSE covers **the tooling in this repository only** —
+the extractors, the review application, the build scripts and the Foundry VTT
+module. It is verbatim MIT so that automated tooling identifies it correctly.
+
+It does not, and cannot, grant any rights to Shadowrun game content.
+
+Shadowrun is a registered trademark of The Topps Company, Inc. The Sixth World
+is published by Catalyst Game Labs. This project is unaffiliated with either.
+
+**No game data is included in or distributed with this repository.** The
+extraction pipeline reads books that the operator already owns, on their own
+machine, and the output stays there. `data/`, `export/` and all PDFs are
+gitignored and have never been committed. Sample records under `examples/` and
+`site/shared/` are invented and carry an explicit `_notice` saying so.
+
+Do not redistribute the data the pipeline produces. It is the books in another
+format, and your licence to it is the copy you bought.

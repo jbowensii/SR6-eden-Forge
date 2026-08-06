@@ -34,11 +34,16 @@ export function statusAllows(filter, qaStatus) {
 // !actors!) rather than Items. Everything else is an Item.
 export const ACTOR_DOMAINS = new Set(["npcs", "critters", "spirits"]);
 
+/** Display name of the generated compendium module. The generator that reads
+ *  it is SR6 Forge; this is the library it reads FROM, and naming it after the
+ *  setting rather than the tool says what it holds. */
+export const CATALOG_NAME = "Shadowrun 6th World Catalog";
+
 export function buildManifest({ book, version, packs, title }) {
   return {
     id: `sr6-forge-${book}`,
-    title: title ?? `SR6 Forge — ${book} gear`,
-    description: "Personal-use compendium built with SR6-eden-Forge. Not for distribution.",
+    title: title ?? `${CATALOG_NAME} — ${book}`,
+    description: "Shadowrun 6th World game data, extracted from books you own. Personal use only — not for distribution.",
     version,
     compatibility: { minimum: "13", verified: "14" },
     authors: [{ name: "SR6-eden-Forge" }],
@@ -235,7 +240,8 @@ export async function exportAll(dataRoot, exportRoot, { book, status = "all", ve
       mkdirSync(dirname(dest), { recursive: true });
       copyFileSync(source, dest);
     }
-    const manifest = buildManifest({ book, version, packs, title: `SR6 Forge — ${product ?? book}` });
+    const manifest = buildManifest({ book, version, packs,
+      title: `${CATALOG_NAME} — ${product ?? book}` });
     writeFileSync(join(stagingDir, "module.json"), JSON.stringify(manifest, null, 2) + "\n");
     rmSync(moduleDir, { recursive: true, force: true });
     renameSync(stagingDir, moduleDir);

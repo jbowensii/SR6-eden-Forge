@@ -59,9 +59,22 @@ def test_grades_are_read_as_grades(packs):
 
 
 def test_every_referenced_item_resolves(packs):
-    """A pack naming gear we never imported would half-expand on purchase."""
+    """A pack must not reference gear the local library lacks *for a book that
+    has been ingested*.
+
+    Scoped deliberately. PACKs come from the Companion but reference items
+    across the whole line, so a pack naming a Firing Squad weapon is not a
+    fault when Firing Squad has not been imported — it is just a book the user
+    does not own or has not run yet. Asserting zero unresolved refs outright
+    made this test fail the moment the library covered fewer books than the
+    jar, which says nothing about the parser.
+    """
     import json
     import pathlib
+    import re
+    import zipfile
+
+    from extractor.commlink6 import DEFAULT_JAR
 
     have = set()
     for f in pathlib.Path("data").rglob("*.json"):
@@ -78,12 +91,27 @@ def test_every_referenced_item_resolves(packs):
     if not have:
         pytest.skip("item library not present")
 
+    # which book each id comes from, so a miss can be attributed
+    owner: dict[str, str] = {}
+    ingested = {d.name for d in pathlib.Path("data").iterdir() if d.is_dir()}
+    with zipfile.ZipFile(DEFAULT_JAR) as z:
+        for n in z.namelist():
+            m = re.match(r"de/rpgframework/shadowrun6/data/([^/]+)/data/[^/]+\.xml$", n)
+            if not m:
+                continue
+            for gid in re.findall(rb'<item[^>]*id="([^"]+)"', z.read(n)):
+                owner.setdefault(gid.decode(), m.group(1))
+
     missing = set()
     for p in packs.values():
         for r in p["contents"]:
-            if r["kind"] == "gear" and r["ref"] and r["ref"] not in have:
-                missing.add(r["ref"])
-            for e in r["embeds"]:
-                if e["ref"] and e["ref"] not in have:
-                    missing.add(e["ref"])
-    assert not missing, f"packs reference {len(missing)} unknown items: {sorted(missing)[:10]}"
+            refs = [r["ref"]] + [e["ref"] for e in r["embeds"]]
+            for ref in refs:
+                if not ref or r["kind"] != "gear" or ref in have:
+                    continue
+                # only a fault when we claim to have imported that book
+                if owner.get(ref, "corebook") in ingested:
+                    missing.add(ref)
+    assert not missing, (
+        f"packs reference {len(missing)} items missing from an INGESTED book: "
+        f"{sorted(missing)[:10]}")

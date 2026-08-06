@@ -1,4 +1,19 @@
-# Icon set attributions
+# Attributions
+
+## Software and data sources
+
+| Project | By | Role here |
+| --- | --- | --- |
+| [shadowrun6-eden](https://github.com/yjeroen/foundry-shadowrun6-eden) | Yeroon; Stefan & Anja Prelle | The Foundry VTT system this project targets. It owns the actor and item data models and derives every computed value at runtime, which is why SR6 Forge writes raw inputs only. Read, never modified. |
+| Commlink6 / Genesis ([rpgframework.de](https://rpgframework.de)) | Stefan Prelle | Java character generator for SR6. Its data files supply the structure the printed rules leave implicit — counted accessory mounts, what a quality grants, PACK contents, fake SIN quality levels, per-attribute point pools — and the stable per-item identifiers shared with eden. Read locally from a copy the user installs; nothing from it is redistributed. |
+| [@foundryvtt/foundryvtt-cli](https://github.com/foundryvtt/foundryvtt-cli) | Foundry Gaming LLC | Compiles the LevelDB compendium packs. |
+| [Quench](https://foundryvtt.com/packages/quench) | Ethaks | In-world integration test runner. |
+
+Shadowrun is a registered trademark of The Topps Company, Inc. Game content is
+© Catalyst Game Labs. This project is unaffiliated with either and distributes
+no game content: see *What this does not contain* in the README.
+
+## Icon set attributions
 
 Icon sets staged locally under `data/_assets/iconsets/<set>/` for use in the
 review app and personal module builds. **The image files are not committed to

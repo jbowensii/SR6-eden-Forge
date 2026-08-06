@@ -13,7 +13,8 @@
  * ## Acknowledgements
  *
  * **shadowrun6-eden** — the Shadowrun 6 system this module is built on, by
- * Stefan Prelle and contributors (https://github.com/Prelle/shadowrun6-eden).
+ * Yeroon with Stefan & Anja Prelle
+ * (https://github.com/yjeroen/foundry-shadowrun6-eden).
  * Eden does the real work: it owns the actor and item data models and derives
  * every computed value at runtime — attribute pools, condition monitors,
  * essence from ware. SR6 Forge deliberately writes only raw inputs and lets
@@ -22,7 +23,7 @@
  * conventions; it never modifies the system.
  *
  * **Commlink6 / Genesis** — the Java character generator by Stefan Prelle
- * (https://www.rpgframework.de), whose data files describe the Sixth World in
+ * (https://rpgframework.de), whose data files describe the Sixth World in
  * a structured form and whose editor established the workflow this wizard
  * follows. Where the printed rules are ambiguous, Commlink6's own declarations
  * settled the question — counted accessory mounts, quality grants, fake SIN
@@ -132,6 +133,18 @@ Hooks.once("ready", async () => {
   } catch (err) {
     console.error(`${LOG_PREFIX} failed to load chargen-data.json`, err);
     ui.notifications?.error("SR6 Forge: chargen-data.json missing — rebuild the module.");
+  }
+
+  // A fresh install has the app but no data: the compendium module is built
+  // locally from books the user owns and is never distributed. Say so plainly
+  // once, rather than letting the wizard open onto empty shelves.
+  const { PackCatalog } = await import("./services/pack-catalog.mjs");
+  if (!PackCatalog.list().length) {
+    console.warn(`${LOG_PREFIX} no sr6-forge-* data packs found — the wizard has nothing to shop from`);
+    ui.notifications?.warn(
+      "SR6 Forge: no data module found. Build one from your own books with the "
+      + "import pipeline (see the README), then enable it in this world.",
+      { permanent: false });
   }
 
   // module API: macros / other modules / console
