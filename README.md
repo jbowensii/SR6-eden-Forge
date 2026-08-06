@@ -1,6 +1,6 @@
 # SR6 Forge
 
-**Turn the Shadowrun books on your shelf into a live Foundry VTT library — then roll characters against it in minutes.**
+**Turn the Shadowrun PDF books into a live Foundry VTT library — then roll characters against it in minutes.**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-00d4c8.svg)](LICENSE)
 ![Foundry v14](https://img.shields.io/badge/Foundry-v14-c4183c.svg)
@@ -46,7 +46,7 @@ Shadowrun is a registered trademark of The Topps Company, Inc.; Catalyst Game La
 
 ## Reading the books
 
-The extractor is the part that matters, because the books are the only complete source. **Commlink6 has been slow to pick up newer releases**, and a rules engine that can only see what someone else has already transcribed will always trail the shelf. This one reads the shelf directly.
+The extractor is the part that matters, because the books are the only complete source. **Commlink6 has been slow to pick up newer releases**, and a rules engine that can only see what someone else has already transcribed will always trail the books. This one reads the PDFs directly, so a supplement is available the day you buy it.
 
 That is harder than it sounds. A Shadowrun page is a designed artefact, not a database dump: three columns that break for a sidebar, tables with no ruled lines, headers that only differ from body text by a point and a half, dual damage codes, ranges printed as five numbers in a row that mean five different things.
 
