@@ -217,6 +217,32 @@ export function registerQuenchBatches(quench) {
         assert.equal(actor.system.attributes.res.base, 0);
       });
 
+      it("keeps system.sr6forge alive through document creation", async function () {
+        // Foundry's TypeDataField._cleanType merges template.json with the
+        // source using insertKeys = !system.strictDataCleaning. Eden does not
+        // set that flag, so our namespace survives — but that is a property of
+        // eden's configuration, not a guarantee, so assert it rather than
+        // assume it.
+        const rows = await PackCatalog.index("gear");
+        const rated = rows.find((r) => r.system?.sr6forge?.priceByRating?.length);
+        assert.ok(rated, "no rated item carries sr6forge in the pack index");
+
+        const doc = await fromUuid(rated.uuid);
+        assert.ok(doc.system.sr6forge, "sr6forge missing on the pack document");
+
+        // the real test: create it on an actor and see what survives
+        const [created] = await actor.createEmbeddedDocuments("Item", [doc.toObject()]);
+        try {
+          assert.ok(created.system.sr6forge,
+            "sr6forge was stripped when the item was embedded — eden may have "
+            + "enabled strictDataCleaning, or given gear a DataModel");
+          assert.deepEqual(created.system.sr6forge.priceByRating,
+            rated.system.sr6forge.priceByRating, "price ladder did not survive");
+        } finally {
+          await created.delete();
+        }
+      });
+
       it("records the chargen snapshot for later reference", function () {
         const snap = actor.getFlag(MODULE_ID, "chargen");
         assert.ok(snap, "chargen flag missing");
