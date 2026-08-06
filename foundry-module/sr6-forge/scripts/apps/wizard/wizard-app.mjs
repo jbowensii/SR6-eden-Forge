@@ -523,12 +523,18 @@ export class SR6ForgeWizard extends RememberPosition(
             points: st.attributes[k].points, adjust: st.attributes[k].adjust,
             karma: st.attributes[k].karma ?? 0 };
         });
-        const specials = [{ key: "edg", label: "EDGE", sub: `max ${maxima.edg ?? 6}` }];
-        if (mor.magic) specials.push({ key: "mag", label: "MAGIC", sub: "from priority" });
-        if (mor.resonance) specials.push({ key: "res", label: "RESONANCE", sub: "from priority" });
+        const specials = [{ key: "edg", label: "EDGE", max: maxima.edg ?? 6 }];
+        if (mor.magic) specials.push({ key: "mag", label: "MAGIC", max: maxima.mag ?? 6 });
+        if (mor.resonance) specials.push({ key: "res", label: "RESONANCE", max: maxima.res ?? 6 });
         for (const sp of specials) {
           sp.rating = e.attrRating(sp.key);
           sp.adjust = st.attributes[sp.key].adjust;
+          // Edge and Magic take karma ranks exactly like a core attribute
+          // (core p68-70; Commlink6 does the same). Without the control the
+          // only route to Edge 4 was adjustment points that may be spent.
+          sp.karma = st.attributes[sp.key].karma ?? 0;
+          sp.sub = sp.key === "edg" ? `max ${sp.max}` : `from priority · max ${sp.max}`;
+          sp.atMax = sp.rating >= sp.max;
           const b = augmentBonus(st, sp.key, data);
           sp.bonus = b; sp.augmented = sp.rating + b; sp.hasBonus = b !== 0;
         }

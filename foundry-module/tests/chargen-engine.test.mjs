@@ -1335,3 +1335,48 @@ describe("committing a PACK", () => {
     expect(respirator.catalogId).toBe("respirator");
   });
 });
+
+describe("karma on special attributes", () => {
+  function adept() {
+    const e = engineWith({ METATYPE: "D", ATTRIBUTE: "B", MAGIC: "A", SKILLS: "C", RESOURCES: "E" });
+    e.setMetatype("human");
+    e.setMagicPath("mysticadept");
+    return e;
+  }
+
+  it("buys an Edge rank with karma at 5 x the new rating", () => {
+    // Commlink6 does this (Knight: EDGE points3 = 1) and it was unreachable in
+    // the UI, which only offered the adjustment pool for special attributes
+    const e = adept();
+    e.spend({ kind: "attribute", target: "edg", pool: "adjust", delta: 2 });
+    const before = e.budgets().karma.spent;
+    e.spend({ kind: "attribute", target: "edg", pool: "karma", delta: 1 });
+    expect(e.attrRating("edg")).toBe(4);                 // 1 + 2 adjust + 1 karma
+    expect(e.budgets().karma.spent - before).toBe(20);   // 4 x 5
+  });
+
+  it("names the Edge rank in the karma breakdown", () => {
+    const e = adept();
+    e.spend({ kind: "attribute", target: "edg", pool: "karma", delta: 1 });
+    const line = e.budgets().karma.breakdown.find((x) => x.key === "attr:edg");
+    expect(line).toBeTruthy();
+    expect(line.label).toMatch(/EDG 1 → 2/);
+  });
+
+  it("caps Magic at 6 unless the world allows initiation past it", () => {
+    const e = adept();
+    // priority A Magic for a mystic adept is 4; push it well past 6
+    e.spend({ kind: "attribute", target: "mag", pool: "karma", delta: 4 });
+    expect(e.attrRating("mag")).toBeGreaterThan(6);
+    expect(e.validate().some((i) => i.id === "attr.specialMax")).toBe(true);
+
+    e.setOptionalRules({ raiseMagicAboveSix: true });
+    expect(e.validate().some((i) => i.id === "attr.specialMax")).toBe(false);
+  });
+
+  it("still flags Edge past its metatype maximum", () => {
+    const e = adept();
+    e.spend({ kind: "attribute", target: "edg", pool: "karma", delta: 8 });
+    expect(e.validate().some((i) => i.id === "attr.creationMax")).toBe(true);
+  });
+});

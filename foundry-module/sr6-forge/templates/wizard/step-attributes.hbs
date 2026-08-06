@@ -44,17 +44,27 @@ Magic/Resonance and metatype-adjusted attributes only.</p>
 <h3>Special</h3>
 <div class="attr-grid">
   {{#each specials}}
-  <div class="attr-cell">
+  <div class="attr-cell {{#if atMax}}at-max{{/if}}">
     <span class="a-name">{{label}}</span>
     <span class="a-val">{{rating}}{{#if hasBonus}} <span class="aug">({{augmented}})</span>{{/if}}</span>
     <span class="a-max">{{sub}}</span>
-    <div class="stepper">
-      <button type="button" class="up" data-action="adj" data-kind="attribute" data-pool="adjust"
-              data-target="{{key}}" data-delta="1">+</button>
-      <span class="n">{{adjust}}</span>
-      <button type="button" class="down" data-action="adj" data-kind="attribute" data-pool="adjust"
-              data-target="{{key}}" data-delta="-1">−</button>
-      <span class="lbl">ADJ</span>
+    <div class="attr-pools">
+      <div class="stepper">
+        <button type="button" class="up" data-action="adj" data-kind="attribute" data-pool="adjust"
+                data-target="{{key}}" data-delta="1">+</button>
+        <span class="n">{{adjust}}</span>
+        <button type="button" class="down" data-action="adj" data-kind="attribute" data-pool="adjust"
+                data-target="{{key}}" data-delta="-1">−</button>
+        <span class="lbl">ADJ</span>
+      </div>
+      <div class="stepper">
+        <button type="button" class="up" data-action="adj" data-kind="attribute" data-pool="karma"
+                data-target="{{key}}" data-delta="1" title="Raise with karma (new rating × 5)">+</button>
+        <span class="n">{{karma}}</span>
+        <button type="button" class="down" data-action="adj" data-kind="attribute" data-pool="karma"
+                data-target="{{key}}" data-delta="-1">−</button>
+        <span class="lbl">KARMA</span>
+      </div>
     </div>
   </div>
   {{/each}}

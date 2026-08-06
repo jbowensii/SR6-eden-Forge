@@ -31,6 +31,7 @@
   "SR6FORGE.Validate.prio.metatypeAllowed": "{metatype} is not available at Metatype priority {letter}.",
   "SR6FORGE.Validate.prio.morAllowed": "{mor} is not available at Magic priority {letter}.",
   "SR6FORGE.Validate.attr.creationMax": "{attr} exceeds the creation maximum of {max}.",
+  "SR6FORGE.Validate.attr.specialMax": "{attr} exceeds the creation maximum of {max} — raising it further needs initiation or submersion.",
   "SR6FORGE.Validate.attr.oneAtMax": "Only one attribute may be at its maximum during creation.",
   "SR6FORGE.Validate.attr.adjustTargets": "Adjustment points may only raise Edge, Magic/Resonance, or metatype-adjusted attributes.",
   "SR6FORGE.Validate.attr.overspent": "More attribute points spent than available.",

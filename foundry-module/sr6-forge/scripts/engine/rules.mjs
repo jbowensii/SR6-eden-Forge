@@ -57,6 +57,26 @@ export const VALIDATION_RULES = [
     },
   },
   {
+    /* Magic and Resonance were outside attr.creationMax, which only walks the
+     * core eight plus Edge. That was harmless while the only way to raise them
+     * was the capped adjustment pool, but they take karma ranks too, and karma
+     * has no per-attribute ceiling — so without this a runner could buy Magic
+     * to any rating and nothing would say a word. 6 unless the world allows
+     * higher through initiation. */
+    id: "attr.specialMax", severity: "error", step: "attributes",
+    check: ({ state, data, rules, provider }) => {
+      const above = creationSetting("raiseMagicAboveSix",
+        data, rules, state.rulesetId, state.optionalRules);
+      if (above) return null;
+      const maxima = data.metatypes?.[state.metatypeId]?.attributeMaxCreation ?? {};
+      for (const k of ["mag", "res"]) {
+        const max = maxima[k] ?? 6;
+        if (attrRating(state, k, provider) > max) return { attr: k.toUpperCase(), max };
+      }
+      return null;
+    },
+  },
+  {
     id: "attr.oneAtMax", severity: "error", step: "attributes",
     check: ({ state, data, rules, provider }) => {
       if (!rules.oneAttributeAtMax.value) return null;
