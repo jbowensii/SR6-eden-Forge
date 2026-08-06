@@ -59,6 +59,26 @@ def _first(tree: dict, tag: str) -> dict | None:
     return None
 
 
+def _hook_value(raw: str | None):
+    """A counted-hook value: an int where it is fixed, else the formula text.
+
+    Seen in the data: plain numbers, ``$RATING``, ``$RATING*2``, ``$RATING/2``
+    and ``$CONCURRENT_PROGRAMS``. Anything non-numeric is passed through for
+    the consumer to resolve, rather than guessed at here.
+    """
+    if raw is None:
+        return 1
+    raw = raw.strip().replace("$$", "$")
+    try:
+        return int(raw)
+    except ValueError:
+        pass
+    try:
+        return float(raw)
+    except ValueError:
+        return raw
+
+
 def parse_item_mounts(trees: list[dict]) -> dict:
     """One data file -> {catalog_id: {hooks[], fits[], hostSubtypes[], embedded[]}}.
 
@@ -74,12 +94,20 @@ def parse_item_mounts(trees: list[dict]) -> dict:
             continue
 
         hooks: list[str] = []
+        capacity: dict = {}
         embedded: list[dict] = []
         mods = _first(t, "modifications")
         for m in (mods["children"] if mods else []):
             a = m.get("attrs", {})
             if m["tag"] == "itemmod" and a.get("type") == "HOOK" and a.get("ref"):
                 hooks.append(a["ref"])
+            elif m["tag"] == "valmod" and a.get("type") == "HOOK" and a.get("ref"):
+                # A counted hook: the item offers N of this mount rather than
+                # one. Rating-3 glasses grant three OPTICAL slots, which is why
+                # rating reads as "how much can I fit" on imaging gear. The
+                # value may be a plain number or a formula over $RATING, so it
+                # is kept verbatim and resolved once the rating is known.
+                capacity[a["ref"]] = _hook_value(a.get("value"))
             elif m["tag"] == "embed" and a.get("ref"):
                 embedded.append({
                     "ref": a["ref"],
@@ -110,12 +138,14 @@ def parse_item_mounts(trees: list[dict]) -> dict:
                 variants[v["attrs"].get("id", "")] = vslots
 
         bonuses = attribute_bonuses(t)
-        if hooks or fits or embedded or host_subtypes or bonuses:
+        if hooks or capacity or fits or embedded or host_subtypes or bonuses:
             rec = {}
             if bonuses:
                 rec["bonuses"] = bonuses
             if hooks:
                 rec["hooks"] = sorted(set(hooks))
+            if capacity:
+                rec["hookCapacity"] = capacity
             if fits:
                 rec["fits"] = sorted(set(fits))
             if host_subtypes:

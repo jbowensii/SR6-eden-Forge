@@ -806,3 +806,17 @@
   margin-right: 6px;
   white-space: nowrap;
 }
+
+/* Homebrew item entry: a compact row of fields under the shop lists. */
+.sr6-forge .custom-item {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin: 6px 0 10px;
+  padding: 8px;
+  border: 1px dashed var(--sf-line);
+  background: rgba(255,255,255,.02);
+}
+.sr6-forge .custom-item .field { min-width: 74px; }
+.sr6-forge .custom-item .field.grow { flex: 1 1 180px; }

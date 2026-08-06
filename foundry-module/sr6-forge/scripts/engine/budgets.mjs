@@ -120,6 +120,50 @@ export function ratedValues(item, data, rating = null) {
   };
 }
 
+/**
+ * How many of each mount an item offers, once its rating is known.
+ *
+ * Two kinds sit side by side. `hooks` are named mounts, one apiece — a pistol
+ * has one BARREL. `hookCapacity` counts them instead, and the count is often
+ * a formula: rating-3 glasses grant three OPTICAL slots, which is why rating
+ * reads as "how much can I fit" on imaging gear and armour rather than as a
+ * quality. Both are merged here so callers see one map.
+ *
+ * @returns {Record<string, number>} mount name -> how many are available
+ */
+export function hookCapacity(item, data) {
+  const meta = data?.gearMounts?.[item?.catalogId] ?? {};
+  const out = {};
+  for (const h of meta.hooks ?? []) out[h] = (out[h] ?? 0) + 1;
+
+  const rating = ratedValues(item, data).rating;
+  for (const [ref, raw] of Object.entries(meta.hookCapacity ?? {})) {
+    const n = resolveHookCount(raw, rating);
+    if (n > 0) out[ref] = (out[ref] ?? 0) + n;
+  }
+  return out;
+}
+
+/**
+ * Resolve a counted-hook value against a rating.
+ *
+ * Deliberately narrow: numbers, and the $RATING forms the data actually uses.
+ * Anything else (notably $CONCURRENT_PROGRAMS, which depends on a device
+ * rating we do not track here) yields 0 rather than a guess, so an unknown
+ * formula shows no capacity instead of a wrong one.
+ */
+export function resolveHookCount(raw, rating = 1) {
+  if (typeof raw === "number") return Math.floor(raw);
+  if (typeof raw !== "string") return 0;
+  const s = raw.replace(/\s+/g, "");
+  if (/^-?\d+(\.\d+)?$/.test(s)) return Math.floor(Number(s));
+  const m = s.match(/^\$RATING(?:([*/])(-?\d+(?:\.\d+)?))?$/);
+  if (!m) return 0;
+  if (!m[1]) return Math.floor(rating);
+  const n = Number(m[2]);
+  return Math.floor(m[1] === "*" ? rating * n : rating / n);
+}
+
 export function attributePointsSpent(state) {
   return CORE_ATTRS.reduce((n, k) => n + (state.attributes[k]?.points ?? 0), 0);
 }

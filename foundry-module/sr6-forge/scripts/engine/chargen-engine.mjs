@@ -2,7 +2,8 @@
  *  creation-rules and (optionally) a pack catalog are injected, so the whole
  *  engine unit-tests in plain node. The wizard renders budgets()/validate()
  *  and calls the mutators; commitPlan() emits everything the committer needs. */
-import { allBudgets, attrRating, skillRank, CORE_ATTRS, SPECIAL_ATTRS } from "./budgets.mjs";
+import { allBudgets, attrRating, skillRank, hookCapacity,
+  CORE_ATTRS, SPECIAL_ATTRS } from "./budgets.mjs";
 import { buildCommitPlan } from "./commit-plan.mjs";
 import { makeProvider } from "./providers.mjs";
 import { runValidation } from "./rules.mjs";
@@ -83,8 +84,10 @@ export function migrateState(state, data = null) {
   if (Array.isArray(state.purchases)) {
     const split = [];
     for (const p of state.purchases) {
-      const hooks = (data?.gearMounts?.[p.catalogId]?.hooks ?? []).length;
-      const stackable = STACKABLE_TYPES.has(p.gearType) && !hooks;
+      const gm = data?.gearMounts?.[p.catalogId] ?? {};
+      const mountable = (gm.hooks ?? []).length
+        || Object.keys(gm.hookCapacity ?? {}).length;
+      const stackable = STACKABLE_TYPES.has(p.gearType) && !mountable;
       if (!stackable && (p.qty ?? 1) > 1) {
         const n = p.qty;
         for (let i = 0; i < n; i++) {
@@ -132,7 +135,8 @@ export class ChargenEngine {
    */
   #stackable(op) {
     if (!STACKABLE_TYPES.has(op.gearType)) return false;
-    return !(this.data.gearMounts?.[op.catalogId]?.hooks ?? []).length;
+    const gm = this.data.gearMounts?.[op.catalogId] ?? {};
+    return !((gm.hooks ?? []).length || Object.keys(gm.hookCapacity ?? {}).length);
   }
 
   /* ---------- persistence ---------- */
@@ -260,7 +264,11 @@ export class ChargenEngine {
         const existing = s.purchases.find((p) => p.uuid === op.uuid);
         if (existing && op.stack && this.#stackable(op)) existing.qty = (existing.qty ?? 1) + 1;
         else s.purchases.push({ uuid: op.uuid, name: op.name, price: op.price ?? 0,
-          avail: op.avail ?? 0, essence: op.essence ?? 0, qty: 1, rating: op.rating ?? null,
+          avail: op.avail ?? 0, essence: op.essence ?? 0,
+          qty: Math.max(1, op.qty ?? 1), rating: op.rating ?? null,
+          // homebrew: no compendium document behind it, so the commit plan
+          // builds the item rather than copying one
+          custom: !!op.custom, note: op.note || null,
           itemType: op.itemType ?? "gear", gearType: op.gearType ?? null,
           catalogId: op.catalogId ?? null, subtype: op.subtype ?? null,
           // the item's own pricing tables travel with the purchase, so a draft
@@ -359,17 +367,17 @@ export class ChargenEngine {
           return { ok: true };
         }
         const mounts = this.data.gearMounts ?? {};
-        const hostMeta = mounts[host.catalogId] ?? {};
         const accMeta = mounts[op.catalogId] ?? {};
-        const hooks = hostMeta.hooks ?? [];
+        // capacity, not a bare list: an item may offer several of one mount
+        // (rating-3 glasses have three OPTICAL slots)
+        const capacity = hookCapacity(host, this.data);
         // pick the slot: the caller's, else the first slot both sides share
         const slot = op.slot
-          ?? (accMeta.fits ?? []).find((f) => hooks.includes(f));
+          ?? (accMeta.fits ?? []).find((f) => capacity[f] > 0);
         if (!slot) return { ok: false, reason: "no-compatible-slot" };
-        if (!hooks.includes(slot)) return { ok: false, reason: "host-lacks-slot" };
-        if (host.accessories.some((x) => x.slot === slot)) {
-          return { ok: false, reason: "slot-occupied" };
-        }
+        if (!capacity[slot]) return { ok: false, reason: "host-lacks-slot" };
+        const usedHere = host.accessories.filter((x) => x.slot === slot).length;
+        if (usedHere >= capacity[slot]) return { ok: false, reason: "slot-occupied" };
         const allowed = accMeta.hostSubtypes;
         if (allowed?.length && !allowed.includes(host.subtype)) {
           return { ok: false, reason: "subtype-not-allowed" };

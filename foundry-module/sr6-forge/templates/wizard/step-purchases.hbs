@@ -144,6 +144,30 @@
   </div>
 {{/if}}
 
+{{#unless isLifestyleTab}}
+{{#unless isPacksTab}}
+{{#unless isMagicTab}}
+<h3>Custom item</h3>
+<p class="hint">Anything the books do not cover — a priest's kit, a family
+  heirloom, a gamemaster's prop. You set the price; it is spent like any other
+  purchase and arrives on the sheet as ordinary gear.</p>
+<div class="custom-item">
+  <label class="field grow"><span class="field-label">Name</span>
+    <input type="text" data-custom="name" placeholder="Priest's kit" /></label>
+  <label class="field"><span class="field-label">Price ¥</span>
+    <input type="number" data-custom="price" min="0" step="5" placeholder="0" /></label>
+  <label class="field"><span class="field-label">Avail</span>
+    <input type="number" data-custom="avail" min="0" placeholder="0" /></label>
+  <label class="field"><span class="field-label">Rating</span>
+    <input type="number" data-custom="rating" min="0" placeholder="—" /></label>
+  <label class="field"><span class="field-label">Qty</span>
+    <input type="number" data-custom="qty" min="1" value="1" /></label>
+  <button type="button" data-action="addCustomItem">+ Add</button>
+</div>
+{{/unless}}
+{{/unless}}
+{{/unless}}
+
 <h3>Owned ({{owned.length}}) — {{spentText}}</h3>
 <p class="hint">Items marked ⛓ accept accessories; fit them from the dropdown on
    the owned entry.</p>

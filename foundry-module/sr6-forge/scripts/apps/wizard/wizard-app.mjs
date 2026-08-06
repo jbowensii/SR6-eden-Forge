@@ -6,7 +6,8 @@ import { MODULE_ID, SETTINGS, ACTOR_SKILLS, catalogIdOf } from "../../config.mjs
 import { chargenData } from "../../main.mjs";
 import { ChargenEngine } from "../../engine/chargen-engine.mjs";
 import { POINT_BUY, LIFEPATH_ADULT_COUNT } from "../../engine/providers.mjs";
-import { qualityKarma, creationSetting, augmentBonus, ratedValues } from "../../engine/budgets.mjs";
+import { qualityKarma, creationSetting, augmentBonus, ratedValues,
+  hookCapacity } from "../../engine/budgets.mjs";
 import { DraftStore } from "../../services/draft-store.mjs";
 import { PackCatalog } from "../../services/pack-catalog.mjs";
 import { commitCharacter } from "../../services/actor-committer.mjs";
@@ -149,6 +150,7 @@ export class SR6ForgeWizard extends RememberPosition(
       removeKnowledge: SR6ForgeWizard.#onRemoveKnowledge,
       addSin: SR6ForgeWizard.#onAddSin,
       removeSin: SR6ForgeWizard.#onRemoveSin,
+      addCustomItem: SR6ForgeWizard.#onAddCustomItem,
       addPack: SR6ForgeWizard.#onAddPack,
       removePack: SR6ForgeWizard.#onRemovePack,
       shopTab: SR6ForgeWizard.#onShopTab,
@@ -637,10 +639,19 @@ export class SR6ForgeWizard extends RememberPosition(
         // For each owned item: which of its mount slots are free, and which
         // accessories in the library fit them (slot AND host-subtype must match)
         const owned = st.purchases.map((pItem, index) => {
-          const hostMeta = mounts[pItem.catalogId] ?? {};
-          const hooks = hostMeta.hooks ?? [];
-          const used = new Set((pItem.accessories ?? []).map((a) => a.slot));
-          const free = hooks.filter((h) => !used.has(h));
+          // capacity, not a bare list of names: rating-3 glasses offer three
+          // OPTICAL mounts, and armour counts its ARMOR slots the same way
+          const cap = hookCapacity(pItem, data);
+          const usedCount = {};
+          for (const a of pItem.accessories ?? []) {
+            usedCount[a.slot] = (usedCount[a.slot] ?? 0) + 1;
+          }
+          const free = Object.entries(cap)
+            .filter(([h, n]) => (usedCount[h] ?? 0) < n)
+            .map(([h]) => h);
+          const totalSlots = Object.values(cap).reduce((n, v) => n + v, 0);
+          const freeCount = Object.entries(cap)
+            .reduce((n, [h, v]) => n + Math.max(0, v - (usedCount[h] ?? 0)), 0);
           const offers = free.length ? accessoryRows.filter((r) => {
             const m = mounts[catalogIdOf(r)];
             if (!m?.fits?.some((f) => free.includes(f))) return false;
@@ -656,11 +667,14 @@ export class SR6ForgeWizard extends RememberPosition(
             rating: rv.rating,
             ratingOptions: (rm?.ratings ?? []).map((n) => ({
               n, selected: n === rv.rating })),
-            slots: hooks.map((h) => ({ id: h, label: h.replaceAll("_", " ").toLowerCase(),
-              taken: used.has(h) })),
-            hasSlots: hooks.length > 0,
-            freeSlots: free.length,
-            totalSlots: hooks.length,
+            // one chip per physical mount, so three OPTICAL slots draw three
+            slots: Object.entries(cap).flatMap(([h, n]) =>
+              Array.from({ length: n }, (_, i) => ({
+                id: h, label: h.replaceAll("_", " ").toLowerCase(),
+                taken: i < (usedCount[h] ?? 0) }))),
+            hasSlots: totalSlots > 0,
+            freeSlots: freeCount,
+            totalSlots,
             // only worth showing when it is actually a stack
             showQty: (pItem.qty ?? 1) > 1,
             accessories: (pItem.accessories ?? []).map((a) => ({
@@ -1152,6 +1166,31 @@ export class SR6ForgeWizard extends RememberPosition(
   static #onRemoveSin(_ev, t) { this.#spend({ kind: "sin", index: Number(t.dataset.index), remove: true }); }
 
   /** Buy a Companion PACK: one price, and its whole contents come with it. */
+  /** Homebrew kit: a priest's kit, a family heirloom, anything not in a book. */
+  static #onAddCustomItem() {
+    const root = this.element;
+    const val = (n) => root.querySelector(`[data-custom="${n}"]`)?.value?.trim() ?? "";
+    const name = val("name");
+    if (!name) {
+      ui.notifications.warn("SR6 Forge: give the custom item a name.");
+      return;
+    }
+    const num = (n, d = 0) => {
+      const v = Number(val(n));
+      return Number.isFinite(v) ? v : d;
+    };
+    this.#spend({
+      kind: "purchase", custom: true, uuid: null, catalogId: null,
+      name, price: num("price"), avail: num("avail"), essence: num("essence"),
+      rating: num("rating") || null, qty: Math.max(1, num("qty", 1) || 1),
+      gearType: val("type") || "TOOLS", note: val("note"),
+    });
+    for (const n of ["name", "price", "avail", "essence", "rating", "note"]) {
+      const el = root.querySelector(`[data-custom="${n}"]`);
+      if (el) el.value = "";
+    }
+  }
+
   static #onAddPack(_ev, t) { this.#spend({ kind: "pack", catalogId: t.dataset.pack }); }
 
   static #onRemovePack(_ev, t) {

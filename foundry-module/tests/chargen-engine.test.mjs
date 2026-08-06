@@ -5,7 +5,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { ChargenEngine, blankState, migrateState } from "../sr6-forge/scripts/engine/chargen-engine.mjs";
 import { LIFEPATH_OPENING } from "../sr6-forge/scripts/engine/providers.mjs";
-import { augmentBonus, augmentedRating, ratedValues, qualityKarma } from "../sr6-forge/scripts/engine/budgets.mjs";
+import { augmentBonus, augmentedRating, ratedValues, qualityKarma,
+  hookCapacity, resolveHookCount } from "../sr6-forge/scripts/engine/budgets.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const data = JSON.parse(readFileSync(join(here, "..", "..", "export", "chargen-data.json"), "utf8"));
@@ -1447,5 +1448,73 @@ describe("stacking identical purchases", () => {
     state.purchases = [{ uuid: "u-ammo", catalogId: "regular_ammo",
       gearType: "AMMUNITION", qty: 4, price: 60, accessories: [] }];
     expect(migrateState(state, data).purchases).toHaveLength(1);
+  });
+});
+
+describe("counted mounts (rating = hardpoints)", () => {
+  function shop() {
+    const e = engineWith({ METATYPE: "D", ATTRIBUTE: "C", MAGIC: "E", SKILLS: "D", RESOURCES: "A" });
+    e.setMetatype("human");
+    return e;
+  }
+
+  it("reads rating-scaled hooks off the item", () => {
+    // glasses declare <valmod type="HOOK" ref="OPTICAL" value="$RATING"/>,
+    // so rating IS the number of accessories that fit
+    expect(data.gearMounts.glasses.hookCapacity).toEqual({ OPTICAL: "$RATING" });
+    const g = { catalogId: "glasses", rating: 3 };
+    expect(hookCapacity(g, data)).toEqual({ OPTICAL: 3 });
+    expect(hookCapacity({ catalogId: "glasses", rating: 1 }, data)).toEqual({ OPTICAL: 1 });
+  });
+
+  it("resolves the formulas the data actually uses", () => {
+    expect(resolveHookCount(8)).toBe(8);
+    expect(resolveHookCount("$RATING", 4)).toBe(4);
+    expect(resolveHookCount("$RATING*2", 3)).toBe(6);
+    expect(resolveHookCount("$RATING/2", 5)).toBe(2);
+    // an unknown formula must not invent capacity
+    expect(resolveHookCount("$CONCURRENT_PROGRAMS", 6)).toBe(0);
+  });
+
+  it("fits as many accessories as the rating allows, then stops", () => {
+    const e = shop();
+    e.spend({ kind: "purchase", uuid: "u-glass", name: "Glasses", price: 300,
+      catalogId: "glasses", gearType: "ELECTRONICS", rating: 3 });
+    const fit = (n) => e.spend({ kind: "accessory", index: 0, uuid: `u-v${n}`,
+      name: `Vision mod ${n}`, catalogId: "vision_magnification", slot: "OPTICAL", price: 100 });
+    expect(fit(1).ok).toBe(true);
+    expect(fit(2).ok).toBe(true);
+    expect(fit(3).ok).toBe(true);
+    expect(fit(4).reason).toBe("slot-occupied");        // rating 3 = 3 mounts
+  });
+
+  it("counts armour capacity, which is a flat number", () => {
+    expect(hookCapacity({ catalogId: "armor_jacket" }, data)).toEqual({ ARMOR: 8 });
+  });
+});
+
+describe("custom items", () => {
+  it("buys a homebrew item at the price you set", () => {
+    const e = engineWith({ METATYPE: "D", ATTRIBUTE: "C", MAGIC: "E", SKILLS: "D", RESOURCES: "A" });
+    e.setMetatype("human");
+    e.spend({ kind: "purchase", custom: true, uuid: null, catalogId: null,
+      name: "Priest's kit", price: 250, avail: 0, qty: 1, gearType: "TOOLS" });
+    expect(e.budgets().nuyen.spent).toBe(250);
+    expect(e.state.purchases[0].custom).toBe(true);
+  });
+
+  it("builds it as a synthetic item, since there is nothing to copy", () => {
+    const e = engineWith({ METATYPE: "D", ATTRIBUTE: "C", MAGIC: "E", SKILLS: "D", RESOURCES: "A" });
+    e.setMetatype("human");
+    e.spend({ kind: "purchase", custom: true, uuid: null, catalogId: null,
+      name: "Priest's kit", price: 250, qty: 2, gearType: "TOOLS", note: "chrism, stole, missal" });
+    const plan = e.commitPlan();
+    const kit = plan.syntheticItems.find((i) => i.name === "Priest's kit");
+    expect(kit).toBeTruthy();
+    expect(kit.type).toBe("gear");
+    expect(kit.system.count).toBe(2);
+    expect(kit.system.description).toBe("chrism, stole, missal");
+    // it must not be sent down the compendium path, which would drop it
+    expect(plan.embeddedFromPacks.some((g) => g.uuid === null && !g.catalogId)).toBe(false);
   });
 });

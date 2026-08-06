@@ -43,10 +43,29 @@ export function buildCommitPlan(state, data, rules, provider, budgets) {
       },
     });
   }
+  // declared up here because custom purchases in the loop below build straight
+  // into it — they have no compendium document to reference
+  const syntheticItems = [];
   for (const p of state.purchases) {
     // The PACK line is a receipt, not a thing: its contents are the items that
     // belong on the sheet, and they are already in this list.
     if (p.isPack) continue;
+    // A homebrew item has no compendium document to copy, so it is built here
+    // instead. Eden's `gear` template is permissive, so it lands on the sheet
+    // as a normal piece of kit.
+    if (p.custom) {
+      syntheticItems.push({
+        name: p.name || "Custom item", type: "gear",
+        system: {
+          type: p.gearType || "TOOLS", subtype: p.subtype || "",
+          price: p.price ?? 0, avail: p.avail ?? 0,
+          essence: p.essence ?? 0, count: p.qty ?? 1,
+          ...(p.rating ? { rating: p.rating } : {}),
+          description: p.note ?? "",
+        },
+      });
+      continue;
+    }
     embeddedFromPacks.push({ uuid: p.uuid, catalogId: p.catalogId, itemType: p.itemType,
       overrides: { ...(p.qty > 1 ? { "system.count": p.qty } : {}),
                    ...(p.rating ? { "system.rating": p.rating } : {}) } });
@@ -68,8 +87,7 @@ export function buildCommitPlan(state, data, rules, provider, budgets) {
   for (const r of state.rituals) embeddedFromPacks.push({ uuid: r.uuid, itemType: "ritual" });
   for (const f of state.foci) embeddedFromPacks.push({ uuid: f.uuid, itemType: "focus" });
 
-  /* ---- synthetic items (no compendium source) ---- */
-  const syntheticItems = [];
+  /* ---- synthetic items, continued ---- */
   for (const c of state.contacts) {
     syntheticItems.push({
       name: c.name || "Contact", type: "contact",
