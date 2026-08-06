@@ -10,7 +10,9 @@
 
 Rolling a runner by hand is an hour of arithmetic before anyone touches a die. Priority columns, adjustment points, karma at five times the *new* rating, essence bleeding out of every implant, availability caps, the nuyen you forgot to convert. Get one number wrong on the Attributes page and you find out three steps later, at the gear table, with no idea which number it was.
 
-Two halves fix that, and you need both.
+SR6 Forge does it for you, inside Foundry, against a library built from your own books.
+
+Two halves, and you need both.
 
 | | | |
 |---|---|---|
@@ -21,15 +23,15 @@ They are separate on purpose. Part 1 handles content that isn't ours to give awa
 
 ---
 
-## Your PDFs are the licence
+## Your PDFs are the license
 
 **This repository contains no game data. None. Not one weapon, not one spell.**
 
 The pipeline reads the books **you already bought**. The PDF on your drive is what entitles you to the data the extractor produces from it — that is the whole arrangement, and it is why nothing is bundled here. No PDF, no data. Buy the books.
 
-Shadowrun is a registered trademark of The Topps Company, Inc.; Catalyst Game Labs publishes the Sixth World under licence. `data/`, `export/` and every PDF are gitignored, and `git log` will confirm they were never committed — not buried in an old commit, never there at all. The handful of sample files under `examples/` and `site/shared/` each carry an explicit `_notice`; the "Example Autopistol" is invented, and exists only to show a record's shape.
+Shadowrun is a registered trademark of The Topps Company, Inc.; Catalyst Game Labs publishes the Sixth World under license. `data/`, `export/` and every PDF are gitignored, and `git log` will confirm they were never committed — not buried in an old commit, never there at all. The handful of sample files under `examples/` and `site/shared/` each carry an explicit `_notice`; the "Example Autopistol" is invented, and exists only to show a record's shape.
 
-**Do not redistribute what comes out the far end.** It is the books, in another format.
+**Do not redistribute what comes out the far end.** It is game content from the books, in another format.
 
 ---
 
@@ -46,18 +48,18 @@ Shadowrun is a registered trademark of The Topps Company, Inc.; Catalyst Game La
 
 ## Reading the books
 
-The extractor is the part that matters, because the books are the only complete source. **Commlink6 has been slow to pick up newer releases**, and a rules engine that can only see what someone else has already transcribed will always trail the books. This one reads the PDFs directly, so a supplement is available the day you buy it.
+The extractor is the part that matters, because the books are the only complete source. **Commlink6 can be slower than you like to pick up new releases**, and a rules engine that can only see what someone else has already transcribed will always trail the books. This one reads the PDFs directly, so a supplement is available the day you buy it.
 
-That is harder than it sounds. A Shadowrun page is a designed artefact, not a database dump: three columns that break for a sidebar, tables with no ruled lines, headers that only differ from body text by a point and a half, dual damage codes, ranges printed as five numbers in a row that mean five different things.
+That is harder than it sounds. A Shadowrun page is a designed artifact, not a database dump: three columns that break for a sidebar, tables with no ruled lines, headers that only differ from body text by a point and a half, dual damage codes, ranges printed as five numbers in a row that mean five different things.
 
 So the extractor works the way a person reads a page, and there is a module for each part of that:
 
 - **Layout first** — `columns.py`, `textcols.py` and `segment.py` recover the column structure, then `toc.py` and `hierarchy.py` rebuild the section tree, so an item lands under the right heading and carries its real page number.
 - **Tables by geometry** — `xtable.py` and `rowengine.py` read columns by x-position rather than by whitespace, which is what makes an unruled stat block parse at all.
 - **Typography as meaning** — `spell_layout.py` and `lifepath_pdf.py` identify records by font metrics: a 17.8pt Sans line is a module header, 13pt is a label, that particular bullet glyph starts a benefit. It is how the Companion's life modules were recovered when nothing else had them.
-- **Domain readers** — separate passes for gear, weapons, armour, vehicles, spells, rituals, adept powers, qualities, critters, spirits, contacts, lifestyles, toxins and drugs. Each knows its own table shape.
-- **Repair and inference** — `demangle.py` fixes ligatures and OCR damage, `normalize.py` regularises units and codes, `subtype_infer.py` and `autodetect.py` classify what the page left implicit, `words.py` and `glossary.py` catch the rest.
-- **Prose too** — `describe.py` and `writeups.py` pull the flavour text, so an item arrives with its description rather than a bare stat line.
+- **Domain readers** — separate passes for gear, weapons, armor, vehicles, spells, rituals, adept powers, qualities, critters, spirits, contacts, lifestyles, toxins and drugs. Each knows its own table shape.
+- **Repair and inference** — `demangle.py` fixes ligatures and OCR damage, `normalize.py` regularizes units and codes, `subtype_infer.py` and `autodetect.py` classify what the page left implicit, `words.py` and `glossary.py` catch the rest.
+- **Prose too** — `describe.py` and `writeups.py` pull the flavor text, so an item arrives with its description rather than a bare stat line.
 - **Art** — `images_extract.py` lifts illustrations off the page and `icon_match.py` pairs items with icons.
 - **Alignment** — `eden_align.py` and `eden_codes.py` translate everything into the type and subtype vocabulary the Foundry system already speaks.
 
@@ -74,7 +76,7 @@ Without Commlink6 you still get a full catalog from the PDFs. With it, those mec
 
 ## Correcting it: the review app
 
-No extractor is perfect on a designed page, and you should never ship data you haven't looked at. So the pipeline's centre of gravity is a **local web app**, not a command line.
+No extractor is perfect on a designed page, and you should never use data in your game that you haven't looked at. So the pipeline's center of gravity is a **local web app**, not a command line.
 
 ```bash
 cd site && npm install && npm run serve     # http://localhost:8347
@@ -84,7 +86,7 @@ Express and React, running only on your machine. From it you can:
 
 - **Browse everything** by book, domain and category, with search and filters
 - **Edit any field** — fix a price the OCR fumbled, correct a damage code, retype a mangled name
-- **Write and repair descriptions**, including the flavour text pulled off the page
+- **Write and repair descriptions**, including the flavor text pulled off the page
 - **Assign icons and artwork** — search a local icon library, pull illustrations lifted from the book, crop and background-strip renders, and preview them exactly as the sheet will show them
 - **See the real output** — the exact Foundry document JSON an item will become, live beside the record
 - **Mark QA status**, so nothing reaches a character sheet before a human has approved it
@@ -107,7 +109,14 @@ cd site && npm run serve              # review, correct, illustrate, export
 
 # Part 2 — SR6 Forge (the module)
 
-The character generator. Install from a release; it carries no game data.
+**SR6 Forge brings Commlink6 / Genesis inside Foundry VTT.** The same character
+creation you would do in the standalone generator — the same five methods, the
+same budgets, the same rules — except it happens in the window next to your
+game, and the finished runner is already an actor on your sheet. No exporting,
+no importing, no reconciling two copies of the same character. One seamless
+pass from priority table to first initiative roll.
+
+Install from a release; it carries no game data.
 
 ### Install
 
@@ -127,7 +136,7 @@ https://github.com/jbowensii/SR6-eden-Forge/releases/latest/download/module.json
 
 **Five ways to build a runner** — Priority, Sum-to-Ten, Point Buy, Karma, and the Companion's Life Path. One engine, a different budget provider on top of each.
 
-**It shows the maths.** Every budget is itemised. Karma doesn't just say *85 spent* — it names the raise:
+**It shows the math.** Every budget is itemized. Karma doesn't just say *85 spent* — it names the raise:
 
 ```
 Customization karma            50
@@ -146,7 +155,7 @@ Because a rank costs five times the *new* rating, and that is where budgets quie
 **It knows the fiddly rules**, and cites them:
 
 - Mystic adepts split priority Magic between power points and spells (core p67) — spend it all on powers and your spells cost karma
-- Fake SIN rating × 2,500¥; fake licence rating × 200¥, assigned to one SIN and never out-rating it (core p274)
+- Fake SIN rating × 2,500¥; fake license rating × 200¥, assigned to one SIN and never out-rating it (core p274)
 - Contact points are Charisma × 6, neither rating above Charisma at creation (core p68)
 - Six qualities maximum, net bonus karma capped at 20 (core p67)
 - Availability caps, essence floors, one-attribute-at-maximum
@@ -197,8 +206,8 @@ Seven batches covering what only exists in a live world — that eden derives th
 
 Shadowrun is a registered trademark of The Topps Company, Inc. Game content © Catalyst Game Labs. This project is unaffiliated with either, and ships neither.
 
-## Licence
+## License
 
 [MIT](LICENSE) — the code, verbatim, so tooling reads it correctly.
-[NOTICE](NOTICE) — what that licence does *not* cover. The data was never
+[NOTICE](NOTICE) — what that license does *not* cover. The data was never
 ours to license, and isn't here.
