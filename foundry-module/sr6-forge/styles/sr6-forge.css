@@ -797,3 +797,12 @@
   font-size: 9px;
   letter-spacing: .08em;
 }
+
+/* Hardpoint tally on an owned item — how many mounts are still open, so the
+   answer is visible without counting the chips. */
+.sr6-forge .slots .slot-count {
+  color: var(--sf-mute);
+  font-size: 10px;
+  margin-right: 6px;
+  white-space: nowrap;
+}

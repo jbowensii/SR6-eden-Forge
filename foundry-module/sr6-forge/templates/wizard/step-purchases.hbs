@@ -133,7 +133,7 @@
       </span>
       <span class="mt">{{#if where}}<span class="where">{{where}}</span> · {{/if}}{{price}}¥ · A{{avail}}{{#if essence}} · E{{essence}}{{/if}}{{#if ratedFrom}} · rating {{ratedFrom}}{{/if}}</span>
       <button type="button" data-action="addPurchase" data-uuid="{{uuid}}" data-name="{{name}}"
-              data-catalog-id="{{catalogId}}" data-subtype="{{subtype}}"
+              data-catalog-id="{{catalogId}}" data-subtype="{{subtype}}" data-gear-type="{{gearType}}"
               data-sr6forge="{{json sr6forge}}"
               data-price="{{price}}" data-avail="{{avail}}" data-essence="{{essence}}"
               data-item-type="{{itemType}}" {{#if overCap}}disabled title="over availability cap"{{/if}}>Buy</button>
@@ -150,7 +150,7 @@
 <div class="chosen-list">
   {{#each owned}}
   <div class="chosen owned-item">
-    <span class="c-name">{{name}}{{#if qty}} ×{{qty}}{{/if}}
+    <span class="c-name">{{name}}{{#if showQty}} ×{{qty}}{{/if}}
       <span class="c-meta">{{price}}¥{{#if essence}} · ess {{essence}}{{/if}}</span>
       {{#if ratings}}
       {{!-- rated gear prices per rating, so the rating is a live choice --}}
@@ -167,6 +167,7 @@
       {{#if hasSlots}}
       {{!-- accessory mounts: what is fitted, and what will still fit --}}
       <span class="slots">
+        <span class="slot-count">{{freeSlots}} of {{totalSlots}} hardpoints free</span>
         {{#each slots}}<span class="slot {{#if taken}}taken{{/if}}">{{label}}</span>{{/each}}
       </span>
       {{#each accessories}}

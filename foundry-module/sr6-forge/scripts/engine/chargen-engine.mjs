@@ -44,6 +44,18 @@ export function blankState(method = "priority", rulesetId = "core") {
   };
 }
 
+/**
+ * Item types that may share one line with a quantity.
+ *
+ * Consumables and supplies — rounds, chemicals, rope, tools. Everything else
+ * is a discrete object: two Ares Predators are two guns, and collapsing them
+ * into "x2" makes it impossible to silence one and leave the other alone,
+ * because accessories hang off the line rather than the weapon.
+ */
+export const STACKABLE_TYPES = new Set([
+  "AMMUNITION", "CHEMICALS", "SURVIVAL", "TOOLS",
+]);
+
 /** State collections whose entries are keyed by a catalog id. */
 const CATALOG_KEYED = ["qualities", "spells", "powers", "complexForms", "rituals",
   "foci", "purchases", "knowledge", "contacts"];
@@ -60,8 +72,34 @@ const CATALOG_KEYED = ["qualities", "spells", "powers", "complexForms", "rituals
  *
  * @param {object} state  mutated in place and returned
  */
-export function migrateState(state) {
+export function migrateState(state, data = null) {
   if (!state) return state;
+
+  // Split lines that should never have been stacked. Drafts saved before
+  // stacking was restricted collapsed two identical weapons into "x2", which
+  // leaves them sharing one accessory list — you cannot silence one Predator
+  // and not the other. Splitting is safe: the totals are unchanged, since
+  // price is per unit and multiplied by qty either way.
+  if (Array.isArray(state.purchases)) {
+    const split = [];
+    for (const p of state.purchases) {
+      const hooks = (data?.gearMounts?.[p.catalogId]?.hooks ?? []).length;
+      const stackable = STACKABLE_TYPES.has(p.gearType) && !hooks;
+      if (!stackable && (p.qty ?? 1) > 1) {
+        const n = p.qty;
+        for (let i = 0; i < n; i++) {
+          // the accessories already fitted stay on the first copy; the rest
+          // come out bare, which is what "I only modified one of them" means
+          split.push({ ...structuredClone(p), qty: 1,
+            accessories: i === 0 ? (p.accessories ?? []) : [] });
+        }
+      } else {
+        split.push(p);
+      }
+    }
+    state.purchases = split;
+  }
+
   for (const key of CATALOG_KEYED) {
     for (const entry of state[key] ?? []) {
       if (entry?.genesisID !== undefined) {
@@ -82,8 +120,19 @@ export class ChargenEngine {
     this.data = chargenData;
     this.rules = creationRules;
     this.catalog = catalog;
-    this.state = migrateState(state ?? blankState());
+    this.state = migrateState(state ?? blankState(), chargenData);
     this.provider = makeProvider(this.state.method, chargenData);
+  }
+
+  /**
+   * May this purchase share a line with an identical one?
+   *
+   * Only consumables, and only when the item takes no accessories — a hook
+   * means the thing can be individually modified, which stacking would hide.
+   */
+  #stackable(op) {
+    if (!STACKABLE_TYPES.has(op.gearType)) return false;
+    return !(this.data.gearMounts?.[op.catalogId]?.hooks ?? []).length;
   }
 
   /* ---------- persistence ---------- */
@@ -209,10 +258,10 @@ export class ChargenEngine {
           return { ok: true };
         }
         const existing = s.purchases.find((p) => p.uuid === op.uuid);
-        if (existing && op.stack) existing.qty = (existing.qty ?? 1) + 1;
+        if (existing && op.stack && this.#stackable(op)) existing.qty = (existing.qty ?? 1) + 1;
         else s.purchases.push({ uuid: op.uuid, name: op.name, price: op.price ?? 0,
           avail: op.avail ?? 0, essence: op.essence ?? 0, qty: 1, rating: op.rating ?? null,
-          itemType: op.itemType ?? "gear",
+          itemType: op.itemType ?? "gear", gearType: op.gearType ?? null,
           catalogId: op.catalogId ?? null, subtype: op.subtype ?? null,
           // the item's own pricing tables travel with the purchase, so a draft
           // reopened later re-costs from the item rather than a lookup file

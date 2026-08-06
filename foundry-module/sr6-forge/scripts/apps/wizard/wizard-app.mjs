@@ -184,14 +184,15 @@ export class SR6ForgeWizard extends RememberPosition(
       this.engine = draft
         ? ChargenEngine.fromDraft(draft.engineState, chargenData(), rules)
         : new ChargenEngine(chargenData(), rules);
-      if (draft?.step) {
-        this.step = draft.step;
-        // a resumed character has already passed through the earlier steps —
-        // tick them immediately instead of waiting for the user to revisit
-        for (const st of STEPS) {
-          this.visited.add(st);
-          if (st === draft.step) break;
-        }
+      if (draft) {
+        if (draft.step) this.step = draft.step;
+        // A resumed draft carries a complete state, so every step can be
+        // judged right now — not just the ones at or above where it was saved.
+        // Stopping at draft.step left everything below it blank until the user
+        // clicked through, which reads as "unfinished" when it is really
+        // "never looked at". `done` still requires the step to be error-free,
+        // so this reveals problems rather than papering over them.
+        for (const st of STEPS) this.visited.add(st);
       }
       if (!draft) this.engine.setRuleset(game.settings.get(MODULE_ID, SETTINGS.RULESET));
       // world optional-rule overrides always apply (they may have changed
@@ -659,6 +660,9 @@ export class SR6ForgeWizard extends RememberPosition(
               taken: used.has(h) })),
             hasSlots: hooks.length > 0,
             freeSlots: free.length,
+            totalSlots: hooks.length,
+            // only worth showing when it is actually a stack
+            showQty: (pItem.qty ?? 1) > 1,
             accessories: (pItem.accessories ?? []).map((a) => ({
               ...a, slotLabel: (a.slot || "").replaceAll("_", " ").toLowerCase() })),
             offers: offers.map((r) => ({
@@ -775,6 +779,8 @@ export class SR6ForgeWizard extends RememberPosition(
           .map((r) => ({ uuid: r.uuid, name: r.name, price: r.system?.price ?? 0,
             avail: r.system?.avail ?? 0, essence: r.system?.essence ?? 0,
             catalogId: catalogIdOf(r) ?? "", subtype: r.system?.subtype ?? "",
+            // the shop's own type, which decides whether copies may stack
+            gearType: r.system?.type ?? "",
             sr6forge: r.system?.sr6forge ?? null,
             itemType: r.type, overCap: (r.system?.avail ?? 0) > cap,
             // rated gear has no flat price: quote it at its lowest rating,
@@ -1096,7 +1102,7 @@ export class SR6ForgeWizard extends RememberPosition(
     this.#spend({ kind: "purchase", uuid: d.uuid, name: d.name, price: Number(d.price ?? 0),
       avail: Number(d.avail ?? 0), essence: Number(d.essence ?? 0),
       catalogId: d.catalogId ?? null, subtype: d.subtype ?? null, sr6forge,
-      itemType: d.itemType, stack: true }, "shop");
+      itemType: d.itemType, gearType: d.gearType, stack: true }, "shop");
   }
   static #onRemovePurchase(_ev, t) { this.#spend({ kind: "purchase", uuid: t.dataset.uuid, remove: true }); }
   static #onAddPick(_ev, t) {

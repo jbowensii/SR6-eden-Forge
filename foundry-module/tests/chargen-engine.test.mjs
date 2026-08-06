@@ -1380,3 +1380,72 @@ describe("karma on special attributes", () => {
     expect(e.validate().some((i) => i.id === "attr.creationMax")).toBe(true);
   });
 });
+
+describe("stacking identical purchases", () => {
+  function shop() {
+    const e = engineWith({ METATYPE: "D", ATTRIBUTE: "C", MAGIC: "E", SKILLS: "D", RESOURCES: "A" });
+    e.setMetatype("human");
+    return e;
+  }
+  const buy = (e, over = {}) => e.spend({
+    kind: "purchase", uuid: "u-pred", name: "Ares Predator VI", price: 725,
+    catalogId: "ares_predator_vi", gearType: "WEAPON_FIREARMS",
+    subtype: "PISTOLS_HEAVY", stack: true, ...over });
+
+  it("gives each weapon its own line so they can differ", () => {
+    // the reported bug: two Predators collapsed to one "x2" line, and since
+    // accessories hang off the line you could not silence just one of them
+    const e = shop();
+    buy(e); buy(e);
+    expect(e.state.purchases).toHaveLength(2);
+    expect(e.state.purchases.every((p) => (p.qty ?? 1) === 1)).toBe(true);
+  });
+
+  it("fits an accessory to one copy only", () => {
+    const e = shop();
+    buy(e); buy(e);
+    // the Predator carries a factory-fitted accessory of its own, so count
+    // only what the player added
+    const fitted = (p) => p.accessories.filter((a) => !a.included).length;
+    expect(fitted(e.state.purchases[0])).toBe(0);
+    e.spend({ kind: "accessory", index: 0, uuid: "u-silencer", name: "Silencer",
+      catalogId: "silencer", slot: "BARREL", price: 500 });
+    expect(fitted(e.state.purchases[0])).toBe(1);
+    expect(fitted(e.state.purchases[1])).toBe(0);
+  });
+
+  it("still stacks ammo and consumables", () => {
+    const e = shop();
+    for (let i = 0; i < 3; i++) {
+      e.spend({ kind: "purchase", uuid: "u-ammo", name: "Regular Ammo", price: 60,
+        catalogId: "regular_ammo", gearType: "AMMUNITION", stack: true });
+    }
+    expect(e.state.purchases).toHaveLength(1);
+    expect(e.state.purchases[0].qty).toBe(3);
+  });
+
+  it("charges the same either way", () => {
+    const e = shop();
+    buy(e); buy(e);
+    expect(e.budgets().nuyen.spent).toBe(1450);          // 2 x 725
+  });
+
+  it("splits a stack saved by an older build", () => {
+    const state = blankState();
+    state.purchases = [{ uuid: "u-pred", name: "Ares Predator VI", price: 725,
+      catalogId: "ares_predator_vi", gearType: "WEAPON_FIREARMS", qty: 2,
+      accessories: [{ uuid: "u-s", name: "Silencer", slot: "TOP", price: 500 }] }];
+    const migrated = migrateState(state, data);
+    expect(migrated.purchases).toHaveLength(2);
+    // the modification stays on one of them, which is what "I only did one" means
+    expect(migrated.purchases[0].accessories).toHaveLength(1);
+    expect(migrated.purchases[1].accessories).toHaveLength(0);
+  });
+
+  it("leaves a legitimate ammo stack alone when migrating", () => {
+    const state = blankState();
+    state.purchases = [{ uuid: "u-ammo", catalogId: "regular_ammo",
+      gearType: "AMMUNITION", qty: 4, price: 60, accessories: [] }];
+    expect(migrateState(state, data).purchases).toHaveLength(1);
+  });
+});
