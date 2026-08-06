@@ -58,13 +58,18 @@ export function skillPointsSpent(state) {
 }
 
 /** Karma for ranks bought with karma instead of skill points. Core p68: 5 x new
- *  rank, paid per rank, so the karma ranks are the TOP ranks of the skill. */
+ *  rank, paid per rank, so the karma ranks are the TOP ranks of the skill.
+ *  Knowledge and language ranks are priced the same way. */
 export function skillKarmaSpent(state, rules) {
   const per = rules.karmaCosts?.skillPerRank ?? 5;
   let n = 0;
   for (const s of Object.values(state.skills)) {
     const top = skillRank(s);
     for (let i = 0; i < (s.karma ?? 0); i++) n += (top - i) * per;
+  }
+  for (const k of state.knowledge ?? []) {
+    const top = (k.points ?? 1) + (k.karma ?? 0);
+    for (let i = 0; i < (k.karma ?? 0); i++) n += (top - i) * per;
   }
   return n;
 }

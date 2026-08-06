@@ -58,11 +58,19 @@
     </span>
     <span>
       {{#unless native}}
-      <span class="rank">{{points}}</span>
-      <span class="inline-step">
-        <button type="button" data-action="adj" data-kind="knowledgeRank" data-target="{{@index}}" data-delta="1">+</button>
-        <button type="button" data-action="adj" data-kind="knowledgeRank" data-target="{{@index}}" data-delta="-1">−</button>
+      <span class="rank total">{{rank}}</span>
+      <span class="inline-step" title="free knowledge points">
+        <button type="button" data-action="adj" data-kind="knowledgeRank" data-target="{{index}}" data-delta="1">+</button>
+        <button type="button" data-action="adj" data-kind="knowledgeRank" data-target="{{index}}" data-delta="-1">−</button>
       </span>
+      <span class="mt">{{points}} pt</span>
+      <span class="inline-step" title="buy a rank with karma">
+        <button type="button" data-action="adj" data-kind="knowledgeRank" data-pool="karma"
+                data-target="{{index}}" data-delta="1">+</button>
+        <button type="button" data-action="adj" data-kind="knowledgeRank" data-pool="karma"
+                data-target="{{index}}" data-delta="-1">−</button>
+      </span>
+      <span class="mt">{{karma}} ka</span>
       {{/unless}}
       <button type="button" class="x" data-action="removeKnowledge" data-index="{{@index}}">✕</button>
     </span>

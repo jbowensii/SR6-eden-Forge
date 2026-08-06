@@ -100,7 +100,10 @@
     {{#each list}}
     <div class="row {{#if overCap}}over{{/if}}" data-filter-text="{{name}}"
          data-detail-kind="uuid" data-detail-id="{{uuid}}">
-      <span class="nm">{{name}}</span>
+      <span class="nm">{{name}}
+        {{!-- tell the user BEFORE they buy that this thing takes accessories --}}
+        {{#if mounts}}<span class="mount-badge" title="accepts accessories — fit them from the Owned list below">⛓ {{mounts}}</span>{{/if}}
+      </span>
       <span class="mt">{{price}}¥ · A{{avail}}{{#if essence}} · E{{essence}}{{/if}}</span>
       <button type="button" data-action="addPurchase" data-uuid="{{uuid}}" data-name="{{name}}"
               data-genesis-id="{{genesisID}}" data-subtype="{{subtype}}"
@@ -114,6 +117,8 @@
 {{/if}}
 
 <h3>Owned ({{owned.length}}) — {{spentText}}</h3>
+<p class="hint">Items marked ⛓ accept accessories; fit them from the dropdown on
+   the owned entry.</p>
 <div class="chosen-list">
   {{#each owned}}
   <div class="chosen owned-item">

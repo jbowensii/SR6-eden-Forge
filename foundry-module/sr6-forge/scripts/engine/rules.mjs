@@ -145,14 +145,14 @@ export const VALIDATION_RULES = [
     check: ({ budgets }) => (budgets.karma.left >= 0 ? null : {}),
   },
   {
-    id: "nuyen.overspent", severity: "error", step: "purchases",
+    id: "nuyen.overspent", severity: "error", step: "gear",
     check: ({ budgets, state, data, rules }) => {
       const allowNeg = creationSetting("allowNegativeNuyen", data, rules, state.rulesetId, state.optionalRules);
       return budgets.nuyen.left >= 0 || allowNeg ? null : {};
     },
   },
   {
-    id: "gear.availCap", severity: "error", step: "purchases",
+    id: "gear.availCap", severity: "error", step: "gear",
     check: ({ state, data, rules }) => {
       const cap = creationSetting("maxAvailability", data, rules, state.rulesetId, state.optionalRules);
       for (const p of state.purchases) {
@@ -165,18 +165,18 @@ export const VALIDATION_RULES = [
     },
   },
   {
-    id: "essence.positive", severity: "error", step: "purchases",
+    id: "essence.positive", severity: "error", step: "augments",
     check: ({ budgets }) => (budgets.essence.left > 0 ? null : {}),
   },
   {
-    id: "magic.spellsAllowed", severity: "error", step: "purchases",
+    id: "magic.spellsAllowed", severity: "error", step: "powers",
     check: ({ state, data }) => {
       if (!state.spells.length) return null;
       return data.morTypes?.[state.morId]?.spells ? null : {};
     },
   },
   {
-    id: "adept.ppBudget", severity: "error", step: "purchases",
+    id: "adept.ppBudget", severity: "error", step: "powers",
     check: ({ budgets, state, data }) => {
       const mor = data.morTypes?.[state.morId];
       if (!mor?.powers) return state.powers.length ? {} : null;
@@ -186,7 +186,7 @@ export const VALIDATION_RULES = [
   {
     // Core p67: a mystic adept buys power points "up to a maximum of their
     // Magic attribute" from the priority table.
-    id: "adept.ppCap", severity: "error", step: "purchases",
+    id: "adept.ppCap", severity: "error", step: "powers",
     check: ({ budgets, state, data }) => {
       const mor = data.morTypes?.[state.morId];
       if (!mor?.paysPowers) return null;

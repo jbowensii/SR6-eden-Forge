@@ -268,8 +268,14 @@
 .sr6-forge .wizard-nav .spacer { flex: 1; }
 /* Foundry forces height/min-height (--button-size), display:flex, centered
    content and zero vertical padding on EVERY button. Undo that here — our
-   cards and steppers are multi-line and must size to their content. */
-.sr6-forge button {
+   cards and steppers are multi-line and must size to their content.
+   
+   The :not([class*="fa-"]) guard matters: since v14 Foundry puts the Font
+   Awesome class on the header buttons THEMSELVES rather than on a child <i>
+   —  <button class="header-control icon fa-solid fa-xmark">  — so styling
+   every button would override the icon font and render close/collapse as
+   blank squares, and box them in our panel chrome besides. */
+.sr6-forge button:not([class*="fa-"]) {
   font-family: inherit;
   background: var(--sf-panel-2);
   border: 1px solid var(--sf-line-hot);
@@ -283,8 +289,8 @@
   white-space: normal;
   transition: background .12s, border-color .12s, color .12s;
 }
-.sr6-forge button:hover:not(:disabled) { background: #1d2230; border-color: var(--sf-magenta); }
-.sr6-forge button:disabled { opacity: .38; cursor: not-allowed; }
+.sr6-forge button:not([class*="fa-"]):hover:not(:disabled) { background: #1d2230; border-color: var(--sf-magenta); }
+.sr6-forge button:not([class*="fa-"]):disabled { opacity: .38; cursor: not-allowed; }
 .sr6-forge button.primary {
   background: linear-gradient(180deg, var(--sf-magenta), var(--sf-magenta-d));
   border-color: var(--sf-magenta);
@@ -728,3 +734,12 @@
 .sr6-forge .add-acc select { max-width: 320px; }
 .sr6-forge .lvl { display: inline-flex; align-items: center; gap: 5px; margin-left: 8px; }
 .sr6-forge .lvl select { width: 62px; }
+
+.sr6-forge .mount-badge {
+  margin-left: 6px;
+  padding: 0 5px;
+  font-family: var(--sf-mono);
+  font-size: 9px;
+  color: var(--sf-cyan);
+  border: 1px solid var(--sf-line-hot);
+}

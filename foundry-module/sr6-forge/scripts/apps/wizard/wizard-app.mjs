@@ -18,7 +18,17 @@ const TPL = (n) => `modules/${MODULE_ID}/templates/wizard/${n}.hbs`;
 const renderTpl = (p, d) => foundry.applications.handlebars.renderTemplate(p, d);
 
 const STEPS = ["method", "priority", "metatype", "magic", "attributes",
-  "skills", "qualities", "purchases", "contacts", "review"];
+  "skills", "qualities", "gear", "augments", "powers", "contacts", "review"];
+
+/** Shopping is split across three rail entries rather than one crowded step:
+ *  mundane goods, implants, and the magical/resonant side. Each renders the
+ *  same template with its own subset of tabs. */
+const STEP_TABS = {
+  gear:    ["weapons", "ammo", "accessories", "armor", "matrix", "gear",
+            "vehicles", "lifestyle"],
+  augments: ["cyberware", "bioware"],
+  powers:  ["magic", "foci"],
+};
 /** The second step is method-specific: priorities, a CP ledger, a karma pool
  *  or the life path. One step slot, four templates. */
 const BUILD_TEMPLATE = {
@@ -33,8 +43,8 @@ const BUILD_LABEL = {
 const STEP_LABEL = {
   method: "Method", priority: "Priorities", metatype: "Metatype",
   magic: "Magic / Res", attributes: "Attributes", skills: "Skills",
-  qualities: "Qualities", purchases: "Gear & Magic", contacts: "Contacts",
-  review: "Review",
+  qualities: "Qualities", gear: "Gear", augments: "Augmentations",
+  powers: "Spells & Powers", contacts: "Contacts", review: "Review",
 };
 
 /** Shop tabs: which gear types belong where (organised like Commlink sections). */
@@ -113,6 +123,9 @@ export class SR6ForgeWizard extends RememberPosition(
     this.draftId = options.draftId ?? foundry.utils.randomID();
     this.ui = { shopTab: "weapons", shopSubtype: "", qualityFilter: "all",
       query: {}, issuesOpen: false };
+    // steps the user has actually opened — the rail tick persists whichever
+    // way they navigate afterwards
+    this.visited = new Set(["method"]);
     this.detail = null;
     this._scroll = {};
     this._detailCache = new Map();
@@ -132,6 +145,11 @@ export class SR6ForgeWizard extends RememberPosition(
       // since a draft was saved)
       this.engine.setOptionalRules(game.settings.get(MODULE_ID, SETTINGS.OPTIONAL_RULES));
     }
+    if (this._lastStep !== this.step) {
+      if (STEP_TABS[this.step]) this.#resetShopFilters();
+      this._lastStep = this.step;
+    }
+    this.visited.add(this.step);
     const e = this.engine;
     const budgets = e.budgets();
     const issues = e.validate().map((i) => ({
@@ -143,7 +161,8 @@ export class SR6ForgeWizard extends RememberPosition(
       if (i.severity === "error") errsByStep[i.step] = (errsByStep[i.step] ?? 0) + 1;
     }
     const tplName = this.step === "priority"
-      ? `step-${BUILD_TEMPLATE[e.state.method] ?? "priority"}` : `step-${this.step}`;
+      ? `step-${BUILD_TEMPLATE[e.state.method] ?? "priority"}`
+      : (STEP_TABS[this.step] ? "step-purchases" : `step-${this.step}`);
     const stepHtml = await renderTpl(TPL(tplName),
       await this.#stepContext(this.step, e, budgets, issues));
 
@@ -153,7 +172,9 @@ export class SR6ForgeWizard extends RememberPosition(
       steps: STEPS.map((s, i) => ({
         id: s, index: i + 1,
         label: s === "priority" ? (BUILD_LABEL[e.state.method] ?? STEP_LABEL[s]) : STEP_LABEL[s],
-        active: s === this.step, done: STEPS.indexOf(this.step) > i,
+        active: s === this.step,
+        // ticked once visited and error-free, regardless of the current step
+        done: this.visited.has(s) && s !== this.step && !(errsByStep[s] ?? 0),
         errors: errsByStep[s] ?? 0,
       })),
       stepHtml,
@@ -468,7 +489,11 @@ export class SR6ForgeWizard extends RememberPosition(
               .map(([sid, sp]) => ({ id: sid, label: sp.name, selected: s.spec === sid }))
               .sort((a, b) => a.label.localeCompare(b.label)) };
         }).sort((a, b) => a.label.localeCompare(b.label));
-        return { skills, query: q("skill"), knowledge: st.knowledge,
+        return { skills, query: q("skill"),
+          knowledge: st.knowledge.map((k, index) => ({
+            ...k, index,
+            karma: k.karma ?? 0,
+            rank: (k.points ?? 1) + (k.karma ?? 0) })),
           skillKarmaHint: `Ranks can also be bought with karma (${rules.karmaCosts.skillPerRank} x the new rank) — ${budgets.karma.left} karma left.`,
           knowledgeHint: `${budgets.knowledgePoints.left} of ${budgets.knowledgePoints.max} knowledge points left (free points equal your Logic; a native language is free).` };
       }
@@ -497,7 +522,11 @@ export class SR6ForgeWizard extends RememberPosition(
           taken: st.qualities.map((qq) => {
             const m = meta[qq.genesisID] ?? {};
             const positive = qq.positive ?? m.positive ?? true;
-            return { ...qq, name: qq.name ?? qq.genesisID,
+            // A draft stores the name as it was when the quality was picked, so
+            // a later correction (Sinner -> SINner) would never reach it. The
+            // live pack row wins whenever we can still find it.
+            const live = rows.find((r) => r.system?.genesisID === qq.genesisID);
+            return { ...qq, name: live?.name ?? qq.name ?? qq.genesisID,
               karma: Math.abs(qq.subOptionKarma ?? qq.karma ?? m.karma ?? 0) * (qq.rating ?? 1),
               sign: positive ? "−" : "+",
               note: qq.note ?? "" };
@@ -505,10 +534,15 @@ export class SR6ForgeWizard extends RememberPosition(
         };
       }
 
-      case "purchases": {
+      case "gear": case "augments": case "powers": {
         const mor = data.morTypes?.[st.morId] ?? {};
-        const tabDef = SHOP_TABS.find((t) => t.id === this.ui.shopTab) ?? SHOP_TABS[0];
-        const tabs = SHOP_TABS.map((t) => ({
+        // only this step's tabs, and the remembered tab must be one of them
+        const allowed = STEP_TABS[step];
+        const stepTabs = SHOP_TABS.filter((t) => allowed.includes(t.id));
+        const current = allowed.includes(this.ui.shopTab)
+          ? this.ui.shopTab : allowed[0];
+        const tabDef = stepTabs.find((t) => t.id === current) ?? stepTabs[0];
+        const tabs = stepTabs.map((t) => ({
           id: t.id, label: t.label, active: t.id === tabDef.id,
           enabled: t.magic ? !!(mor.spells || mor.powers || mor.resonance) : true,
           title: t.magic && !(mor.spells || mor.powers || mor.resonance)
@@ -939,6 +973,9 @@ export class SR6ForgeWizard extends RememberPosition(
   static #onRemoveKnowledge(_ev, t) { this.#spend({ kind: "knowledge", index: Number(t.dataset.index), remove: true }); }
   static #onAddSin(_ev, t) { this.#spend({ kind: "sin", rating: Number(t.dataset.rating ?? 1) }); }
   static #onRemoveSin(_ev, t) { this.#spend({ kind: "sin", index: Number(t.dataset.index), remove: true }); }
+  /** Changing rail step clears the per-tab filters, which belong to the tab. */
+  #resetShopFilters() { this.ui.shopSubtype = ""; this.ui.query.shop = ""; }
+
   static #onShopTab(_ev, t) {
     this.ui.shopTab = t.dataset.tab;
     this.ui.shopSubtype = "";

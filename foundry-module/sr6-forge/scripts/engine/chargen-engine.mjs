@@ -233,9 +233,19 @@ export class ChargenEngine {
         }
         const meta = op.kind === "power"
           ? (this.data.adeptPowers?.[op.genesisID] ?? {}) : {};
-        // a "multi" power (Attribute Boost) may be taken more than once
-        if (!meta.multi && list.some((x) => x.uuid === op.uuid)) {
-          return { ok: false, reason: "duplicate" };
+        const existing = list.find((x) => x.uuid === op.uuid);
+        if (existing) {
+          // A leveled power is bought per level — Improved Reflexes at 1 PP a
+          // level is taken up to three times — so taking it again raises the
+          // level rather than being rejected as a duplicate.
+          if (meta.hasLevel) {
+            const cap = meta.maxLevel ?? 6;
+            if ((existing.level ?? 1) >= cap) return { ok: false, reason: "at-max-level" };
+            existing.level = (existing.level ?? 1) + 1;
+            return { ok: true, level: existing.level };
+          }
+          // "multi" powers (Attribute Boost) are separate instances instead
+          if (!meta.multi) return { ok: false, reason: "duplicate" };
         }
         list.push({
           uuid: op.uuid, name: op.name, genesisID: op.genesisID ?? null,
@@ -268,10 +278,12 @@ export class ChargenEngine {
         const k = s.knowledge[Number(op.target)];
         if (!k) return { ok: false, reason: "unknown-entry" };
         if (k.native) return { ok: false, reason: "native-is-fixed" };
-        const next = (k.points ?? 1) + (op.delta ?? 1);
-        if (next < 1) return { ok: false, reason: "minimum-1" };
-        if (next > 6) return { ok: false, reason: "maximum-6" };
-        k.points = next;
+        const field = op.pool === "karma" ? "karma" : "points";
+        const next = (k[field] ?? (field === "points" ? 1 : 0)) + (op.delta ?? 1);
+        const floor = field === "points" ? 1 : 0;
+        if (next < floor) return { ok: false, reason: `minimum-${floor}` };
+        if ((k.points ?? 1) + (k.karma ?? 0) > 6) return { ok: false, reason: "maximum-6" };
+        k[field] = next;
         return { ok: true };
       }
       case "cp": {

@@ -843,3 +843,77 @@ describe("adept powers", () => {
     expect(e.validate().map((i) => i.id)).toContain("adept.ppBudget");
   });
 });
+
+describe("leveled powers are bought per level", () => {
+  it("taking a leveled power again raises its level instead of erroring", () => {
+    // reported: buying Improved Reflexes 3 times said "duplicate"
+    const e = engineWith({ METATYPE: "D", ATTRIBUTE: "B", MAGIC: "A",
+      SKILLS: "C", RESOURCES: "E" });
+    e.setMetatype("human");
+    e.setMagicPath("adept");
+    const take = () => e.spend({ kind: "power", uuid: "Item.ir",
+      name: "Improved Reflexes", genesisID: "improved_reflexes" });
+
+    expect(take().ok).toBe(true);
+    expect(e.state.powers[0].level).toBe(1);
+    expect(take().ok).toBe(true);
+    expect(take().ok).toBe(true);
+    expect(e.state.powers).toHaveLength(1);          // one entry, level 3
+    expect(e.state.powers[0].level).toBe(3);
+
+    const per = data.adeptPowers.improved_reflexes.cost;
+    expect(e.budgets().powerPoints.spent).toBe(per * 3);
+  });
+
+  it("a power without levels is still a duplicate the second time", () => {
+    const e = engineWith({ METATYPE: "D", ATTRIBUTE: "B", MAGIC: "A",
+      SKILLS: "C", RESOURCES: "E" });
+    e.setMetatype("human");
+    e.setMagicPath("adept");
+    const take = () => e.spend({ kind: "power", uuid: "Item.ap",
+      name: "Astral Perception", genesisID: "astral_perception" });
+    expect(take().ok).toBe(true);
+    const again = take();
+    expect(again.ok).toBe(false);
+    expect(again.reason).toBe("duplicate");
+  });
+
+  it("Mystic Armor is available as a power, not only as a spell", () => {
+    // it exists as both; a genesisID collision had dropped the power
+    expect(data.adeptPowers.mystic_armor).toBeTruthy();
+    expect(data.adeptPowers.mystic_armor.hasLevel).toBe(true);
+  });
+});
+
+describe("knowledge skills bought with karma", () => {
+  function withKnowledge() {
+    const e = engineWith();
+    e.setMetatype("human");
+    e.spend({ kind: "knowledge", name: "Gang Politics", type: "knowledge" });
+    return e;
+  }
+
+  it("starts at rank 1 on the free points", () => {
+    const e = withKnowledge();
+    expect(e.state.knowledge[0].points).toBe(1);
+    expect(e.budgets().knowledgePoints.spent).toBe(1);
+    expect(e.budgets().karma.spent).toBe(0);
+  });
+
+  it("charges karma for a karma-bought rank at 5 x the new rank", () => {
+    const e = withKnowledge();
+    const before = e.budgets().karma.spent;
+    e.spend({ kind: "knowledgeRank", target: 0, pool: "karma", delta: 1 });
+    expect(e.state.knowledge[0].karma).toBe(1);
+    // rank 1 free + 1 karma rank = top rank 2, so 2 x 5
+    expect(e.budgets().karma.spent).toBe(before + 10);
+    // and it does not consume a free knowledge point
+    expect(e.budgets().knowledgePoints.spent).toBe(1);
+  });
+
+  it("will not go below zero karma ranks", () => {
+    const e = withKnowledge();
+    const r = e.spend({ kind: "knowledgeRank", target: 0, pool: "karma", delta: -1 });
+    expect(r.ok).toBe(false);
+  });
+});
