@@ -47,6 +47,11 @@ Hooks.once("init", () => {
   });
 
   addIndexFields();
+
+  // Serialise a value into a data- attribute. Rated gear carries its pricing
+  // tables on the item, and the shop row has to hand them to the click handler.
+  Handlebars.registerHelper("json", (v) =>
+    new Handlebars.SafeString(foundry.utils.escapeHTML(JSON.stringify(v ?? null))));
 });
 
 /**

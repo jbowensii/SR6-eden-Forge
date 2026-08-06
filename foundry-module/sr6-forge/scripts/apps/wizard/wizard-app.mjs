@@ -669,15 +669,19 @@ export class SR6ForgeWizard extends RememberPosition(
           .map((r) => ({ uuid: r.uuid, name: r.name, price: r.system?.price ?? 0,
             avail: r.system?.avail ?? 0, essence: r.system?.essence ?? 0,
             genesisID: r.system?.genesisID ?? "", subtype: r.system?.subtype ?? "",
+            sr6forge: r.system?.sr6forge ?? null,
             itemType: r.type, overCap: (r.system?.avail ?? 0) > cap,
-            // rated gear has no flat price: quote it at its lowest rating
+            // rated gear has no flat price: quote it at its lowest rating,
+            // reading the tables off the item first
             ...(() => {
-              const rm = data.gearRatings?.[r.system?.genesisID];
-              if (!rm?.ratings?.length) return {};
-              const v = ratedValues({ genesisID: r.system?.genesisID }, data, rm.ratings[0]);
-              return { ratings: rm.ratings, maxRating: rm.maxRating,
+              const onItem = r.system?.sr6forge;
+              const rs = onItem?.ratings ?? data.gearRatings?.[r.system?.genesisID]?.ratings;
+              if (!rs?.length) return {};
+              const v = ratedValues(
+                { genesisID: r.system?.genesisID, sr6forge: onItem }, data, rs[0]);
+              return { ratings: rs, maxRating: onItem?.maxRating ?? rs.at(-1),
                 price: v.price, avail: v.avail, essence: v.essence,
-                ratedFrom: `${rm.ratings[0]}-${rm.maxRating}` };
+                ratedFrom: `${rs[0]}-${onItem?.maxRating ?? rs.at(-1)}` };
             })(),
             // does this item accept accessories at all?
             mounts: (mounts[r.system?.genesisID]?.hooks ?? []).length }));
@@ -964,9 +968,13 @@ export class SR6ForgeWizard extends RememberPosition(
   static #onAddPurchase(_ev, t) {
     const d = t.dataset;
     // genesisID + subtype are what the accessory rules match on
+    // the row carries the item's pricing tables as JSON so the purchase can be
+    // re-costed later without consulting chargen-data
+    let sr6forge = null;
+    try { sr6forge = d.sr6forge ? JSON.parse(d.sr6forge) : null; } catch { /* ignore */ }
     this.#spend({ kind: "purchase", uuid: d.uuid, name: d.name, price: Number(d.price ?? 0),
       avail: Number(d.avail ?? 0), essence: Number(d.essence ?? 0),
-      genesisID: d.genesisId ?? null, subtype: d.subtype ?? null,
+      genesisID: d.genesisId ?? null, subtype: d.subtype ?? null, sr6forge,
       itemType: d.itemType, stack: true }, "shop");
   }
   static #onRemovePurchase(_ev, t) { this.#spend({ kind: "purchase", uuid: t.dataset.uuid, remove: true }); }

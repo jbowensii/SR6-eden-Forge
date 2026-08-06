@@ -22,6 +22,13 @@ export const SETTINGS = {
 export const EXTRA_INDEX_FIELDS = [
   "system.type", "system.subtype", "system.price", "system.avail",
   "system.value", "system.category", "system.essence", "system.rating",
+  // Rated gear prices per rating, and eden has one `price` field. The tables
+  // ride on the item under our own namespace so the cost can be computed from
+  // the item alone — see ratedValues(). Indexed because the shop list works
+  // from the compendium index, not from loaded documents.
+  "system.sr6forge.ratings", "system.sr6forge.maxRating",
+  "system.sr6forge.priceByRating", "system.sr6forge.availByRating",
+  "system.sr6forge.essenceByRating",
 ];
 
 /** Data-module package prefix — every pack whose package id starts with this

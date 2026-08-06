@@ -107,6 +107,7 @@
       <span class="mt">{{price}}¥ · A{{avail}}{{#if essence}} · E{{essence}}{{/if}}{{#if ratedFrom}} · rating {{ratedFrom}}{{/if}}</span>
       <button type="button" data-action="addPurchase" data-uuid="{{uuid}}" data-name="{{name}}"
               data-genesis-id="{{genesisID}}" data-subtype="{{subtype}}"
+              data-sr6forge="{{json sr6forge}}"
               data-price="{{price}}" data-avail="{{avail}}" data-essence="{{essence}}"
               data-item-type="{{itemType}}" {{#if overCap}}disabled title="over availability cap"{{/if}}>Buy</button>
     </div>

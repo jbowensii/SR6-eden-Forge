@@ -13,6 +13,21 @@ const COLUMNS = [
   { key: "subtype", label: "Subtype", get: (it) => it.system.subtype ?? "", type: "str" },
   { key: "price", label: "Price", get: (it) => it.system.priceDef || it.system.price || "", type: "num" },
   { key: "avail", label: "Avail", get: (it) => it.system.availDef || it.system.avail || "", type: "num" },
+  // rated gear prices per rating; show the range and the spread so a reviewer
+  // can see the whole ladder rather than just the rating-1 figure
+  { key: "rating", label: "Rating",
+    get: (it) => {
+      const f = it.system.sr6forge;
+      return f?.ratings?.length ? `${f.ratings[0]}-${f.maxRating}` : "";
+    } },
+  { key: "priceLadder", label: "Price by rating",
+    get: (it) => (it.system.sr6forge?.priceByRating ?? []).join(" / ") },
+  { key: "essence", label: "Essence",
+    get: (it) => {
+      const f = it.system.sr6forge;
+      if (f?.essenceByRating?.length) return f.essenceByRating.join(" / ");
+      return it.system.essence || "";
+    } },
   { key: "page", label: "Ref", get: (it) => it.meta.page ?? 0, type: "num" },
   { key: "qa", label: "QA", get: (it) => QA_ORDER[it.meta.qaStatus] ?? 0, type: "num" },
 ];
@@ -69,6 +84,18 @@ export default function CategoryTable({ payload, issues, onEdit }) {
             <td className="cell-subtype">{item.system.subtype ?? ""}</td>
             <td className="cell-num">{item.system.priceDef || item.system.price}</td>
             <td className="cell-num">{item.system.availDef || item.system.avail}</td>
+            <td className="cell-num">
+              {item.system.sr6forge?.ratings?.length
+                ? `${item.system.sr6forge.ratings[0]}-${item.system.sr6forge.maxRating}` : ""}
+            </td>
+            <td className="cell-num">
+              {(item.system.sr6forge?.priceByRating ?? []).join(" / ")}
+            </td>
+            <td className="cell-num">
+              {item.system.sr6forge?.essenceByRating?.length
+                ? item.system.sr6forge.essenceByRating.join(" / ")
+                : (item.system.essence || "")}
+            </td>
             <td className="cell-ref">p. {item.meta.page}</td>
             <td><span className={`qa-chip qa-${item.meta.qaStatus}`}>{item.meta.qaStatus}</span></td>
             <td className="cell-issues">{(issueMap.get(item.id) ?? []).map((i) => i.rule).join(", ")}</td>

@@ -1051,3 +1051,53 @@ describe("rated gear prices by rating", () => {
     expect(augmentBonus(e.state, "rea", data)).toBe(3);
   });
 });
+
+describe("pricing works from the item alone", () => {
+  // The point of putting the tables on the item: a cost must be computable
+  // WITHOUT chargen-data, so custom or homebrew gear prices correctly and the
+  // two sources can never drift.
+  const onItem = {
+    genesisID: "some_homebrew_ware",
+    sr6forge: {
+      ratings: [1, 2, 3], maxRating: 3,
+      priceByRating: [1000, 4000, 9000],
+      availByRating: [2, 4, 8],
+      essenceByRating: [0.5, 1, 1.5],
+    },
+  };
+
+  it("prices from the item with NO chargen-data present", () => {
+    const none = {};                                   // no gearRatings at all
+    expect(ratedValues(onItem, none, 1).price).toBe(1000);
+    expect(ratedValues(onItem, none, 3).price).toBe(9000);
+    expect(ratedValues(onItem, none, 2).essence).toBe(1);
+    expect(ratedValues(onItem, none, 3).avail).toBe(8);
+  });
+
+  it("prefers the item's own tables over the central ones", () => {
+    // same id in both, different numbers: the item must win
+    const conflicting = { gearRatings: { some_homebrew_ware: {
+      ratings: [1], price: { flat: 999999 } } } };
+    expect(ratedValues(onItem, conflicting, 2).price).toBe(4000);
+  });
+
+  it("still falls back to chargen-data for an item carrying nothing", () => {
+    expect(ratedValues({ genesisID: "wired_reflexes" }, data, 3).price).toBe(250000);
+  });
+
+  it("falls back to the flat price for unrated gear either way", () => {
+    expect(ratedValues({ genesisID: "nope", price: 250, avail: 1 }, {}, 1).price).toBe(250);
+  });
+
+  it("a purchase keeps its tables, so a reopened draft re-costs itself", () => {
+    const e = engineWith();
+    e.setMetatype("human");
+    e.spend({ kind: "purchase", uuid: "Item.hb", name: "Homebrew Ware",
+      genesisID: onItem.genesisID, sr6forge: onItem.sr6forge, rating: 3 });
+    // round-trip through the draft, then cost it with NO chargen-data
+    const draft = e.toDraft();
+    const revived = ChargenEngine.fromDraft(draft, { gearRatings: {} }, rules);
+    expect(revived.budgets().nuyen.spent).toBe(9000);
+    expect(revived.budgets().essence.spent).toBe(1.5);
+  });
+});

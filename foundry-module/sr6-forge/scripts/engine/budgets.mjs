@@ -71,32 +71,52 @@ export function augmentedRating(state, key, provider, data) {
  * Resolve a rated item's price / availability / essence at a given rating.
  *
  * Rated gear carries no flat price — Wired Reflexes is 40,000 at rating 1 and
- * 450,000 at rating 4 — so it arrives as either a per-rating lookup table or a
- * per-rating multiplier. Anything without rating metadata falls through to the
- * flat value already on the item.
+ * 450,000 at rating 4 — and eden's schema has room for exactly one `price`.
+ * The per-rating tables therefore ride on the item itself, under our own
+ * `system.sr6forge` namespace, which is what makes the cost computable from
+ * the item alone.
+ *
+ * Sources, most authoritative first:
+ *   1. `item.sr6forge` — carried by the item, so a custom or homebrew entry
+ *      prices correctly with no central table to maintain
+ *   2. `data.gearRatings` — the extracted fallback, keyed by genesisID
+ *   3. the item's own flat price/avail/essence, for unrated gear
  *
  * @returns {{price:number, avail:number, essence:number, rating:number}}
  */
 export function ratedValues(item, data, rating = null) {
-  const meta = data.gearRatings?.[item.genesisID];
-  const r = rating ?? item.rating ?? meta?.ratings?.[0] ?? 1;
-  const pick = (spec, fallback) => {
-    if (!spec) return fallback;
+  const onItem = item.sr6forge ?? null;
+  const fromData = data?.gearRatings?.[item.genesisID] ?? null;
+  const ratings = onItem?.ratings ?? fromData?.ratings ?? null;
+  const r = rating ?? item.rating ?? ratings?.[0] ?? 1;
+
+  // the item's arrays are already resolved per rating: index straight in
+  const fromArray = (arr) => {
+    if (!Array.isArray(arr) || !arr.length) return undefined;
+    const v = arr[Math.min(Math.max(r, 1), arr.length) - 1];
+    const n = parseFloat(String(v));
+    return Number.isFinite(n) ? n : undefined;
+  };
+  // the extracted spec is a table or a multiplier
+  const fromSpec = (spec) => {
+    if (!spec) return undefined;
     if (spec.table) {
-      // tables are in rating order, so rating 1 is index 0
-      const raw = spec.table[Math.max(0, r - 1)] ?? spec.table.at(-1);
+      const raw = spec.table[Math.min(Math.max(r, 1), spec.table.length) - 1];
       const n = parseFloat(String(raw));
-      return Number.isFinite(n) ? n : fallback;
+      return Number.isFinite(n) ? n : undefined;
     }
     if (spec.perRating != null) return spec.perRating * r;
     if (spec.flat != null) return spec.flat;
-    return fallback;
+    return undefined;
   };
+  const pick = (arrKey, specKey, flat) =>
+    fromArray(onItem?.[arrKey]) ?? fromSpec(fromData?.[specKey]) ?? flat ?? 0;
+
   return {
     rating: r,
-    price: pick(meta?.price, item.price ?? 0),
-    avail: pick(meta?.avail, item.avail ?? 0),
-    essence: pick(meta?.essence, item.essence ?? 0),
+    price: pick("priceByRating", "price", item.price),
+    avail: pick("availByRating", "avail", item.avail),
+    essence: pick("essenceByRating", "essence", item.essence),
   };
 }
 

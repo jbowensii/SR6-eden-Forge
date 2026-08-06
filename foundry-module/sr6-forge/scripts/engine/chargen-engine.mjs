@@ -172,6 +172,9 @@ export class ChargenEngine {
           avail: op.avail ?? 0, essence: op.essence ?? 0, qty: 1, rating: op.rating ?? null,
           itemType: op.itemType ?? "gear",
           genesisID: op.genesisID ?? null, subtype: op.subtype ?? null,
+          // the item's own pricing tables travel with the purchase, so a draft
+          // reopened later re-costs from the item rather than a lookup file
+          sr6forge: op.sr6forge ?? null,
           // factory-fitted accessories occupy their slot and cost nothing extra
           accessories: (this.data.gearMounts?.[op.genesisID]?.embedded ?? [])
             .filter((e) => e.included)
