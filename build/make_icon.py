@@ -72,9 +72,15 @@ def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     layers = [draw(n) for n in SIZES]
     ico = OUT / "app.ico"
-    # every size embedded, so Explorer, the taskbar and Alt-Tab each get one
-    # drawn for their own resolution
-    layers[0].save(ico, format="ICO",
+    # Every size embedded, so Explorer, the taskbar and Alt-Tab each get one
+    # drawn at their own resolution.
+    #
+    # bitmap_format="bmp" is load-bearing. Pillow's default writes EVERY entry
+    # PNG-compressed, and Windows only renders a PNG entry at 256x256 — at
+    # 16/24/32/48 the shell needs BMP (DIB). A default save therefore produces
+    # an .ico that embeds cleanly, reports the right dimensions, and draws as
+    # nothing: the file has an icon resource the shell cannot decode.
+    layers[0].save(ico, format="ICO", bitmap_format="bmp",
                    sizes=[(n, n) for n in SIZES], append_images=layers[1:])
     draw(256).save(OUT / "app-256.png")
     print(f"wrote {ico} ({', '.join(str(n) for n in SIZES)})")

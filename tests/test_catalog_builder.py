@@ -341,3 +341,50 @@ def test_the_build_refuses_to_ship_pdfs(tmp_path):
     with pytest.raises(SystemExit) as e:
         br.assert_no_books(clean)
     assert "REFUSING TO BUILD" in str(e.value)
+
+
+# ---------- the icon ----------
+
+def test_icon_entries_are_bmp_not_png():
+    """Windows only renders a PNG-format icon entry at 256x256.
+
+    Below that the shell needs BMP (DIB). Pillow's default ICO save writes
+    every entry PNG-compressed, which produces a file that embeds cleanly,
+    reports the right dimensions, and draws as nothing — the exe has an icon
+    resource the shell cannot decode. That is exactly how the installer
+    shipped twice with no visible icon.
+    """
+    import struct
+
+    ico = Path(__file__).resolve().parent.parent / "build" / "wizard" / "app.ico"
+    if not ico.is_file():
+        pytest.skip("icon not built")
+    data = ico.read_bytes()
+    _, _, count = struct.unpack("<HHH", data[:6])
+    assert count >= 5, "too few sizes for the shell to choose from"
+
+    bad = []
+    for i in range(count):
+        off = 6 + i * 16
+        w, h, _, _, _, _, _, doff = struct.unpack("<BBBBHHII", data[off:off + 16])
+        w = w or 256
+        is_png = data[doff:doff + 8] == b"\x89PNG\r\n\x1a\n"
+        if is_png and w < 256:
+            bad.append(w)
+    assert not bad, f"PNG-format entries the shell cannot draw at: {bad}"
+
+
+def test_icon_includes_the_sizes_windows_asks_for():
+    import struct
+
+    ico = Path(__file__).resolve().parent.parent / "build" / "wizard" / "app.ico"
+    if not ico.is_file():
+        pytest.skip("icon not built")
+    data = ico.read_bytes()
+    _, _, count = struct.unpack("<HHH", data[:6])
+    sizes = set()
+    for i in range(count):
+        w = struct.unpack("<B", data[6 + i * 16:7 + i * 16])[0] or 256
+        sizes.add(w)
+    # 16 for the title bar and Explorer list, 32 for the desktop, 256 for large
+    assert {16, 32, 48, 256} <= sizes, f"missing sizes: {sizes}"
