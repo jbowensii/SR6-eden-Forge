@@ -22,3 +22,8 @@ dist/
 Thumbs.db
 .superpowers/
 .venv-ocr/
+
+# ── PyInstaller build output (regenerated) ─────────────────────
+build/dist/
+build/work/
+*.manifest
