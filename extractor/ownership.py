@@ -33,11 +33,16 @@ COMMLINK6_ALIAS = {
 #: ownership of them.
 UNGATEABLE = {"other_us", "de_other"}
 
-#: German-language books. Out of scope for this project, and excluded from the
-#: Commlink6 import even when a PDF happens to be present — the standing rule
-#: is English only. Not derivable from the jar: every book carries a base
-#: .properties file, so language is editorial knowledge, held here once and
-#: imported by tools/curate_english.py rather than duplicated.
+#: German-language books.
+#:
+#: These are NOT excluded from import. The ownership rule is uniform: own the
+#: German PDF and its Commlink6 data imports like any other book; do not own it
+#: and nothing imports, exactly as for an English book you lack. The list exists
+#: only so tools/curate_english.py can hide items whose *sole* source is a book
+#: outside the English line — a post-import curation choice, not a gate.
+#:
+#: Not derivable from the jar: every book ships a base .properties file, so
+#: language is editorial knowledge. Held here once rather than duplicated.
 GERMAN_BOOKS = {
     "de_alpen", "de_berlin2080", "de_bundeswehr", "de_feuerlaeufer", "de_other",
     "de_piraten", "de_revierbericht", "de_sota2081", "de_sota2082",
@@ -51,8 +56,9 @@ _ITEM_ID = re.compile(rb'<item[^>]*id="')
 def commlink6_books(jar: Path) -> dict[str, int]:
     """Commlink6 directory -> how many items it defines.
 
-    Excludes the German line and the grab-bags, so the result is only books
-    that could be matched to a PDF.
+    Excludes only the grab-bags, which are not a single publication and so
+    cannot be matched to any one PDF. Language is irrelevant here: a German
+    book imports if — and only if — its PDF is present, like any other.
     """
     out: dict[str, int] = {}
     with zipfile.ZipFile(jar) as z:
@@ -61,7 +67,9 @@ def commlink6_books(jar: Path) -> dict[str, int]:
             if not m:
                 continue
             book = m.group(1)
-            if book in GERMAN_BOOKS or book in UNGATEABLE:
+            # language is not a gate — ownership is. Only the grab-bags,
+            # which no single PDF can vouch for, are refused outright.
+            if book in UNGATEABLE:
                 continue
             out[book] = out.get(book, 0) + len(_ITEM_ID.findall(z.read(name)))
     return out

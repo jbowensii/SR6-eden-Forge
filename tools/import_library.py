@@ -37,39 +37,7 @@ from extractor.commlink6_convert import to_item
 from extractor.identity import IdLock, stamp_catalog_ids
 from extractor.ingest import ingest_book, load_library, load_registry, write_library
 from extractor.ownership import plan_import
-
-#: Fields the jar states better than the page does — machine-readable
-#: declarations the book only implies in prose, if at all.
-JAR_WINS = {"type", "subtype", "rating", "essence", "capacity", "hooks", "mounts"}
-
-#: Fields the book states better than the jar does. The jar's descriptions are
-#: often truncated or absent; the book is the text.
-PDF_WINS = {"description"}
-
-
-def _merge_field(item: dict, field: str, jar_val, pdf_val) -> str | None:
-    """Settle one field. Returns a note when the two sources disagreed."""
-    if jar_val in (None, "", 0) and pdf_val in (None, "", 0):
-        return None
-    if jar_val in (None, "", 0):
-        item["system"][field] = pdf_val
-        return None
-    if pdf_val in (None, "", 0):
-        item["system"][field] = jar_val
-        return None
-    if jar_val == pdf_val:
-        item["system"][field] = jar_val
-        return None
-
-    # both present and different — pick per policy, but say so
-    if field in PDF_WINS:
-        item["system"][field] = pdf_val
-        winner = "pdf"
-    else:
-        item["system"][field] = jar_val
-        winner = "commlink6"
-    return f"{field}: commlink6={jar_val!r} pdf={pdf_val!r} -> {winner}"
-
+from extractor.reconcile import reconcile_library
 
 def import_commlink6(data_root: _P, book: str, jar_book: str, jar: _P,
                      domain: str = "gear") -> dict:
@@ -100,6 +68,43 @@ def import_commlink6(data_root: _P, book: str, jar_book: str, jar: _P,
 
     write_library(data_root, domain, library, envelopes)
     return {"jarItems": added}
+
+
+def _snapshot(data_root: _P, book: str, domain: str = "gear") -> dict:
+    """This book's Commlink6 rows, keyed by name, before the PDF pass runs."""
+    library, _ = load_library(data_root, domain)
+    out: dict[str, list[dict]] = {}
+    for cat, items in library.items():
+        rows = [i for i in items
+                if (i.get("meta") or {}).get("book") == book
+                and (i.get("meta") or {}).get("source") == "commlink6"]
+        if rows:
+            out[cat] = [json.loads(json.dumps(r)) for r in rows]
+    return out
+
+
+def _reconcile_book(data_root: _P, book: str, before: dict,
+                    domain: str = "gear") -> dict:
+    """Fold the pre-PDF jar rows back over what the PDF pass produced.
+
+    ingest_book rewrites this book's rows from the page. Anything the jar
+    declared that the page does not carry would be lost, so the two readings
+    are reconciled here and disagreements recorded on the item.
+    """
+    if not before:
+        return {"conflicts": 0}
+    library, envelopes = load_library(data_root, domain)
+    total = 0
+    for cat, jar_rows in before.items():
+        pdf_rows = [i for i in library.get(cat, [])
+                    if (i.get("meta") or {}).get("book") == book]
+        others = [i for i in library.get(cat, [])
+                  if (i.get("meta") or {}).get("book") != book]
+        merged, stats = reconcile_library(jar_rows, pdf_rows)
+        library[cat] = others + merged
+        total += stats["conflicts"]
+    write_library(data_root, domain, library, envelopes)
+    return {"conflicts": total}
 
 
 def run(data_root: _P, jar: _P | None, only: str | None, apply: bool) -> int:
@@ -139,11 +144,17 @@ def run(data_root: _P, jar: _P | None, only: str | None, apply: bool) -> int:
                 print(f"  {book:20} commlink6 {st['jarItems']:>5} items", end="")
             else:
                 print(f"  {book:20} pdf-only", end="")
-            # the PDF pass fills what the jar lacks and always supplies prose
+            # the PDF pass fills what the jar lacks and always supplies prose.
+            # ingest_book merges into the same library, so reconciliation
+            # happens against rows already carrying meta.source == "commlink6".
+            before = _snapshot(data_root, book)
             st = ingest_book(data_root, book)
+            rec = _reconcile_book(data_root, book, before)
             totals["new"] += st.get("new", 0)
             totals["descriptions"] += st.get("descriptions", 0)
-            print(f"  +pdf new={st.get('new', 0)} desc={st.get('descriptions', 0)}")
+            totals["conflicts"] += rec["conflicts"]
+            print(f"  +pdf new={st.get('new', 0)} desc={st.get('descriptions', 0)}"
+                  f" conflicts={rec['conflicts']}")
         except SystemExit as e:
             print(f"  {book:20} SKIP: {e}")
         except Exception as e:  # one bad book must not lose the whole run

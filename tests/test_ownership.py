@@ -53,10 +53,20 @@ def test_aliases_cover_the_names_that_differ(tmp_path):
     assert p["source"] == "both" and p["jarBook"] == "core"
 
 
-def test_german_books_are_not_importable_even_if_owned():
-    """Standing rule: English only. Ownership does not override it."""
-    assert "lofwyr" in GERMAN_BOOKS
-    assert "slip_streams" in GERMAN_BOOKS
+def test_language_is_not_a_gate_ownership_is(tmp_path):
+    """A German book imports if you own its PDF, exactly like an English one.
+    Language decides post-import curation, not whether data may be read."""
+    pdf = tmp_path / "lofwyr.pdf"
+    pdf.write_bytes(b"%PDF-1.4")
+    assert plan_book("lofwyr", {"pdf": str(pdf)}, {"lofwyr": 12})["source"] == "both"
+
+
+def test_a_german_book_you_do_not_own_is_still_refused():
+    assert plan_book("lofwyr", {"pdf": ""}, {"lofwyr": 12})["source"] == "skip"
+
+
+def test_german_list_is_kept_for_curation_not_gating():
+    assert "lofwyr" in GERMAN_BOOKS and "slip_streams" in GERMAN_BOOKS
 
 
 def test_grab_bags_are_ungateable():
