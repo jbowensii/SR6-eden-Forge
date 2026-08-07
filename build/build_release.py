@@ -93,6 +93,28 @@ def sign(target: Path) -> bool:
     return False
 
 
+def assert_no_books(app_dir: Path) -> None:
+    """The installer must never carry, move or reference the user's books.
+
+    Structural, not a promise: the freeze is scanned for PDFs and the installer
+    script for any reference to a PDF or a books folder. The user's library is
+    theirs, it stays where they put it, and the builder only ever READS it from
+    the path they choose at runtime.
+    """
+    strays = [p for p in app_dir.rglob("*") if p.suffix.lower() == ".pdf"]
+    if strays:
+        listed = "\n  ".join(str(s) for s in strays[:5])
+        raise SystemExit(
+            f"REFUSING TO BUILD: the freeze contains PDF files:\n  {listed}")
+
+    iss = (BUILD / "installer.iss").read_text(encoding="utf-8")
+    for needle in (".pdf", "Downloads"):
+        if needle.lower() in iss.lower():
+            raise SystemExit(
+                f"REFUSING TO BUILD: installer.iss references {needle!r}. "
+                "The installer must never touch the user's books.")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -120,6 +142,7 @@ def main() -> int:
         if rc != 0 or not exe.is_file():
             print("\nfreeze failed")
             return 1
+        assert_no_books(app_dir)
         size = sum(f.stat().st_size for f in app_dir.rglob("*") if f.is_file())
         print(f"      {size / 1e6:.0f} MB, {sum(1 for _ in app_dir.rglob('*'))} files")
 
@@ -135,6 +158,7 @@ def main() -> int:
         return 0
 
     # 3. installer
+    assert_no_books(app_dir)          # again, in case --skip-freeze was used
     step(3, total, "compiling the installer")
     iscc = find_iscc()
     if not iscc:

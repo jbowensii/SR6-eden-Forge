@@ -84,7 +84,8 @@ exe = EXE(                             # noqa: F821
     console=False,                     # windowed: the log lives in the UI
     strip=False,
     upx=False,                         # UPX-packed binaries get flagged
-    icon=None,
+    # the installed application's icon, in Explorer, the taskbar and Alt-Tab
+    icon=str(REPO / 'build' / 'wizard' / 'app.ico'),
 )
 coll = COLLECT(                        # noqa: F821
     exe, a.binaries, a.datas,

@@ -75,6 +75,34 @@ class Settings:
         return Path(self["workspace"] or default_workspace())
 
 
+#: Created under the workspace on first run rather than asked about. They are
+#: ours to place — the user has no existing folder we would be overriding, and
+#: a question with only one sensible answer is a question not worth asking.
+WORKSPACE_DIRS = {
+    "data": "extracted library, one folder per book",
+    "export": "built catalog modules",
+    "icons": "drop icon sets here to assign in the review app",
+    "art": "artwork lifted from the books, and anything you add",
+    "_ids": "catalog id lockfile — keeps ids stable when you rename things",
+}
+
+
+def ensure_workspace(ws: Path) -> Path:
+    """Create the working folders, with a note saying what each is for.
+
+    Idempotent, and it never touches anything already there.
+    """
+    ws = Path(ws)
+    ws.mkdir(parents=True, exist_ok=True)
+    for name, what in WORKSPACE_DIRS.items():
+        d = ws / name
+        d.mkdir(exist_ok=True)
+        readme = d / "README.txt"
+        if not readme.exists():
+            readme.write_text(f"{name} - {what}\n", encoding="utf-8")
+    return ws
+
+
 def detect_foundry_data() -> Path | None:
     """Foundry's user data directory, if it is where Foundry usually puts it.
 

@@ -285,3 +285,59 @@ def test_app_module_avoids_relative_imports_too():
 def test_entry_can_load_the_window_module():
     from catalog_builder.__main__ import _load_app
     assert _load_app().__name__.endswith("catalog_builder.app")
+
+
+# ---------- the workspace ----------
+
+def test_workspace_folders_are_created_not_asked_about(tmp_path):
+    """icons/ and art/ have exactly one sensible location, so asking would be
+    noise. They are made under the workspace with a note saying what each is."""
+    ws = tmp_path / "SR6 Catalog"
+    settings.ensure_workspace(ws)
+    made = {p.name for p in ws.iterdir()}
+    assert {"data", "export", "icons", "art", "_ids"} <= made
+    assert "icon sets" in (ws / "icons" / "README.txt").read_text(encoding="utf-8")
+
+
+def test_ensuring_the_workspace_twice_changes_nothing(tmp_path):
+    ws = tmp_path / "ws"
+    settings.ensure_workspace(ws)
+    (ws / "icons" / "mine.svg").write_text("x", encoding="utf-8")
+    settings.ensure_workspace(ws)
+    assert (ws / "icons" / "mine.svg").exists(), "existing work must be untouched"
+
+
+# ---------- the books stay where the user put them ----------
+
+def test_the_builder_never_writes_to_the_pdf_folder(tmp_path):
+    """Scanning must be strictly read-only. The library is the user's, it is
+    large, and it is irreplaceable."""
+    pdfs = tmp_path / "books"
+    pdfs.mkdir()
+    f = _pdf(pdfs, "Sixth World Core Rulebook-CAT28000.pdf")
+    before = {p: (p.stat().st_mtime, p.stat().st_size) for p in pdfs.rglob("*")}
+
+    books.scan(pdfs, REG)
+
+    after = {p: (p.stat().st_mtime, p.stat().st_size) for p in pdfs.rglob("*")}
+    assert before == after, "scanning modified the PDF folder"
+    assert f.exists()
+
+
+def test_the_build_refuses_to_ship_pdfs(tmp_path):
+    """A structural guarantee, not a promise: the release build fails outright
+    if a PDF reaches the freeze."""
+    import importlib.util as iu
+    spec = iu.spec_from_file_location(
+        "br", Path(__file__).resolve().parent.parent / "build" / "build_release.py")
+    br = iu.module_from_spec(spec)
+    spec.loader.exec_module(br)
+
+    clean = tmp_path / "app"
+    clean.mkdir()
+    br.assert_no_books(clean)                       # nothing there: fine
+
+    (clean / "Some Book.pdf").write_bytes(b"%PDF-1.4")
+    with pytest.raises(SystemExit) as e:
+        br.assert_no_books(clean)
+    assert "REFUSING TO BUILD" in str(e.value)

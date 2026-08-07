@@ -118,11 +118,11 @@ var
 begin
   { pick the render closest to the display scaling, then let it scale DOWN —
     enlarging a bitmap softens it, reducing one does not }
-  W := ScaleX(220);
-  if W >= 400 then Result := 'sidebar-440x840.bmp'
-  else if W >= 320 then Result := 'sidebar-330x630.bmp'
-  else if W >= 255 then Result := 'sidebar-264x504.bmp'
-  else Result := 'sidebar-220x420.bmp';
+  W := ScaleY(420);
+  if W >= 780 then Result := 'sidebar-686x840.bmp'
+  else if W >= 580 then Result := 'sidebar-516x630.bmp'
+  else if W >= 470 then Result := 'sidebar-413x504.bmp'
+  else Result := 'sidebar-345x420.bmp';
 end;
 
 procedure ShiftRight(C: TControl; By: Integer);
@@ -136,30 +136,46 @@ end;
 
 procedure InitializeWizard();
 var
-  ArtW: Integer;
+  ArtW, ArtH, MaxW: Integer;
   F: String;
 begin
   F := SidebarFile();
   ExtractTemporaryFile(F);
 
-  ArtW := ScaleX(150);
-
-  { widen the window so the figure is added beside the content rather than
-    eating into it }
-  WizardForm.Width := WizardForm.Width + ArtW;
-  WizardForm.Left := WizardForm.Left - (ArtW div 2);
-
+  { The panel is sized FROM the bitmap so the figure fills the height with
+    nothing cropped and no dead space. A fixed width cannot do both: too narrow
+    and the figure is squeezed and clipped, too wide and it floats in a column
+    of white. Capped at a third of the screen so it cannot swallow the window
+    on a small display. }
   Runner := TBitmapImage.Create(WizardForm);
   Runner.Parent := WizardForm;
   Runner.Bitmap.LoadFromFile(ExpandConstant('{tmp}\') + F);
   Runner.Stretch := True;
-  Runner.Left := 0;
-  Runner.Top := 0;
-  Runner.Width := ArtW;
-  Runner.Height := WizardForm.ClientHeight;
-  Runner.Anchors := [akLeft, akTop, akBottom];
 
-  { everything the wizard draws moves right by the width of the figure }
+  { width follows the bitmap's own aspect at the wizard's height, so the figure
+    fills the height without being distorted or cropped }
+  ArtH := WizardForm.ClientHeight;
+  ArtW := (Runner.Bitmap.Width * ArtH) div Runner.Bitmap.Height;
+  MaxW := (WizardForm.Width * 2) div 5;
+  if ArtW > MaxW then
+  begin
+    ArtW := MaxW;
+    ArtH := (Runner.Bitmap.Height * ArtW) div Runner.Bitmap.Width;
+  end;
+
+  Runner.Left := 0;
+  Runner.Top := WizardForm.ClientHeight - ArtH;
+  Runner.Width := ArtW;
+  Runner.Height := ArtH;
+  Runner.Anchors := [akLeft, akBottom];
+
+  { widen the window so the figure is added BESIDE the content rather than
+    eating into it, then move everything the wizard draws right past it }
+  WizardForm.Width := WizardForm.Width + ArtW;
+  WizardForm.Left := WizardForm.Left - (ArtW div 2);
+  if WizardForm.Left < 0 then WizardForm.Left := 0;
+
+
   ShiftRight(WizardForm.OuterNotebook, ArtW);
   ShiftRight(WizardForm.InnerNotebook, ArtW);
   ShiftRight(WizardForm.Bevel, ArtW);
@@ -168,6 +184,10 @@ begin
   { the welcome and finished pages carry their own image; it is redundant now }
   WizardForm.WizardBitmapImage.Visible := False;
   WizardForm.WizardBitmapImage2.Visible := False;
+  { Inno's own box-and-disc mark, top right. Removing the
+    WizardSmallImageFile line does not remove the image -- it falls back
+    to the built-in one. It has to be hidden. }
+  WizardForm.WizardSmallBitmapImage.Visible := False;
 
   Runner.SendToBack();
 end;

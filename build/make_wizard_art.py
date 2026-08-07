@@ -34,9 +34,26 @@ LARGE = [(164, 314), (192, 386), (256, 482), (328, 628)]
 SMALL = [(55, 55), (64, 68), (92, 97), (110, 110)]
 
 #: The full-height figure drawn down the left of EVERY page by the [Code]
-#: section. Generated tall and wide enough for a 200% display, then scaled
-#: down in the wizard rather than up, which never softens.
-SIDEBAR = [(220, 420), (264, 504), (330, 630), (440, 840)]
+#: section, generated at the aspect it is DISPLAYED at.
+#:
+#: This matters more than it sounds. The wizard panel is roughly one unit wide
+#: to three tall; the figure is about 1:1.2. Rendering at the figure's own
+#: aspect and letting the wizard stretch it to the panel squeezed it
+#: horizontally — which cropped the axe off the left edge and left a band of
+#: empty white down the right. Rendering at the panel's aspect and fitting the
+#: figure inside it means the wizard scales without distorting at all.
+#: Rendered at the FIGURE's own aspect, not the panel's.
+#:
+#: Two failures got us here. Rendering at the figure's aspect and letting the
+#: wizard stretch it into a narrow column squeezed it horizontally and cropped
+#: the axe off the left edge. Rendering at a narrow panel aspect and fitting
+#: the figure by width fixed the crop but left the top 40% of the column empty,
+#: which is not "full height" by any reading.
+#:
+#: So: the bitmap IS the figure, near enough edge to edge, and the wizard sizes
+#: the panel from the bitmap's aspect at runtime. Full height, nothing cropped,
+#: no dead space, and no distortion at any display scaling.
+SIDEBAR_HEIGHTS = [420, 504, 630, 840]
 
 #: Inno's wizard pages are white, and a custom TBitmapImage has no alpha —
 #: so "transparent" means composited onto that background, seamlessly.
@@ -125,14 +142,13 @@ def build(src_path: Path) -> None:
         bmp.save(OUT / f"small-{size[0]}x{size[1]}.bmp")
 
     # the full-height sidebar figure, on the wizard's own white
-    for size in SIDEBAR:
-        w, h = size
-        # fills the height; the panel is sized to the figure so nothing crops
-        scale = (h * 0.98) / subject.height
-        fig = subject.resize((max(1, int(subject.width * scale)),
-                              max(1, int(subject.height * scale))), Image.LANCZOS)
-        panel = Image.new("RGB", size, PAGE_BG)
-        panel.paste(fig, ((w - fig.width) // 2, h - fig.height), fig)
+    for h in SIDEBAR_HEIGHTS:
+        scale = h / subject.height
+        fig = subject.resize((max(1, round(subject.width * scale)), h), Image.LANCZOS)
+        # a couple of pixels of margin so the figure does not touch the edges
+        w = fig.width + 4
+        panel = Image.new("RGB", (w, h), PAGE_BG)
+        panel.paste(fig, (2, 0), fig)
         panel.save(OUT / f"sidebar-{w}x{h}.bmp")
 
     made = sorted(p.name for p in OUT.glob("*"))

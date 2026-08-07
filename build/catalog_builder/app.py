@@ -26,12 +26,14 @@ try:
     from catalog_builder import books, commlink6, publish
     from catalog_builder.runner import Job, Progress, pipeline_command
     from catalog_builder.settings import (
-        Settings, default_workspace, detect_commlink6, detect_foundry_data)
+        Settings, default_workspace, detect_commlink6, detect_foundry_data,
+        ensure_workspace)
 except ImportError:                       # installed under a different root
     from build.catalog_builder import books, commlink6, publish
     from build.catalog_builder.runner import Job, Progress, pipeline_command
     from build.catalog_builder.settings import (
-        Settings, default_workspace, detect_commlink6, detect_foundry_data)
+        Settings, default_workspace, detect_commlink6, detect_foundry_data,
+        ensure_workspace)
 
 APP_TITLE = "Shadowrun 6th World Catalog Builder"
 REVIEW_URL = "http://localhost:8347"
@@ -219,9 +221,19 @@ class App(tk.Tk):
             self.foundry_status.configure(text="Not set.", foreground=MUTED)
 
         ws = self.workspace_var.get().strip()
-        self.workspace_status.configure(
-            text=f"{ws}" if ws else "Not set.",
-            foreground=MUTED)
+        if ws:
+            # icons/ and art/ are created here rather than asked about — there
+            # is only one sensible answer, so a question would be noise
+            try:
+                ensure_workspace(Path(ws))
+                self.workspace_status.configure(
+                    text=f"{ws}   (data, export, icons, art created)",
+                    foreground=MUTED)
+            except OSError as e:
+                self.workspace_status.configure(
+                    text=f"Cannot create folders there — {e.strerror}", foreground=BAD)
+        else:
+            self.workspace_status.configure(text="Not set.", foreground=MUTED)
 
         busy = bool(self.job and self.job.running)
         self.import_btn.configure(state="disabled" if busy else "normal")
@@ -269,8 +281,7 @@ class App(tk.Tk):
                 "Point step 1 at the folder holding your PDFs.")
             return
         self._save()
-        ws = Path(self.workspace_var.get().strip() or default_workspace())
-        ws.mkdir(parents=True, exist_ok=True)
+        ws = ensure_workspace(self.workspace_var.get().strip() or default_workspace())
 
         n = len(self.scan_result["matched"])
         self._write(f"=== importing {n} book(s) into {ws}")
