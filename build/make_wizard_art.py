@@ -33,6 +33,15 @@ ACCENT = (47, 212, 217)        # #2fd4d9
 LARGE = [(164, 314), (192, 386), (256, 482), (328, 628)]
 SMALL = [(55, 55), (64, 68), (92, 97), (110, 110)]
 
+#: The full-height figure drawn down the left of EVERY page by the [Code]
+#: section. Generated tall and wide enough for a 200% display, then scaled
+#: down in the wizard rather than up, which never softens.
+SIDEBAR = [(220, 420), (264, 504), (330, 630), (440, 840)]
+
+#: Inno's wizard pages are white, and a custom TBitmapImage has no alpha —
+#: so "transparent" means composited onto that background, seamlessly.
+PAGE_BG = (255, 255, 255)
+
 
 def gradient(size: tuple[int, int]) -> Image.Image:
     """A vertical wash, so the panel is not a flat rectangle of one colour."""
@@ -114,6 +123,17 @@ def build(src_path: Path) -> None:
         bmp = gradient(size)
         bmp.paste(h2, ((size[0] - h2.width) // 2, (size[1] - h2.height) // 2), h2)
         bmp.save(OUT / f"small-{size[0]}x{size[1]}.bmp")
+
+    # the full-height sidebar figure, on the wizard's own white
+    for size in SIDEBAR:
+        w, h = size
+        # fills the height; the panel is sized to the figure so nothing crops
+        scale = (h * 0.98) / subject.height
+        fig = subject.resize((max(1, int(subject.width * scale)),
+                              max(1, int(subject.height * scale))), Image.LANCZOS)
+        panel = Image.new("RGB", size, PAGE_BG)
+        panel.paste(fig, ((w - fig.width) // 2, h - fig.height), fig)
+        panel.save(OUT / f"sidebar-{w}x{h}.bmp")
 
     made = sorted(p.name for p in OUT.glob("*"))
     print(f"wrote {len(made)} files to {OUT}")

@@ -37,7 +37,7 @@ PrivilegesRequired=lowest
 ArchitecturesInstallIn64BitMode=x64compatible
 ArchitecturesAllowed=x64compatible
 UninstallDisplayName={#AppName}
-SetupIconFile=
+SetupIconFile=wizard\app.ico
 
 ; Wizard artwork. Several sizes each so Windows picks one per display scaling
 ; rather than stretching a single 100% image, which on a 200% display looks
@@ -45,8 +45,7 @@ SetupIconFile=
 ; Inno 6.3+, and BMP works everywhere — the figure is composited onto the
 ; app's own panel colour first, since BMP carries no alpha.
 WizardImageFile=wizard\wizard-164x314.bmp,wizard\wizard-192x386.bmp,wizard\wizard-256x482.bmp,wizard\wizard-328x628.bmp
-WizardSmallImageFile=wizard\small-55x55.bmp,wizard\small-64x68.bmp,wizard\small-92x97.bmp,wizard\small-110x110.bmp
-WizardImageStretch=no
+WizardImageStretch=yes
 WizardImageAlphaFormat=none
 
 [Languages]
@@ -71,6 +70,11 @@ Source: "..\site\*"; DestDir: "{app}\site"; \
 Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\NOTICE"; DestDir: "{app}"; Flags: ignoreversion
 
+[Files]
+; the sidebar figure, unpacked before the wizard is drawn so it can be loaded
+; in InitializeWizard
+Source: "wizard\sidebar-*.bmp"; Flags: dontcopy
+
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\SR6CatalogBuilder.exe"
 Name: "{group}\Uninstall {#AppName}"; Filename: "{uninstallexe}"
@@ -91,3 +95,79 @@ Type: filesandordirs; Name: "{app}\tools\__pycache__"
 
 [Messages]
 WelcomeLabel2=This installs the Catalog Builder, which turns Shadowrun PDFs you own into a Foundry VTT compendium.%n%nNo game content is included. You supply the books.
+
+[Code]
+{ The runner stands full height down the LEFT of every page, and the wizard's
+  own controls are moved right to make room.
+
+  Inno only draws WizardImageFile on the welcome and finished pages, and only
+  inside a fixed box. To have the figure present throughout, a TBitmapImage is
+  parented to the form and every other control is shifted by its width.
+
+  "Transparent" here means composited onto the wizard's own white: a
+  TBitmapImage created in code has no alpha channel, so a PNG cutout would
+  arrive with a black box behind it. Matching the background is the honest way
+  to get the same result.                                                     }
+
+var
+  Runner: TBitmapImage;
+
+function SidebarFile(): String;
+var
+  W: Integer;
+begin
+  { pick the render closest to the display scaling, then let it scale DOWN —
+    enlarging a bitmap softens it, reducing one does not }
+  W := ScaleX(220);
+  if W >= 400 then Result := 'sidebar-440x840.bmp'
+  else if W >= 320 then Result := 'sidebar-330x630.bmp'
+  else if W >= 255 then Result := 'sidebar-264x504.bmp'
+  else Result := 'sidebar-220x420.bmp';
+end;
+
+procedure ShiftRight(C: TControl; By: Integer);
+begin
+  if C <> nil then
+  begin
+    C.Left := C.Left + By;
+    C.Width := C.Width - By;
+  end;
+end;
+
+procedure InitializeWizard();
+var
+  ArtW: Integer;
+  F: String;
+begin
+  F := SidebarFile();
+  ExtractTemporaryFile(F);
+
+  ArtW := ScaleX(150);
+
+  { widen the window so the figure is added beside the content rather than
+    eating into it }
+  WizardForm.Width := WizardForm.Width + ArtW;
+  WizardForm.Left := WizardForm.Left - (ArtW div 2);
+
+  Runner := TBitmapImage.Create(WizardForm);
+  Runner.Parent := WizardForm;
+  Runner.Bitmap.LoadFromFile(ExpandConstant('{tmp}\') + F);
+  Runner.Stretch := True;
+  Runner.Left := 0;
+  Runner.Top := 0;
+  Runner.Width := ArtW;
+  Runner.Height := WizardForm.ClientHeight;
+  Runner.Anchors := [akLeft, akTop, akBottom];
+
+  { everything the wizard draws moves right by the width of the figure }
+  ShiftRight(WizardForm.OuterNotebook, ArtW);
+  ShiftRight(WizardForm.InnerNotebook, ArtW);
+  ShiftRight(WizardForm.Bevel, ArtW);
+  ShiftRight(WizardForm.MainPanel, ArtW);
+
+  { the welcome and finished pages carry their own image; it is redundant now }
+  WizardForm.WizardBitmapImage.Visible := False;
+  WizardForm.WizardBitmapImage2.Visible := False;
+
+  Runner.SendToBack();
+end;

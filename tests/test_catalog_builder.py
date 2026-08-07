@@ -252,3 +252,36 @@ def test_a_job_that_cannot_start_reports_it_rather_than_raising():
         import time
         time.sleep(0.01)
     assert job.returncode == 127
+
+
+# ---------- the entry point ----------
+
+def test_entry_uses_absolute_imports_only():
+    """A frozen entry script has no package context.
+
+    PyInstaller runs __main__.py as `__main__`, so `from .app import ...`
+    raises "attempted relative import with no known parent package" — and only
+    in the packaged build, which is the worst place to discover it. This is a
+    source check because the failure cannot be reproduced from source, where
+    the module IS reached as catalog_builder.__main__.
+    """
+    src = (Path(__file__).resolve().parent.parent
+           / "build" / "catalog_builder" / "__main__.py").read_text(encoding="utf-8")
+    offenders = [ln.strip() for ln in src.splitlines()
+                 if ln.strip().startswith("from .") or ln.strip().startswith("import .")]
+    assert not offenders, f"relative import in the frozen entry point: {offenders}"
+
+
+def test_app_module_avoids_relative_imports_too():
+    src = (Path(__file__).resolve().parent.parent
+           / "build" / "catalog_builder" / "app.py").read_text(encoding="utf-8")
+    offenders = [ln.strip() for ln in src.splitlines()
+                 if ln.strip().startswith("from . import")
+                 or ln.strip().startswith("from .runner")
+                 or ln.strip().startswith("from .settings")]
+    assert not offenders, f"relative import in app.py: {offenders}"
+
+
+def test_entry_can_load_the_window_module():
+    from catalog_builder.__main__ import _load_app
+    assert _load_app().__name__.endswith("catalog_builder.app")

@@ -19,9 +19,19 @@ import webbrowser
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
-from . import books, commlink6, publish
-from .runner import Job, Progress, pipeline_command
-from .settings import Settings, default_workspace, detect_commlink6, detect_foundry_data
+# Absolute, not relative. A frozen entry script has no package context, and a
+# relative import there fails only in the packaged build — the worst place to
+# find out. See __main__.py.
+try:
+    from catalog_builder import books, commlink6, publish
+    from catalog_builder.runner import Job, Progress, pipeline_command
+    from catalog_builder.settings import (
+        Settings, default_workspace, detect_commlink6, detect_foundry_data)
+except ImportError:                       # installed under a different root
+    from build.catalog_builder import books, commlink6, publish
+    from build.catalog_builder.runner import Job, Progress, pipeline_command
+    from build.catalog_builder.settings import (
+        Settings, default_workspace, detect_commlink6, detect_foundry_data)
 
 APP_TITLE = "Shadowrun 6th World Catalog Builder"
 REVIEW_URL = "http://localhost:8347"
