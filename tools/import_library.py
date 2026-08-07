@@ -346,8 +346,11 @@ def run(data_root: _P, jar: _P | None, only: str | None, apply: bool,
             print(f"    restored {kept['restored']} Commlink6 value(s) on "
                   f"{kept['items']} item(s) that a later phase overwrote: "
                   f"{kept['fields']}", flush=True)
-        else:
-            print("    no Commlink6 values were overwritten", flush=True)
+        if kept["resurrected"]:
+            print(f"    brought back {kept['resurrected']} Commlink6 row(s) a "
+                  f"later phase deleted outright", flush=True)
+        if not kept["restored"] and not kept["resurrected"]:
+            print("    no Commlink6 data was overwritten or removed", flush=True)
 
         # Your edits, last of all — after the guard, so a manual correction
         # outranks Commlink6 as well as everything derived. Skipped entirely

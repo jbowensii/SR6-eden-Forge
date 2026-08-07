@@ -99,7 +99,7 @@ def test_zero_and_false_count_as_real_values(tmp_path):
     """A price of 0 is something Commlink6 said, not an empty field."""
     f = _lib(tmp_path, [_cl6("a", price=0, rating=False)])
     snap = snapshot(tmp_path)
-    assert snap["a"]["price"] == 0
+    assert snap["a"]["fields"]["price"] == 0
 
     doc = json.loads(f.read_text(encoding="utf-8"))
     doc["items"][0]["system"]["price"] = 9999
@@ -123,3 +123,51 @@ def test_is_authoritative_reads_the_provenance_stamp():
     assert not is_authoritative({"meta": {"source": "pdf"}})
     assert not is_authoritative({"meta": {}})
     assert not is_authoritative({})
+
+
+def test_a_deleted_commlink6_row_is_brought_back(tmp_path):
+    """Deleting is the most complete form of clobbering there is.
+
+    ingest_vehicles rewrites vehicles.json wholesale from its own reading of
+    the books, which dropped 366 Commlink6 vehicles outright. Restoring fields
+    cannot help a row that is no longer there, so the row itself is recovered.
+    """
+    f = _lib(tmp_path, [_cl6("v1", description="Commlink6 vehicle."),
+                        _cl6("v2", description="Another.")],
+             domain="vehicles", cat="vehicles")
+    snap = snapshot(tmp_path)
+
+    # the phase replaces the whole file with what it read from the page
+    f.write_text(json.dumps({"book": "corebook", "domain": "vehicles",
+                             "category": "vehicles",
+                             "items": [_pdf("p1", description="From the page.")]}),
+                 encoding="utf-8")
+
+    stats = restore(tmp_path, snap)
+    assert stats["resurrected"] == 2
+
+    items = {i["id"]: i for i in
+             json.loads(f.read_text(encoding="utf-8"))["items"]}
+    assert set(items) == {"p1", "v1", "v2"}          # the PDF row is kept too
+    assert items["v1"]["system"]["description"] == "Commlink6 vehicle."
+    assert items["v1"]["meta"]["source"] == "commlink6"
+
+
+def test_a_deleted_row_is_restored_even_if_the_file_went_with_it(tmp_path):
+    f = _lib(tmp_path, [_cl6("v1", description="Commlink6 vehicle.")],
+             domain="vehicles", cat="vehicles")
+    snap = snapshot(tmp_path)
+    f.unlink()
+
+    assert restore(tmp_path, snap)["resurrected"] == 1
+    doc = json.loads(f.read_text(encoding="utf-8"))
+    assert doc["domain"] == "vehicles"
+    assert doc["items"][0]["id"] == "v1"
+
+
+def test_resurrection_does_not_duplicate_a_row_that_survived(tmp_path):
+    f = _lib(tmp_path, [_cl6("a", description="Kept.")])
+    snap = snapshot(tmp_path)
+    stats = restore(tmp_path, snap)
+    assert stats["resurrected"] == 0
+    assert len(json.loads(f.read_text(encoding="utf-8"))["items"]) == 1
