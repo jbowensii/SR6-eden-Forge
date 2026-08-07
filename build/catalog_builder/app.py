@@ -25,17 +25,17 @@ from tkinter import filedialog, messagebox, ttk
 # relative import there fails only in the packaged build — the worst place to
 # find out. See __main__.py.
 try:
-    from catalog_builder import books, commlink6, publish
+    from catalog_builder import books, commlink6, cores, publish
     from catalog_builder.runner import Job, Progress, pipeline_command
     from catalog_builder.settings import (
         Settings, default_workspace, detect_commlink6, detect_foundry_data,
-        ensure_workspace)
+        ensure_workspace, sync_review_settings)
 except ImportError:                       # installed under a different root
-    from build.catalog_builder import books, commlink6, publish
+    from build.catalog_builder import books, commlink6, cores, publish
     from build.catalog_builder.runner import Job, Progress, pipeline_command
     from build.catalog_builder.settings import (
         Settings, default_workspace, detect_commlink6, detect_foundry_data,
-        ensure_workspace)
+        ensure_workspace, sync_review_settings)
 
 APP_TITLE = "Shadowrun 6th World Catalog Builder"
 #: a blank line inside a message box
@@ -168,6 +168,13 @@ class App(tk.Tk):
         self._row(form, "4.  Working folder",
                   "Where the extracted library and the built catalog are kept.",
                   "workspace", self._pick_workspace, 12)
+        # Deliberately NOT pre-filled. There is no folder we could guess that
+        # would be right, and a wrong path presented as a default reads as
+        # "this is where your icons are" when it is nothing of the kind.
+        self._row(form, "5.  Icon sets  (optional)",
+                  "A folder of icon packs to match items against in the review "
+                  "app. Leave empty if you have none.",
+                  "icons", self._pick_icons, 16)
 
         bar = ttk.Frame(pad)
         bar.grid(row=3, column=0, sticky="ew", pady=(16, 6))
@@ -204,7 +211,9 @@ class App(tk.Tk):
         self.jar_var.set(s["commlink6Jar"] or str(detect_commlink6() or ""))
         self.foundry_var.set(s["foundryData"] or str(detect_foundry_data() or ""))
         self.workspace_var.set(s["workspace"] or str(default_workspace()))
-        for v in (self.pdf_var, self.jar_var, self.foundry_var, self.workspace_var):
+        self.icons_var.set(s["iconLibrary"])      # never guessed
+        for v in (self.pdf_var, self.jar_var, self.foundry_var,
+                  self.workspace_var, self.icons_var):
             v.trace_add("write", lambda *_: self._refresh_state())
 
     def _save(self) -> None:
@@ -213,6 +222,7 @@ class App(tk.Tk):
         s["commlink6Jar"] = self.jar_var.get().strip()
         s["foundryData"] = self.foundry_var.get().strip()
         s["workspace"] = self.workspace_var.get().strip()
+        s["iconLibrary"] = self.icons_var.get().strip()
         s.save()
 
     def _refresh_state(self) -> None:
@@ -246,6 +256,22 @@ class App(tk.Tk):
                                           foreground=OK if ok else WARN)
         else:
             self.foundry_status.configure(text="Not set.", foreground=MUTED)
+
+        icons = self.icons_var.get().strip()
+        if icons and Path(icons).is_dir():
+            sets = sorted(d.name for d in Path(icons).iterdir() if d.is_dir())
+            n = sum(1 for _ in Path(icons).rglob("*") if _.is_file())
+            self.icons_status.configure(
+                text=(f"{len(sets)} set(s), {n} files: " + ", ".join(sets[:3])
+                      + (" ..." if len(sets) > 3 else "")) if sets
+                     else f"{n} file(s).",
+                foreground=OK if n else WARN)
+        elif icons:
+            self.icons_status.configure(text="That folder does not exist.",
+                                        foreground=BAD)
+        else:
+            self.icons_status.configure(
+                text="Not set — item art matching is skipped.", foreground=MUTED)
 
         ws = self.workspace_var.get().strip()
         if ws:
@@ -365,6 +391,11 @@ class App(tk.Tk):
             self.foundry_var.set(d)
             self._save()
 
+    def _pick_icons(self):
+        d = filedialog.askdirectory(title="Folder holding your icon sets")
+        if d:
+            self.icons_var.set(d)
+
     def _pick_workspace(self):
         d = filedialog.askdirectory(title="Working folder")
         if d:
@@ -386,10 +417,20 @@ class App(tk.Tk):
                 "Point step 1 at the folder holding your PDFs.")
             return
         self._save()
+
+        # asked every run, remembered between runs: the right answer depends on
+        # what else the machine is doing today
+        workers = cores.ask_workers(self, self.settings)
+        if workers is None:
+            return                                   # backed out of the dialog
+
         ws = ensure_workspace(self.workspace_var.get().strip() or default_workspace())
+        sync_review_settings(ws, self.icons_var.get().strip())
 
         n = len(self.scan_result["matched"])
         self._write(f"=== importing {n} book(s) into {ws}")
+        self._write(f"    reading {workers} book(s) at a time; "
+                    f"merging one at a time, in order")
 
         # The registry, with the matched PDF paths filled in, written INTO the
         # workspace the pipeline is about to read. Without this the import dies
@@ -401,7 +442,8 @@ class App(tk.Tk):
 
         self.progress = Progress(n)
 
-        args = ["--apply", "--data", str(ws / "data")]
+        args = ["--apply", "--data", str(ws / "data"),
+                "--workers", str(workers)]
         jar = self.jar_var.get().strip()
         if jar:
             args += ["--jar", jar]

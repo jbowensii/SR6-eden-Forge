@@ -35,7 +35,9 @@ sys.path.insert(0, str(_P(__file__).resolve().parent.parent))
 from extractor.commlink6 import DEFAULT_JAR, read_book
 from extractor.commlink6_convert import to_item
 from extractor.identity import IdLock, stamp_catalog_ids
-from extractor.ingest import ingest_book, load_library, load_registry, write_library
+from extractor.ingest import (CURATED, ingest_book, load_library, load_registry,
+                              write_library)
+from extractor.bookprep import default_workers, prepare_books
 from extractor.ownership import plan_import
 from extractor.quiet import quiet_pdf_noise
 from extractor.reconcile import reconcile_library
@@ -108,7 +110,8 @@ def _reconcile_book(data_root: _P, book: str, before: dict,
     return {"conflicts": total}
 
 
-def run(data_root: _P, jar: _P | None, only: str | None, apply: bool) -> int:
+def run(data_root: _P, jar: _P | None, only: str | None, apply: bool,
+        workers: int = 1) -> int:
     quiet_pdf_noise()          # or the log is all FontBBox and nothing else
     plan = plan_import(data_root, jar)
     if only:
@@ -136,17 +139,37 @@ def run(data_root: _P, jar: _P | None, only: str | None, apply: bool) -> int:
     reg = load_registry(data_root)
     totals = collections.Counter()
     todo = [p for p in plan if p["source"] != "skip"]
+
+    # ---- read every book's pages, several books at a time -------------------
+    # This is the part that took hours: pdfplumber walking every page, and
+    # nothing in it depends on the library. The merge below stays strictly
+    # serial and in plan order, so Commlink6 keeps precedence over the page.
+    library, _ = load_library(data_root, "gear")
+    lib_text = " ".join(i["name"] + " " + i["system"].get("description", "")
+                        for cat in library.values() for i in cat)
+    jobs = [{"book": p["book"], "pdf": reg[p["book"]]["pdf"],
+             "curated": p["book"] in CURATED, "libText": lib_text}
+            for p in todo]
+
+    n_read = [0]
+
+    def _read(r):
+        n_read[0] += 1
+        note = f"ERROR: {r['error']}" if r["error"] else f"{r['pages']} pages"
+        print(f"[{n_read[0]}/{len(jobs)}] {r['book']} read  {note}", flush=True)
+
+    print(f"\nreading {len(jobs)} book(s) with {workers} worker(s)", flush=True)
+    prepared = prepare_books(jobs, workers, on_done=_read)
+
+    # ---- merge, one book at a time, in plan order ---------------------------
+    print(f"\nmerging {len(todo)} book(s)", flush=True)
     for n, p in enumerate(todo, 1):
         book = p["book"]
-        # A COMPLETE line BEFORE the slow part.
-        #
-        # This used to be printed with end="" ahead of the PDF pass, so the
-        # newline that ends it only arrived once the book was finished. Anything
-        # reading this stream a line at a time -- which is what the builder's
-        # log window does -- therefore saw nothing at all while a book was being
-        # read, and a book takes minutes. The import looked hung when it was
-        # working perfectly.
-        print(f"[{n}/{len(todo)}] {book} reading", flush=True)
+        # A COMPLETE line BEFORE the work, not a partial one after it. This was
+        # printed with end="" ahead of the slow pass, so the newline that ends
+        # it only arrived once the book had finished -- and anything reading
+        # this stream a line at a time saw nothing at all in between.
+        print(f"[{n}/{len(todo)}] {book} merging", flush=True)
         try:
             if p["source"] == "both":
                 st = import_commlink6(data_root, book, p["jarBook"], jar)
@@ -158,7 +181,7 @@ def run(data_root: _P, jar: _P | None, only: str | None, apply: bool) -> int:
             # ingest_book merges into the same library, so reconciliation
             # happens against rows already carrying meta.source == "commlink6".
             before = _snapshot(data_root, book)
-            st = ingest_book(data_root, book)
+            st = ingest_book(data_root, book, prepared=prepared.get(book))
             rec = _reconcile_book(data_root, book, before)
             totals["new"] += st.get("new", 0)
             totals["descriptions"] += st.get("descriptions", 0)
@@ -208,12 +231,22 @@ def main() -> None:
     ap.add_argument("--jar", type=_P, default=DEFAULT_JAR)
     ap.add_argument("--book", help="just this one book")
     ap.add_argument("--apply", action="store_true", help="write changes")
+    ap.add_argument(
+        "--workers", type=int, default=default_workers(),
+        help="how many books to READ at once (default: %(default)s). The merge "
+             "is always one book at a time, in plan order. 1 disables the pool.")
     args = ap.parse_args()
     jar = args.jar if args.jar and _P(args.jar).is_file() else None
     if not jar:
         print("Commlink6 jar not found — every owned PDF will be read on its own.\n")
-    raise SystemExit(run(args.data, jar, args.book, args.apply))
+    raise SystemExit(run(args.data, jar, args.book, args.apply, args.workers))
 
 
 if __name__ == "__main__":
+    # Books are read in worker processes, and Windows starts a worker by
+    # re-executing this program. Without this the worker would fall through to
+    # main() and start an import of its own.
+    import multiprocessing
+
+    multiprocessing.freeze_support()
     main()

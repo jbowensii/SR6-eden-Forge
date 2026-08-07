@@ -22,6 +22,7 @@ window down with it.
 from __future__ import annotations
 
 import importlib
+import multiprocessing
 import sys
 from pathlib import Path
 
@@ -72,4 +73,13 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    # MUST be the first thing that runs, before anything touches sys.argv.
+    #
+    # The import reads several books at once in worker processes, and on
+    # Windows a worker is started by re-executing this program. In a frozen
+    # build that means re-running THIS exe: without freeze_support() each
+    # worker would fall through to main() and open another copy of the window,
+    # which would start its own workers, and so on until the machine gives up.
+    # freeze_support() spots the re-exec, runs the worker, and exits.
+    multiprocessing.freeze_support()
     sys.exit(main())

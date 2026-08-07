@@ -137,35 +137,49 @@ class Progress:
     moves the bar.
     """
 
+    #: How the bar splits between the two phases. Reading is the long pole even
+    #: with every core busy; merging is mostly bookkeeping.
+    READ_SHARE = 0.8
+
     def __init__(self, total_books: int):
         self.total = max(1, total_books)
+        self.read = 0
         self.done = 0
         self.current = ""
         self.phase = ""
 
     def feed(self, line: str) -> None:
-        # "[3/47] street_grimoire reading" then "[3/47] street_grimoire done ..."
+        # reading  (in parallel): "[3/47] street_grimoire read  212 pages"
+        # merging  (in order):    "[3/47] street_grimoire merging"
+        #                         "[3/47] street_grimoire done  +pdf new=12"
         m = _STEP.match(line.strip())
         if not m:
             return
         idx, total, book, what = int(m[1]), int(m[2]), m[3], m[4]
-        # The pipeline counts the books it will actually read; we only counted
-        # the ones the scan matched, and the two differ whenever a book is
-        # skipped for want of a PDF. Its number is the true one.
+        # The pipeline counts the books it will actually process; we only
+        # counted the ones the scan matched, and the two differ whenever a book
+        # is skipped for want of a PDF. Its number is the true one.
         self.total = max(1, total)
         self.current = book
-        self.phase = "done" if what.startswith("done") else "reading"
-        # A book being read is not a book finished — the bar reaches idx only
-        # once that book reports done, so it never runs ahead of the work.
-        self.done = idx if self.phase == "done" else idx - 1
+        if what.startswith("read"):
+            # books finish reading out of order, so idx is a completion count
+            self.phase = "reading"
+            self.read = max(self.read, idx)
+        elif what.startswith("done"):
+            self.phase = "merging"
+            self.done = max(self.done, idx)
+        else:
+            self.phase = "merging"
 
     @property
     def fraction(self) -> float:
-        return self.done / self.total
+        return (self.READ_SHARE * (self.read / self.total)
+                + (1 - self.READ_SHARE) * (self.done / self.total))
 
     def label(self) -> str:
         if not self.current:
             return "starting"
         if self.done >= self.total:
             return "finishing up"
-        return f"{self.current} — {self.phase}  ({self.done}/{self.total})"
+        n = self.read if self.phase == "reading" else self.done
+        return f"{self.current} — {self.phase}  ({n}/{self.total})"

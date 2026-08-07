@@ -86,13 +86,28 @@ def page_lines(page, page_no: int) -> list[tuple[int, str]]:
     return out
 
 
-def extract_book_descriptions(pdf_path, index, pages) -> dict:
+def book_lines(pdf_path, pages) -> list[tuple[int, str]]:
+    """Every line of the book, font-aware, as ``(page, text)``.
+
+    Split out from :func:`extract_book_descriptions` because this half is the
+    expensive one -- a full pdfplumber walk of the book -- and it depends on
+    nothing but the PDF. That makes it safe to run for many books at once,
+    ahead of the serial merge (see :mod:`extractor.bookprep`). Matching those
+    lines to items still needs the library, so it stays where it was.
+    """
     import pdfplumber
 
     lines: list[tuple[int, str]] = []
     with pdfplumber.open(str(pdf_path)) as pdf:
         for pno in pages:
             lines.extend(page_lines(pdf.pages[pno - 1], pno))
+    return lines
+
+
+def extract_book_descriptions(pdf_path, index, pages, lines=None) -> dict:
+    """:param lines: output of :func:`book_lines`, if it was read earlier."""
+    if lines is None:
+        lines = book_lines(pdf_path, pages)
     return parse_sections(lines, index)
 
 

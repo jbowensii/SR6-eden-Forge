@@ -32,6 +32,8 @@ DEFAULTS: dict = {
     "commlink6Jar": "",       # optional
     "foundryData": "",        # ...\FoundryVTT\Data
     "workspace": "",          # extracted library + built modules
+    "iconLibrary": "",        # optional: a folder of icon sets to match against
+    "workers": 0,             # books read at once; 0 = not chosen yet
     "lastImport": "",
     "artSupport": False,      # the optional heavy download
     "firstRunDone": False,
@@ -101,6 +103,36 @@ def ensure_workspace(ws: Path) -> Path:
         if not readme.exists():
             readme.write_text(f"{name} - {what}\n", encoding="utf-8")
     return ws
+
+
+def sync_review_settings(ws: Path, icon_library: str = "") -> Path:
+    """Pass the builder's choices to the review app.
+
+    The review app reads its own ``<workspace>/data/settings.json`` — that is
+    where it looks for ``iconLibrary`` — so a folder chosen in this window has
+    to be written there or the browser side never sees it.
+
+    Merged, not overwritten: the review app stores its own keys in this file
+    and a blind write would throw away whatever the user set over there.
+    """
+    target = Path(ws) / "data" / "settings.json"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        current = json.loads(target.read_text(encoding="utf-8"))
+        if not isinstance(current, dict):
+            current = {}
+    except (OSError, ValueError):
+        current = {}
+
+    if icon_library:
+        current["iconLibrary"] = str(icon_library)
+    else:
+        current.pop("iconLibrary", None)    # cleared here means cleared there
+
+    tmp = target.with_suffix(".tmp")
+    tmp.write_text(json.dumps(current, indent=2) + "\n", encoding="utf-8")
+    tmp.replace(target)
+    return target
 
 
 def detect_foundry_data() -> Path | None:

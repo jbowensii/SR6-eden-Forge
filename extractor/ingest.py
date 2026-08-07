@@ -126,7 +126,7 @@ def _name_fixer(pdf: str, pages, library: dict):
     return lambda n: demangle_name(n, seg) if _looks_mangled(n) else n
 
 
-def _apply_descriptions(library: dict, book: str, pdf: str, pages) -> int:
+def _apply_descriptions(library: dict, book: str, pdf: str, pages, lines=None) -> int:
     """Attach writeup descriptions to this book's items via font-aware matching."""
     payloads: dict[str, dict] = {}
     for cat, items in library.items():
@@ -136,7 +136,7 @@ def _apply_descriptions(library: dict, book: str, pdf: str, pages) -> int:
     if not payloads:
         return 0
     index = build_index(payloads)
-    sections = extract_book_descriptions(pdf, index, pages)
+    sections = extract_book_descriptions(pdf, index, pages, lines=lines)
     by_id = {i["id"]: i for cat in library.values() for i in cat}
     n = 0
     for (_cat, item_id), text in sections.items():
@@ -234,7 +234,16 @@ def fill_blank_fields(items, base_fields=(), group_by="type"):
     return added
 
 
-def ingest_book(data_root: Path, book: str, domain: str = "gear", redump: bool = False) -> dict:
+def ingest_book(data_root: Path, book: str, domain: str = "gear", redump: bool = False,
+                prepared: dict | None = None) -> dict:
+    """Merge one book into the library.
+
+    :param prepared: the book's page reading, already done by
+        :func:`extractor.bookprep.prepare_book` -- possibly in another process,
+        alongside other books. When absent every page is read here, exactly as
+        before. Either way the MERGE happens here, one book at a time, in the
+        caller's order, so Commlink6 keeps precedence over the printed page.
+    """
     reg = load_registry(data_root)
     info = reg.get(book)
     if not info:
@@ -247,7 +256,7 @@ def ingest_book(data_root: Path, book: str, domain: str = "gear", redump: bool =
     reprint = bool(info.get("reprint_of"))
     version = extractor.__version__
     today = date.today().isoformat()
-    npages = _page_count(pdf)
+    npages = (prepared or {}).get("pages") or _page_count(pdf)
     pages = range(1, npages + 1)
     library, envelopes = load_library(data_root, domain)
     stats = {"new": 0, "referenced": 0, "variants": 0, "skipped": 0, "images": 0}
@@ -256,19 +265,26 @@ def ingest_book(data_root: Path, book: str, domain: str = "gear", redump: bool =
         # idempotent: drop this book's prior rows before re-reading it
         for cat in list(library):
             library[cat] = [i for i in library[cat] if i["meta"]["book"] != book]
-        name_fixer = _name_fixer(pdf, pages, library)
-        incoming = extract_book(Path(pdf), pages, name_fixer=name_fixer)  # tables + de-mangle
+        if prepared is not None:
+            incoming = prepared["incoming"]
+        else:
+            name_fixer = _name_fixer(pdf, pages, library)
+            incoming = extract_book(Path(pdf), pages, name_fixer=name_fixer)  # tables + de-mangle
         if book in SPECIAL_READERS:  # dedicated layout readers
             catname, reader = SPECIAL_READERS[book]
             incoming.setdefault(catname, []).extend(reader(pdf, pages))
         _, stats = merge_book(library, incoming, book, dates, version, today, reprint=reprint)
 
     # single heading-hierarchy read -> subtypes, descriptions, prose-only gear
-    sample = extract_sample(pdf, pages)
-    hier = read_hierarchy(pdf, pages, sample=sample)
-    markers = read_sections(pdf, pages, sample=sample)
+    if prepared is not None:
+        hier, markers = prepared["hier"], prepared["markers"]
+    else:
+        sample = extract_sample(pdf, pages)
+        hier = read_hierarchy(pdf, pages, sample=sample)
+        markers = read_sections(pdf, pages, sample=sample)
     filled, changed = _apply_subtypes(library, book, hier, markers)
-    desc_n = _apply_descriptions(library, book, pdf, pages)
+    desc_n = _apply_descriptions(library, book, pdf, pages,
+                                 lines=(prepared or {}).get("lines"))
     prose = 0
     if not reprint:
         prose_items = _prose_only_items(library, hier)

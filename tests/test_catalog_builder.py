@@ -192,10 +192,12 @@ def test_install_replaces_the_module(tmp_path, monkeypatch):
 def test_progress_counts_books_not_invented_percentages():
     p = runner.Progress(total_books=3)
     assert p.fraction == 0
+    for i, b in enumerate(("corebook", "companion", "firing_squad"), 1):
+        p.feed(f"[{i}/3] {b} read  200 pages")
     p.feed("[1/3] corebook done  commlink6 533 items  +pdf new=0 desc=79")
     p.feed("[2/3] companion done  commlink6 783 items  +pdf new=12 desc=40")
-    assert p.done == 2
-    assert 0.6 < p.fraction < 0.7
+    assert p.read == 3 and p.done == 2
+    assert 0.9 < p.fraction < 1.0          # all read, two of three merged
     assert "companion" in p.label()
 
 
@@ -209,8 +211,9 @@ def test_progress_ignores_banners_and_totals():
 def test_progress_never_exceeds_the_total():
     p = runner.Progress(total_books=1)
     for _ in range(5):
+        p.feed("[1/1] corebook read  322 pages")
         p.feed("[1/1] corebook done  commlink6 1 items +pdf new=0")
-    assert p.fraction == 1.0
+    assert p.fraction == 1.0                # repeats must not push it past 100%
 
 
 def test_pipeline_command_from_source_uses_the_interpreter():
@@ -490,18 +493,26 @@ def test_progress_moves_while_a_book_is_being_read():
 
     p = Progress(3)
 
-    p.feed("[1/3] corebook reading")
-    assert p.current == "corebook"
+    # phase 1: books are read in parallel, so they land out of order and the
+    # index is a completion count, not a position in the plan
+    p.feed("[1/3] firing_squad read  180 pages")
+    assert p.current == "firing_squad"
     assert p.phase == "reading"
+    assert p.read == 1 and p.done == 0      # read is not merged
+    assert 0 < p.fraction < 0.3
+
+    p.feed("[2/3] corebook read  322 pages")
+    p.feed("[3/3] street_grimoire read  210 pages")
+    assert p.read == 3
+    assert p.fraction == pytest.approx(Progress.READ_SHARE)
+
+    # phase 2: merged one at a time, in plan order
+    p.feed("[1/3] corebook merging")
+    assert p.phase == "merging"
     assert p.done == 0                      # started is not finished
 
     p.feed("[1/3] corebook done  commlink6 533 items  +pdf new=0 desc=79")
     assert p.done == 1
-    assert p.fraction == 1 / 3
-
-    p.feed("[2/3] street_grimoire reading")
-    assert p.current == "street_grimoire"
-    assert p.done == 1                      # bar holds until this one lands
 
     p.feed("[3/3] firing_squad done  pdf-only  +pdf new=12 desc=3")
     assert p.done == 3
@@ -539,3 +550,67 @@ def test_pdf_noise_is_silenced():
     quiet_pdf_noise()
     assert logging.getLogger("pdfminer.pdffont").level == logging.ERROR
     assert logging.getLogger("pdfminer").level == logging.ERROR
+
+
+def test_core_advice_is_capped_by_memory_not_just_cores():
+    """A worker holds a whole book; 16 of them will not fit in 16 GB.
+
+    The measured peak was about 3 GB for one import process, so the honest
+    recommendation is whichever is smaller — spare cores, or spare memory.
+    """
+    from build.catalog_builder.cores import advise
+
+    a = advise(cores=32, ram_gb=16)
+    assert a["byCores"] == 30
+    assert a["byMemory"] == 5
+    assert a["recommended"] == 5
+    assert "memory" in a["why"]
+
+    b = advise(cores=4, ram_gb=128)
+    assert b["recommended"] == 2          # cores, less the two held back
+    assert "cores" in b["why"]
+
+    # never zero, however small the machine
+    assert advise(cores=1, ram_gb=1)["recommended"] == 1
+
+
+def test_core_advice_without_a_memory_reading_falls_back_to_cores():
+    from build.catalog_builder.cores import advise
+
+    a = advise(cores=8, ram_gb=0)
+    assert a["recommended"] == 6
+    assert a["byMemory"] == a["byCores"]   # does not invent a memory limit
+
+
+def test_explanation_names_the_serial_merge():
+    """The dialog must not imply this setting parallelises the merge."""
+    from build.catalog_builder.cores import advise, explain
+
+    text = explain(advise(cores=16, ram_gb=64))
+    assert "one book at a time" in text
+    assert "Commlink6" in text
+
+
+def test_review_settings_merge_rather_than_overwrite(tmp_path):
+    """The review app keeps its own keys in this file; do not eat them."""
+    import json
+
+    from build.catalog_builder.settings import sync_review_settings
+
+    data = tmp_path / "data"
+    data.mkdir()
+    (data / "settings.json").write_text(
+        json.dumps({"dataDir": "somewhere", "artDir": "elsewhere"}),
+        encoding="utf-8")
+
+    sync_review_settings(tmp_path, r"C:\icons")
+    got = json.loads((data / "settings.json").read_text(encoding="utf-8"))
+    assert got["iconLibrary"] == r"C:\icons"
+    assert got["dataDir"] == "somewhere"    # untouched
+    assert got["artDir"] == "elsewhere"
+
+    # clearing it here clears it there, without harming the neighbours
+    sync_review_settings(tmp_path, "")
+    got = json.loads((data / "settings.json").read_text(encoding="utf-8"))
+    assert "iconLibrary" not in got
+    assert got["dataDir"] == "somewhere"
