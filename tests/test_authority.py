@@ -84,7 +84,7 @@ def test_pdf_rows_are_left_entirely_alone(tmp_path):
     """The guard protects the authority, not everything."""
     f = _lib(tmp_path, [_pdf("a", description="From the page.")])
     snap = snapshot(tmp_path)
-    assert snap == {}
+    assert snap["fields"] == {} and snap["rows"] == {}
 
     doc = json.loads(f.read_text(encoding="utf-8"))
     doc["items"][0]["system"]["description"] = "Rewritten by a later phase."
@@ -99,7 +99,7 @@ def test_zero_and_false_count_as_real_values(tmp_path):
     """A price of 0 is something Commlink6 said, not an empty field."""
     f = _lib(tmp_path, [_cl6("a", price=0, rating=False)])
     snap = snapshot(tmp_path)
-    assert snap["a"]["fields"]["price"] == 0
+    assert snap["fields"]["a"]["price"] == 0
 
     doc = json.loads(f.read_text(encoding="utf-8"))
     doc["items"][0]["system"]["price"] = 9999
@@ -115,7 +115,7 @@ def test_the_guard_spans_every_domain_not_just_gear(tmp_path):
     _lib(tmp_path, [_cl6("q1", description="Commlink6 quality text.")],
          domain="qualities", cat="positive")
     snap = snapshot(tmp_path)
-    assert set(snap) == {"s1", "q1"}
+    assert set(snap["fields"]) == {"s1", "q1"}
 
 
 def test_is_authoritative_reads_the_provenance_stamp():
@@ -171,3 +171,45 @@ def test_resurrection_does_not_duplicate_a_row_that_survived(tmp_path):
     stats = restore(tmp_path, snap)
     assert stats["resurrected"] == 0
     assert len(json.loads(f.read_text(encoding="utf-8"))["items"]) == 1
+
+
+def test_rows_sharing_an_id_are_all_recovered(tmp_path):
+    """Commlink6 reuses ids: 385 vehicle rows share only 356 of them.
+
+    Keyed by id, the snapshot kept one row of each colliding pair, so 29
+    vehicles stayed dead after the guard reported "restored". Rows are counted
+    per id now, not matched as a set.
+    """
+    f = _lib(tmp_path, [_cl6("dup", description="First."),
+                        _cl6("dup", description="Second."),
+                        _cl6("solo", description="Third.")],
+             domain="vehicles", cat="vehicles")
+    snap = snapshot(tmp_path)
+
+    # a phase rewrites the file from its own reading
+    f.write_text(json.dumps({"book": "corebook", "domain": "vehicles",
+                             "category": "vehicles", "items": []}),
+                 encoding="utf-8")
+
+    stats = restore(tmp_path, snap)
+    assert stats["resurrected"] == 3          # not 2
+
+    items = json.loads(f.read_text(encoding="utf-8"))["items"]
+    assert len(items) == 3
+    assert sorted(i["system"]["description"] for i in items) == \
+        ["First.", "Second.", "Third."]
+
+
+def test_a_partial_deletion_of_duplicate_ids_restores_only_the_gap(tmp_path):
+    """Two rows shared an id, one survived — bring back one, not two."""
+    f = _lib(tmp_path, [_cl6("dup", description="First."),
+                        _cl6("dup", description="Second.")],
+             domain="vehicles", cat="vehicles")
+    snap = snapshot(tmp_path)
+
+    doc = json.loads(f.read_text(encoding="utf-8"))
+    doc["items"] = [doc["items"][0]]
+    f.write_text(json.dumps(doc), encoding="utf-8")
+
+    assert restore(tmp_path, snap)["resurrected"] == 1
+    assert len(json.loads(f.read_text(encoding="utf-8"))["items"]) == 2

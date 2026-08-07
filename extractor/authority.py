@@ -28,6 +28,9 @@ from pathlib import Path
 
 COMMLINK6 = "commlink6"
 
+#: book folder used when a phase deleted a file and its envelope with it
+LIBRARY_FALLBACK = "corebook"
+
 #: Fields a derived pass has any business touching. Everything else on a
 #: Commlink6 row is structural and nothing downstream writes it.
 GUARDED = ("description", "type", "subtype", "notes", "category",
@@ -66,36 +69,42 @@ def _library_files(data_root: Path):
 def snapshot(data_root: Path) -> dict[str, dict]:
     """Everything needed to put a Commlink6 row back exactly as it was.
 
-    ``{id: {"fields": {...}, "item": <whole row>, "file": <relative path>}}``
+    ``{"fields": {id: {field: value}}, "rows": {file: [whole row, ...]}}``
 
-    The whole row is kept, not just its fields, because a phase can DELETE a
-    Commlink6 record rather than merely edit it — ``ingest_vehicles`` rewrites
-    the vehicles file wholesale from its own reading, which silently dropped
-    366 Commlink6 vehicles. Restoring fields cannot help an item that is no
-    longer there, and deleting is the most complete form of clobbering there
-    is, so the row itself has to be recoverable.
+    Whole rows are kept, not just fields, because a phase can DELETE a record
+    rather than merely edit it — ``ingest_vehicles`` rewrites the vehicles file
+    wholesale from its own reading, destroying every Commlink6 vehicle in it.
+    Restoring fields cannot help a row that is no longer there.
+
+    They are keyed by FILE and kept as a list, not keyed by id, because
+    Commlink6 reuses ids: 385 vehicle rows share only 356 of them. An id-keyed
+    store drops one of each colliding pair, which is how 29 vehicles stayed
+    dead after the guard reported them restored.
     """
     import copy
 
-    snap: dict[str, dict] = {}
+    fields: dict[str, dict] = {}
+    rows: dict[str, list] = {}
     root = Path(data_root)
     for f in _library_files(root):
         try:
             doc = json.loads(f.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             continue
+        rel = f.relative_to(root).as_posix()
         for item in doc.get("items") or []:
             if not is_authoritative(item) or not item.get("id"):
                 continue
             sysd = item.get("system") or {}
             kept = {k: sysd[k] for k in GUARDED
                     if k in sysd and _filled(sysd[k])}
-            snap[item["id"]] = {
-                "fields": kept,
-                "item": copy.deepcopy(item),
-                "file": f.relative_to(root).as_posix(),
-            }
-    return snap
+            fields.setdefault(item["id"], kept)
+            # EVERY row, not one per id. Commlink6 reuses an id across rows —
+            # 385 vehicle rows share only 356 ids — so an id-keyed store
+            # silently discards one of each colliding pair, and 29 vehicles
+            # stayed dead after the guard "restored" them.
+            rows.setdefault(rel, []).append(copy.deepcopy(item))
+    return {"fields": fields, "rows": rows}
 
 
 def restore(data_root: Path, snap: dict[str, dict]) -> dict:
@@ -106,10 +115,11 @@ def restore(data_root: Path, snap: dict[str, dict]) -> dict:
     from collections import Counter
 
     root = Path(data_root)
+    want_fields = snap.get("fields") or {}
+    want_rows = snap.get("rows") or {}
     restored = 0
     touched_items = 0
     per_field: Counter = Counter()
-    survived: set[str] = set()
 
     # pass 1 — put back any field a phase changed on a row that still exists
     for f in _library_files(root):
@@ -122,13 +132,14 @@ def restore(data_root: Path, snap: dict[str, dict]) -> dict:
             continue
         dirty = False
         for item in items:
-            was = snap.get(item.get("id"))
+            if not is_authoritative(item):
+                continue
+            was = want_fields.get(item.get("id"))
             if not was:
                 continue
-            survived.add(item["id"])
             sysd = item.setdefault("system", {})
             hit = False
-            for field, value in was["fields"].items():
+            for field, value in was.items():
                 if sysd.get(field) != value:
                     sysd[field] = value
                     per_field[field] += 1
@@ -141,31 +152,39 @@ def restore(data_root: Path, snap: dict[str, dict]) -> dict:
             f.write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n",
                          encoding="utf-8")
 
-    # pass 2 — bring back rows a phase deleted outright, to the file they came
-    # from. Grouped so each file is rewritten once however many rows it lost.
-    gone = [i for i in snap if i not in survived]
-    by_file: dict[str, list] = {}
-    for item_id in gone:
-        by_file.setdefault(snap[item_id]["file"], []).append(snap[item_id]["item"])
-
+    # pass 2 — bring back rows a phase removed.
+    #
+    # Counted per id, not matched as a set: Commlink6 reuses ids, so "is this
+    # id present?" is the wrong question. The right one is "did this file hold
+    # THREE rows with this id before and only one now?"
     resurrected = 0
-    for rel, rows in by_file.items():
+    for rel, before in want_rows.items():
         path = root / rel
         try:
             doc = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
-            # the phase removed the file as well; rebuild its envelope
+            # the phase deleted the file too; rebuild its envelope
             parts = Path(rel).parts
-            doc = {"book": parts[0] if parts else "corebook",
+            doc = {"book": parts[0] if parts else LIBRARY_FALLBACK,
                    "domain": parts[1] if len(parts) > 1 else "gear",
                    "category": Path(rel).stem, "items": []}
         if not isinstance(doc.get("items"), list):
             doc["items"] = []
-        have = {i.get("id") for i in doc["items"]}
-        for row in rows:
-            if row.get("id") not in have:
+
+        now = Counter(i.get("id") for i in doc["items"]
+                      if is_authoritative(i))
+        need = Counter(i.get("id") for i in before)
+        missing = need - now                     # multiset difference
+        if not missing:
+            continue
+
+        for row in before:
+            rid = row.get("id")
+            if missing.get(rid, 0) > 0:
                 doc["items"].append(row)
+                missing[rid] -= 1
                 resurrected += 1
+
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n",
                         encoding="utf-8")
