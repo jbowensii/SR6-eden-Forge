@@ -66,6 +66,7 @@ class App(tk.Tk):
         self.minsize(760, 560)
         self.configure(bg=BG)
 
+        self._set_window_icon()
         self.settings = Settings()
         self.job: Job | None = None
         self.progress: Progress | None = None
@@ -75,6 +76,25 @@ class App(tk.Tk):
         self._build()
         self._prefill()
         self._refresh_state()
+
+    def _set_window_icon(self) -> None:
+        """Give the window our icon.
+
+        Tk draws its own feather in the title bar and the taskbar regardless of
+        what icon the executable carries — the exe icon covers Explorer, this
+        covers the running window. Two different things, and only fixing one
+        leaves the other looking like a stray Python script.
+        """
+        for base in (Path(getattr(sys, "_MEIPASS", "")),
+                     Path(sys.executable).parent,
+                     Path(__file__).resolve().parent.parent):
+            ico = base / "app.ico"
+            if ico.is_file():
+                try:
+                    self.iconbitmap(default=str(ico))
+                    return
+                except tk.TclError:
+                    continue
 
     # ---------- chrome ----------
     def _style(self) -> None:

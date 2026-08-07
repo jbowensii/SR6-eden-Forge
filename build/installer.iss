@@ -111,6 +111,7 @@ WelcomeLabel2=This installs the Catalog Builder, which turns Shadowrun PDFs you 
 
 var
   Runner: TBitmapImage;
+  Backing: TPanel;
 
 function SidebarFile(): String;
 var
@@ -147,6 +148,19 @@ begin
     and the figure is squeezed and clipped, too wide and it floats in a column
     of white. Capped at a third of the screen so it cannot swallow the window
     on a small display. }
+  { A white panel behind the figure, full height. Without it the column above
+    the figure is the form's own grey, which reads as an empty box rather than
+    as part of the page. The figure is composited onto white, so the two meet
+    invisibly. }
+  Backing := TPanel.Create(WizardForm);
+  Backing.Parent := WizardForm;
+  Backing.BevelOuter := bvNone;
+  Backing.Color := clWhite;
+  Backing.Left := 0;
+  Backing.Top := 0;
+  Backing.Height := WizardForm.ClientHeight;
+  Backing.Anchors := [akLeft, akTop, akBottom];
+
   Runner := TBitmapImage.Create(WizardForm);
   Runner.Parent := WizardForm;
   Runner.Bitmap.LoadFromFile(ExpandConstant('{tmp}\') + F);
@@ -163,6 +177,7 @@ begin
     ArtH := (Runner.Bitmap.Height * ArtW) div Runner.Bitmap.Width;
   end;
 
+  Backing.Width := ArtW;
   Runner.Left := 0;
   Runner.Top := WizardForm.ClientHeight - ArtH;
   Runner.Width := ArtW;
@@ -189,5 +204,9 @@ begin
     to the built-in one. It has to be hidden. }
   WizardForm.WizardSmallBitmapImage.Visible := False;
 
+  { the figure sits above its backing panel, both behind the wizard's controls }
+  Backing.SendToBack();
+  Runner.BringToFront();
   Runner.SendToBack();
+  Backing.SendToBack();
 end;

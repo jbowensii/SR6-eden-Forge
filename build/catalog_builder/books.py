@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 from pathlib import Path
 
 CAT_RE = re.compile(r"\bCAT(\d{4,6})\b", re.I)
@@ -42,10 +43,31 @@ def _norm(s: str) -> list[str]:
 
 
 def load_registry(repo: Path) -> dict:
-    """The book registry that ships with the pipeline."""
-    for candidate in (repo / "data" / "books.json", repo / "books.json"):
-        if candidate.is_file():
-            return json.loads(candidate.read_text(encoding="utf-8"))
+    """The book registry: what titles exist and their Catalyst product codes.
+
+    Shipped WITH the application, not just with the repo. Without it there is
+    nothing to match a PDF against, so every folder reads as "no Shadowrun
+    books found" — which is exactly how the first installed build behaved, and
+    it blames the user's folder for a missing data file.
+
+    Bibliographic metadata only: titles, product codes and dates. No game
+    content, and no PDF paths — those are per-machine and the scan fills them.
+    """
+    here = Path(__file__).resolve().parent
+    candidates = [
+        repo / "data" / "books.json",     # running from the repo
+        repo / "books.json",              # beside the exe
+        here / "books.json",              # bundled in the package
+    ]
+    if getattr(sys, "frozen", False):
+        candidates.insert(0, Path(sys.executable).parent / "books.json")
+        candidates.insert(1, Path(getattr(sys, "_MEIPASS", "")) / "books.json")
+    for candidate in candidates:
+        try:
+            if candidate.is_file():
+                return json.loads(candidate.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
     return {}
 
 

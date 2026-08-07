@@ -26,6 +26,13 @@ EXCLUDE = [
 ]
 
 datas = [
+    # The book registry — without it nothing can be recognised and every folder
+    # reads as "no Shadowrun books found". Shipped at the bundle root AND
+    # beside the package, so either lookup path finds it.
+    (str(REPO / "build" / "catalog_builder" / "books.json"), "."),
+    (str(REPO / "build" / "catalog_builder" / "books.json"), "catalog_builder"),
+    # the window loads this at runtime; the exe's own icon only covers Explorer
+    (str(REPO / "build" / "wizard" / "app.ico"), "."),
     # the pipeline reads these at runtime
     (str(REPO / "schemas"), "schemas"),
     (str(REPO / "foundry-module" / "sr6-forge" / "data" / "creation-rules.json"),

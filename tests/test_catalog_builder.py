@@ -444,3 +444,35 @@ def test_the_notice_names_the_author_and_says_it_is_optional():
     assert "Stefan Prelle" in commlink6.NOTICE
     assert "optional" in commlink6.NOTICE.lower()
     assert "rpgframework.de" in commlink6.NOTICE
+
+
+# ---------- the registry must ship ----------
+
+def test_registry_is_bundled_with_the_application():
+    """Without it nothing can be recognised and every folder reads as
+    "No Shadowrun books found" — which blames the user's folder for a missing
+    data file. That is exactly how the first installed build behaved."""
+    bundled = (Path(__file__).resolve().parent.parent
+               / "build" / "catalog_builder" / "books.json")
+    assert bundled.is_file(), "the book registry is not shipped with the app"
+    reg = json.loads(bundled.read_text(encoding="utf-8"))
+    assert len(reg) >= 40, f"registry looks truncated: {len(reg)} books"
+    assert reg["corebook"]["cat"] == "CAT28000"
+
+
+def test_bundled_registry_carries_no_machine_paths():
+    """PDF paths are per-machine and would be meaningless — or misleading — on
+    someone else's computer."""
+    bundled = (Path(__file__).resolve().parent.parent
+               / "build" / "catalog_builder" / "books.json")
+    if not bundled.is_file():
+        pytest.skip("registry not built")
+    reg = json.loads(bundled.read_text(encoding="utf-8"))
+    leaked = [k for k, v in reg.items() if v.get("pdf")]
+    assert not leaked, f"machine-specific paths in the shipped registry: {leaked[:3]}"
+
+
+def test_registry_loads_without_a_repo():
+    """The installed app has no repo beside it — only the bundled copy."""
+    reg = books.load_registry(Path("/definitely/not/a/repo"))
+    assert len(reg) >= 40, "fell back to an empty registry"

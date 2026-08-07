@@ -1,0 +1,305 @@
+{
+ "corebook": {
+  "title": "Sixth World Core Rulebook",
+  "date": "2019-08",
+  "cat": "CAT28000",
+  "pdf": ""
+ },
+ "companion": {
+  "title": "Sixth World Companion",
+  "date": "2020-11",
+  "cat": "CAT28005",
+  "pdf": ""
+ },
+ "firing_squad": {
+  "title": "Firing Squad",
+  "date": "2021-06",
+  "cat": "CAT28002",
+  "pdf": ""
+ },
+ "street_wyrd": {
+  "title": "Street Wyrd",
+  "date": "2021-08",
+  "cat": "CAT28003",
+  "pdf": ""
+ },
+ "double_clutch": {
+  "title": "Double Clutch",
+  "date": "2021-10",
+  "cat": "CAT28004",
+  "pdf": ""
+ },
+ "hack_slash": {
+  "title": "Hack & Slash",
+  "date": "2022-03",
+  "cat": "CAT28006",
+  "pdf": ""
+ },
+ "body_shop": {
+  "title": "Body Shop",
+  "date": "2022-06",
+  "cat": "CAT28007",
+  "pdf": ""
+ },
+ "gun_rack": {
+  "title": "Gun Rack",
+  "date": "2022-09",
+  "cat": "CAT28504",
+  "pdf": ""
+ },
+ "smooth_operations": {
+  "title": "Smooth Operations",
+  "date": "2023-02",
+  "cat": "CAT28009",
+  "pdf": ""
+ },
+ "deadly_arts": {
+  "title": "Deadly Arts",
+  "date": "2023-05",
+  "cat": "CAT28011",
+  "pdf": ""
+ },
+ "krime_katalog": {
+  "title": "Krime Katalog",
+  "date": "2023-07",
+  "cat": "none",
+  "pdf": ""
+ },
+ "rides": {
+  "title": "Rides",
+  "date": "2023-09",
+  "cat": "CAT28509",
+  "pdf": ""
+ },
+ "no_future": {
+  "title": "No Future",
+  "date": "2022-08",
+  "cat": "CAT27453",
+  "pdf": ""
+ },
+ "astral_ways": {
+  "title": "Astral Ways",
+  "date": "2022-05",
+  "cat": "CAT28101",
+  "pdf": ""
+ },
+ "shadows_new_orleans": {
+  "title": "Shadows in Focus: New Orleans",
+  "date": "2022-03",
+  "cat": "none",
+  "pdf": ""
+ },
+ "kechibi_code": {
+  "title": "The Kechibi Code",
+  "date": "2022-10",
+  "cat": "CAT28302",
+  "pdf": ""
+ },
+ "lethal_harvest": {
+  "title": "Lethal Harvest",
+  "date": "2023-01",
+  "cat": "CAT28305",
+  "pdf": ""
+ },
+ "tarnished_star": {
+  "title": "Tarnished Star",
+  "date": "2024-02",
+  "cat": "CAT28516",
+  "pdf": ""
+ },
+ "corebook_seattle": {
+  "title": "Core Rulebook (Seattle Edition)",
+  "date": "2020-01",
+  "cat": "CAT28000S",
+  "reprint_of": "corebook",
+  "pdf": ""
+ },
+ "corebook_berlin": {
+  "title": "Core Rulebook (Berlin Edition)",
+  "date": "2021-01",
+  "cat": "CAT28000B",
+  "reprint_of": "corebook",
+  "pdf": ""
+ },
+ "corebook_hongkong": {
+  "title": "Core Rulebook (Hong Kong Edition)",
+  "date": "2021-05",
+  "cat": "CAT28000H",
+  "reprint_of": "corebook",
+  "pdf": ""
+ },
+ "30_nights": {
+  "title": "30 Nights",
+  "date": "2023-01",
+  "cat": "CAT28400",
+  "pdf": ""
+ },
+ "age_of_rust": {
+  "title": "Age of Rust",
+  "date": "2023-01",
+  "cat": "none",
+  "pdf": ""
+ },
+ "assassins_night": {
+  "title": "Assassins Night",
+  "date": "2023-01",
+  "cat": "CAT28402",
+  "pdf": ""
+ },
+ "collapsing_now": {
+  "title": "Collapsing Now",
+  "date": "2023-01",
+  "cat": "CAT28450",
+  "pdf": ""
+ },
+ "cutting_black": {
+  "title": "Cutting Black",
+  "date": "2023-01",
+  "cat": "CAT28300",
+  "pdf": ""
+ },
+ "dealers_of_death": {
+  "title": "Dealers of Death",
+  "date": "2023-01",
+  "cat": "none",
+  "pdf": ""
+ },
+ "emerald_city": {
+  "title": "Emerald City",
+  "date": "2023-01",
+  "cat": "CAT28100",
+  "pdf": ""
+ },
+ "falling_point": {
+  "title": "Falling Point",
+  "date": "2023-01",
+  "cat": "CAT28453",
+  "pdf": ""
+ },
+ "final_bets": {
+  "title": "Final Bets",
+  "date": "2023-01",
+  "cat": "CAT28405",
+  "pdf": ""
+ },
+ "free_seattle": {
+  "title": "Free Seattle",
+  "date": "2023-01",
+  "cat": "CAT28401",
+  "pdf": ""
+ },
+ "ingentis_athletes": {
+  "title": "Ingentis Athletes",
+  "date": "2023-01",
+  "cat": "none",
+  "pdf": ""
+ },
+ "johnson_dex": {
+  "title": "Johnson 'Dex",
+  "date": "2023-01",
+  "cat": "CAT28508",
+  "pdf": ""
+ },
+ "margin_calls": {
+  "title": "Margin Calls",
+  "date": "2023-01",
+  "cat": "CAT28306",
+  "pdf": ""
+ },
+ "neo": {
+  "title": "Neo",
+  "date": "2023-01",
+  "cat": "CAT27454",
+  "pdf": ""
+ },
+ "null_value": {
+  "title": "Null Value",
+  "date": "2023-01",
+  "cat": "CAT28452",
+  "pdf": ""
+ },
+ "power_plays": {
+  "title": "Power Plays",
+  "date": "2023-01",
+  "cat": "CAT28451",
+  "pdf": ""
+ },
+ "risks_rewards": {
+  "title": "Risks & Rewards",
+  "date": "2023-01",
+  "cat": "CAT28454",
+  "pdf": ""
+ },
+ "scotophobia": {
+  "title": "Scotophobia",
+  "date": "2023-01",
+  "cat": "CAT28303",
+  "pdf": ""
+ },
+ "shadow_cast": {
+  "title": "Shadow Cast",
+  "date": "2023-01",
+  "cat": "CAT28510",
+  "pdf": ""
+ },
+ "shoot_straight": {
+  "title": "Shoot Straight",
+  "date": "2023-01",
+  "cat": "CAT28513",
+  "pdf": ""
+ },
+ "slip_streams": {
+  "title": "Slip Streams",
+  "date": "2023-01",
+  "cat": "CAT28301",
+  "pdf": ""
+ },
+ "the_needle_s_eye": {
+  "title": "The Needle's Eye",
+  "date": "2023-01",
+  "cat": "CAT28304",
+  "pdf": ""
+ },
+ "the_third_parallel": {
+  "title": "The Third Parallel",
+  "date": "2023-01",
+  "cat": "CAT28403",
+  "pdf": ""
+ },
+ "whisper_nets": {
+  "title": "Whisper Nets",
+  "date": "2023-01",
+  "cat": "CAT28404",
+  "pdf": ""
+ },
+ "wild_life": {
+  "title": "Wild Life",
+  "date": "2023-01",
+  "cat": "CAT28008",
+  "pdf": ""
+ },
+ "lofwyr": {
+  "title": "Lofwyr's Legions",
+  "date": "2024-01",
+  "cat": "",
+  "pdf": ""
+ },
+ "bestial_nature": {
+  "title": "Bestial Nature",
+  "date": "2024-01",
+  "cat": "",
+  "pdf": ""
+ },
+ "explosive_decompression": {
+  "title": "Explosive Decompression",
+  "date": "2026-02",
+  "cat": "",
+  "pdf": ""
+ },
+ "los_alamos": {
+  "title": "Los Alamos: The Secret City",
+  "date": "2026",
+  "cat": "",
+  "pdf": ""
+ }
+}
