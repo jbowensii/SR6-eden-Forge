@@ -192,8 +192,8 @@ def test_install_replaces_the_module(tmp_path, monkeypatch):
 def test_progress_counts_books_not_invented_percentages():
     p = runner.Progress(total_books=3)
     assert p.fraction == 0
-    p.feed("  corebook   commlink6  533 items  +pdf new=0 desc=79")
-    p.feed("  companion  commlink6  783 items  +pdf new=12 desc=40")
+    p.feed("[1/3] corebook done  commlink6 533 items  +pdf new=0 desc=79")
+    p.feed("[2/3] companion done  commlink6 783 items  +pdf new=12 desc=40")
     assert p.done == 2
     assert 0.6 < p.fraction < 0.7
     assert "companion" in p.label()
@@ -209,7 +209,7 @@ def test_progress_ignores_banners_and_totals():
 def test_progress_never_exceeds_the_total():
     p = runner.Progress(total_books=1)
     for _ in range(5):
-        p.feed("  corebook  commlink6 1 items +pdf new=0")
+        p.feed("[1/1] corebook done  commlink6 1 items +pdf new=0")
     assert p.fraction == 1.0
 
 
@@ -476,3 +476,66 @@ def test_registry_loads_without_a_repo():
     """The installed app has no repo beside it — only the bundled copy."""
     reg = books.load_registry(Path("/definitely/not/a/repo"))
     assert len(reg) >= 40, "fell back to an empty registry"
+
+
+def test_progress_moves_while_a_book_is_being_read():
+    """The label must move on the START marker, not only on the finish.
+
+    Regression: the import printed its per-book line with end="" *before* the
+    slow PDF pass, so the terminating newline only arrived once the book was
+    done. A line-oriented reader saw nothing for minutes at a time and the
+    import looked hung.
+    """
+    from build.catalog_builder.runner import Progress
+
+    p = Progress(3)
+
+    p.feed("[1/3] corebook reading")
+    assert p.current == "corebook"
+    assert p.phase == "reading"
+    assert p.done == 0                      # started is not finished
+
+    p.feed("[1/3] corebook done  commlink6 533 items  +pdf new=0 desc=79")
+    assert p.done == 1
+    assert p.fraction == 1 / 3
+
+    p.feed("[2/3] street_grimoire reading")
+    assert p.current == "street_grimoire"
+    assert p.done == 1                      # bar holds until this one lands
+
+    p.feed("[3/3] firing_squad done  pdf-only  +pdf new=12 desc=3")
+    assert p.done == 3
+    assert p.fraction == 1.0
+
+
+def test_progress_defers_to_the_pipeline_total():
+    """The scan counts matched books; the pipeline counts what it will read."""
+    from build.catalog_builder.runner import Progress
+
+    p = Progress(50)                        # what the folder scan matched
+    p.feed("[1/12] corebook reading")       # what is actually importable
+    assert p.total == 12
+
+
+def test_progress_ignores_ordinary_chatter():
+    from build.catalog_builder.runner import Progress
+
+    p = Progress(2)
+    for noise in ("book                   source  commlink6",
+                  "  corebook   both    core", "", "=== importing 2 book(s)",
+                  "Could not get FontBBox from font descriptor because None"):
+        p.feed(noise)
+    assert p.done == 0 and p.current == ""
+    assert p.label() == "starting"
+
+
+def test_pdf_noise_is_silenced():
+    """FontBBox warnings are pdfminer telling us about an optional field."""
+    import logging
+
+    from extractor.quiet import quiet_pdf_noise
+
+    logging.getLogger("pdfminer.pdffont").setLevel(logging.WARNING)
+    quiet_pdf_noise()
+    assert logging.getLogger("pdfminer.pdffont").level == logging.ERROR
+    assert logging.getLogger("pdfminer").level == logging.ERROR

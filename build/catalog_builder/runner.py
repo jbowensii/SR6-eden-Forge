@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import os
 import queue
+import re
 import subprocess
 import sys
 import threading
@@ -119,35 +120,52 @@ class Job:
         return out, done
 
 
+#: The import's per-book marker: "[3/47] street_grimoire reading|done ..."
+_STEP = re.compile(r"\[(\d+)/(\d+)\]\s+(\S+)\s+(.*)")
+
+
 class Progress:
     """Turn pipeline chatter into a number, without pretending to precision.
 
-    The import prints one line per book as it finishes. Counting those against
-    the book total is honest and needs no cooperation from the pipeline; a
-    fabricated smooth percentage would only be a lie told slowly.
+    The import prints a marker when it starts a book and another when that book
+    finishes. Reading those is honest and needs no guesswork; a fabricated
+    smooth percentage would only be a lie told slowly.
+
+    Both markers matter. Reading the finish alone leaves the bar and the label
+    frozen for the several minutes a book takes, which is indistinguishable
+    from a hang — so the start marker moves the label, and only the finish
+    moves the bar.
     """
 
     def __init__(self, total_books: int):
         self.total = max(1, total_books)
         self.done = 0
         self.current = ""
+        self.phase = ""
 
     def feed(self, line: str) -> None:
-        s = line.strip()
-        if not s or s.startswith(("=", "-", "TOTAL")):
+        # "[3/47] street_grimoire reading" then "[3/47] street_grimoire done ..."
+        m = _STEP.match(line.strip())
+        if not m:
             return
-        # "  corebook   commlink6  533 items  +pdf new=0 desc=79"
-        head = s.split()[0] if s.split() else ""
-        if head and head.replace("_", "").isalnum() and not head[0].isdigit():
-            self.current = head
-            if "+pdf" in s or "pdf-only" in s or s.count("=") >= 1:
-                self.done = min(self.total, self.done + 1)
+        idx, total, book, what = int(m[1]), int(m[2]), m[3], m[4]
+        # The pipeline counts the books it will actually read; we only counted
+        # the ones the scan matched, and the two differ whenever a book is
+        # skipped for want of a PDF. Its number is the true one.
+        self.total = max(1, total)
+        self.current = book
+        self.phase = "done" if what.startswith("done") else "reading"
+        # A book being read is not a book finished — the bar reaches idx only
+        # once that book reports done, so it never runs ahead of the work.
+        self.done = idx if self.phase == "done" else idx - 1
 
     @property
     def fraction(self) -> float:
         return self.done / self.total
 
     def label(self) -> str:
+        if not self.current:
+            return "starting"
         if self.done >= self.total:
             return "finishing up"
-        return f"{self.current or 'starting'}  ({self.done}/{self.total})"
+        return f"{self.current} — {self.phase}  ({self.done}/{self.total})"

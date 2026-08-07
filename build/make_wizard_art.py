@@ -151,6 +151,15 @@ def build(src_path: Path) -> None:
         panel.paste(fig, (2, 0), fig)
         panel.save(OUT / f"sidebar-{w}x{h}.bmp")
 
+    # A plain white tile, stretched behind the figure to fill its column.
+    #
+    # This exists because a TPanel could not do the job: Inno's panels are
+    # theme-drawn, so assigning Color := clWhite is silently ignored and the
+    # column stayed the form's grey above the figure's own white background --
+    # a grey box floating over the page. A TBitmapImage always paints what it
+    # is given, so the column is white for certain.
+    Image.new("RGB", (8, 8), PAGE_BG).save(OUT / "sidebar-bg.bmp")
+
     made = sorted(p.name for p in OUT.glob("*"))
     print(f"wrote {len(made)} files to {OUT}")
     for m in made:

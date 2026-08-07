@@ -104,12 +104,13 @@ Type: filesandordirs; Name: "{app}\tools\__pycache__"
 WelcomeLabel2=This installs the Catalog Builder, which turns Shadowrun PDFs you own into a Foundry VTT compendium.%n%nNo game content is included. You supply the books.
 
 [Code]
-{ The runner stands full height down the LEFT of every page, and the wizard's
-  own controls are moved right to make room.
+{ The runner stands down the LEFT of every page, his boots level with the
+  bottom of the page's content box, and the wizard's own controls are moved
+  right to make room for him.
 
   Inno only draws WizardImageFile on the welcome and finished pages, and only
   inside a fixed box. To have the figure present throughout, a TBitmapImage is
-  parented to the form and every other control is shifted by its width.
+  parented to the form itself and every other control is shifted by its width.
 
   "Transparent" here means composited onto the wizard's own white: a
   TBitmapImage created in code has no alpha channel, so a PNG cutout would
@@ -117,14 +118,13 @@ WelcomeLabel2=This installs the Catalog Builder, which turns Shadowrun PDFs you 
   to get the same result.                                                     }
 
 var
-  Runner: TBitmapImage;
-  Backing: TPanel;
+  Runner, Backing: TBitmapImage;
 
 function SidebarFile(): String;
 var
   W: Integer;
 begin
-  { pick the render closest to the display scaling, then let it scale DOWN —
+  { pick the render closest to the display scaling, then let it scale DOWN --
     enlarging a bitmap softens it, reducing one does not }
   W := ScaleY(420);
   if W >= 780 then Result := 'sidebar-686x840.bmp'
@@ -133,9 +133,25 @@ begin
   else Result := 'sidebar-345x420.bmp';
 end;
 
+function AbsTop(C: TControl): Integer;
+var
+  P: TControl;
+begin
+  { A control's Top is relative to its PARENT, and Inno nests the page controls
+    several levels down (form -> notebook -> page -> control). Walking up to
+    the form is what turns that into the y the figure has to line up with. }
+  Result := 0;
+  P := C;
+  while (P <> nil) and (P <> WizardForm) do
+  begin
+    Result := Result + P.Top;
+    P := P.Parent;
+  end;
+end;
+
 procedure ShiftRight(C: TControl; By: Integer);
 begin
-  { Only controls parented DIRECTLY to the form. Inno nests some of these —
+  { Only controls parented DIRECTLY to the form. Inno nests some of these --
     shifting a parent and then its child moves the child twice, which is how
     the text ended up starting at roughly double the figure's width with a
     band of dead white between the two. }
@@ -148,38 +164,42 @@ end;
 
 procedure InitializeWizard();
 var
-  ArtW, ArtH, MaxW, Shift: Integer;
+  ArtW, ArtH, MaxW, Shift, Overlap, TextBottom, ColumnBottom: Integer;
   F: String;
 begin
   F := SidebarFile();
   ExtractTemporaryFile(F);
+  ExtractTemporaryFile('sidebar-bg.bmp');
 
-  { The panel is sized FROM the bitmap so the figure fills the height with
-    nothing cropped and no dead space. A fixed width cannot do both: too narrow
-    and the figure is squeezed and clipped, too wide and it floats in a column
-    of white. Capped at a third of the screen so it cannot swallow the window
-    on a small display. }
-  { A white panel behind the figure, full height. Without it the column above
-    the figure is the form's own grey, which reads as an empty box rather than
-    as part of the page. The figure is composited onto white, so the two meet
-    invisibly. }
-  Backing := TPanel.Create(WizardForm);
+  { Both anchors are READ from real controls rather than guessed at, so they
+    hold at any display scaling: the bottom of the licence box, which the
+    figure's boots line up with, and the rule above the buttons, which the
+    white column stops at so the button strip keeps the form's own grey. }
+  TextBottom := AbsTop(WizardForm.LicenseMemo) + WizardForm.LicenseMemo.Height;
+  ColumnBottom := AbsTop(WizardForm.Bevel);
+
+  { The white column the figure stands in.
+    A TBitmapImage, NOT a TPanel: Inno's panels are theme-drawn, so assigning
+    Color := clWhite is quietly ignored and the column stayed the form's grey
+    above the figure's own white background -- which is the grey box that kept
+    appearing in the top-left corner. A bitmap always paints what it is given. }
+  Backing := TBitmapImage.Create(WizardForm);
   Backing.Parent := WizardForm;
-  Backing.BevelOuter := bvNone;
-  Backing.Color := clWhite;
+  Backing.Bitmap.LoadFromFile(ExpandConstant('{tmp}\sidebar-bg.bmp'));
+  Backing.Stretch := True;
   Backing.Left := 0;
   Backing.Top := 0;
-  Backing.Height := WizardForm.ClientHeight;
-  Backing.Anchors := [akLeft, akTop, akBottom];
+  Backing.Height := ColumnBottom;
 
   Runner := TBitmapImage.Create(WizardForm);
   Runner.Parent := WizardForm;
   Runner.Bitmap.LoadFromFile(ExpandConstant('{tmp}\') + F);
   Runner.Stretch := True;
 
-  { width follows the bitmap's own aspect at the wizard's height, so the figure
-    fills the height without being distorted or cropped }
-  ArtH := WizardForm.ClientHeight;
+  { Width follows the bitmap's OWN aspect, so the figure is never stretched.
+    Capped twice -- by a share of the window, and by the height available above
+    the licence box -- and whichever bites first decides the other dimension. }
+  ArtH := TextBottom;
   ArtW := (Runner.Bitmap.Width * ArtH) div Runner.Bitmap.Height;
   MaxW := (WizardForm.Width * 2) div 5;
   if ArtW > MaxW then
@@ -189,19 +209,21 @@ begin
   end;
 
   Backing.Width := ArtW;
-  Backing.Height := WizardForm.ClientHeight;
+
   Runner.Left := 0;
-  Runner.Top := WizardForm.ClientHeight - ArtH;
   Runner.Width := ArtW;
   Runner.Height := ArtH;
-  Runner.Anchors := [akLeft, akBottom];
+  Runner.Top := TextBottom - ArtH;     { boots level with the licence box }
+  Runner.Anchors := [akLeft, akTop];
 
-  { How far the wizard's own controls move over.
-    Deliberately LESS than the figure's width, so he stands ON the page's white
-    rather than in a column of his own beside it — which is what was asked for,
-    and it also stops a wide figure pushing the text off the right of a small
-    screen. He is composited onto white, so the overlap is invisible. }
-  Shift := (ArtW * 62) div 100;
+  { How far the wizard's own controls move over. Deliberately a little LESS
+    than the figure's width, so he stands ON the page rather than in a column
+    beside it. The overlap is taken out of the shift, not out of the page's own
+    text inset, so what he covers is the empty left margin -- no label, no
+    licence box and no radio button ends up underneath him. }
+  Overlap := ScaleX(40);
+  Shift := ArtW - Overlap;
+  if Shift < 0 then Shift := 0;
 
   WizardForm.Width := WizardForm.Width + Shift;
   WizardForm.Left := WizardForm.Left - (Shift div 2);
@@ -212,17 +234,15 @@ begin
   ShiftRight(WizardForm.Bevel, Shift);
   ShiftRight(WizardForm.MainPanel, Shift);
 
-  { the welcome and finished pages carry their own image; it is redundant now }
+  { the welcome and finished pages carry their own copy of the figure; it is
+    redundant once he is on every page }
   WizardForm.WizardBitmapImage.Visible := False;
   WizardForm.WizardBitmapImage2.Visible := False;
-  { Inno's own box-and-disc mark, top right. Removing the
-    WizardSmallImageFile line does not remove the image -- it falls back
-    to the built-in one. It has to be hidden. }
+  { Inno's own box-and-disc mark, top right. Removing the WizardSmallImageFile
+    line does not remove it -- it falls back to the built-in one. }
   WizardForm.WizardSmallBitmapImage.Visible := False;
 
-  { the figure sits above its backing panel, both behind the wizard's controls }
+  { white column behind everything, figure in front of everything }
   Backing.SendToBack();
   Runner.BringToFront();
-  Runner.SendToBack();
-  Backing.SendToBack();
 end;

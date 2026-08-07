@@ -37,6 +37,7 @@ from extractor.commlink6_convert import to_item
 from extractor.identity import IdLock, stamp_catalog_ids
 from extractor.ingest import ingest_book, load_library, load_registry, write_library
 from extractor.ownership import plan_import
+from extractor.quiet import quiet_pdf_noise
 from extractor.reconcile import reconcile_library
 
 def import_commlink6(data_root: _P, book: str, jar_book: str, jar: _P,
@@ -108,6 +109,7 @@ def _reconcile_book(data_root: _P, book: str, before: dict,
 
 
 def run(data_root: _P, jar: _P | None, only: str | None, apply: bool) -> int:
+    quiet_pdf_noise()          # or the log is all FontBBox and nothing else
     plan = plan_import(data_root, jar)
     if only:
         plan = [p for p in plan if p["book"] == only]
@@ -133,17 +135,25 @@ def run(data_root: _P, jar: _P | None, only: str | None, apply: bool) -> int:
 
     reg = load_registry(data_root)
     totals = collections.Counter()
-    for p in plan:
+    todo = [p for p in plan if p["source"] != "skip"]
+    for n, p in enumerate(todo, 1):
         book = p["book"]
-        if p["source"] == "skip":
-            continue
+        # A COMPLETE line BEFORE the slow part.
+        #
+        # This used to be printed with end="" ahead of the PDF pass, so the
+        # newline that ends it only arrived once the book was finished. Anything
+        # reading this stream a line at a time -- which is what the builder's
+        # log window does -- therefore saw nothing at all while a book was being
+        # read, and a book takes minutes. The import looked hung when it was
+        # working perfectly.
+        print(f"[{n}/{len(todo)}] {book} reading", flush=True)
         try:
             if p["source"] == "both":
                 st = import_commlink6(data_root, book, p["jarBook"], jar)
                 totals["jarItems"] += st["jarItems"]
-                print(f"  {book:20} commlink6 {st['jarItems']:>5} items", end="")
+                head = f"commlink6 {st['jarItems']:>5} items"
             else:
-                print(f"  {book:20} pdf-only", end="")
+                head = "pdf-only"
             # the PDF pass fills what the jar lacks and always supplies prose.
             # ingest_book merges into the same library, so reconciliation
             # happens against rows already carrying meta.source == "commlink6".
@@ -153,12 +163,14 @@ def run(data_root: _P, jar: _P | None, only: str | None, apply: bool) -> int:
             totals["new"] += st.get("new", 0)
             totals["descriptions"] += st.get("descriptions", 0)
             totals["conflicts"] += rec["conflicts"]
-            print(f"  +pdf new={st.get('new', 0)} desc={st.get('descriptions', 0)}"
-                  f" conflicts={rec['conflicts']}")
+            print(f"[{n}/{len(todo)}] {book} done  {head}"
+                  f"  +pdf new={st.get('new', 0)} desc={st.get('descriptions', 0)}"
+                  f" conflicts={rec['conflicts']}", flush=True)
         except SystemExit as e:
-            print(f"  {book:20} SKIP: {e}")
+            print(f"[{n}/{len(todo)}] {book} done  SKIP: {e}", flush=True)
         except Exception as e:  # one bad book must not lose the whole run
-            print(f"  {book:20} ERROR: {type(e).__name__}: {e}")
+            print(f"[{n}/{len(todo)}] {book} done  "
+                  f"ERROR: {type(e).__name__}: {e}", flush=True)
 
     # every record leaves with a stable catalog id
     minted = 0
