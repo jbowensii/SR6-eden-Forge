@@ -2,7 +2,8 @@ import { mkdtempSync, readFileSync, mkdirSync, readdirSync, writeFileSync } from
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { SEGMENT, StoreError, readCategory, tree, writeItem } from "../server/store.mjs";
+import { SEGMENT, StoreError, assignRender, readCategory, tree, writeItem } from "../server/store.mjs";
+import { assignIcon } from "../server/iconLibrary.mjs";
 
 const ITEM = {
   id: "example_autopistol",
@@ -88,5 +89,43 @@ describe("store", () => {
     });
     const good = entries.find((e) => e.category === "weapons_firearms");
     expect(good).toMatchObject({ book: "corebook", domain: "gear", category: "weapons_firearms", items: 1 });
+  });
+});
+
+describe("artwork survives a re-import", () => {
+  // Assigning a picture is a manual choice like editing a field, so it has to
+  // land in _corrections. It did not: assignRender and assignIcon wrote
+  // item.img straight to the category file and nowhere else, and the next
+  // import rewrote that file from the books — so every picture chosen by hand
+  // vanished, silently, with no record it had ever been made.
+  it("records a correction when book art is assigned", () => {
+    const root = seed();
+    mkdirSync(join(root, "_assets", "corebook", "_inbox"), { recursive: true });
+    writeFileSync(join(root, "_assets", "corebook", "_inbox", "pic.png"), "x");
+
+    assignRender(root, "corebook", "gear", "weapons_firearms",
+                 ITEM.id, "corebook/_inbox/pic.png");
+
+    const rec = JSON.parse(readFileSync(
+      join(root, "_corrections", "gear", `${ITEM.id}.json`), "utf8"));
+    expect(rec.id).toBe(ITEM.id);
+    expect(rec.img).toBe(`corebook/${ITEM.id}.png`);
+  });
+
+  it("records a correction when an icon from the user's sets is assigned", () => {
+    const root = seed();
+    const lib = mkdtempSync(join(tmpdir(), "icons-"));
+    mkdirSync(join(lib, "set"), { recursive: true });
+    writeFileSync(join(lib, "set", "pistol.png"), "x");
+    mkdirSync(join(root, "_assets", "corebook", "lib"), { recursive: true });
+
+    assignIcon(root, lib, {
+      book: "corebook", domain: "gear", category: "weapons_firearms",
+      itemId: ITEM.id, libraryPath: "set/pistol.png", mode: "item",
+    });
+
+    const rec = JSON.parse(readFileSync(
+      join(root, "_corrections", "gear", `${ITEM.id}.json`), "utf8"));
+    expect(rec.img).toBe(`corebook/lib/${ITEM.id}.png`);
   });
 });

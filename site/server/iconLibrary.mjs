@@ -1,6 +1,6 @@
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { extname, join, relative, resolve, sep } from "node:path";
-import { SEGMENT, StoreError, rewriteDomain } from "./store.mjs";
+import { SEGMENT, StoreError, recordCorrection, rewriteDomain } from "./store.mjs";
 
 const EXTS = new Set([".png", ".webp", ".svg", ".jpg", ".jpeg"]);
 
@@ -94,13 +94,19 @@ export function assignIcon(dataRoot, libraryRoot, { book, domain, category, item
   if (mode === "item") {
     const img = `${book}/lib/${itemId}${ext}`;
     copyFileSync(source, join(destDir, `${itemId}${ext}`));
+    let chosen = null;
     const updated = rewriteDomain(dataRoot, book, domain, (item, cat) => {
       if (cat === category && item.id === itemId) {
         item.img = img;
+        chosen = item;
         return true;
       }
       return false;
     });
+    // Recorded like any other manual edit. An icon picked from the user's own
+    // sets was written straight to the category file and nowhere else, so the
+    // next import replaced that file and the choice was gone.
+    if (chosen) recordCorrection(dataRoot, domain, category, chosen);
     return { img, updated };
   }
 

@@ -270,6 +270,11 @@ export function assignRender(dataRoot, book, domain, category, itemId, imagePath
   const tmp = `${path}.tmp`;
   writeFileSync(tmp, JSON.stringify(payload, null, 2) + "\n", "utf8");
   renameSync(tmp, path);
+  // Artwork is a manual choice like any other, so it belongs in the corrections
+  // layer. Without this the next import silently wiped every picture assigned
+  // by hand: the category file is rewritten from the books, and nothing
+  // remembered what had been chosen.
+  recordCorrection(dataRoot, domain, category, item);
   return { img: rel };
 }
 
