@@ -209,6 +209,7 @@ def run_post_phases(data_root: _P, phases, on_line=print) -> list[str]:
     here = _P(__file__).resolve().parent
     env = {**os.environ, "SR6_DATA": str(data_root), "PYTHONUNBUFFERED": "1"}
     failed: list[str] = []
+    frozen = getattr(sys, "frozen", False)
 
     for n, (label, script, args) in enumerate(phases, 1):
         path = here / script
@@ -216,8 +217,22 @@ def run_post_phases(data_root: _P, phases, on_line=print) -> list[str]:
             on_line(f"[{n}/{len(phases)}] {script} missing — skipped")
             continue
         on_line(f"[{n}/{len(phases)}] {label}")
-        r = subprocess.run([sys.executable, "-u", str(path), *args],
-                           cwd=str(data_root.parent), env=env)
+
+        if frozen:
+            # sys.executable is SR6CatalogBuilder.exe, not python.exe. Handing
+            # it "-u somescript.py" does not run the script: the exe does not
+            # recognise those arguments, falls through to its entry point and
+            # OPENS ANOTHER COPY OF THE WINDOW. Sixteen phases meant sixteen
+            # windows and sixteen phases that silently did nothing.
+            #
+            # The bundle re-invokes itself through this marker instead, which
+            # dispatches to the module by name.
+            argv = [sys.executable, "--run-pipeline",
+                    f"tools.{script[:-3]}", *args]
+        else:
+            argv = [sys.executable, "-u", str(path), *args]
+
+        r = subprocess.run(argv, cwd=str(data_root.parent), env=env)
         if r.returncode:
             # one bad phase must not lose the rest, but it must be VISIBLE
             on_line(f"    !! {script} exited {r.returncode}")

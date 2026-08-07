@@ -61,12 +61,22 @@ def main() -> int:
         module_name = sys.argv[2]
         # the module parses sys.argv itself, so present the argv it expects
         sys.argv = [module_name, *sys.argv[3:]]
-        mod = importlib.import_module(module_name)
+        try:
+            mod = importlib.import_module(module_name)
+        except SystemExit as e:
+            # a top-level script that finished by raising SystemExit
+            return 0 if e.code in (None, 0) else int(e.code)
+
         fn = getattr(mod, "main", None)
         if fn is None:
-            print(f"{module_name} has no main()", file=sys.stderr)
-            return 2
-        result = fn()
+            # Not an error. Most pipeline phases are plain scripts that do
+            # their work at module level, so importing them HAS run them —
+            # treating that as a failure would report every phase as broken.
+            return 0
+        try:
+            result = fn()
+        except SystemExit as e:
+            return 0 if e.code in (None, 0) else int(e.code)
         return 0 if result is None else int(result)
 
     return _load_app().main()

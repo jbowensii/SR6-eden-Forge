@@ -246,3 +246,171 @@ def test_the_build_resolves_npm_rather_than_calling_it_bare():
            / "build" / "build_release.py").read_text(encoding="utf-8")
     assert 'shutil.which("npm")' in src
     assert '["npm"' not in src and "['npm'" not in src
+
+
+def test_frozen_builds_never_hand_a_script_path_to_the_exe(tmp_path, monkeypatch):
+    """The fork bomb: sys.executable is the GUI exe, not python.
+
+    Handing SR6CatalogBuilder.exe "-u somescript.py" does not run the script.
+    The exe does not recognise those arguments, falls through to its entry
+    point and opens ANOTHER COPY OF THE WINDOW — sixteen phases meant sixteen
+    windows and sixteen phases that silently did nothing. Invisible from the
+    repo, where sys.executable really is python.
+    """
+    seen = {}
+
+    class _R:
+        returncode = 0
+
+    def fake_run(argv, cwd=None, env=None):
+        seen["argv"] = argv
+        return _R()
+
+    import subprocess
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    monkeypatch.setattr(import_library.sys, "frozen", True, raising=False)
+
+    data = tmp_path / "ws" / "data"
+    data.mkdir(parents=True)
+    import_library.run_post_phases(
+        data, [("x", "apply_corrections.py", ["--apply"])],
+        on_line=lambda _s: None)
+
+    argv = seen["argv"]
+    assert "--run-pipeline" in argv
+    assert "tools.apply_corrections" in argv
+    assert not any(str(a).endswith(".py") for a in argv), \
+        "a frozen build must not be given a script path"
+    assert "--apply" in argv
+
+
+def test_source_runs_still_call_the_script_directly(tmp_path, monkeypatch):
+    seen = {}
+
+    class _R:
+        returncode = 0
+
+    import subprocess
+    monkeypatch.setattr(subprocess, "run",
+                        lambda argv, cwd=None, env=None: (seen.update(argv=argv), _R())[1])
+    monkeypatch.setattr(import_library.sys, "frozen", False, raising=False)
+
+    data = tmp_path / "ws" / "data"
+    data.mkdir(parents=True)
+    import_library.run_post_phases(
+        data, [("x", "apply_corrections.py", [])], on_line=lambda _s: None)
+
+    assert any(str(a).endswith("apply_corrections.py") for a in seen["argv"])
+    assert "--run-pipeline" not in seen["argv"]
+
+
+def test_a_script_without_main_is_not_reported_as_broken():
+    """Most phases do their work at import; no main() is normal, not a failure."""
+    src = (Path(__file__).resolve().parent.parent / "build" / "catalog_builder"
+           / "__main__.py").read_text(encoding="utf-8")
+    assert "has no main()" not in src, \
+        "importing a top-level script must count as having run it"
+
+
+# ---------- the frozen build, exercised for real ----------
+#
+# The unit tests above assert the COMMAND SHAPE with sys.frozen faked. That is
+# the root cause and worth pinning, but the bug itself only ever appeared in a
+# real bundle: from the repo sys.executable is python.exe and the old command
+# line was perfectly correct. So this runs a phase through an actual frozen exe
+# and checks the two things that went wrong — did it do the work, and did it
+# open a window.
+
+def _staged_frozen_exe():
+    """The exe THIS repo just built, with the pipeline staged beside it.
+
+    Deliberately not the installed copy: that is whatever the user last
+    installed, so the test would pass or fail on someone else's build. The
+    installer places tools/ and extractor/ next to the exe, and the frozen
+    entry point adds its own directory to sys.path, so the layout is
+    reproduced here with directory junctions — instant, where copying the
+    156 MB bundle per run would not be.
+
+    :returns: ``(exe, [things to remove afterwards])``, or ``(None, [])``.
+    """
+    import subprocess as sp
+
+    root = Path(__file__).resolve().parent.parent
+    base = root / "build" / "dist" / "SR6CatalogBuilder"
+    exe = base / "SR6CatalogBuilder.exe"
+    if not exe.is_file():
+        return None, []
+
+    made = []
+    for name in ("tools", "extractor", "schemas"):
+        link = base / name
+        if link.exists():
+            continue
+        r = sp.run(["cmd", "/c", "mklink", "/J", str(link), str(root / name)],
+                   capture_output=True, text=True)
+        if r.returncode != 0:
+            for m in made:
+                sp.run(["cmd", "/c", "rmdir", str(m)], capture_output=True)
+            return None, []
+        made.append(link)
+    return exe, made
+
+
+def _sr6_processes():
+    import subprocess as sp
+    out = sp.run(["powershell", "-NoProfile", "-Command",
+                  "@(Get-Process SR6CatalogBuilder -ErrorAction SilentlyContinue).Count"],
+                 capture_output=True, text=True)
+    try:
+        return int((out.stdout or "0").strip())
+    except ValueError:
+        return 0
+
+
+def test_a_frozen_phase_runs_its_work_and_opens_no_window(tmp_path):
+    """Regression: sixteen phases opened sixteen windows and did nothing.
+
+    sys.executable in a bundle is SR6CatalogBuilder.exe. Handing it
+    "-u somescript.py" does not run the script — the exe ignores arguments it
+    does not recognise, falls through to its entry point, and shows the GUI.
+    """
+    exe, staged = _staged_frozen_exe()
+    if exe is None:
+        pytest.skip("no frozen build in build/dist — run build_release.py first")
+
+    data = tmp_path / "data"
+    (data / "corebook" / "gear").mkdir(parents=True)
+    (data / "_corrections" / "gear").mkdir(parents=True)
+    (data / "corebook" / "gear" / "electronics.json").write_text(json.dumps({
+        "book": "corebook", "domain": "gear", "category": "electronics",
+        "items": [{"id": "w", "name": "Widget",
+                   "system": {"description": "ORIGINAL"},
+                   "meta": {"book": "corebook", "source": "pdf",
+                            "qaStatus": "extracted"}}]}), encoding="utf-8")
+    (data / "_corrections" / "gear" / "w.json").write_text(json.dumps({
+        "domain": "gear", "category": "electronics", "id": "w",
+        "correctedAt": "2026-08-07T00:00:00Z", "name": "Widget",
+        "system": {"description": "CORRECTED"}, "qaStatus": "reviewed"}),
+        encoding="utf-8")
+
+    import os
+    import subprocess as sp
+
+    before = _sr6_processes()
+    try:
+        r = sp.run([str(exe), "--run-pipeline", "tools.apply_corrections",
+                    "--apply"],
+                   cwd=str(tmp_path), capture_output=True, text=True,
+                   timeout=180, env={**os.environ, "SR6_DATA": str(data)})
+    finally:
+        for link in staged:
+            sp.run(["cmd", "/c", "rmdir", str(link)], capture_output=True)
+    after = _sr6_processes()
+
+    assert r.returncode == 0, r.stdout + r.stderr
+    # it did the work
+    got = json.loads((data / "corebook" / "gear" / "electronics.json")
+                     .read_text(encoding="utf-8"))
+    assert got["items"][0]["system"]["description"] == "CORRECTED"
+    # and it did not spawn another copy of the app
+    assert after <= before, f"a phase spawned {after - before} extra process(es)"
