@@ -37,6 +37,7 @@ from extractor.commlink6_convert import to_item
 from extractor.identity import IdLock, stamp_catalog_ids
 from extractor.ingest import (CURATED, LIBRARY, ingest_book, load_library,
                               load_registry, write_library)
+from extractor import authority
 from extractor.bookprep import default_workers, prepare_books
 from extractor.ownership import plan_import
 from extractor.quiet import quiet_pdf_noise
@@ -320,8 +321,27 @@ def run(data_root: _P, jar: _P | None, only: str | None, apply: bool,
     if post:
         phases = list(POST_PHASES) + (list(GRAPHICS_PHASES) if graphics else [])
         print(f"\nfinishing the library — {len(phases)} phase(s)", flush=True)
+
+        # Commlink6 is the source of truth and these phases predate it: none of
+        # them checks where a row came from, and rebuild_descriptions assigns
+        # description unconditionally — writing "" when the page yields
+        # nothing, which ERASES a Commlink6 description rather than merely
+        # replacing it. So every non-empty Commlink6 field is recorded first
+        # and put back afterwards. A field Commlink6 left empty keeps whatever
+        # a phase filled in: enhance, never clobber.
+        guarded = authority.snapshot(data_root)
+        print(f"    guarding {len(guarded)} Commlink6 record(s)", flush=True)
+
         phase_failures = run_post_phases(
             data_root, phases, on_line=lambda s: print(s, flush=True))
+
+        kept = authority.restore(data_root, guarded)
+        if kept["restored"]:
+            print(f"    restored {kept['restored']} Commlink6 value(s) on "
+                  f"{kept['items']} item(s) that a later phase overwrote: "
+                  f"{kept['fields']}", flush=True)
+        else:
+            print("    no Commlink6 values were overwritten", flush=True)
 
     # every record leaves with a stable catalog id
     minted = 0

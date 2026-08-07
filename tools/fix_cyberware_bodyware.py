@@ -25,6 +25,10 @@ def target(name):
 def broken(sys_):
     return sys_.get("type") == "CYBER_BODYWARE" and not sys_.get("subtype")
 
+# absent when the user owns no book with cyberware
+if not _P(LIVE).is_file():
+    print(f"{LIVE} not present — nothing to repair")
+    raise SystemExit(0)
 live = json.load(open(LIVE, encoding="utf-8"))
 fixed = []
 for it in live["items"]:

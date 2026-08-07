@@ -22,8 +22,13 @@ APPLY = "--apply" in sys.argv
 
 _files = {}
 def F(name):
+    # A category file only exists if the user owns a book that fills it.
+    # Crashing here meant a smaller library — anyone who owns a subset of
+    # the books — could not finish an import at all.
     if name not in _files:
-        _files[name] = json.load(open(DATA / f"{name}.json", encoding="utf-8"))
+        p = DATA / f"{name}.json"
+        _files[name] = (json.load(open(p, encoding="utf-8")) if p.is_file()
+                        else {"items": []})
     return _files[name]
 
 # body_shop drugs that are really TOXINS (damage-dealing), everything else = DRUG

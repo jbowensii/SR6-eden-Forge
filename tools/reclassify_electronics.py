@@ -37,7 +37,12 @@ RULES = [
 
 
 def load(name):
+    # A category file only exists if the user owns a book that fills it.
+    # Crashing here meant a smaller library — anyone who owns a subset of
+    # the books — could not finish an import at all.
     p = DATA / f"{name}.json"
+    if not p.is_file():
+        return p, {"items": []}          # same shape, so callers need no branch
     return p, json.load(open(p, encoding="utf-8"))
 
 

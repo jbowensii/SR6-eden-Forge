@@ -38,7 +38,10 @@ REFILE = {
 _files = {}
 def F(name):
     if name not in _files:
-        _files[name] = json.load(open(DATA / f"{name}.json", encoding="utf-8"))
+        p = DATA / f"{name}.json"
+        # absent when the user owns no book that fills this category
+        _files[name] = (json.load(open(p, encoding="utf-8")) if p.is_file()
+                        else {"items": []})
     return _files[name]
 
 src = F("weapons_firearms")

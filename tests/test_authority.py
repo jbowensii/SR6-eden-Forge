@@ -1,0 +1,125 @@
+"""Commlink6 is the source of truth: enhance it, never overwrite it.
+
+The post-merge phases were written when the library came only from PDFs and
+none of them checks a row's provenance. rebuild_descriptions in particular does
+
+    item["system"]["description"] = new        # new may be ""
+
+so a Commlink6 description is not just replaced when the page yields nothing —
+it is erased. These tests pin the guard that surrounds those phases.
+"""
+from __future__ import annotations
+
+import json
+
+from extractor.authority import is_authoritative, restore, snapshot
+
+
+def _lib(root, items, domain="gear", cat="electronics"):
+    d = root / "corebook" / domain
+    d.mkdir(parents=True, exist_ok=True)
+    (d / f"{cat}.json").write_text(
+        json.dumps({"book": "corebook", "domain": domain,
+                    "category": cat, "items": items}),
+        encoding="utf-8")
+    return d / f"{cat}.json"
+
+
+def _cl6(id_, **system):
+    return {"id": id_, "name": id_, "system": system,
+            "meta": {"book": "corebook", "source": "commlink6"}}
+
+
+def _pdf(id_, **system):
+    return {"id": id_, "name": id_, "system": system,
+            "meta": {"book": "corebook", "source": "pdf"}}
+
+
+def test_an_erased_commlink6_description_is_put_back(tmp_path):
+    """The exact failure: a phase blanks it because the page had nothing."""
+    f = _lib(tmp_path, [_cl6("a", description="From Commlink6.", type="ELECTRONICS")])
+    snap = snapshot(tmp_path)
+
+    doc = json.loads(f.read_text(encoding="utf-8"))
+    doc["items"][0]["system"]["description"] = ""        # rebuild_descriptions
+    f.write_text(json.dumps(doc), encoding="utf-8")
+
+    stats = restore(tmp_path, snap)
+    assert stats["restored"] == 1
+    back = json.loads(f.read_text(encoding="utf-8"))["items"][0]
+    assert back["system"]["description"] == "From Commlink6."
+
+
+def test_an_overwritten_commlink6_type_is_put_back(tmp_path):
+    f = _lib(tmp_path, [_cl6("a", type="CYBERWARE", subtype="HEADWARE")])
+    snap = snapshot(tmp_path)
+
+    doc = json.loads(f.read_text(encoding="utf-8"))
+    doc["items"][0]["system"]["type"] = "ELECTRONICS"    # fix_gear_types
+    doc["items"][0]["system"]["subtype"] = "OTHER"
+    f.write_text(json.dumps(doc), encoding="utf-8")
+
+    restore(tmp_path, snap)
+    got = json.loads(f.read_text(encoding="utf-8"))["items"][0]["system"]
+    assert got["type"] == "CYBERWARE"
+    assert got["subtype"] == "HEADWARE"
+
+
+def test_a_gap_commlink6_left_empty_is_KEPT(tmp_path):
+    """The other half of the rule: filling a gap is enhancement, and stands."""
+    f = _lib(tmp_path, [_cl6("a", description="", type="ELECTRONICS")])
+    snap = snapshot(tmp_path)
+
+    doc = json.loads(f.read_text(encoding="utf-8"))
+    doc["items"][0]["system"]["description"] = "Read from the page."
+    f.write_text(json.dumps(doc), encoding="utf-8")
+
+    stats = restore(tmp_path, snap)
+    assert stats["restored"] == 0
+    kept = json.loads(f.read_text(encoding="utf-8"))["items"][0]
+    assert kept["system"]["description"] == "Read from the page."
+
+
+def test_pdf_rows_are_left_entirely_alone(tmp_path):
+    """The guard protects the authority, not everything."""
+    f = _lib(tmp_path, [_pdf("a", description="From the page.")])
+    snap = snapshot(tmp_path)
+    assert snap == {}
+
+    doc = json.loads(f.read_text(encoding="utf-8"))
+    doc["items"][0]["system"]["description"] = "Rewritten by a later phase."
+    f.write_text(json.dumps(doc), encoding="utf-8")
+
+    assert restore(tmp_path, snap)["restored"] == 0
+    got = json.loads(f.read_text(encoding="utf-8"))["items"][0]
+    assert got["system"]["description"] == "Rewritten by a later phase."
+
+
+def test_zero_and_false_count_as_real_values(tmp_path):
+    """A price of 0 is something Commlink6 said, not an empty field."""
+    f = _lib(tmp_path, [_cl6("a", price=0, rating=False)])
+    snap = snapshot(tmp_path)
+    assert snap["a"]["price"] == 0
+
+    doc = json.loads(f.read_text(encoding="utf-8"))
+    doc["items"][0]["system"]["price"] = 9999
+    f.write_text(json.dumps(doc), encoding="utf-8")
+
+    restore(tmp_path, snap)
+    assert json.loads(f.read_text(encoding="utf-8"))["items"][0]["system"]["price"] == 0
+
+
+def test_the_guard_spans_every_domain_not_just_gear(tmp_path):
+    _lib(tmp_path, [_cl6("s1", description="Commlink6 spell text.")],
+         domain="spells", cat="combat")
+    _lib(tmp_path, [_cl6("q1", description="Commlink6 quality text.")],
+         domain="qualities", cat="positive")
+    snap = snapshot(tmp_path)
+    assert set(snap) == {"s1", "q1"}
+
+
+def test_is_authoritative_reads_the_provenance_stamp():
+    assert is_authoritative({"meta": {"source": "commlink6"}})
+    assert not is_authoritative({"meta": {"source": "pdf"}})
+    assert not is_authoritative({"meta": {}})
+    assert not is_authoritative({})

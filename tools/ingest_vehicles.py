@@ -212,9 +212,12 @@ if __name__ == "__main__":
     _HDR = re.compile(r"HAND\s+ACC(EL)?\b|PILOT\s+SENS")
     byname = {}
     # corebook tables (broad subtypes) first
-    for r in read_vehicles(reg["corebook"]["pdf"], range(301, 307)):
+    # corebook supplies the ruled vehicle tables; without it the stat-block
+    # pass below still runs over whatever books the user does own
+    core = (reg.get("corebook") or {}).get("pdf") or ""
+    for r in (read_vehicles(core, range(301, 307)) if _P(core).is_file() else []):
         byname[norm_base(r["name"])] = r
-    for r in read_vehicles_text(reg["corebook"]["pdf"], range(301, 307)):
+    for r in (read_vehicles_text(core, range(301, 307)) if _P(core).is_file() else []):
         byname.setdefault(norm_base(r["name"]), r)
     # every other book: stat-block vehicles (fine subtypes from parens)
     import pdfplumber as _pp
