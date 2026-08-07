@@ -12,7 +12,9 @@ from pathlib import Path as _P
 
 sys.path.insert(0, str(_P(__file__).resolve().parent.parent))
 from extractor.ingest import LIBRARY, load_registry
-from extractor.writeups import find_block, is_stat_line, read_book_lines
+from extractor.bookprep import env_workers, map_jobs
+from extractor.writeup_scan import scan_book
+from extractor.writeups import is_stat_line
 
 DATA = _P("data")
 APPLY = "--apply" in sys.argv
@@ -37,15 +39,49 @@ def main():
 
     counts = dict(book=0, notes=0, empty=0, skipped=0)
     dirty = set()
+
+    # ---- search the books, several at a time -------------------------------
+    # Building a book's line index is a full pdfplumber walk, ~25s on a big
+    # one, and fifty of those in series was twenty silent minutes -- long
+    # enough to be reasonably mistaken for a hang. The walk depends on nothing
+    # but the PDF, so it runs in workers; applying the results stays here,
+    # because that is the half that touches the shared library.
+    jobs = []
     for book, entries in sorted(by_book.items()):
-        meta = reg.get(book) or {}
-        pdf = meta.get("pdf", "")
-        lines = read_book_lines(pdf) if pdf and _P(pdf).is_file() else []
+        pdf = (reg.get(book) or {}).get("pdf", "")
+        jobs.append({
+            "book": book,
+            "pdf": pdf if pdf and _P(pdf).is_file() else "",
+            "wanted": [(it["id"], it["name"], it["meta"].get("page") or 0)
+                       for _f, it in entries if it["id"] not in CORR],
+        })
+
+    workers = env_workers()
+    print(f"searching {len(jobs)} book(s) with {workers} worker(s)", flush=True)
+
+    done = [0]
+
+    def landed(r):
+        done[0] += 1
+        if r.get("error"):
+            print(f"  {r.get('book', '?')}: {r['error']}", flush=True)
+        # the form the builder's progress label understands, so a long phase
+        # visibly moves instead of looking stopped
+        print(f"scanned {r.get('book', '?')}  ({done[0]}/{len(jobs)})", flush=True)
+
+    found = {}
+    for r in map_jobs(scan_book, jobs, workers, on_done=landed):
+        if r and r.get("book"):
+            found[r["book"]] = r.get("found") or {}
+
+    # ---- apply, in order, one library at a time ----------------------------
+    for book, entries in sorted(by_book.items()):
+        blocks = found.get(book, {})
         for f, it in entries:
             if it["id"] in CORR:
                 counts["skipped"] += 1
                 continue
-            new = find_block(it["name"], it["meta"].get("page") or 0, lines) if lines else None
+            new = blocks.get(it["id"])
             src = "book"
             if not new:
                 new = notes_prose(it)
@@ -55,7 +91,6 @@ def main():
                 dirty.add(f)
             it["system"]["description"] = new
             counts[src] += 1
-        print(f"{book:22} processed {len(entries)}", flush=True)
 
     if APPLY:
         for f in dirty:
@@ -73,4 +108,10 @@ def main():
 
 
 if __name__ == "__main__":
+    # Workers are started by spawn, which re-imports the main module. Without
+    # this guard every child would re-run this script from the top and start a
+    # search of its own.
+    import multiprocessing
+
+    multiprocessing.freeze_support()
     main()

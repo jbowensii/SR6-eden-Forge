@@ -414,3 +414,34 @@ def test_a_frozen_phase_runs_its_work_and_opens_no_window(tmp_path):
     assert got["items"][0]["system"]["description"] == "CORRECTED"
     # and it did not spawn another copy of the app
     assert after <= before, f"a phase spawned {after - before} extra process(es)"
+
+
+def test_the_description_phase_reports_progress_the_builder_understands():
+    """Twenty silent minutes reads as a hang.
+
+    The phase printed "<book> processed N", which the progress parser ignored,
+    so the longest step in the import showed nothing at all. It emits the
+    "scanned <book>  (k/N)" form the label already knows.
+    """
+    src = (Path(__file__).resolve().parent.parent
+           / "tools" / "rebuild_descriptions.py").read_text(encoding="utf-8")
+    assert 'print(f"scanned {r.get(' in src
+    assert "processed {len(entries)}" not in src, "the ignored form is back"
+
+
+def test_the_description_phase_scans_in_parallel_and_is_spawn_safe():
+    src = (Path(__file__).resolve().parent.parent
+           / "tools" / "rebuild_descriptions.py").read_text(encoding="utf-8")
+    assert "map_jobs(scan_book" in src
+    # spawn re-imports the main module; without the guard every child restarts
+    # the whole phase
+    assert 'if __name__ == "__main__":' in src
+    assert "freeze_support()" in src
+
+
+def test_the_worker_target_lives_in_a_module_not_the_script():
+    """A target defined in a script makes every spawned child re-run it."""
+    from extractor import writeup_scan
+
+    assert callable(writeup_scan.scan_book)
+    assert writeup_scan.scan_book.__module__ == "extractor.writeup_scan"
