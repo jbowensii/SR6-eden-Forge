@@ -140,10 +140,17 @@ def test_merge_commlink6_is_never_run_as_a_phase():
     assert "merge_commlink6.py" not in scripts
 
 
-def test_corrections_run_last():
-    """A manual fix outranks anything a reader inferred, so nothing may follow."""
+def test_corrections_are_not_a_post_phase():
+    """They must run AFTER the Commlink6 guard, not inside the guarded block.
+
+    The precedence chain is: your correction > Commlink6 > anything inferred.
+    Run inside POST_PHASES, the guard would fire afterwards and restore the
+    Commlink6 value straight over a manual edit — defending the authority from
+    the one source meant to outrank it.
+    """
     scripts = [s for _label, s, _args in import_library.POST_PHASES]
-    assert scripts[-1] == "apply_corrections.py"
+    assert "apply_corrections.py" not in scripts
+    assert import_library.CORRECTIONS_PHASE[1] == "apply_corrections.py"
 
 
 def test_descriptions_run_before_subtype_inference():
@@ -197,3 +204,32 @@ def test_a_failing_phase_is_reported_not_swallowed(tmp_path, monkeypatch):
 
     assert failed == ["apply_corrections.py"]
     assert any("exited 2" in ln for ln in lines)
+
+
+def test_the_workspace_owns_a_corrections_folder():
+    """Web-app edits land in the workspace, so the folder is part of it."""
+    from build.catalog_builder.settings import WORKSPACE_DIRS, ensure_workspace
+
+    assert "_corrections" in WORKSPACE_DIRS
+
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        ws = ensure_workspace(Path(d) / "ws")
+        assert (ws / "_corrections").is_dir()
+
+
+def test_the_review_app_is_told_where_the_library_is():
+    """Installed, the app's own data/ does not exist.
+
+    Without SR6_DATA the review app opened on an empty library and recorded
+    every edit into the installation directory, where the import would never
+    look for them.
+    """
+    src = (Path(__file__).resolve().parent.parent
+           / "site" / "server" / "index.mjs").read_text(encoding="utf-8")
+    assert "process.env.SR6_DATA" in src
+
+    app = (Path(__file__).resolve().parent.parent
+           / "build" / "catalog_builder" / "app.py").read_text(encoding="utf-8")
+    # passed to the node process that serves the review app
+    assert '"SR6_DATA": str(ws / "data")' in app

@@ -87,6 +87,11 @@ WORKSPACE_DIRS = {
     "icons": "drop icon sets here to assign in the review app",
     "art": "artwork lifted from the books, and anything you add",
     "_ids": "catalog id lockfile — keeps ids stable when you rename things",
+    # Every edit made in the review app is written here as one file per item,
+    # and the import re-applies them as its final phase — so a correction
+    # survives re-importing the book it came from. Created up front rather than
+    # on first write, so it is visible and obviously yours to back up.
+    "_corrections": "your edits from the review app; re-applied after every import",
 }
 
 

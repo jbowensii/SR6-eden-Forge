@@ -523,8 +523,13 @@ class App(tk.Tk):
             return
 
         self._write(f"=== starting the review app on {port}")
+        # SR6_DATA, or the review app reads the installation's own data/ — which
+        # does not exist — and records the user's edits there too, where the
+        # import would never find them.
+        ws = ensure_workspace(self.workspace_var.get().strip() or default_workspace())
         self.job = Job(["node", "site/server/index.mjs"], cwd=repo_root(),
-                       env={"PORT": str(port)}).start()
+                       env={"PORT": str(port),
+                            "SR6_DATA": str(ws / "data")}).start()
         self.after(120, self._pump)
         self._await_review(port, url, tries=0)
 

@@ -333,7 +333,9 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
   // files. Runs the same tool the CLI uses; fast (pure JSON overlay, no PDFs).
   app.post("/api/corrections/apply", (_req, res) => {
     const py = process.env.PYTHON || "python";
-    const child = spawn(py, ["-u", join("tools", "apply_corrections.py")], { cwd: repoRoot });
+    // same data root the server is serving, not whatever ./data resolves to
+    const child = spawn(py, ["-u", join("tools", "apply_corrections.py"), "--apply"],
+                        { cwd: repoRoot, env: { ...process.env, SR6_DATA: dataRoot } });
     let out = "";
     child.stdout.on("data", (b) => { out += b.toString(); });
     child.stderr.on("data", (b) => { const s = b.toString(); if (!/FontBBox|CropBox/.test(s)) out += s; });

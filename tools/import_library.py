@@ -178,9 +178,15 @@ POST_PHASES: list[tuple[str, str, list[str]]] = [
     ("Subtypes: firearms from source tables",
      "subtype_firearms_from_book.py", ["--apply"]),
     ("Subtypes: infer blank gear subtypes", "infer_gear_subtypes.py", ["--apply"]),
-    # LAST, always: a manual correction outranks anything a reader inferred
-    ("Re-apply manual corrections", "apply_corrections.py", ["--apply"]),
 ]
+
+#: Run alone, after everything else INCLUDING the Commlink6 guard.
+#:
+#: The precedence chain is: your correction > Commlink6 > anything a reader
+#: inferred. If this ran inside POST_PHASES the guard would fire afterwards and
+#: restore the Commlink6 value straight over a manual edit — protecting the
+#: authority from the one source that is meant to outrank it.
+CORRECTIONS_PHASE = ("Re-apply your corrections", "apply_corrections.py", ["--apply"])
 
 #: Slow, and it changes artwork rather than item counts, so it is opt-in.
 GRAPHICS_PHASES: list[tuple[str, str, list[str]]] = [
@@ -342,6 +348,23 @@ def run(data_root: _P, jar: _P | None, only: str | None, apply: bool,
                   f"{kept['fields']}", flush=True)
         else:
             print("    no Commlink6 values were overwritten", flush=True)
+
+        # Your edits, last of all — after the guard, so a manual correction
+        # outranks Commlink6 as well as everything derived. Skipped entirely
+        # when there is nothing to apply, so a fresh workspace says so rather
+        # than running a no-op and looking like it did something.
+        corrections = data_root / "_corrections"
+        pending = (sorted(corrections.rglob("*.json"))
+                   if corrections.is_dir() else [])
+        if pending:
+            print(f"\napplying {len(pending)} saved correction(s) from "
+                  f"{corrections}", flush=True)
+            phase_failures += run_post_phases(
+                data_root, [CORRECTIONS_PHASE],
+                on_line=lambda s: print(s, flush=True))
+        else:
+            print(f"\nno saved corrections in {corrections} — nothing to "
+                  f"re-apply", flush=True)
 
     # every record leaves with a stable catalog id
     minted = 0
