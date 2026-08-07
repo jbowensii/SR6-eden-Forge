@@ -116,8 +116,11 @@ def ask_workers(parent, settings) -> int | None:
     from tkinter import ttk
 
     a = advise()
-    start = int(settings.get("workers") or 0) or a["recommended"]
-    start = max(1, min(a["limit"], start))
+    # The recommendation, every time — NOT the last answer. What is safe
+    # depends on how much memory is free right now, and a number that was fine
+    # when nothing else was open is the wrong default on a busy machine. The
+    # previous choice is still saved, but it does not preselect itself.
+    start = max(1, min(a["limit"], a["recommended"]))
 
     try:
         from catalog_builder import theme

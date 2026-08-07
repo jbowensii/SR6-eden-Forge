@@ -130,3 +130,51 @@ def prepare_books(jobs: list[dict], workers: int, on_done=None) -> dict[str, dic
             if on_done:
                 on_done(r)
     return out
+
+
+def env_workers(default: int | None = None) -> int:
+    """How many books at once, as chosen in the builder's dialog.
+
+    The finishing phases are separate processes, so the number the user picked
+    has to reach them somehow; import_library puts it in SR6_WORKERS. Falls
+    back to the machine default rather than to one, because silently dropping
+    to a single core is what made those phases look hung.
+    """
+    raw = os.environ.get("SR6_WORKERS", "").strip()
+    try:
+        n = int(raw)
+    except ValueError:
+        n = 0
+    return n if n > 0 else (default or default_workers())
+
+
+def map_jobs(fn, jobs: list, workers: int, on_done=None) -> list:
+    """``fn(job)`` for every job, up to ``workers`` at a time, results in order.
+
+    ``fn`` must live in an importable module, not in a script: spawn re-imports
+    the module the function came from, and a script would re-execute itself.
+    """
+    if not jobs:
+        return []
+    if workers <= 1:
+        out = []
+        for j in jobs:
+            r = fn(j)
+            out.append(r)
+            if on_done:
+                on_done(r)
+        return out
+
+    ctx = multiprocessing.get_context("spawn")
+    results: dict[int, object] = {}
+    with cf.ProcessPoolExecutor(max_workers=workers, mp_context=ctx) as pool:
+        futures = {pool.submit(fn, j): i for i, j in enumerate(jobs)}
+        for fut in cf.as_completed(futures):
+            i = futures[fut]
+            try:
+                results[i] = fut.result()
+            except Exception as e:
+                results[i] = {"error": f"worker lost: {e}"}
+            if on_done:
+                on_done(results[i])
+    return [results[i] for i in range(len(jobs))]

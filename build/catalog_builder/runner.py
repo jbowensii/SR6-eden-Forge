@@ -120,8 +120,18 @@ class Job:
         return out, done
 
 
-#: The import's per-book marker: "[3/47] street_grimoire reading|done ..."
+#: The import's per-book marker: "[3/47] street_grimoire read|merging|done ..."
 _STEP = re.compile(r"\[(\d+)/(\d+)\]\s+(\S+)\s+(.*)")
+
+#: A finishing phase: "[phase 4/16] Repair gear type/subtype".
+#: Tagged distinctly because the old form, "[4/16] Repair gear...", matched the
+#: per-book pattern above — so starting the phases silently reset the bar's
+#: total from 50 books to 16 phases and the reading it showed was nonsense.
+_PHASE = re.compile(r"\[phase (\d+)/(\d+)\]\s*(.*)")
+
+#: Phases that walk the books announce each one; the only motion inside a step
+#: that can run for twenty minutes.
+_SCANNED = re.compile(r"^scanned\s+(\S+)")
 
 
 class Progress:
@@ -137,9 +147,12 @@ class Progress:
     moves the bar.
     """
 
-    #: How the bar splits between the two phases. Reading is the long pole even
-    #: with every core busy; merging is mostly bookkeeping.
-    READ_SHARE = 0.8
+    #: How the bar splits across the three stages of an import. Reading is
+    #: parallel and fast; the finishing phases are serial and re-walk every
+    #: book, so they are the long pole despite being "the end".
+    READ_SHARE = 0.35
+    MERGE_SHARE = 0.15
+    PHASE_SHARE = 0.50
 
     def __init__(self, total_books: int):
         self.total = max(1, total_books)
@@ -147,12 +160,34 @@ class Progress:
         self.done = 0
         self.current = ""
         self.phase = ""
+        self.phase_no = 0
+        self.phase_total = 0
+        self.phase_label = ""
+        self.detail = ""
 
     def feed(self, line: str) -> None:
         # reading  (in parallel): "[3/47] street_grimoire read  212 pages"
         # merging  (in order):    "[3/47] street_grimoire merging"
         #                         "[3/47] street_grimoire done  +pdf new=12"
-        m = _STEP.match(line.strip())
+        # finishing:              "[phase 4/16] Repair gear type/subtype"
+        text = line.strip()
+
+        ph = _PHASE.match(text)
+        if ph:
+            self.phase_no = int(ph[1])
+            self.phase_total = max(1, int(ph[2]))
+            self.phase_label = ph[3].strip()
+            self.phase = "finishing"
+            self.detail = ""
+            return
+
+        sc = _SCANNED.match(text)
+        if sc:
+            # movement inside a phase that gives no other sign of life
+            self.detail = sc[1]
+            return
+
+        m = _STEP.match(text)
         if not m:
             return
         idx, total, book, what = int(m[1]), int(m[2]), m[3], m[4]
@@ -173,13 +208,19 @@ class Progress:
 
     @property
     def fraction(self) -> float:
-        return (self.READ_SHARE * (self.read / self.total)
-                + (1 - self.READ_SHARE) * (self.done / self.total))
+        phases = (self.phase_no / self.phase_total) if self.phase_total else 0.0
+        return min(1.0,
+                   self.READ_SHARE * (self.read / self.total)
+                   + self.MERGE_SHARE * (self.done / self.total)
+                   + self.PHASE_SHARE * phases)
 
     def label(self) -> str:
+        if self.phase == "finishing":
+            where = f"({self.phase_no}/{self.phase_total})"
+            if self.detail:
+                return f"{self.phase_label} — {self.detail}  {where}"
+            return f"{self.phase_label}  {where}"
         if not self.current:
             return "starting"
-        if self.done >= self.total:
-            return "finishing up"
         n = self.read if self.phase == "reading" else self.done
         return f"{self.current} — {self.phase}  ({n}/{self.total})"

@@ -197,7 +197,9 @@ def test_progress_counts_books_not_invented_percentages():
     p.feed("[1/3] corebook done  commlink6 533 items  +pdf new=0 desc=79")
     p.feed("[2/3] companion done  commlink6 783 items  +pdf new=12 desc=40")
     assert p.read == 3 and p.done == 2
-    assert 0.9 < p.fraction < 1.0          # all read, two of three merged
+    # all read + two of three merged, with the finishing phases still to come
+    assert p.fraction == pytest.approx(
+        runner.Progress.READ_SHARE + runner.Progress.MERGE_SHARE * 2 / 3)
     assert "companion" in p.label()
 
 
@@ -213,6 +215,7 @@ def test_progress_never_exceeds_the_total():
     for _ in range(5):
         p.feed("[1/1] corebook read  322 pages")
         p.feed("[1/1] corebook done  commlink6 1 items +pdf new=0")
+        p.feed("[phase 16/16] Re-apply your corrections")
     assert p.fraction == 1.0                # repeats must not push it past 100%
 
 
@@ -516,6 +519,16 @@ def test_progress_moves_while_a_book_is_being_read():
 
     p.feed("[3/3] firing_squad done  pdf-only  +pdf new=12 desc=3")
     assert p.done == 3
+    # merging done, but the finishing phases are half the work
+    assert p.fraction == pytest.approx(
+        Progress.READ_SHARE + Progress.MERGE_SHARE)
+
+    p.feed("[phase 8/16] Descriptions: writeup extractor")
+    assert "Descriptions" in p.label() and "8/16" in p.label()
+    p.feed("scanned street_grimoire  (3/50)")
+    assert "street_grimoire" in p.label()      # motion inside a long phase
+
+    p.feed("[phase 16/16] Re-apply your corrections")
     assert p.fraction == 1.0
 
 
@@ -769,3 +782,30 @@ def test_is_free_does_not_use_so_reuseaddr():
     body = inspect.getsource(ports.is_free)
     body = body.replace(ports.is_free.__doc__ or "", "")
     assert "setsockopt" not in body
+
+
+def test_a_phase_heading_is_not_mistaken_for_a_book():
+    """Regression: "[4/16] Repair gear type/subtype" matched the book pattern.
+
+    Starting the finishing phases silently reset the bar's total from 50 books
+    to 16 phases, so the reading it showed afterwards was nonsense.
+    """
+    p = runner.Progress(total_books=50)
+    for i in range(1, 51):
+        p.feed(f"[{i}/50] book{i} read  100 pages")
+    assert p.total == 50 and p.read == 50
+
+    p.feed("[phase 4/16] Repair gear type/subtype")
+    assert p.total == 50, "a phase heading must not redefine the book total"
+    assert p.read == 50
+    assert p.phase_no == 4 and p.phase_total == 16
+
+
+def test_phase_progress_moves_the_bar():
+    p = runner.Progress(total_books=10)
+    for i in range(1, 11):
+        p.feed(f"[{i}/10] b{i} read  10 pages")
+        p.feed(f"[{i}/10] b{i} done  pdf-only")
+    base = p.fraction
+    p.feed("[phase 8/16] Descriptions: writeup extractor")
+    assert p.fraction > base, "the bar must move as phases complete"

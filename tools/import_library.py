@@ -195,7 +195,8 @@ GRAPHICS_PHASES: list[tuple[str, str, list[str]]] = [
 ]
 
 
-def run_post_phases(data_root: _P, phases, on_line=print) -> list[str]:
+def run_post_phases(data_root: _P, phases, on_line=print,
+                    workers: int = 1) -> list[str]:
     """Run the post-merge phases against ``data_root``.
 
     Several of these tools resolve ``data/`` relative to the working directory
@@ -207,16 +208,20 @@ def run_post_phases(data_root: _P, phases, on_line=print) -> list[str]:
     import subprocess
 
     here = _P(__file__).resolve().parent
-    env = {**os.environ, "SR6_DATA": str(data_root), "PYTHONUNBUFFERED": "1"}
+    # SR6_WORKERS carries the user's choice into the phases. They are separate
+    # processes, and the ones that walk every book were running on a single
+    # core while the rest of the machine idled — the "seems stuck" phase.
+    env = {**os.environ, "SR6_DATA": str(data_root),
+           "SR6_WORKERS": str(max(1, workers)), "PYTHONUNBUFFERED": "1"}
     failed: list[str] = []
     frozen = getattr(sys, "frozen", False)
 
     for n, (label, script, args) in enumerate(phases, 1):
         path = here / script
         if not path.is_file():
-            on_line(f"[{n}/{len(phases)}] {script} missing — skipped")
+            on_line(f"[phase {n}/{len(phases)}] {script} missing — skipped")
             continue
-        on_line(f"[{n}/{len(phases)}] {label}")
+        on_line(f"[phase {n}/{len(phases)}] {label}")
 
         if frozen:
             # sys.executable is SR6CatalogBuilder.exe, not python.exe. Handing
@@ -351,10 +356,16 @@ def run(data_root: _P, jar: _P | None, only: str | None, apply: bool,
         # and put back afterwards. A field Commlink6 left empty keeps whatever
         # a phase filled in: enhance, never clobber.
         guarded = authority.snapshot(data_root)
-        print(f"    guarding {len(guarded)} Commlink6 record(s)", flush=True)
+        # len(guarded) is 2 -- it is {"fields": ..., "rows": ...}. Printing that
+        # said "guarding 2 Commlink6 record(s)" over a library holding 4,604 of
+        # them, which reads as the guard having failed when it was working.
+        n_rows = sum(len(v) for v in guarded["rows"].values())
+        print(f"    guarding {n_rows} Commlink6 record(s) "
+              f"across {len(guarded['rows'])} file(s)", flush=True)
 
         phase_failures = run_post_phases(
-            data_root, phases, on_line=lambda s: print(s, flush=True))
+            data_root, phases, on_line=lambda s: print(s, flush=True),
+            workers=workers)
 
         kept = authority.restore(data_root, guarded)
         if kept["restored"]:
@@ -379,7 +390,7 @@ def run(data_root: _P, jar: _P | None, only: str | None, apply: bool,
                   f"{corrections}", flush=True)
             phase_failures += run_post_phases(
                 data_root, [CORRECTIONS_PHASE],
-                on_line=lambda s: print(s, flush=True))
+                on_line=lambda s: print(s, flush=True), workers=workers)
         else:
             print(f"\nno saved corrections in {corrections} — nothing to "
                   f"re-apply", flush=True)
