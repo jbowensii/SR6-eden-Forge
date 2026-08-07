@@ -111,15 +111,23 @@ def ensure_workspace(ws: Path) -> Path:
     return ws
 
 
-def sync_review_settings(ws: Path, icon_library: str = "") -> Path:
+def sync_review_settings(ws: Path, icon_library: str = "",
+                         commlink6_jar: str = "") -> Path:
     """Pass the builder's choices to the review app.
 
-    The review app reads its own ``<workspace>/data/settings.json`` — that is
-    where it looks for ``iconLibrary`` — so a folder chosen in this window has
-    to be written there or the browser side never sees it.
+    The review app has its own settings page showing the same paths this window
+    asks for. Only the icon library was ever pushed across, so changing the
+    Commlink6 jar or the working folder here left the website still showing —
+    and using — whatever it had before. Two windows disagreeing about where the
+    data is, with no indication which one is right.
 
-    Merged, not overwritten: the review app stores its own keys in this file
-    and a blind write would throw away whatever the user set over there.
+    Everything the builder owns is written now. ``dataDir`` is derived rather
+    than asked for: the review app is always pointed at the workspace this
+    window manages.
+
+    Merged, not overwritten: the review app keeps its own keys in this file
+    (art path, image-search engine and key) and a blind write would discard
+    settings made over there.
     """
     target = Path(ws) / "data" / "settings.json"
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -130,10 +138,15 @@ def sync_review_settings(ws: Path, icon_library: str = "") -> Path:
     except (OSError, ValueError):
         current = {}
 
-    if icon_library:
-        current["iconLibrary"] = str(icon_library)
-    else:
-        current.pop("iconLibrary", None)    # cleared here means cleared there
+    # the library the review app should serve is the one this window manages
+    current["dataDir"] = str(Path(ws) / "data")
+
+    for key, value in (("iconLibrary", icon_library),
+                       ("commlink6Jar", commlink6_jar)):
+        if value:
+            current[key] = str(value)
+        else:
+            current.pop(key, None)          # cleared here means cleared there
 
     tmp = target.with_suffix(".tmp")
     tmp.write_text(json.dumps(current, indent=2) + "\n", encoding="utf-8")

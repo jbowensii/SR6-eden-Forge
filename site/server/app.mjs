@@ -196,7 +196,11 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
         data: osPath(s.dataDir || dataRoot),
         art: osPath(s.artDir || join(dataRoot, "_assets")),
         iconLibrary: osPath(icon || ""),
-        commlink6: osPath(s.commlink6Jar || "C:/Users/johnb/CommLink6/app/stable"),
+        // No default. This carried one developer's home directory into every
+        // install, so a machine without that exact path showed a Commlink6
+        // location that did not exist and had never been chosen. The builder
+        // writes the real one; empty means "not set", which is the truth.
+        commlink6: osPath(s.commlink6Jar || ""),
       },
       books: Object.entries(books)
         .map(([slug, b]) => ({ slug, title: b.title ?? slug, pdf: osPath(b.pdf ?? ""), exists: Boolean(b.pdf && existsSync(b.pdf)) }))

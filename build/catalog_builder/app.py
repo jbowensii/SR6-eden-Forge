@@ -279,6 +279,16 @@ class App(tk.Tk):
         s["iconLibrary"] = self.icons_var.get().strip()
         s.save()
 
+        # Push the paths to the review app every time they change, not only at
+        # import: the website shows the same settings, and the two silently
+        # disagreeing is worse than either being wrong on its own.
+        try:
+            sync_review_settings(
+                Path(s["workspace"] or default_workspace()),
+                s["iconLibrary"], s["commlink6Jar"])
+        except OSError:
+            pass                       # the workspace may not exist yet
+
     def _refresh_state(self) -> None:
         """Say what each answer means, before anything is run."""
         pdf = Path(self.pdf_var.get().strip() or ".")
@@ -479,7 +489,8 @@ class App(tk.Tk):
             return                                   # backed out of the dialog
 
         ws = ensure_workspace(self.workspace_var.get().strip() or default_workspace())
-        sync_review_settings(ws, self.icons_var.get().strip())
+        sync_review_settings(ws, self.icons_var.get().strip(),
+                             self.jar_var.get().strip())
 
         n = len(self.scan_result["matched"])
         self._write(f"=== importing {n} book(s) into {ws}")

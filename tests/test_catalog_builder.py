@@ -617,17 +617,22 @@ def test_review_settings_merge_rather_than_overwrite(tmp_path):
         json.dumps({"dataDir": "somewhere", "artDir": "elsewhere"}),
         encoding="utf-8")
 
-    sync_review_settings(tmp_path, r"C:\icons")
+    sync_review_settings(tmp_path, r"C:\icons", r"C:\cl6\commlink6.jar")
     got = json.loads((data / "settings.json").read_text(encoding="utf-8"))
     assert got["iconLibrary"] == r"C:\icons"
-    assert got["dataDir"] == "somewhere"    # untouched
+    assert got["commlink6Jar"] == r"C:\cl6\commlink6.jar"
+    # the review app's own keys survive
     assert got["artDir"] == "elsewhere"
+    # ...but it is pointed at the workspace THIS window manages, so the two
+    # cannot silently disagree about where the library is
+    assert got["dataDir"] == str(data)
 
-    # clearing it here clears it there, without harming the neighbours
-    sync_review_settings(tmp_path, "")
+    # clearing here clears there, without harming the neighbours
+    sync_review_settings(tmp_path, "", "")
     got = json.loads((data / "settings.json").read_text(encoding="utf-8"))
     assert "iconLibrary" not in got
-    assert got["dataDir"] == "somewhere"
+    assert "commlink6Jar" not in got
+    assert got["artDir"] == "elsewhere"
 
 
 # ---------- theme ----------
@@ -809,3 +814,15 @@ def test_phase_progress_moves_the_bar():
     base = p.fraction
     p.feed("[phase 8/16] Descriptions: writeup extractor")
     assert p.fraction > base, "the bar must move as phases complete"
+
+
+def test_no_personal_path_is_baked_into_the_shipped_review_app():
+    """A developer's home directory shipped as everyone's default.
+
+    The config page fell back to "C:/Users/johnb/CommLink6/app/stable", so a
+    machine without that exact path was shown a Commlink6 location that did not
+    exist and had never been chosen.
+    """
+    src = (Path(__file__).resolve().parent.parent
+           / "site" / "server" / "app.mjs").read_text(encoding="utf-8")
+    assert "Users/johnb" not in src and "Users\johnb" not in src
