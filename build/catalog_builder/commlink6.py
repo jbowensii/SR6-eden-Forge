@@ -15,7 +15,14 @@ import hashlib
 import urllib.request
 from pathlib import Path
 
-HOME_PAGE = "https://rpgframework.de"
+HOME_PAGE = "https://commlink.rocks"
+DOWNLOAD_PAGE = "https://commlink.rocks/download"
+
+#: What the author actually ships on Windows: an updater, which then fetches
+#: Commlink6 itself. Kept as a fallback — the live page is read first, because
+#: this URL carries a version number and will go stale.
+FALLBACK_MSI = ("https://www.rpgframework.de/commlink6-builds/win/"
+                "Commlink6-Updater-1.0.3.msi")
 
 #: Where a manual install usually lands, newest jar wins.
 SEARCH_ROOTS = ("CommLink6/app", "CommLink6", "commlink6")
@@ -70,6 +77,26 @@ def validate(jar: Path) -> tuple[bool, str]:
     return True, f"{len(books)} books"
 
 
+def latest_windows_url(timeout: int = 12) -> str:
+    """The Windows installer URL, verified reachable before it is handed back.
+
+    Scraping the download page was tried and abandoned: commlink.rocks serves a
+    240-byte shell and renders its links in the browser, so there is nothing in
+    the HTML to find. A scraper would have failed silently on every run and
+    quietly returned the fallback anyway — worse than not having one.
+
+    So the known URL is used, but CHECKED first. When the author publishes a
+    new version and this 404s, the caller is told, and the honest response is
+    to open the download page and let the user pick — not to guess a filename.
+    """
+    req = urllib.request.Request(FALLBACK_MSI, method="HEAD",
+                                 headers={"User-Agent": USER_AGENT})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        if r.status != 200:
+            raise RuntimeError(f"installer not available (HTTP {r.status})")
+    return FALLBACK_MSI
+
+
 def download(url: str, dest: Path, on_progress=None) -> Path:
     """Fetch a jar to ``dest``, reporting progress.
 
@@ -93,12 +120,30 @@ def download(url: str, dest: Path, on_progress=None) -> Path:
             if on_progress:
                 on_progress(got, total)
 
-    ok, why = validate(tmp)
-    if not ok:
+    if dest.suffix.lower() == ".jar":
+        ok, why = validate(tmp)
+        if not ok:
+            tmp.unlink(missing_ok=True)
+            raise RuntimeError(f"downloaded file is not usable: {why}")
+    elif tmp.stat().st_size < 100_000:
+        # an installer this small is an error page, not a program
         tmp.unlink(missing_ok=True)
-        raise RuntimeError(f"downloaded file is not usable: {why}")
+        raise RuntimeError("the download was too small to be an installer — "
+                           "the link may have moved")
     tmp.replace(dest)
     return dest
+
+
+def install_windows(msi: Path) -> None:
+    """Hand the downloaded installer to Windows.
+
+    Deliberately NOT silent. This is third-party software; the user should see
+    its own installer, its licence and where it is going, and be able to say
+    no. We fetched it, they install it.
+    """
+    import subprocess
+
+    subprocess.Popen(["msiexec", "/i", str(msi)], close_fds=True)
 
 
 def sha256(path: Path) -> str:

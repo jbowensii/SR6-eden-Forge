@@ -388,3 +388,59 @@ def test_icon_includes_the_sizes_windows_asks_for():
         sizes.add(w)
     # 16 for the title bar and Explorer list, 32 for the desktop, 256 for large
     assert {16, 32, 48, 256} <= sizes, f"missing sizes: {sizes}"
+
+
+# ---------- Commlink6 acquisition ----------
+
+def test_finds_an_installed_commlink6(tmp_path, monkeypatch):
+    from catalog_builder import commlink6
+    root = tmp_path / "CommLink6" / "app"
+    root.mkdir(parents=True)
+    jar = root / "commlink6-1.14.0-complete.jar"
+    jar.write_bytes(b"PK\x03\x04")
+    monkeypatch.setattr(commlink6.Path, "home", staticmethod(lambda: tmp_path))
+    assert commlink6.find_local() == jar
+
+
+def test_prefers_the_newest_jar_when_several_are_installed(tmp_path, monkeypatch):
+    import os
+    import time
+    from catalog_builder import commlink6
+    root = tmp_path / "CommLink6" / "app"
+    root.mkdir(parents=True)
+    old = root / "commlink6-1.12.0-complete.jar"
+    new = root / "commlink6-1.14.0-complete.jar"
+    for f in (old, new):
+        f.write_bytes(b"PK\x03\x04")
+    os.utime(old, (time.time() - 9000, time.time() - 9000))
+    monkeypatch.setattr(commlink6.Path, "home", staticmethod(lambda: tmp_path))
+    assert commlink6.find_local() == new
+
+
+def test_rejects_a_jar_that_is_not_commlink6(tmp_path):
+    """Checked by looking for the data tree, not the filename — so a truncated
+    download is caught here rather than halfway through an import."""
+    from catalog_builder import commlink6
+    import zipfile
+    jar = tmp_path / "commlink6-fake.jar"
+    with zipfile.ZipFile(jar, "w") as z:
+        z.writestr("hello.txt", "not shadowrun")
+    ok, why = commlink6.validate(jar)
+    assert not ok and "Commlink6" in why
+
+
+def test_rejects_a_file_that_is_not_a_zip(tmp_path):
+    from catalog_builder import commlink6
+    bad = tmp_path / "commlink6-truncated.jar"
+    bad.write_bytes(b"not a zip at all")
+    ok, why = commlink6.validate(bad)
+    assert not ok and "zip" in why.lower()
+
+
+def test_the_notice_names_the_author_and_says_it_is_optional():
+    """It is someone else's software under their terms, and the user should
+    know that before we send them to fetch it."""
+    from catalog_builder import commlink6
+    assert "Stefan Prelle" in commlink6.NOTICE
+    assert "optional" in commlink6.NOTICE.lower()
+    assert "rpgframework.de" in commlink6.NOTICE

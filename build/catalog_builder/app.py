@@ -14,6 +14,8 @@ Long work never runs on the UI thread. See runner.Job.
 from __future__ import annotations
 
 import sys
+import tempfile
+import threading
 import tkinter as tk
 import webbrowser
 from pathlib import Path
@@ -36,6 +38,8 @@ except ImportError:                       # installed under a different root
         ensure_workspace)
 
 APP_TITLE = "Shadowrun 6th World Catalog Builder"
+#: a blank line inside a message box
+NL2 = chr(10) + chr(10)
 REVIEW_URL = "http://localhost:8347"
 
 BG = "#11141c"
@@ -95,7 +99,7 @@ class App(tk.Tk):
                     insertcolor=FG, padding=6)
         s.configure("TProgressbar", background=ACCENT, troughcolor="#181c26")
 
-    def _row(self, parent, label, hint, key, browse, row):
+    def _row(self, parent, label, hint, key, browse, row, extra=None):
         ttk.Label(parent, text=label, style="Head.TLabel").grid(
             row=row, column=0, sticky="w", pady=(12, 0))
         ttk.Label(parent, text=hint, style="Hint.TLabel").grid(
@@ -105,6 +109,9 @@ class App(tk.Tk):
         ent.grid(row=row + 2, column=0, sticky="ew", pady=(4, 0))
         ttk.Button(parent, text="Browse…", command=browse).grid(
             row=row + 2, column=1, padx=(8, 0), pady=(4, 0))
+        if extra:
+            ttk.Button(parent, text=extra[0], command=extra[1]).grid(
+                row=row + 2, column=2, padx=(8, 0), pady=(4, 0))
         status = ttk.Label(parent, text="", style="Hint.TLabel")
         status.grid(row=row + 3, column=0, columnspan=3, sticky="w")
         setattr(self, f"{key}_var", var)
@@ -133,7 +140,7 @@ class App(tk.Tk):
         self._row(form, "2.  Commlink6  (optional)",
                   "Adds structure the printed page leaves implicit. Leave empty "
                   "to skip.",
-                  "jar", self._pick_jar, 4)
+                  "jar", self._pick_jar, 4, extra=("Get it…", self._get_commlink6))
         self._row(form, "3.  Where is Foundry?",
                   "Foundry's Data folder — the one containing 'modules' and "
                   "'worlds'.",
@@ -253,6 +260,84 @@ class App(tk.Tk):
         if f:
             self.jar_var.set(f)
             self._save()
+
+    def _get_commlink6(self):
+        """Find Commlink6, or download the author's installer and run it.
+
+        Detection first: most people who have it already have it, and asking
+        them to download it again would be daft.
+
+        Failing that, this fetches the installer from rpgframework.de and hands
+        it to Windows — NOT silently. It is someone else's software; they should
+        see its own installer, its terms and where it is going, and be able to
+        decline. We do the fetching, they do the installing.
+
+        If the link has moved, the download page opens instead. Guessing a
+        filename would produce a 404 the user would fairly blame on us.
+        """
+        found = commlink6.find_local()
+        if found:
+            self.jar_var.set(str(found))
+            self._save()
+            ok, why = commlink6.validate(found)
+            messagebox.showinfo(
+                APP_TITLE,
+                "Commlink6 is already installed:" + NL2 + str(found)
+                + NL2 + ("Looks good — " + why if ok else "But: " + why))
+            return
+
+        if not messagebox.askokcancel(
+                APP_TITLE,
+                commlink6.NOTICE + NL2
+                + "Download the installer from rpgframework.de and run it?",
+                icon="question"):
+            return
+
+        self._write("=== fetching Commlink6 from rpgframework.de")
+        self.stage.configure(text="Downloading Commlink6…")
+        try:
+            url = commlink6.latest_windows_url()
+        except Exception as e:
+            self._write(f"!! could not reach the installer: {e}")
+            if messagebox.askokcancel(
+                    APP_TITLE,
+                    "That download link is no longer valid — the author has "
+                    "probably published a new version." + NL2
+                    + "Open the download page so you can pick it up there?"):
+                webbrowser.open(commlink6.DOWNLOAD_PAGE)
+            return
+
+        dest = Path(tempfile.gettempdir()) / Path(url).name
+        self._c6_job = threading.Thread(
+            target=self._fetch_commlink6, args=(url, dest), daemon=True)
+        self._c6_job.start()
+
+    def _fetch_commlink6(self, url: str, dest: Path) -> None:
+        """Download off the UI thread, then offer to run the installer."""
+        def progress(got, total):
+            if total:
+                self.after(0, lambda: self.stage.configure(
+                    text=f"Downloading Commlink6… {got * 100 // total}%"))
+
+        try:
+            commlink6.download(url, dest, on_progress=progress)
+        except Exception as e:
+            self.after(0, lambda: self._write(f"!! download failed: {e}"))
+            self.after(0, lambda: self.stage.configure(text="Download failed."))
+            return
+
+        def done():
+            self._write(f"=== downloaded {dest.name}")
+            self.stage.configure(text="Ready.")
+            if messagebox.askokcancel(
+                    APP_TITLE,
+                    "Downloaded." + NL2 + str(dest) + NL2
+                    + "Run the installer now? Commlink6 will ask its own "
+                      "questions. When it has finished, press 'Get it…' again "
+                      "and the jar will be found automatically."):
+                commlink6.install_windows(dest)
+                self._write("=== Commlink6 installer started")
+        self.after(0, done)
 
     def _pick_foundry(self):
         d = filedialog.askdirectory(title="Foundry VTT Data folder")
