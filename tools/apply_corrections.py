@@ -13,9 +13,10 @@ import glob
 import json
 from collections import Counter
 
+from extractor.paths import data_root, positional
 from extractor.eden_codes import map_code
 
-DATA = _P("data")
+DATA = data_root()
 LIBRARY = "corebook"
 CORR = DATA / "_corrections"
 

@@ -12,6 +12,7 @@ from collections import Counter
 from datetime import date
 import pdfplumber
 import extractor
+from extractor.paths import data_root, positional
 from extractor.emit import slugify
 from extractor.ingest import LIBRARY, load_registry
 from extractor.normalize import normalize_text
@@ -29,7 +30,7 @@ def _column_lines(page):
             out.append(normalize_text(" ".join(w["text"] for w in ln)).strip())
     return out
 
-DATA = _P("data")
+DATA = data_root()
 FIELDS = ["handling", "accel", "speedInterval", "topSpeed", "body", "armor",
           "pilot", "sensor", "seats", "availability", "price"]
 CATS = {  # section header -> (subtype, is_drone)

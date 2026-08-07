@@ -17,6 +17,7 @@ import fitz
 import pdfplumber
 
 import extractor
+from extractor.paths import data_root, positional
 from extractor.autodetect import _valid_name
 from extractor.emit import slugify
 from extractor.ingest import LIBRARY, fill_blank_fields, load_registry
@@ -44,7 +45,7 @@ from extractor.actors import read_actors, read_npc_blocks
 from extractor.critters import read_critters
 from extractor.spirits import read_spirits
 
-DATA = _P(__file__).resolve().parent.parent / "data"
+DATA = data_root()          # --data / SR6_DATA / <repo>/data
 S = re.compile
 # domain -> (reader, signature, base_fields, group_by, extra_filter)
 DOMAINS = {
@@ -72,7 +73,7 @@ DOMAINS = {
 SKIP = {"gun_rack", "rides", "corebook"}
 
 reg = load_registry(DATA)
-_only = set(sys.argv[1:])          # optional: restrict to specific book slugs (scoped run)
+_only = set(positional())          # optional: restrict to specific book slugs (scoped run)
 books = [(k, v["pdf"]) for k, v in reg.items()
          if k not in SKIP and _P(v.get("pdf", "")).is_file() and (not _only or k in _only)]
 
@@ -100,7 +101,7 @@ for book, pdf in books:
 
 # merge each domain into the library
 for domain, (_r, _s, base, group_by, extra) in DOMAINS.items():
-    files = {_P(f).stem: json.load(open(f, encoding="utf-8"))["items"] for f in glob.glob(f"data/{LIBRARY}/{domain}/*.json")}
+    files = {_P(f).stem: json.load(open(f, encoding="utf-8"))["items"] for f in glob.glob(str(DATA / LIBRARY / domain / "*.json"))}
     existing = {norm_base(it["name"]): it for items in files.values() for it in items}
     seen_ids = {it["id"] for items in files.values() for it in items}
     added = refs = 0

@@ -122,3 +122,78 @@ def test_installer_still_excludes_the_dev_tree():
     assert "--omit=dev" in (
         Path(__file__).resolve().parent.parent / "build" / "build_release.py"
     ).read_text(encoding="utf-8")
+
+
+# ---------- the two rules the pipeline exists to enforce ----------
+
+def test_merge_commlink6_is_never_run_as_a_phase():
+    """PDF ownership gates Commlink6 data, so the wholesale merge is banned.
+
+    tools/merge_commlink6.py imports Commlink6 for every book it covers,
+    whether or not the PDF is present. That is precisely the rule this
+    pipeline exists to enforce — "if you do not have the PDF you do NOT import
+    that data from Commlink6" — so the gated per-book import_commlink6() is
+    used instead, driven by the ownership plan.
+    """
+    scripts = [s for _label, s, _args in
+               import_library.POST_PHASES + import_library.GRAPHICS_PHASES]
+    assert "merge_commlink6.py" not in scripts
+
+
+def test_corrections_run_last():
+    """A manual fix outranks anything a reader inferred, so nothing may follow."""
+    scripts = [s for _label, s, _args in import_library.POST_PHASES]
+    assert scripts[-1] == "apply_corrections.py"
+
+
+def test_descriptions_run_before_subtype_inference():
+    """Subtype inference reads descriptions; reversed, it has nothing to read."""
+    scripts = [s for _label, s, _args in import_library.POST_PHASES]
+    assert scripts.index("rebuild_descriptions.py") < \
+        scripts.index("infer_gear_subtypes.py")
+
+
+def test_post_phases_pin_both_the_cwd_and_the_data_root(tmp_path, monkeypatch):
+    """Some phases resolve data/ against the cwd, others against the repo.
+
+    Pinning only one of them rebuilt the developer's copy instead of the
+    user's workspace — silently, because both paths exist on a dev machine.
+    """
+    seen = {}
+
+    class _R:
+        returncode = 0
+
+    def fake_run(argv, cwd=None, env=None):
+        seen["cwd"] = cwd
+        seen["SR6_DATA"] = (env or {}).get("SR6_DATA")
+        return _R()
+
+    import subprocess
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    data = tmp_path / "ws" / "data"
+    data.mkdir(parents=True)
+    # a phase that exists on disk, so it is not skipped
+    import_library.run_post_phases(
+        data, [("x", "apply_corrections.py", [])], on_line=lambda _s: None)
+
+    assert seen["SR6_DATA"] == str(data)
+    assert seen["cwd"] == str(data.parent)
+
+
+def test_a_failing_phase_is_reported_not_swallowed(tmp_path, monkeypatch):
+    class _R:
+        returncode = 2
+
+    import subprocess
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: _R())
+
+    data = tmp_path / "data"
+    data.mkdir()
+    lines = []
+    failed = import_library.run_post_phases(
+        data, [("x", "apply_corrections.py", [])], on_line=lines.append)
+
+    assert failed == ["apply_corrections.py"]
+    assert any("exited 2" in ln for ln in lines)

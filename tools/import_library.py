@@ -138,8 +138,88 @@ def _reconcile_book(data_root: _P, book: str, before: dict,
     return {"conflicts": total}
 
 
+#: Everything that has to happen AFTER the per-book merge to reach the state
+#: the curated library is in. Same order as tools/rebuild_all.py, which is the
+#: order that reproduces it — descriptions before subtypes because the subtype
+#: inference reads descriptions, and corrections dead last so a manual fix
+#: always wins.
+#:
+#: merge_commlink6.py is deliberately NOT here. It imports Commlink6 wholesale
+#: for every book it covers, regardless of whether the PDF is present, which is
+#: exactly the ownership rule this pipeline exists to enforce. The gated
+#: equivalent is import_commlink6() above, run per book from the plan.
+POST_PHASES: list[tuple[str, str, list[str]]] = [
+    # more of the book: domains the gear pass does not produce
+    ("Content: spells, qualities, NPCs, critters, spirits",
+     "ingest_content_all.py", []),
+    ("New types: complex forms, foci, contacts, SINs",
+     "ingest_new_types.py", []),
+    ("Vehicles and drones", "ingest_vehicles.py", []),
+    # repair systematic mis-filing before anything reads the types
+    ("Reclassify over-typed electronics", "reclassify_electronics.py", ["--apply"]),
+    ("Repair gear type/subtype", "fix_gear_types.py", ["--apply"]),
+    ("Fix cyberware CYBER_BODYWARE type", "fix_cyberware_bodyware.py", ["--apply"]),
+    ("Re-file mis-filed weapons", "refile_misfiled_weapons.py", ["--apply"]),
+    # descriptions
+    ("Descriptions: writeup extractor", "rebuild_descriptions.py", ["--apply"]),
+    ("Descriptions: spell layout", "fill_list_descriptions.py",
+     ["--domain=spells", "--apply"]),
+    ("Descriptions: complex-form layout", "fill_list_descriptions.py",
+     ["--domain=complexforms", "--apply"]),
+    ("Descriptions: critter-power layout", "fill_list_descriptions.py",
+     ["--domain=critter_powers", "--apply"]),
+    ("Descriptions: ritual layout", "fill_list_descriptions.py",
+     ["--domain=rituals", "--apply"]),
+    ("Descriptions: notes and prose tail", "fill_prose_tail.py", ["--apply"]),
+    ("Descriptions: recover malformed entries",
+     "fix_corrected_descriptions.py", ["--apply"]),
+    # subtypes read descriptions, so they come after
+    ("Subtypes: firearms from source tables",
+     "subtype_firearms_from_book.py", ["--apply"]),
+    ("Subtypes: infer blank gear subtypes", "infer_gear_subtypes.py", ["--apply"]),
+    # LAST, always: a manual correction outranks anything a reader inferred
+    ("Re-apply manual corrections", "apply_corrections.py", ["--apply"]),
+]
+
+#: Slow, and it changes artwork rather than item counts, so it is opt-in.
+GRAPHICS_PHASES: list[tuple[str, str, list[str]]] = [
+    ("Book graphics", "dump_book_images.py", []),
+    ("Auto-pair artwork", "pair_art.py", []),
+]
+
+
+def run_post_phases(data_root: _P, phases, on_line=print) -> list[str]:
+    """Run the post-merge phases against ``data_root``.
+
+    Several of these tools resolve ``data/`` relative to the working directory
+    and others relative to the repo, so BOTH are pinned: cwd is the folder that
+    contains the library, and SR6_DATA names it outright. Without that they
+    quietly rebuilt the developer's copy instead of the user's workspace.
+    """
+    import os
+    import subprocess
+
+    here = _P(__file__).resolve().parent
+    env = {**os.environ, "SR6_DATA": str(data_root), "PYTHONUNBUFFERED": "1"}
+    failed: list[str] = []
+
+    for n, (label, script, args) in enumerate(phases, 1):
+        path = here / script
+        if not path.is_file():
+            on_line(f"[{n}/{len(phases)}] {script} missing — skipped")
+            continue
+        on_line(f"[{n}/{len(phases)}] {label}")
+        r = subprocess.run([sys.executable, "-u", str(path), *args],
+                           cwd=str(data_root.parent), env=env)
+        if r.returncode:
+            # one bad phase must not lose the rest, but it must be VISIBLE
+            on_line(f"    !! {script} exited {r.returncode}")
+            failed.append(script)
+    return failed
+
+
 def run(data_root: _P, jar: _P | None, only: str | None, apply: bool,
-        workers: int = 1) -> int:
+        workers: int = 1, post: bool = True, graphics: bool = False) -> int:
     quiet_pdf_noise()          # or the log is all FontBBox and nothing else
     plan = plan_import(data_root, jar)
     if only:
@@ -229,6 +309,20 @@ def run(data_root: _P, jar: _P | None, only: str | None, apply: bool,
             print(f"[{n}/{len(todo)}] {book} done  "
                   f"ERROR: {type(e).__name__}: {e}", flush=True)
 
+    # ---- the rest of the book -----------------------------------------------
+    # The gear pass and Commlink6 between them do not produce spells, critters,
+    # NPCs, contacts, vehicles or any of the smaller domains, and nothing so far
+    # has filled a description. Running only the merge left a library about a
+    # fifth the size of the curated one, which is what "the import does not look
+    # like the backup" came down to. These phases run BEFORE ids are minted, so
+    # everything they add is stamped too.
+    phase_failures: list[str] = []
+    if post:
+        phases = list(POST_PHASES) + (list(GRAPHICS_PHASES) if graphics else [])
+        print(f"\nfinishing the library — {len(phases)} phase(s)", flush=True)
+        phase_failures = run_post_phases(
+            data_root, phases, on_line=lambda s: print(s, flush=True))
+
     # every record leaves with a stable catalog id
     minted = 0
     for domain in sorted({d.name for b in data_root.iterdir() if b.is_dir()
@@ -252,9 +346,30 @@ def run(data_root: _P, jar: _P | None, only: str | None, apply: bool,
                     minted += n
             lock.save()
 
+    # a count of what is actually THERE, not of what we did to it — the old
+    # totals line could report success over a library a fifth the expected size
+    total_items = 0
+    for bookdir in data_root.iterdir():
+        if not bookdir.is_dir() or bookdir.name.startswith("_"):
+            continue
+        for dom in bookdir.iterdir():
+            if not dom.is_dir():
+                continue
+            for f in dom.glob("*.json"):
+                try:
+                    doc = json.loads(f.read_text(encoding="utf-8"))
+                except (OSError, ValueError):
+                    continue
+                if isinstance(doc.get("items"), list):
+                    total_items += len(doc["items"])
+
     print(f"\nTOTALS commlink6={totals['jarItems']} pdf-new={totals['new']} "
           f"descriptions={totals['descriptions']} ids-minted={minted}")
-    print("\nNext: python tools/apply_corrections.py --apply   (your manual fixes)")
+    print(f"LIBRARY {total_items} items in {data_root}")
+    if phase_failures:
+        print(f"\n!! these phases failed: {', '.join(phase_failures)}")
+        print("   the library is usable but incomplete — see the log above")
+        return 1
     return 0
 
 
@@ -269,11 +384,17 @@ def main() -> None:
         "--workers", type=int, default=default_workers(),
         help="how many books to READ at once (default: %(default)s). The merge "
              "is always one book at a time, in plan order. 1 disables the pool.")
+    ap.add_argument("--no-post", action="store_true",
+                    help="stop after the merge; skip the phases that add the "
+                         "other domains, the descriptions and your corrections")
+    ap.add_argument("--graphics", action="store_true",
+                    help="also extract book artwork and auto-pair it (slow)")
     args = ap.parse_args()
     jar = args.jar if args.jar and _P(args.jar).is_file() else None
     if not jar:
         print("Commlink6 jar not found — every owned PDF will be read on its own.\n")
-    raise SystemExit(run(args.data, jar, args.book, args.apply, args.workers))
+    raise SystemExit(run(args.data, jar, args.book, args.apply, args.workers,
+                         post=not args.no_post, graphics=args.graphics))
 
 
 if __name__ == "__main__":

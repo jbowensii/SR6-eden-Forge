@@ -25,6 +25,7 @@ from datetime import date
 import pdfplumber
 
 import extractor
+from extractor.paths import data_root, positional
 from extractor.autodetect import _valid_name
 from extractor.emit import slugify
 from extractor.ingest import LIBRARY, fill_blank_fields, load_registry
@@ -36,7 +37,7 @@ from extractor.newtypes import (
     read_martial_styles, read_martial_techs, read_foci, read_critter_powers,
 )
 
-DATA = _P(__file__).resolve().parent.parent / "data"
+DATA = data_root()          # --data / SR6_DATA / <repo>/data
 S = lambda p: re.compile(p, re.I)
 
 META_STOP = {"metamagic", "metamagics", "initiation", "initiate grade", "magic",
@@ -95,7 +96,7 @@ SKIP = {"gun_rack", "rides"}   # not real content books
 
 def merge_write(domain, collected, base_fields, group_by):
     files = {_P(f).stem: json.load(open(f, encoding="utf-8"))["items"]
-             for f in glob.glob(f"data/{LIBRARY}/{domain}/*.json")}
+             for f in glob.glob(str(DATA / LIBRARY / domain / "*.json"))}
     existing = {norm_base(it["name"]): it for items in files.values() for it in items}
     seen_ids = {it["id"] for items in files.values() for it in items}
     added = refs = 0
@@ -139,7 +140,7 @@ def merge_write(domain, collected, base_fields, group_by):
 def harvest_powers(actor_domain, out_domain, category):
     """Mine distinct power names out of extracted actor blocks' powers fields."""
     names = {}
-    for f in glob.glob(f"data/{LIBRARY}/{actor_domain}/*.json"):
+    for f in glob.glob(str(DATA / LIBRARY / actor_domain / "*.json")):
         for it in json.load(open(f, encoding="utf-8"))["items"]:
             for field in ("powers", "optionalPowers"):
                 blob = it["system"].get(field) or ""
