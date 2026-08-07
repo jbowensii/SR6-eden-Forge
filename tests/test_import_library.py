@@ -233,3 +233,16 @@ def test_the_review_app_is_told_where_the_library_is():
            / "build" / "catalog_builder" / "app.py").read_text(encoding="utf-8")
     # passed to the node process that serves the review app
     assert '"SR6_DATA": str(ws / "data")' in app
+
+
+def test_the_build_resolves_npm_rather_than_calling_it_bare():
+    """On Windows npm is npm.cmd and CreateProcess ignores PATHEXT.
+
+    A bare ["npm", ...] raises FileNotFoundError even with npm plainly on the
+    PATH, which is how the review-app build step failed the first time it was
+    actually run.
+    """
+    src = (Path(__file__).resolve().parent.parent
+           / "build" / "build_release.py").read_text(encoding="utf-8")
+    assert 'shutil.which("npm")' in src
+    assert '["npm"' not in src and "['npm'" not in src

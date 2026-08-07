@@ -53,6 +53,21 @@ def version() -> str:
         return "0.0.0"
 
 
+def _utf8_console() -> None:
+    """Stop the build dying on a character it merely wanted to PRINT.
+
+    Windows gives Python a cp1252 stdout. vite draws its progress with box
+    characters and this script's own headings use an em dash, so echoing a
+    subprocess's output raised UnicodeEncodeError and took the whole build
+    with it — after the work had already succeeded.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, OSError):
+            pass
+
+
 def step(n: int, total: int, what: str) -> None:
     print(f"\n[{n}/{total}] {what}")
 
@@ -122,6 +137,7 @@ def main() -> int:
     ap.add_argument("--no-sign", action="store_true")
     ap.add_argument("--skip-freeze", action="store_true")
     args = ap.parse_args()
+    _utf8_console()
 
     v = version()
     total = 5 if not args.no_installer else 2
@@ -137,7 +153,16 @@ def main() -> int:
     # and would have had no front end to serve anyway.
     if not args.no_installer:
         step(0, total, "building the review app")
-        rc = run(["npm", "run", "build"], cwd=REPO / "site")
+        # On Windows npm is npm.cmd, and CreateProcess does not apply PATHEXT
+        # to a bare name — so subprocess raises FileNotFoundError even though
+        # npm is plainly on the PATH. shutil.which resolves the real file.
+        npm = shutil.which("npm")
+        if not npm:
+            print("      npm not found on PATH — the review app needs it to "
+                  "build.\n      Install Node.js, or pass --no-installer to "
+                  "skip the review app.")
+            return 1
+        rc = run([npm, "run", "build"], cwd=REPO / "site")
         if rc:
             return rc
         stage = BUILD / "work" / "site-deps"
@@ -148,7 +173,7 @@ def main() -> int:
                 shutil.copy2(src, stage / f)
         # production only: 17 MB, against 66 MB with vite and react's dev
         # tooling, none of which ever runs on the user's machine
-        rc = run(["npm", "ci", "--omit=dev", "--no-audit", "--no-fund"], cwd=stage)
+        rc = run([npm, "ci", "--omit=dev", "--no-audit", "--no-fund"], cwd=stage)
         if rc:
             return rc
         mods = stage / "node_modules"
