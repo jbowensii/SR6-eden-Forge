@@ -27,3 +27,4 @@ Thumbs.db
 build/dist/
 build/work/
 *.manifest
+export/dist/*.exe
