@@ -25,13 +25,13 @@ from tkinter import filedialog, messagebox, ttk
 # relative import there fails only in the packaged build — the worst place to
 # find out. See __main__.py.
 try:
-    from catalog_builder import books, commlink6, cores, publish
+    from catalog_builder import books, commlink6, cores, publish, theme
     from catalog_builder.runner import Job, Progress, pipeline_command
     from catalog_builder.settings import (
         Settings, default_workspace, detect_commlink6, detect_foundry_data,
         ensure_workspace, sync_review_settings)
 except ImportError:                       # installed under a different root
-    from build.catalog_builder import books, commlink6, cores, publish
+    from build.catalog_builder import books, commlink6, cores, publish, theme
     from build.catalog_builder.runner import Job, Progress, pipeline_command
     from build.catalog_builder.settings import (
         Settings, default_workspace, detect_commlink6, detect_foundry_data,
@@ -42,13 +42,17 @@ APP_TITLE = "Shadowrun 6th World Catalog Builder"
 NL2 = chr(10) + chr(10)
 REVIEW_URL = "http://localhost:8347"
 
-BG = "#11141c"
-FG = "#c8cede"
-ACCENT = "#2fd4d9"
-MUTED = "#5d6678"
-OK = "#5ad48a"
-WARN = "#e0a33e"
-BAD = "#c4183c"
+#: The palette, chosen from what the OS is set to. Read once at startup —
+#: Windows can change it mid-session, but restyling a live Tk window widget by
+#: widget is more machinery than a settings screen deserves.
+P = theme.palette()
+BG = P["bg"]
+FG = P["text"]
+ACCENT = P["blue"]
+MUTED = P["muted"]
+OK = P["ok"]
+WARN = P["warn"]
+BAD = P["bad"]
 
 
 def repo_root() -> Path:
@@ -62,8 +66,6 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title(APP_TITLE)
-        self.geometry("880x620")
-        self.minsize(760, 560)
         self.configure(bg=BG)
 
         self._set_window_icon()
@@ -76,6 +78,7 @@ class App(tk.Tk):
         self._build()
         self._prefill()
         self._refresh_state()
+        self._fit_window()
 
     def _set_window_icon(self) -> None:
         """Give the window our icon.
@@ -98,26 +101,7 @@ class App(tk.Tk):
 
     # ---------- chrome ----------
     def _style(self) -> None:
-        s = ttk.Style(self)
-        try:
-            s.theme_use("clam")
-        except tk.TclError:
-            pass
-        s.configure(".", background=BG, foreground=FG, fieldbackground="#181c26",
-                    borderwidth=0, focuscolor=ACCENT)
-        s.configure("TFrame", background=BG)
-        s.configure("TLabel", background=BG, foreground=FG)
-        s.configure("Head.TLabel", foreground=ACCENT,
-                    font=("Segoe UI Semibold", 11))
-        s.configure("Hint.TLabel", foreground=MUTED, font=("Segoe UI", 9))
-        s.configure("TButton", background="#1d2230", foreground=FG, padding=(12, 6))
-        s.map("TButton", background=[("active", "#28304a")])
-        s.configure("Go.TButton", background=ACCENT, foreground="#08111a",
-                    font=("Segoe UI Semibold", 10), padding=(16, 8))
-        s.map("Go.TButton", background=[("active", "#5ce8ec")])
-        s.configure("TEntry", fieldbackground="#181c26", foreground=FG,
-                    insertcolor=FG, padding=6)
-        s.configure("TProgressbar", background=ACCENT, troughcolor="#181c26")
+        theme.apply(self, ttk.Style(self), P)
 
     def _row(self, parent, label, hint, key, browse, row, extra=None):
         ttk.Label(parent, text=label, style="Head.TLabel").grid(
@@ -195,14 +179,39 @@ class App(tk.Tk):
         self.stage = ttk.Label(pad, text="Ready.", style="Hint.TLabel")
         self.stage.grid(row=5, column=0, sticky="w", pady=(2, 6))
 
-        self.log = tk.Text(pad, height=12, bg="#0c0f16", fg="#9aa4bb",
+        self.log = tk.Text(pad, height=8, bg=P["surface"], fg=P["muted"],
                            insertbackground=FG, relief="flat", wrap="none",
+                           highlightthickness=1, highlightbackground=P["border"],
                            font=("Consolas", 9))
         self.log.grid(row=6, column=0, sticky="nsew")
         pad.rowconfigure(6, weight=1)
         sb = ttk.Scrollbar(pad, command=self.log.yview)
         sb.grid(row=6, column=1, sticky="ns")
         self.log.configure(yscrollcommand=sb.set, state="disabled")
+
+    def _fit_window(self) -> None:
+        """Size to what the widgets actually need, then centre.
+
+        This used to be a hard-coded 880x620, which fitted the layout it was
+        measured against and nothing else: adding a fifth field pushed the
+        buttons and the log off the bottom and the Browse buttons off the
+        right. Tk already knows the required size — asking it means the window
+        cannot be outgrown by adding a row.
+        """
+        self.update_idletasks()
+        need_w, need_h = self.winfo_reqwidth(), self.winfo_reqheight()
+
+        # never larger than the display, allowing for the taskbar
+        max_w = self.winfo_screenwidth() - 80
+        max_h = self.winfo_screenheight() - 140
+        w = max(960, min(need_w, max_w))
+        h = max(700, min(need_h, max_h))
+
+        x = max(0, (self.winfo_screenwidth() - w) // 2)
+        y = max(0, (self.winfo_screenheight() - h) // 3)
+        self.geometry(f"{w}x{h}+{x}+{y}")
+        # the floor is what the fields need, not a number someone liked
+        self.minsize(min(need_w, max_w), min(need_h, max_h))
 
     # ---------- state ----------
     def _prefill(self) -> None:

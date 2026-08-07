@@ -18,15 +18,26 @@ import ctypes
 import os
 
 #: Peak resident memory to budget per worker, in GB. From measurement, not
-#: guesswork: the one-process import peaked around 3 GB on the core rulebook.
-GB_PER_WORKER = 3.0
+#: guesswork: ten workers on the real library were observed holding 31.7 GB.
+GB_PER_WORKER = 3.2
+
+#: Kept back for Windows and whatever else is open. Without this the budget is
+#: computed against memory that is not actually going spare -- a 62 GB machine
+#: with 28 GB already committed to Foundry, a browser and an editor has nothing
+#: like 62 GB to lend an import.
+OS_HEADROOM_GB = 4.0
 
 #: Left free so the machine stays usable while an import runs.
 CORES_HELD_BACK = 2
 
 
-def total_ram_gb() -> float:
-    """Installed RAM. Returns 0.0 if it cannot be determined."""
+def memory_gb() -> tuple[float, float]:
+    """``(installed, available)`` in GB. ``(0.0, 0.0)`` if unreadable.
+
+    AVAILABLE is the number that matters. Budgeting against installed RAM is
+    how a run ended up with ten workers holding 31.7 GB and 1.2 GB left free:
+    the machine had 62 GB, but most of it was already spoken for.
+    """
     try:
         class Status(ctypes.Structure):
             _fields_ = [("dwLength", ctypes.c_ulong),
@@ -42,37 +53,49 @@ def total_ram_gb() -> float:
         s = Status()
         s.dwLength = ctypes.sizeof(Status)
         if ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(s)):
-            return s.ullTotalPhys / (1024 ** 3)
+            return (s.ullTotalPhys / (1024 ** 3),
+                    s.ullAvailPhys / (1024 ** 3))
     except Exception:
         pass
-    return 0.0
+    return 0.0, 0.0
 
 
-def advise(cores: int | None = None, ram_gb: float | None = None) -> dict:
+def advise(cores: int | None = None, ram_gb: float | None = None,
+           avail_gb: float | None = None) -> dict:
     """What to recommend, and the reason for it.
 
-    :returns: ``{cores, ramGb, byCores, byMemory, recommended, limit, why}``
-        where *limit* is the largest value the dialog offers.
+    :param ram_gb: installed memory — shown, but does not set the limit.
+    :param avail_gb: memory actually free right now — this is what limits it.
+    :returns: ``{cores, ramGb, availGb, byCores, byMemory, recommended, limit,
+        why}`` where *limit* is the largest value the dialog offers.
     """
     cores = cores if cores is not None else (os.cpu_count() or 4)
-    ram_gb = ram_gb if ram_gb is not None else total_ram_gb()
+    if ram_gb is None or avail_gb is None:
+        detected_total, detected_avail = memory_gb()
+        ram_gb = detected_total if ram_gb is None else ram_gb
+        avail_gb = detected_avail if avail_gb is None else avail_gb
 
     by_cores = max(1, cores - CORES_HELD_BACK)
     # no memory reading -> do not pretend to know; fall back to cores alone
-    by_memory = max(1, int(ram_gb // GB_PER_WORKER)) if ram_gb else by_cores
+    if avail_gb:
+        spare = max(0.0, avail_gb - OS_HEADROOM_GB)
+        by_memory = max(1, int(spare // GB_PER_WORKER))
+    else:
+        by_memory = by_cores
 
     recommended = max(1, min(by_cores, by_memory))
     why = ("your cores, less a couple left free" if by_cores <= by_memory
-           else f"your memory — about {GB_PER_WORKER:.0f} GB per worker")
+           else f"free memory — about {GB_PER_WORKER:.1f} GB per worker")
 
-    return {"cores": cores, "ramGb": ram_gb, "byCores": by_cores,
-            "byMemory": by_memory, "recommended": recommended,
-            "limit": max(1, cores), "why": why}
+    return {"cores": cores, "ramGb": ram_gb, "availGb": avail_gb,
+            "byCores": by_cores, "byMemory": by_memory,
+            "recommended": recommended, "limit": max(1, cores), "why": why}
 
 
 def explain(a: dict) -> str:
     """The text shown in the dialog. Plain, and honest about the trade."""
-    ram = f"{a['ramGb']:.0f} GB RAM" if a["ramGb"] else "unknown RAM"
+    ram = (f"{a['ramGb']:.0f} GB RAM, {a['availGb']:.0f} GB of it free right now"
+           if a["ramGb"] else "unknown RAM")
     return (
         f"Reading the books is the slow part of an import, and each book is read "
         f"on its own — so several can be read at the same time, one per worker.\n\n"
@@ -96,15 +119,25 @@ def ask_workers(parent, settings) -> int | None:
     start = int(settings.get("workers") or 0) or a["recommended"]
     start = max(1, min(a["limit"], start))
 
+    try:
+        from catalog_builder import theme
+    except ImportError:
+        from build.catalog_builder import theme
+    pal = theme.palette()
+
     win = tk.Toplevel(parent)
     win.title("How many books at once?")
     win.transient(parent)
     win.resizable(False, False)
+    # a Toplevel does not inherit the ttk background; without this the dialog
+    # keeps the system grey and the themed labels sit on the wrong colour
+    win.configure(bg=pal["bg"])
 
     frame = ttk.Frame(win, padding=16)
     frame.grid(sticky="nsew")
 
-    ttk.Label(frame, text="Reading the books", font=("Segoe UI", 12, "bold")
+    ttk.Label(frame, text="Reading the books", style="Head.TLabel",
+              font=("Segoe UI Semibold", 12)
               ).grid(row=0, column=0, columnspan=3, sticky="w", pady=(0, 8))
     ttk.Label(frame, text=explain(a), wraplength=460, justify="left"
               ).grid(row=1, column=0, columnspan=3, sticky="w")
@@ -134,6 +167,12 @@ def ask_workers(parent, settings) -> int | None:
 
     win.bind("<Return>", lambda _e: start_now())
     win.bind("<Escape>", lambda _e: win.destroy())
+    # centre on the parent, and never open larger than the screen
+    win.update_idletasks()
+    x = parent.winfo_rootx() + max(0, (parent.winfo_width() - win.winfo_reqwidth()) // 2)
+    y = parent.winfo_rooty() + 80
+    win.geometry(f"+{max(0, x)}+{max(0, y)}")
+
     win.grab_set()
     spin.focus_set()
     parent.wait_window(win)

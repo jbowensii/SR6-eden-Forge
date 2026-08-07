@@ -560,24 +560,25 @@ def test_core_advice_is_capped_by_memory_not_just_cores():
     """
     from build.catalog_builder.cores import advise
 
-    a = advise(cores=32, ram_gb=16)
+    a = advise(cores=32, ram_gb=64, avail_gb=16)
     assert a["byCores"] == 30
-    assert a["byMemory"] == 5
-    assert a["recommended"] == 5
+    assert a["byMemory"] == 3             # (16 - 4 headroom) / 3.2
+    assert a["recommended"] == 3
     assert "memory" in a["why"]
 
-    b = advise(cores=4, ram_gb=128)
+    b = advise(cores=4, ram_gb=128, avail_gb=128)
     assert b["recommended"] == 2          # cores, less the two held back
     assert "cores" in b["why"]
 
-    # never zero, however small the machine
-    assert advise(cores=1, ram_gb=1)["recommended"] == 1
+    # never zero, however little is going spare
+    assert advise(cores=1, ram_gb=1, avail_gb=1)["recommended"] == 1
+    assert advise(cores=32, ram_gb=64, avail_gb=2)["recommended"] == 1
 
 
 def test_core_advice_without_a_memory_reading_falls_back_to_cores():
     from build.catalog_builder.cores import advise
 
-    a = advise(cores=8, ram_gb=0)
+    a = advise(cores=8, ram_gb=0, avail_gb=0)
     assert a["recommended"] == 6
     assert a["byMemory"] == a["byCores"]   # does not invent a memory limit
 
@@ -614,3 +615,76 @@ def test_review_settings_merge_rather_than_overwrite(tmp_path):
     got = json.loads((data / "settings.json").read_text(encoding="utf-8"))
     assert "iconLibrary" not in got
     assert got["dataDir"] == "somewhere"
+
+
+# ---------- theme ----------
+
+def test_every_text_colour_is_readable_in_both_modes():
+    """The point of the palette is that it works in the OS's mode, not ours.
+
+    Neon on white is a pale smear, so the light palette re-mixes the same hues
+    darker rather than swapping the background. This holds every pair the
+    window actually draws to the WCAG AA threshold for body text.
+    """
+    from build.catalog_builder.theme import (
+        AA_NORMAL, PALETTES, TEXT_PAIRS, contrast_ratio)
+
+    bad = []
+    for mode, p in PALETTES.items():
+        for fg, bg in TEXT_PAIRS:
+            r = contrast_ratio(p[fg], p[bg])
+            if r < AA_NORMAL:
+                bad.append(f"{mode}: {fg} on {bg} = {r:.2f}:1")
+    assert not bad, "unreadable colour pairs: " + "; ".join(bad)
+
+
+def test_contrast_ratio_matches_the_wcag_reference_values():
+    """Guard the formula itself — a wrong one would pass everything."""
+    from build.catalog_builder.theme import contrast_ratio
+
+    assert contrast_ratio("#000000", "#ffffff") == pytest.approx(21.0, abs=0.01)
+    assert contrast_ratio("#ffffff", "#ffffff") == pytest.approx(1.0, abs=0.01)
+    assert contrast_ratio("#777777", "#ffffff") == pytest.approx(4.48, abs=0.02)
+    # order must not matter
+    assert contrast_ratio("#123456", "#abcdef") == pytest.approx(
+        contrast_ratio("#abcdef", "#123456"))
+
+
+def test_the_two_modes_are_actually_different_and_correctly_oriented():
+    from build.catalog_builder.theme import LIGHT, DARK, luminance
+
+    assert luminance(DARK["bg"]) < 0.1        # dark really is dark
+    assert luminance(LIGHT["bg"]) > 0.7
+    assert luminance(DARK["text"]) > luminance(DARK["bg"])
+    assert luminance(LIGHT["text"]) < luminance(LIGHT["bg"])
+
+
+def test_detect_mode_answers_one_of_two_things():
+    from build.catalog_builder.theme import detect_mode, PALETTES
+
+    assert detect_mode() in PALETTES
+
+
+def test_advice_budgets_free_memory_not_installed_memory():
+    """The incident this exists to prevent, 2026-08-07.
+
+    A 62 GB machine was recommended (and given) ten workers. Ten workers took
+    31.7 GB, but ~28 GB was already committed to Foundry, a browser and an
+    editor before the import started — so free memory fell to 1.2 GB and
+    Windows began paging. Installed RAM was never the number that mattered.
+    """
+    from build.catalog_builder.cores import advise
+
+    a = advise(cores=32, ram_gb=61.6, avail_gb=33.0)   # plenty free: fine
+    assert a["recommended"] >= 8
+
+    b = advise(cores=32, ram_gb=61.6, avail_gb=6.0)    # same machine, busy
+    assert b["recommended"] == 1
+    assert b["byMemory"] < b["byCores"]
+
+
+def test_the_explanation_says_free_not_installed():
+    from build.catalog_builder.cores import advise, explain
+
+    text = explain(advise(cores=32, ram_gb=61.6, avail_gb=8.0))
+    assert "free" in text.lower()
