@@ -64,9 +64,21 @@ Source: "..\extractor\*"; DestDir: "{app}\extractor"; \
     Flags: ignoreversion recursesubdirs; Excludes: "__pycache__"
 Source: "..\tools\*.py"; DestDir: "{app}\tools"; Flags: ignoreversion
 Source: "..\schemas\*"; DestDir: "{app}\schemas"; Flags: ignoreversion recursesubdirs
+; The review app: sources, the BUILT front end, and its runtime packages.
+;
+; dist\ and node_modules\ were both excluded here, which meant the installed
+; "Review & correct" button started a server that died on
+;   Cannot find package 'express'
+; and, had it started, would have served no front end. Neither is optional:
+; server/index.mjs does express.static(../dist).
 Source: "..\site\*"; DestDir: "{app}\site"; \
     Flags: ignoreversion recursesubdirs; \
-    Excludes: "node_modules\*,*.log,dist\*"
+    Excludes: "node_modules\*,*.log"
+; Production dependencies only — staged by build_release.py with
+; `npm ci --omit=dev`. 17 MB, against 66 MB for the tree with vite and react's
+; dev tooling in it, none of which runs on the user's machine.
+Source: "work\site-deps\node_modules\*"; DestDir: "{app}\site\node_modules"; \
+    Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\NOTICE"; DestDir: "{app}"; Flags: ignoreversion
 ; The shortcuts point at THIS rather than at the executable's own resource.

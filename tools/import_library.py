@@ -35,42 +35,70 @@ sys.path.insert(0, str(_P(__file__).resolve().parent.parent))
 from extractor.commlink6 import DEFAULT_JAR, read_book
 from extractor.commlink6_convert import to_item
 from extractor.identity import IdLock, stamp_catalog_ids
-from extractor.ingest import (CURATED, ingest_book, load_library, load_registry,
-                              write_library)
+from extractor.ingest import (CURATED, LIBRARY, ingest_book, load_library,
+                              load_registry, write_library)
 from extractor.bookprep import default_workers, prepare_books
 from extractor.ownership import plan_import
 from extractor.quiet import quiet_pdf_noise
 from extractor.reconcile import reconcile_library
 
-def import_commlink6(data_root: _P, book: str, jar_book: str, jar: _P,
-                     domain: str = "gear") -> dict:
-    """Load one book's Commlink6 items into the library, replacing prior rows."""
+def import_commlink6(data_root: _P, book: str, jar_book: str, jar: _P) -> dict:
+    """Load one book's Commlink6 items into the library, replacing prior rows.
+
+    ``to_item`` returns THREE values -- ``(domain, file, item)``. This unpacked
+    two of them, so every single record raised ValueError straight into a bare
+    ``except Exception: continue`` and the import landed zero Commlink6 rows
+    while cheerfully reporting success. Commlink6 is the authority here, so
+    that quietly emptied the half of the library that matters most.
+
+    Two lessons are baked in below: the records are grouped by DOMAIN, because
+    one book's records do not all belong to the same library file; and a record
+    that cannot be converted is counted and reported rather than dropped on the
+    floor.
+    """
     recs = read_book(jar_book, jar)
-    library, envelopes = load_library(data_root, domain)
 
-    # idempotent: this book's previous jar rows go before the new ones land
-    for cat in list(library):
-        library[cat] = [
-            i for i in library[cat]
-            if not (i.get("meta", {}).get("book") == book
-                    and i.get("meta", {}).get("source") == "commlink6")
-        ]
-
-    added = 0
+    by_domain: dict[str, dict[str, list]] = {}
+    failures: dict[str, int] = {}
     for rec in recs.values():
         try:
-            cat, item = to_item(rec, jar_book)
-        except Exception:
+            dom, file_, item = to_item(rec, jar_book)
+        except Exception as e:                  # counted, never silent
+            failures[f"{type(e).__name__}: {e}"] = (
+                failures.get(f"{type(e).__name__}: {e}", 0) + 1)
             continue
-        if not cat or not item:
+        if not dom or not file_ or not item:
+            failures["converter returned nothing"] = (
+                failures.get("converter returned nothing", 0) + 1)
             continue
         item.setdefault("meta", {})
         item["meta"].update(book=book, source="commlink6")
-        library.setdefault(cat, []).append(item)
-        added += 1
+        by_domain.setdefault(dom, {}).setdefault(file_, []).append(item)
 
-    write_library(data_root, domain, library, envelopes)
-    return {"jarItems": added}
+    # Idempotent across EVERY domain already on disk, not just the ones this
+    # run produces — otherwise a book that stops yielding, say, spells leaves
+    # its old spell rows behind forever.
+    existing = set()
+    lib_dir = data_root / LIBRARY
+    if lib_dir.is_dir():
+        existing = {d.name for d in lib_dir.iterdir() if d.is_dir()}
+
+    added = 0
+    for dom in sorted(existing | set(by_domain)):
+        library, envelopes = load_library(data_root, dom)
+        for cat in list(library):
+            library[cat] = [
+                i for i in library[cat]
+                if not (i.get("meta", {}).get("book") == book
+                        and i.get("meta", {}).get("source") == "commlink6")
+            ]
+        for cat, items in by_domain.get(dom, {}).items():
+            library.setdefault(cat, []).extend(items)
+            added += len(items)
+        write_library(data_root, dom, library, envelopes)
+
+    return {"jarItems": added, "read": len(recs), "failures": failures,
+            "domains": sorted(by_domain)}
 
 
 def _snapshot(data_root: _P, book: str, domain: str = "gear") -> dict:
@@ -175,6 +203,12 @@ def run(data_root: _P, jar: _P | None, only: str | None, apply: bool,
                 st = import_commlink6(data_root, book, p["jarBook"], jar)
                 totals["jarItems"] += st["jarItems"]
                 head = f"commlink6 {st['jarItems']:>5} items"
+                if st["failures"]:
+                    worst = max(st["failures"].items(), key=lambda kv: kv[1])
+                    totals["jarFailed"] += sum(st["failures"].values())
+                    print(f"    !! {sum(st['failures'].values())} of {st['read']} "
+                          f"Commlink6 records did not convert — {worst[0]}",
+                          flush=True)
             else:
                 head = "pdf-only"
             # the PDF pass fills what the jar lacks and always supplies prose.

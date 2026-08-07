@@ -1,0 +1,124 @@
+"""The ownership-gated import, and the two silent failures it shipped with.
+
+Both bugs here were invisible: the import printed a success line and a totals
+row while doing nothing at all. Neither would have survived a test that looked
+at the RESULT rather than the exit code.
+"""
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+
+from tools import import_library
+
+
+class _Rec(dict):
+    pass
+
+
+def test_import_commlink6_reports_failures_instead_of_swallowing(tmp_path, monkeypatch):
+    """The bug: to_item returns THREE values and the caller unpacked two.
+
+    Every record raised ValueError into a bare `except Exception: continue`,
+    so a book with 45 Commlink6 records imported 0 of them and still reported
+    success. Commlink6 is the authority in this pipeline, so this quietly
+    emptied the half of the library that matters most.
+    """
+    monkeypatch.setattr(import_library, "read_book",
+                        lambda b, j: {"a": _Rec(), "b": _Rec(), "c": _Rec()})
+
+    def boom(rec, jar_book):
+        raise ValueError("too many values to unpack (expected 2, got 3)")
+
+    monkeypatch.setattr(import_library, "to_item", boom)
+
+    st = import_library.import_commlink6(tmp_path, "astral_ways", "astral_ways",
+                                         Path("nope.jar"))
+    assert st["jarItems"] == 0
+    assert st["read"] == 3
+    # the whole point: the failure is COUNTED and named, not discarded
+    assert sum(st["failures"].values()) == 3
+    assert "too many values to unpack" in "".join(st["failures"])
+
+
+def test_import_commlink6_files_records_by_domain(tmp_path, monkeypatch):
+    """One book's records do not all belong to the same library file."""
+    monkeypatch.setattr(import_library, "read_book",
+                        lambda b, j: {"1": _Rec(), "2": _Rec(), "3": _Rec()})
+
+    out = iter([("gear", "electronics", {"id": "a", "name": "Commlink"}),
+                ("gear", "weapons_firearms", {"id": "b", "name": "Pistol"}),
+                ("spells", "combat", {"id": "c", "name": "Manabolt"})])
+    monkeypatch.setattr(import_library, "to_item", lambda rec, jb: next(out))
+
+    st = import_library.import_commlink6(tmp_path, "corebook", "core",
+                                         Path("nope.jar"))
+    assert st["jarItems"] == 3
+    assert st["failures"] == {}
+    assert st["domains"] == ["gear", "spells"]
+
+    lib = tmp_path / import_library.LIBRARY
+    assert json.loads((lib / "gear" / "electronics.json").read_text(
+        encoding="utf-8"))["items"][0]["name"] == "Commlink"
+    assert json.loads((lib / "spells" / "combat.json").read_text(
+        encoding="utf-8"))["items"][0]["name"] == "Manabolt"
+
+
+def test_commlink6_rows_are_stamped_as_commlink6(tmp_path, monkeypatch):
+    """Provenance is what lets the PDF pass fill gaps without overwriting."""
+    monkeypatch.setattr(import_library, "read_book", lambda b, j: {"1": _Rec()})
+    monkeypatch.setattr(import_library, "to_item",
+                        lambda rec, jb: ("gear", "electronics", {"id": "a"}))
+
+    import_library.import_commlink6(tmp_path, "corebook", "core", Path("x.jar"))
+    item = json.loads((tmp_path / import_library.LIBRARY / "gear" /
+                       "electronics.json").read_text(encoding="utf-8"))["items"][0]
+    assert item["meta"]["source"] == "commlink6"
+    assert item["meta"]["book"] == "corebook"
+
+
+def test_reimporting_a_book_replaces_its_rows_rather_than_doubling_them(
+        tmp_path, monkeypatch):
+    monkeypatch.setattr(import_library, "read_book", lambda b, j: {"1": _Rec()})
+    monkeypatch.setattr(import_library, "to_item",
+                        lambda rec, jb: ("gear", "electronics", {"id": "a"}))
+
+    for _ in range(3):
+        import_library.import_commlink6(tmp_path, "corebook", "core",
+                                        Path("x.jar"))
+    items = json.loads((tmp_path / import_library.LIBRARY / "gear" /
+                        "electronics.json").read_text(encoding="utf-8"))["items"]
+    assert len(items) == 1
+
+
+# ---------- what the installer has to carry ----------
+
+ISS = Path(__file__).resolve().parent.parent / "build" / "installer.iss"
+
+
+def test_installer_ships_what_the_review_app_needs_to_run():
+    """The installed "Review & correct" died on: Cannot find package 'express'.
+
+    site/dist and site/node_modules were both excluded, so the server had no
+    dependencies and no front end to serve. server/index.mjs does
+    express.static(../dist) — neither is optional.
+    """
+    iss = ISS.read_text(encoding="utf-8")
+    site_line = next(ln for ln in iss.splitlines()
+                     if r'Source: "..\site\*"' in ln)
+    block = iss[iss.index(site_line):iss.index(site_line) + 400]
+
+    assert r"dist\*" not in block, "the built front end is excluded again"
+    assert r"work\site-deps\node_modules\*" in iss, \
+        "the review app's runtime packages are not being shipped"
+
+
+def test_installer_still_excludes_the_dev_tree():
+    """Ship production packages, not vite and react's dev tooling."""
+    iss = ISS.read_text(encoding="utf-8")
+    assert r"node_modules\*,*.log" in iss
+    assert "--omit=dev" in (
+        Path(__file__).resolve().parent.parent / "build" / "build_release.py"
+    ).read_text(encoding="utf-8")

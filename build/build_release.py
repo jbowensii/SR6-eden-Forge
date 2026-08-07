@@ -124,11 +124,36 @@ def main() -> int:
     args = ap.parse_args()
 
     v = version()
-    total = 4 if not args.no_installer else 2
+    total = 5 if not args.no_installer else 2
     print(f"Shadowrun 6th World Catalog Builder — build v{v}")
 
     app_dir = DIST / "SR6CatalogBuilder"
     exe = app_dir / "SR6CatalogBuilder.exe"
+
+    # 0. the review app: built front end + runtime packages
+    #
+    # Both used to be left out of the installer, so the installed "Review &
+    # correct" started a server that died on "Cannot find package 'express'"
+    # and would have had no front end to serve anyway.
+    if not args.no_installer:
+        step(0, total, "building the review app")
+        rc = run(["npm", "run", "build"], cwd=REPO / "site")
+        if rc:
+            return rc
+        stage = BUILD / "work" / "site-deps"
+        stage.mkdir(parents=True, exist_ok=True)
+        for f in ("package.json", "package-lock.json"):
+            src = REPO / "site" / f
+            if src.is_file():
+                shutil.copy2(src, stage / f)
+        # production only: 17 MB, against 66 MB with vite and react's dev
+        # tooling, none of which ever runs on the user's machine
+        rc = run(["npm", "ci", "--omit=dev", "--no-audit", "--no-fund"], cwd=stage)
+        if rc:
+            return rc
+        mods = stage / "node_modules"
+        n = sum(1 for _ in mods.rglob("*")) if mods.is_dir() else 0
+        print(f"      site/dist + {n} runtime files")
 
     # 1. freeze
     if args.skip_freeze and exe.is_file():
