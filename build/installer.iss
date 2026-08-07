@@ -39,6 +39,16 @@ ArchitecturesAllowed=x64compatible
 UninstallDisplayName={#AppName}
 SetupIconFile=
 
+; Wizard artwork. Several sizes each so Windows picks one per display scaling
+; rather than stretching a single 100% image, which on a 200% display looks
+; exactly as bad as it sounds. BMP rather than PNG: PNG wizard images need
+; Inno 6.3+, and BMP works everywhere — the figure is composited onto the
+; app's own panel colour first, since BMP carries no alpha.
+WizardImageFile=wizard\wizard-164x314.bmp,wizard\wizard-192x386.bmp,wizard\wizard-256x482.bmp,wizard\wizard-328x628.bmp
+WizardSmallImageFile=wizard\small-55x55.bmp,wizard\small-64x68.bmp,wizard\small-92x97.bmp,wizard\small-110x110.bmp
+WizardImageStretch=no
+WizardImageAlphaFormat=none
+
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
