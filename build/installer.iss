@@ -132,6 +132,38 @@ WelcomeLabel2=This installs the Catalog Builder, which turns Shadowrun PDFs you 
 var
   Runner, Backing: TBitmapImage;
 
+procedure StopOurReviewServer();
+var
+  Code: Integer;
+begin
+  { The review app is a background node.exe with no window and no tray icon.
+    It outlives the app that started it, keeps a LevelDB binding open under
+    site\node_modules, and setup then fails halfway through with
+
+      DeleteFile failed; code 5.  Access is denied.
+
+    on classic-level.node. There is nothing for the user to close, because
+    there is nothing on screen to close.
+
+    So setup stops it itself. Matched on the COMMAND LINE, never on the name:
+    a developer machine runs dozens of node.exe processes and Foundry is one of
+    them. Only a node running OUR server script is touched, and -EA 0 keeps a
+    failure here from stopping the install. }
+  Exec(ExpandConstant('{cmd}'),
+       '/C powershell -NoProfile -WindowStyle Hidden -Command "' +
+       'Get-CimInstance Win32_Process | Where-Object { $_.Name -eq ''node.exe''' +
+       ' -and $_.CommandLine -like ''*site*server*index.mjs*'' } | ' +
+       'ForEach-Object { Stop-Process -Id $_.ProcessId -Force -EA 0 }"',
+       '', SW_HIDE, ewWaitUntilTerminated, Code);
+end;
+
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+begin
+  StopOurReviewServer();
+  Sleep(600);           { let Windows release the file handles }
+  Result := '';         { never block the install over this }
+end;
+
 function SidebarFile(): String;
 var
   W: Integer;
