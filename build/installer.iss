@@ -69,6 +69,12 @@ Source: "..\site\*"; DestDir: "{app}\site"; \
     Excludes: "node_modules\*,*.log,dist\*"
 Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\NOTICE"; DestDir: "{app}"; Flags: ignoreversion
+; The shortcuts point at THIS rather than at the executable's own resource.
+; The exe does carry the icon, but earlier builds did not, and the Windows
+; shell caches "this path has no icon" per path — so a shortcut to the exe kept
+; drawing the generic file glyph long after the icon was fixed. A separate .ico
+; is a different cache key, and it renders immediately.
+Source: "wizard\app.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Files]
 ; the sidebar figure, unpacked before the wizard is drawn so it can be loaded
@@ -76,10 +82,11 @@ Source: "..\NOTICE"; DestDir: "{app}"; Flags: ignoreversion
 Source: "wizard\sidebar-*.bmp"; Flags: dontcopy
 
 [Icons]
-Name: "{group}\{#AppName}"; Filename: "{app}\SR6CatalogBuilder.exe"
+Name: "{group}\{#AppName}"; Filename: "{app}\SR6CatalogBuilder.exe"; \
+    IconFilename: "{app}\app.ico"
 Name: "{group}\Uninstall {#AppName}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#AppName}"; Filename: "{app}\SR6CatalogBuilder.exe"; \
-    Tasks: desktopicon
+    IconFilename: "{app}\app.ico"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\SR6CatalogBuilder.exe"; \
@@ -128,7 +135,11 @@ end;
 
 procedure ShiftRight(C: TControl; By: Integer);
 begin
-  if C <> nil then
+  { Only controls parented DIRECTLY to the form. Inno nests some of these —
+    shifting a parent and then its child moves the child twice, which is how
+    the text ended up starting at roughly double the figure's width with a
+    band of dead white between the two. }
+  if (C <> nil) and (C.Parent = WizardForm) then
   begin
     C.Left := C.Left + By;
     C.Width := C.Width - By;
@@ -137,7 +148,7 @@ end;
 
 procedure InitializeWizard();
 var
-  ArtW, ArtH, MaxW: Integer;
+  ArtW, ArtH, MaxW, Shift: Integer;
   F: String;
 begin
   F := SidebarFile();
@@ -178,23 +189,28 @@ begin
   end;
 
   Backing.Width := ArtW;
+  Backing.Height := WizardForm.ClientHeight;
   Runner.Left := 0;
   Runner.Top := WizardForm.ClientHeight - ArtH;
   Runner.Width := ArtW;
   Runner.Height := ArtH;
   Runner.Anchors := [akLeft, akBottom];
 
-  { widen the window so the figure is added BESIDE the content rather than
-    eating into it, then move everything the wizard draws right past it }
-  WizardForm.Width := WizardForm.Width + ArtW;
-  WizardForm.Left := WizardForm.Left - (ArtW div 2);
+  { How far the wizard's own controls move over.
+    Deliberately LESS than the figure's width, so he stands ON the page's white
+    rather than in a column of his own beside it — which is what was asked for,
+    and it also stops a wide figure pushing the text off the right of a small
+    screen. He is composited onto white, so the overlap is invisible. }
+  Shift := (ArtW * 62) div 100;
+
+  WizardForm.Width := WizardForm.Width + Shift;
+  WizardForm.Left := WizardForm.Left - (Shift div 2);
   if WizardForm.Left < 0 then WizardForm.Left := 0;
 
-
-  ShiftRight(WizardForm.OuterNotebook, ArtW);
-  ShiftRight(WizardForm.InnerNotebook, ArtW);
-  ShiftRight(WizardForm.Bevel, ArtW);
-  ShiftRight(WizardForm.MainPanel, ArtW);
+  ShiftRight(WizardForm.OuterNotebook, Shift);
+  ShiftRight(WizardForm.InnerNotebook, Shift);
+  ShiftRight(WizardForm.Bevel, Shift);
+  ShiftRight(WizardForm.MainPanel, Shift);
 
   { the welcome and finished pages carry their own image; it is redundant now }
   WizardForm.WizardBitmapImage.Visible := False;

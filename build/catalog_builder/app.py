@@ -390,6 +390,15 @@ class App(tk.Tk):
 
         n = len(self.scan_result["matched"])
         self._write(f"=== importing {n} book(s) into {ws}")
+
+        # The registry, with the matched PDF paths filled in, written INTO the
+        # workspace the pipeline is about to read. Without this the import dies
+        # on a missing data/books.json: the scan's results only ever existed in
+        # this process, and ownership gating has nothing to gate on.
+        reg = books.apply_to_registry(repo_root(), self.scan_result,
+                                      out=ws / "data" / "books.json")
+        self._write(f"    book registry -> {reg}")
+
         self.progress = Progress(n)
 
         args = ["--apply", "--data", str(ws / "data")]

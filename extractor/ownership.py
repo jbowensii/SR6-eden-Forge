@@ -107,7 +107,16 @@ def plan_import(data_root: Path, jar: Path | None = None) -> list[dict]:
     lean on), then by publication date, reprints last — the order
     ``tools/ingest_all.py`` has always used.
     """
-    reg = json.loads((data_root / "books.json").read_text(encoding="utf-8"))
+    registry = Path(data_root) / "books.json"
+    if not registry.is_file():
+        # Reached by running an import before anything has scanned a PDF
+        # folder. The bare FileNotFoundError names a path the user never chose
+        # and gives them nothing to act on.
+        raise SystemExit(
+            f"No book registry at {registry}.\n"
+            "Choose your PDF folder and let the scan find your books first — "
+            "that is what writes this file.")
+    reg = json.loads(registry.read_text(encoding="utf-8"))
     jar_books = commlink6_books(jar) if jar and Path(jar).is_file() else None
 
     order = sorted(

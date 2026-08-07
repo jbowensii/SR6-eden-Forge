@@ -90,3 +90,50 @@ def test_real_registry_plans_without_error():
         pytest.skip("no local library")
     plan = plan_import(pathlib.Path("data"), None)
     assert plan and all(p["source"] in {"both", "pdf", "skip"} for p in plan)
+
+
+def test_plan_import_without_a_registry_says_what_to_do(tmp_path):
+    """The import must not die on a raw FileNotFoundError.
+
+    Regression: the installed app passed ``--data <workspace>/data`` but never
+    wrote the scanned book registry there, so the first Import crashed with a
+    traceback naming a path the user had never chosen.
+    """
+    import pytest
+
+    from extractor.ownership import plan_import
+
+    with pytest.raises(SystemExit) as e:
+        plan_import(tmp_path)
+    assert "books.json" in str(e.value)
+    assert "scan" in str(e.value).lower()
+
+
+def test_import_writes_the_registry_into_the_workspace(tmp_path):
+    """The scan's matches must land where the pipeline actually reads them."""
+    from build.catalog_builder import books
+
+    repo = tmp_path / "repo"
+    (repo / "data").mkdir(parents=True)
+    (repo / "data" / "books.json").write_text(
+        '{"corebook": {"title": "Sixth World Core Rulebook", "cat": "CAT28000"}}',
+        encoding="utf-8")
+
+    pdfs = tmp_path / "pdfs"
+    pdfs.mkdir()
+    (pdfs / "Shadowrun 6e-Core Rulebook-CAT28000.pdf").write_bytes(b"%PDF-1.4\n")
+
+    result = books.scan(pdfs, books.load_registry(repo))
+    assert len(result["matched"]) == 1
+
+    ws = tmp_path / "workspace"
+    out = books.apply_to_registry(repo, result, out=ws / "data" / "books.json")
+    assert out.is_file()
+
+    import json
+    written = json.loads(out.read_text(encoding="utf-8"))
+    assert written["corebook"]["pdf"].endswith("CAT28000.pdf")
+
+    # and the plan can now be built from it, which is the thing that crashed
+    from extractor.ownership import plan_import
+    assert plan_import(ws / "data")
