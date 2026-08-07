@@ -34,6 +34,7 @@ DEFAULTS: dict = {
     "workspace": "",          # extracted library + built modules
     "iconLibrary": "",        # optional: a folder of icon sets to match against
     "workers": 0,             # books read at once; 0 = not chosen yet
+    "reviewPort": 8347,       # the review app's local web server
     "lastImport": "",
     "artSupport": False,      # the optional heavy download
     "firstRunDone": False,

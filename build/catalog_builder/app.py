@@ -25,13 +25,13 @@ from tkinter import filedialog, messagebox, ttk
 # relative import there fails only in the packaged build — the worst place to
 # find out. See __main__.py.
 try:
-    from catalog_builder import books, commlink6, cores, publish, theme
+    from catalog_builder import books, commlink6, cores, ports, publish, theme
     from catalog_builder.runner import Job, Progress, pipeline_command
     from catalog_builder.settings import (
         Settings, default_workspace, detect_commlink6, detect_foundry_data,
         ensure_workspace, sync_review_settings)
 except ImportError:                       # installed under a different root
-    from build.catalog_builder import books, commlink6, cores, publish, theme
+    from build.catalog_builder import books, commlink6, cores, ports, publish, theme
     from build.catalog_builder.runner import Job, Progress, pipeline_command
     from build.catalog_builder.settings import (
         Settings, default_workspace, detect_commlink6, detect_foundry_data,
@@ -40,7 +40,7 @@ except ImportError:                       # installed under a different root
 APP_TITLE = "Shadowrun 6th World Catalog Builder"
 #: a blank line inside a message box
 NL2 = chr(10) + chr(10)
-REVIEW_URL = "http://localhost:8347"
+#: the review app's port is chosen per run — see catalog_builder.ports
 
 #: The palette, chosen from what the OS is set to. Read once at startup —
 #: Windows can change it mid-session, but restyling a live Tk window widget by
@@ -495,18 +495,58 @@ class App(tk.Tk):
     def _review(self):
         """Open the review app, starting it if it is not already up."""
         self._save()
-        import socket
 
-        with socket.socket() as s:
-            s.settimeout(0.3)
-            up = s.connect_ex(("127.0.0.1", 8347)) == 0
-        if not up:
-            self._write("=== starting the review app")
-            self.job = Job(["node", "site/server/index.mjs"], cwd=repo_root()).start()
-            self.after(1500, lambda: webbrowser.open(REVIEW_URL))
-            self.after(120, self._pump)
-        else:
-            webbrowser.open(REVIEW_URL)
+        port = ports.ask_port(self, self.settings)
+        if port is None:
+            return
+        url = f"http://localhost:{port}"
+
+        if ports.is_listening(port):
+            webbrowser.open(url)                       # already running
+            return
+
+        # Pre-flight. The server needs its dependencies and its built front
+        # end; without them node exits immediately and the old code opened a
+        # browser tab at a dead port anyway, with the reason nowhere on screen.
+        site = repo_root() / "site"
+        missing = [str(p.relative_to(repo_root()))
+                   for p in (site / "node_modules", site / "dist")
+                   if not p.is_dir()]
+        if missing:
+            self._write(f"!! the review app cannot start — missing: "
+                        f"{', '.join(missing)}")
+            messagebox.showerror(
+                APP_TITLE,
+                "The review app is not installed completely." + NL2
+                + "Missing: " + ", ".join(missing) + NL2
+                + "Reinstall the Catalog Builder to restore it.")
+            return
+
+        self._write(f"=== starting the review app on {port}")
+        self.job = Job(["node", "site/server/index.mjs"], cwd=repo_root(),
+                       env={"PORT": str(port)}).start()
+        self.after(120, self._pump)
+        self._await_review(port, url, tries=0)
+
+    def _await_review(self, port: int, url: str, tries: int) -> None:
+        """Open the browser only once the server actually answers.
+
+        Opening on a timer was the bug: a server that died on startup still got
+        a browser tab pointed at it, so the failure looked like an empty page
+        rather than an error.
+        """
+        if ports.is_listening(port):
+            self._write(f"    review app ready at {url}")
+            webbrowser.open(url)
+            return
+        if self.job and not self.job.running:
+            self._write("!! the review app stopped before it began listening — "
+                        "see the log above for the reason")
+            return
+        if tries > 60:                                 # ~24 seconds
+            self._write(f"!! the review app did not answer on {port} in time")
+            return
+        self.after(400, lambda: self._await_review(port, url, tries + 1))
 
     def _publish(self):
         self._save()

@@ -688,3 +688,84 @@ def test_the_explanation_says_free_not_installed():
 
     text = explain(advise(cores=32, ram_gb=61.6, avail_gb=8.0))
     assert "free" in text.lower()
+
+
+# ---------- the review app's port ----------
+
+def test_a_bound_port_is_reported_as_unavailable():
+    import socket
+
+    from build.catalog_builder import ports
+
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0))
+        # a generous backlog: nothing accepts in this test, and each probe
+        # leaves a connection sitting in the queue
+        s.listen(32)
+        taken = s.getsockname()[1]
+
+        assert ports.is_listening(taken)
+        assert not ports.is_free(taken)
+        state, sentence = ports.describe(taken)
+        assert state == "busy"
+        assert str(taken) in sentence
+
+    # released again once the socket closes
+    assert ports.is_free(taken) or not ports.is_listening(taken)
+
+
+def test_next_free_skips_a_port_in_use():
+    import socket
+
+    from build.catalog_builder import ports
+
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0))
+        s.listen(32)
+        taken = s.getsockname()[1]
+        nxt = ports.next_free(taken)
+        assert nxt != taken
+        assert ports.is_free(nxt)
+
+
+def test_wait_until_up_gives_up_when_the_server_dies():
+    """The bug: the browser was opened on a timer regardless.
+
+    A server that exited on a missing dependency still got a browser tab
+    pointed at it, so a startup failure looked like an empty page and the
+    reason appeared nowhere.
+    """
+    from build.catalog_builder import ports
+
+    # a port nothing is on, with a process that is already gone
+    assert ports.wait_until_up(59999, seconds=5, step=0.1,
+                               still_running=lambda: False) is False
+
+
+def test_wait_until_up_returns_true_once_something_answers():
+    import socket
+
+    from build.catalog_builder import ports
+
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0))
+        s.listen(1)
+        port = s.getsockname()[1]
+        assert ports.wait_until_up(port, seconds=2, step=0.1) is True
+
+
+def test_is_free_does_not_use_so_reuseaddr():
+    """Regression: on Windows SO_REUSEADDR lets you bind a port in use.
+
+    With it set, every occupied port reported as free — the exact opposite of
+    the question. Caught only because the test ran on Windows.
+    """
+    import inspect
+
+    from build.catalog_builder import ports
+
+    # the CALL, not the docstring — which deliberately names the option to
+    # explain why it is absent
+    body = inspect.getsource(ports.is_free)
+    body = body.replace(ports.is_free.__doc__ or "", "")
+    assert "setsockopt" not in body
