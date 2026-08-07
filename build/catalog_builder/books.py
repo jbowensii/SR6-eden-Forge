@@ -71,9 +71,14 @@ def load_registry(repo: Path) -> dict:
     return {}
 
 
-def scan(pdf_dir: Path, registry: dict) -> dict:
+def scan(pdf_dir: Path, registry: dict, identify_fn=None) -> dict:
     """Match every PDF in ``pdf_dir`` against the registry.
 
+    :param identify_fn: optional ``path -> {"book", "confidence", "how"}``,
+        normally :func:`catalog_builder.identify.identify`. When supplied, what
+        is INSIDE the file decides and the filename is only consulted if the
+        contents said nothing. A filename is a convention; the Catalyst product
+        code printed in the book is a fact.
     :returns: ``{matched: [...], unmatched: [...], missing: [...]}`` where
         *matched* pairs a book id with the file, *unmatched* lists PDFs that
         look like nothing we know, and *missing* names registry books with no
@@ -99,12 +104,22 @@ def scan(pdf_dir: Path, registry: dict) -> dict:
         book = None
         how = ""
 
-        m = CAT_RE.search(stem)
-        if m and m.group(1).lstrip("0") in {c.lstrip("0") for c in by_cat}:
-            for cat, b in by_cat.items():
-                if cat.lstrip("0") == m.group(1).lstrip("0"):
-                    book, how = b, f"product code CAT{m.group(1)}"
-                    break
+        if identify_fn is not None:
+            try:
+                found = identify_fn(f) or {}
+            except Exception as e:                # a bad file is not fatal
+                found = {"book": None, "how": f"could not be read ({type(e).__name__})"}
+            if found.get("book"):
+                book = found["book"]
+                how = found.get("how") or "identified from the file contents"
+
+        if book is None:
+            m = CAT_RE.search(stem)
+            if m and m.group(1).lstrip("0") in {c.lstrip("0") for c in by_cat}:
+                for cat, b in by_cat.items():
+                    if cat.lstrip("0") == m.group(1).lstrip("0"):
+                        book, how = b, f"product code CAT{m.group(1)} in the filename"
+                        break
 
         if book is None:
             words = set(_norm(stem))
@@ -122,7 +137,8 @@ def scan(pdf_dir: Path, registry: dict) -> dict:
                     best, score = b, overlap
             if best:
                 book = best
-                how = "title" if score == 999 else f"{score} distinctive words"
+                how = ("title in the filename" if score == 999
+                       else f"{score} distinctive words in the filename")
 
         if book and book not in taken:
             taken.add(book)

@@ -1,0 +1,42 @@
+# Pylint settings for SR6-eden-Forge.
+#
+# Each disable below is a deliberate choice, not a silenced complaint. Anything
+# not listed here is expected to be fixed rather than suppressed.
+[MAIN]
+ignore-paths = ^site/node_modules/.*$,^.*/__pycache__/.*$
+jobs = 0
+
+[MESSAGES CONTROL]
+disable =
+    # House style: the extractors mirror the books' own vocabulary (dmgDef,
+    # avail, DV), and renaming them to satisfy snake_case would make the code
+    # harder to check against a page.
+    invalid-name,
+    # Line length is enforced by eye at ~88; a hard gate flags docstrings that
+    # read better long.
+    line-too-long,
+    # Readers are genuinely long and genuinely branchy: they follow the layout
+    # of a printed page. Splitting them to hit a metric would scatter one
+    # coherent procedure across several functions.
+    too-many-arguments, too-many-positional-arguments, too-many-locals,
+    too-many-branches, too-many-statements, too-many-return-statements,
+    too-many-nested-blocks, too-many-instance-attributes, too-few-public-methods,
+    too-many-lines,
+    # Imports inside functions are deliberate: pdfplumber costs ~1s to import
+    # and the parse stage must not pay it, and the frozen build imports some
+    # modules lazily so a missing optional dependency is not fatal at startup.
+    import-outside-toplevel,
+    # One bad book must never lose the other forty-nine, so broad excepts are
+    # the design. Where one is used, the error is COUNTED and reported.
+    broad-exception-caught,
+    # The readers share a shape (walk columns, group lines, size-test headings)
+    # because the books do. Deduplicating across them would couple unrelated
+    # layouts together.
+    duplicate-code,
+    # subprocess.Popen is held deliberately so a job can be cancelled; a with
+    # block would close it at the end of the function.
+    consider-using-with,
+    # Every tool in tools/ inserts the repo on sys.path before importing from
+    # extractor, because they are run as scripts. The imports CANNOT come
+    # first: without the bootstrap there is nothing to import.
+    wrong-import-position, wrong-import-order,

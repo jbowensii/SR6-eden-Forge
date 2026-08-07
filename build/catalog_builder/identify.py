@@ -276,3 +276,78 @@ def identify(pdf_path, registry: dict, cache: SignalCache | None = None) -> dict
 def default_cache_path() -> Path:
     base = os.environ.get("LOCALAPPDATA") or Path.home()
     return Path(base) / "SR6CatalogBuilder" / "pdf-signals.json"
+
+
+# --------------------------------------------------------------------------
+# naming files the way we name books
+
+#: What a recognised book is called once renamed. Mirrors the retail pattern
+#: the publisher uses, so a renamed library still matches on the filename alone
+#: if it is ever read by something that only looks at names.
+NAME_TEMPLATE = "Shadowrun 6e-{title}-CAT{cat}.pdf"
+NAME_NO_CAT = "Shadowrun 6e-{title}.pdf"
+
+#: Characters Windows will not accept in a filename.
+#: Characters Windows will not accept in a filename, control codes included.
+_ILLEGAL = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
+
+
+def canonical_name(book: str, registry: dict) -> str | None:
+    """What ``book``'s file should be called, or None if we cannot say."""
+    info = registry.get(book) or {}
+    title = (info.get("title") or "").strip()
+    if not title:
+        return None
+    title = _ILLEGAL.sub("", title).rstrip(". ")
+    cat = _norm_cat(info.get("cat") or "")
+    name = (NAME_TEMPLATE.format(title=title, cat=cat) if cat
+            else NAME_NO_CAT.format(title=title))
+    return name
+
+
+def plan_renames(matched: list[dict], registry: dict) -> list[dict]:
+    """Which recognised files are not named our way, and what to call them.
+
+    :param matched: ``[{"book", "file"}, ...]`` as produced by a scan.
+    :returns: ``[{"book", "from", "to", "path", "collision"}]`` -- only files
+        that would actually change, with any name clash flagged rather than
+        resolved. Renaming one book over another would be the worst possible
+        outcome of a convenience feature.
+    """
+    plan = []
+    wanted: dict[str, str] = {}
+    for m in matched:
+        src = Path(m["file"])
+        want = canonical_name(m["book"], registry)
+        if not want or src.name == want:
+            continue
+        target = src.with_name(want)
+        clash = ""
+        if target.exists():
+            clash = "a different file already has that name"
+        elif want in wanted:
+            clash = f"the same name is wanted by {wanted[want]}"
+        wanted[want] = m["book"]
+        plan.append({"book": m["book"], "from": src.name, "to": want,
+                     "path": str(src), "collision": clash})
+    return plan
+
+
+def apply_renames(plan: list[dict]) -> dict:
+    """Carry out a rename plan, skipping anything flagged as a collision.
+
+    :returns: ``{"renamed": [...], "skipped": [...]}``
+    """
+    renamed, skipped = [], []
+    for item in plan:
+        if item.get("collision"):
+            skipped.append({**item, "why": item["collision"]})
+            continue
+        src = Path(item["path"])
+        dst = src.with_name(item["to"])
+        try:
+            src.rename(dst)
+            renamed.append({**item, "path": str(dst)})
+        except OSError as e:
+            skipped.append({**item, "why": f"{type(e).__name__}: {e}"})
+    return {"renamed": renamed, "skipped": skipped}

@@ -19,6 +19,7 @@ caller.
 from __future__ import annotations
 
 import re
+from typing import NamedTuple
 
 from extractor.actors import read_npc_blocks
 from extractor.adept_powers import read_adept_powers
@@ -31,29 +32,48 @@ from extractor.spirits import read_spirits
 
 S = re.compile
 
-#: domain -> (reader, signature, base_fields, group_by, extra_filter)
+
+class Content(NamedTuple):
+    """How one content type is found and filed.
+
+    A NamedTuple rather than a bare 5-tuple: callers used to unpack it as
+    ``(reader, sig, *_rest)``, which said nothing about what the rest was and
+    left static analysis unable to tell that ``sig`` is a compiled pattern.
+    It still unpacks positionally, so nothing downstream changed.
+    """
+
+    reader: object          #: (pdf, pages) -> records
+    sig: re.Pattern         #: marks a page as carrying this content
+    base_fields: tuple      #: blank-filled after the merge
+    group_by: str           #: which system field becomes the category file
+    extra: object = None    #: optional per-domain filter
+
+
+#: domain -> how to find it
 #:
 #: base_fields for aligner-backed domains are the EDEN string fields: the raw
 #: reader fields (cost/gameEffect/descriptor/...) are converted by eden_align at
 #: ingest, so they must NOT be blank-filled back in.
 DOMAINS = {
-    "spells": (read_spells, S(r"RANGE\s+TYPE\s+DURATION\s+DV"),
-               ("description",), "category", None),
-    "rituals": (read_rituals, S(r"Threshold:\s*\d"),
-                ("description",), "category", None),
-    "adept_powers": (read_adept_powers, S(r"Cost:\s*[\d.]+\s*PP"),
-                     ("activation", "description"), "category", None),
-    "qualities": (read_qualities, S(r"(?:Cost|Bonus):\s*\d+\s*Karma"),
-                  ("explain", "description"), "category", None),
-    "npcs": (read_npc_blocks,
-             re.compile(r"Metatype:|B\s+A\s+R\s+S\s+W\s+L\s+I\s+C\s+EDG", re.I),
-             ("metatype", "activeSkills", "knowledgeSkills", "qualities", "gear",
-              "weapons", "augmentations", "description"), "category", None),
-    "critters": (read_critters, S(r"\bB A R S W L I C (?:M )?ESS\b"),
-                 ("skills", "powers", "movement", "description"), "category", None),
-    "spirits": (read_spirits, S(r"Optional Powers:"),
-                ("powers", "optionalPowers", "attacks", "description"),
-                "category", None),
+    "spells": Content(read_spells, S(r"RANGE\s+TYPE\s+DURATION\s+DV"),
+                      ("description",), "category"),
+    "rituals": Content(read_rituals, S(r"Threshold:\s*\d"),
+                       ("description",), "category"),
+    "adept_powers": Content(read_adept_powers, S(r"Cost:\s*[\d.]+\s*PP"),
+                            ("activation", "description"), "category"),
+    "qualities": Content(read_qualities, S(r"(?:Cost|Bonus):\s*\d+\s*Karma"),
+                         ("explain", "description"), "category"),
+    "npcs": Content(
+        read_npc_blocks,
+        re.compile(r"Metatype:|B\s+A\s+R\s+S\s+W\s+L\s+I\s+C\s+EDG", re.I),
+        ("metatype", "activeSkills", "knowledgeSkills", "qualities", "gear",
+         "weapons", "augmentations", "description"), "category"),
+    "critters": Content(read_critters, S(r"\bB A R S W L I C (?:M )?ESS\b"),
+                        ("skills", "powers", "movement", "description"),
+                        "category"),
+    "spirits": Content(read_spirits, S(r"Optional Powers:"),
+                       ("powers", "optionalPowers", "attacks", "description"),
+                       "category"),
     # toxins/drugs are folded into gear as type=CHEMICALS (subtype TOXIN/DRUG),
     # see tools/merge_chemicals.py. Do not re-add them here.
 }
@@ -85,17 +105,17 @@ def scan_book(job: tuple[str, str]) -> dict:
         return {"book": book, "found": {}, "errors": [f"{type(e).__name__}: {e}"]}
 
     npages = len(texts)
-    for domain, (reader, sig, *_rest) in DOMAINS.items():
+    for domain, spec in DOMAINS.items():
         pages = set()
         for i, t in texts:
-            if sig.search(t):
+            if spec.sig.search(t):
                 pages.update((i - 1, i, i + 1))
         pages = sorted(x for x in pages if 1 <= x <= npages)
         if not pages:
             continue
         try:
             recs = []
-            for rec in reader(pdf, pages):
+            for rec in spec.reader(pdf, pages):
                 rec["_book"] = book
                 recs.append(rec)
             if recs:

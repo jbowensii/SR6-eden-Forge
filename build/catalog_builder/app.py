@@ -160,18 +160,18 @@ class App(tk.Tk):
                   "app. Leave empty if you have none.",
                   "icons", self._pick_icons, 16)
 
-        bar = ttk.Frame(pad)
-        bar.grid(row=3, column=0, sticky="ew", pady=(16, 6))
-        self.import_btn = ttk.Button(bar, text="Import books", style="Go.TButton",
+        actions = ttk.Frame(pad)
+        actions.grid(row=3, column=0, sticky="ew", pady=(16, 6))
+        self.import_btn = ttk.Button(actions, text="Import books", style="Go.TButton",
                                      command=self._import)
         self.import_btn.pack(side="left")
-        self.review_btn = ttk.Button(bar, text="Review & correct",
+        self.review_btn = ttk.Button(actions, text="Review & correct",
                                      command=self._review)
         self.review_btn.pack(side="left", padx=8)
-        self.publish_btn = ttk.Button(bar, text="Publish to Foundry",
+        self.publish_btn = ttk.Button(actions, text="Publish to Foundry",
                                       command=self._publish)
         self.publish_btn.pack(side="left")
-        self.cancel_btn = ttk.Button(bar, text="Stop", command=self._cancel)
+        self.cancel_btn = ttk.Button(actions, text="Stop", command=self._cancel)
         self.cancel_btn.pack(side="right")
 
         self.pbar = ttk.Progressbar(pad, mode="determinate", maximum=1000)
