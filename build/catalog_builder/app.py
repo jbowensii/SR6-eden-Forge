@@ -71,6 +71,8 @@ class App(tk.Tk):
         self._set_window_icon()
         self.settings = Settings()
         self.job: Job | None = None
+        self.review_job: Job | None = None
+        self.review_port: int = 0
         self.progress: Progress | None = None
         self.scan_result: dict | None = None
 
@@ -79,6 +81,7 @@ class App(tk.Tk):
         self._prefill()
         self._refresh_state()
         self._fit_window()
+        self.protocol("WM_DELETE_WINDOW", self._on_close)
 
     def _set_window_icon(self) -> None:
         """Give the window our icon.
@@ -212,6 +215,48 @@ class App(tk.Tk):
         self.geometry(f"{w}x{h}+{x}+{y}")
         # the floor is what the fields need, not a number someone liked
         self.minsize(min(need_w, max_w), min(need_h, max_h))
+
+    def _on_close(self) -> None:
+        """Ask about the review server before the window disappears.
+
+        The review app is a real web server in its own process. Closing this
+        window used to leave it listening, so the port stayed busy, edits could
+        still be made to a library nothing was watching, and the only way to
+        stop it was Task Manager. Nor should it be killed silently: leaving it
+        up to keep working in the browser is a perfectly reasonable thing to
+        want.
+        """
+        running = (self.review_job is not None and self.review_job.running) or (
+            self.review_port and ports.is_listening(self.review_port))
+
+        if running:
+            answer = messagebox.askyesnocancel(
+                APP_TITLE,
+                f"The review app is still running on port {self.review_port}."
+                + NL2
+                + "Yes  — stop it and close" + chr(10)
+                + "No   — leave it running and close" + chr(10)
+                + "Cancel — go back")
+            if answer is None:
+                return                      # cancel: stay open
+            if answer:
+                if self.review_job:
+                    self.review_job.cancel()
+                self._write("=== review app stopped")
+            else:
+                self._write(f"=== leaving the review app on "
+                            f"http://localhost:{self.review_port}")
+
+        # an import or publish is a different question: it writes to the library
+        if self.job and self.job.running and self.job is not self.review_job:
+            if not messagebox.askyesno(
+                    APP_TITLE,
+                    "A job is still running and will be stopped." + NL2
+                    + "Close anyway?"):
+                return
+            self.job.cancel()
+
+        self.destroy()
 
     # ---------- state ----------
     def _prefill(self) -> None:
@@ -530,6 +575,10 @@ class App(tk.Tk):
         self.job = Job(["node", "site/server/index.mjs"], cwd=repo_root(),
                        env={"PORT": str(port),
                             "SR6_DATA": str(ws / "data")}).start()
+        # kept apart from self.job, which every other action reuses — closing
+        # the window has to be able to find THIS one specifically
+        self.review_job = self.job
+        self.review_port = port
         self.after(120, self._pump)
         self._await_review(port, url, tries=0)
 

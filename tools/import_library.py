@@ -178,6 +178,13 @@ POST_PHASES: list[tuple[str, str, list[str]]] = [
     ("Subtypes: firearms from source tables",
      "subtype_firearms_from_book.py", ["--apply"]),
     ("Subtypes: infer blank gear subtypes", "infer_gear_subtypes.py", ["--apply"]),
+    # Artwork LAST of the derived phases, and part of the run rather than
+    # opt-in: art and icons are the things most likely to have changed since
+    # the previous import, and leaving them out meant a library that looked
+    # finished but had pictures on 110 items out of five thousand.
+    ("Book graphics", "dump_book_images.py", []),
+    ("Auto-pair artwork", "pair_art.py", []),
+    ("Match icons from your icon sets", "match_icons_all.py", []),
 ]
 
 #: Run alone, after everything else INCLUDING the Commlink6 guard.
@@ -188,11 +195,14 @@ POST_PHASES: list[tuple[str, str, list[str]]] = [
 #: authority from the one source that is meant to outrank it.
 CORRECTIONS_PHASE = ("Re-apply your corrections", "apply_corrections.py", ["--apply"])
 
-#: Slow, and it changes artwork rather than item counts, so it is opt-in.
-GRAPHICS_PHASES: list[tuple[str, str, list[str]]] = [
-    ("Book graphics", "dump_book_images.py", []),
-    ("Auto-pair artwork", "pair_art.py", []),
-]
+#: Kept only so a caller can ask for the artwork phases to be SKIPPED; they
+#: are part of POST_PHASES now.
+GRAPHICS_PHASES: list[tuple[str, str, list[str]]] = []
+
+#: The artwork phases, by script name — skippable with --no-graphics because
+#: extracting every illustration from fifty PDFs is the slowest thing here and
+#: does not change item counts.
+GRAPHICS_SCRIPTS = {"dump_book_images.py", "pair_art.py", "match_icons_all.py"}
 
 
 def run_post_phases(data_root: _P, phases, on_line=print,
@@ -345,7 +355,8 @@ def run(data_root: _P, jar: _P | None, only: str | None, apply: bool,
     # everything they add is stamped too.
     phase_failures: list[str] = []
     if post:
-        phases = list(POST_PHASES) + (list(GRAPHICS_PHASES) if graphics else [])
+        phases = [ph for ph in POST_PHASES
+                  if graphics or ph[1] not in GRAPHICS_SCRIPTS]
         print(f"\nfinishing the library — {len(phases)} phase(s)", flush=True)
 
         # Commlink6 is the source of truth and these phases predate it: none of
@@ -459,8 +470,10 @@ def main() -> None:
     ap.add_argument("--no-post", action="store_true",
                     help="stop after the merge; skip the phases that add the "
                          "other domains, the descriptions and your corrections")
-    ap.add_argument("--graphics", action="store_true",
-                    help="also extract book artwork and auto-pair it (slow)")
+    ap.add_argument("--no-graphics", dest="graphics", action="store_false",
+                    default=True,
+                    help="skip artwork and icon matching (the slowest phases; "
+                         "they do not change item counts)")
     args = ap.parse_args()
     jar = args.jar if args.jar and _P(args.jar).is_file() else None
     if not jar:

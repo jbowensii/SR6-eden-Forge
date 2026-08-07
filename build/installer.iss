@@ -10,7 +10,7 @@
 #define AppPublisher "John Bowens"
 #define AppURL       "https://github.com/jbowensii/SR6-eden-Forge"
 #ifndef AppVersion
-  #define AppVersion "0.6.0"
+  #define AppVersion "0.7.0"
 #endif
 
 [Setup]
