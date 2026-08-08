@@ -29,6 +29,22 @@ from pathlib import Path
 WORKER_FLAG = "--run-pipeline"
 
 
+def _utf8_console() -> None:
+    """Make stdout survive anything a phase prints.
+
+    Windows hands a frozen build a cp1252 stdout. Phase output is decoded with
+    errors="replace", so it can contain U+FFFD, and printing that to cp1252
+    raises UnicodeEncodeError — which killed an import at phase 4 AFTER three
+    phases of real work. Reconfiguring with errors="replace" means an
+    unencodable character degrades to a question mark instead of ending the run.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, OSError):
+            pass
+
+
 def _ensure_paths() -> None:
     """Make both the package and the pipeline importable, frozen or not."""
     here = Path(__file__).resolve().parent          # .../build/catalog_builder
@@ -55,6 +71,7 @@ def _load_app():
 
 
 def main() -> int:
+    _utf8_console()
     _ensure_paths()
 
     if len(sys.argv) > 2 and sys.argv[1] == WORKER_FLAG:

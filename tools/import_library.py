@@ -475,7 +475,24 @@ def run(data_root: _P, jar: _P | None, only: str | None, apply: bool,
     return 0
 
 
+def _utf8_console() -> None:
+    """Make stdout survive anything a phase prints.
+
+    Windows hands a frozen build a cp1252 stdout. Phase output is decoded with
+    errors="replace", so it can contain U+FFFD, and printing that to cp1252
+    raises UnicodeEncodeError — which killed an import at phase 4 AFTER three
+    phases of real work. Reconfiguring with errors="replace" means an
+    unencodable character degrades to a question mark instead of ending the run.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, OSError):
+            pass
+
+
 def main() -> None:
+    _utf8_console()
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--data", type=_P, default=_P("data"))

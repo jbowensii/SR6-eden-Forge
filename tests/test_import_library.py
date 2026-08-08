@@ -464,3 +464,18 @@ def test_phase_output_reaches_the_log(tmp_path, monkeypatch):
 
     assert any("scanned companion" in ln for ln in lines)
     assert any("+114 new" in ln for ln in lines)
+
+
+def test_the_pipeline_console_survives_replacement_characters():
+    """A crash at phase 4, after three phases of real work.
+
+    Forwarded phase output is decoded with errors="replace", so it can contain
+    U+FFFD. Windows gives a frozen build a cp1252 stdout, and printing that
+    character raised UnicodeEncodeError — ending the import over something it
+    merely wanted to display.
+    """
+    root = Path(__file__).resolve().parent.parent
+    for rel in ("build/catalog_builder/__main__.py", "tools/import_library.py"):
+        src = (root / rel).read_text(encoding="utf-8")
+        assert "_utf8_console" in src, rel
+        assert 'errors="replace"' in src, rel
