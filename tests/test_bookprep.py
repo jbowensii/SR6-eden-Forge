@@ -189,6 +189,61 @@ def test_a_degenerate_table_box_is_skipped_not_cropped():
     assert _pad((900.0, 100.0, 950.0, 120.0), PAGE) is None
 
 
+# ---------- vehicle names that wrap across three lines ----------
+
+def _iv():
+    """Load ingest_vehicles WITHOUT running it (its work is behind __main__)."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "iv", Path(__file__).resolve().parent.parent / "tools" / "ingest_vehicles.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+#: p302 as pdfplumber reads it: the name breaks around the stat row.
+CORE_LINES = [
+    "Ford Americar 4/5 9 20 160 11 4 1 2 4 2 16,000",
+    "Saeder-",
+    "Krupp-Bentley 3/5 18 30 180 14 8 3 3 4 3 65,000",
+    "Concordat",
+]
+
+
+def test_a_name_wrapped_around_its_stat_row_is_rejoined():
+    iv = _iv()
+    used = set()
+    assert iv._unwrap(CORE_LINES, 2, "Krupp-Bentley", used) == "Saeder-Krupp-Bentley Concordat"
+
+
+def test_a_trailing_hyphen_opens_the_next_name_not_the_previous_one():
+    """'Saeder-' sits between two stat rows and belongs to the LATER one.
+
+    Taken as Ford Americar's tail it left the Concordat without its marque.
+    """
+    iv = _iv()
+    assert iv._unwrap(CORE_LINES, 0, "Ford Americar", set()) == "Ford Americar"
+
+
+def test_a_name_part_is_never_spent_twice():
+    """'Nightrunner' closes one vehicle and sits above the next one's stat row."""
+    iv = _iv()
+    lines = ["Aztechnology", "Sunrunner/ 3 20 20 120", "Nightrunner",
+             "GMC Riverine 4 10 10 40"]
+    used = set()
+    first = iv._unwrap(lines, 1, "Sunrunner/", used)
+    second = iv._unwrap(lines, 3, "GMC Riverine", used)
+    assert first == "Aztechnology Sunrunner/Nightrunner"
+    assert second == "GMC Riverine"        # not "Nightrunner GMC Riverine"
+
+
+def test_a_wrapped_price_is_not_mistaken_for_a_name():
+    """The Federated Boeing Commuter has '350,000/' directly above its stats."""
+    iv = _iv()
+    lines = ["Federated Boeing", "350,000/", "Commuter/ 3 35 60/80 420", "800,000"]
+    assert iv._unwrap(lines, 2, "Commuter/", set()) == "Federated Boeing Commuter/"
+
+
 def test_a_vehicle_keeps_the_book_it_was_read_from():
     """ingest_vehicles labelled every vehicle "corebook", whatever book it came
     from — so a Double Clutch drone carried a corebook page number pointing at

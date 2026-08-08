@@ -105,6 +105,72 @@ def read_vehicles(pdf_path, pages):
     return items
 
 
+#: A line that is only a number, a price or a wrapped price fragment. These sit
+#: between the parts of a name and must not be mistaken for one — the Federated
+#: Boeing Commuter has "350,000/" directly above its stat line.
+_PRICEISH = re.compile(r"^[\d,./]+[¥�]?$")
+
+
+def _name_part(line: str) -> bool:
+    """Is this line a piece of a vehicle name that wrapped off the stat row?
+
+    Names in the corebook's single-flow tables break across three lines, with
+    the stats attached to the middle one:
+
+        Saeder-                          <- prefix
+        Krupp-Bentley  3/5 18 30 ...     <- the fragment that carries the stats
+        Concordat                        <- suffix
+
+    A part is short, has letters in it, and carries no stats of its own.
+    """
+    s = line.strip()
+    if not s or len(s.split()) > 3:
+        return False
+    if _PRICEISH.match(s) or "HAND" in s or _CATLINE.match(s):
+        return False
+    return any(c.isalpha() for c in s)
+
+
+def _join_name(head: str, tail: str) -> str:
+    """Glue two halves of a wrapped name, respecting the break character.
+
+    'Saeder-' + 'Krupp-Bentley' is one word; 'Proteus' + 'Lamprey' is two.
+    """
+    head = head.strip()
+    return head + tail.strip() if head.endswith(("-", "/")) else f"{head} {tail.strip()}"
+
+
+def _unwrap(lines, i, name, used):
+    """Rebuild a wrapped name from the lines either side of the stat row.
+
+    ``used`` holds the line indexes already spent on a name. Without it the
+    trailing half of one vehicle becomes the leading half of the next — the
+    "Nightrunner" ending Aztechnology's Sunrunner sits directly above the GMC
+    Riverine's stat row, and got claimed by both.
+    """
+    # backwards: skip at most one price fragment, then take a name part
+    for back in (1, 2):
+        j = i - back
+        if j < 0:
+            break
+        prev = lines[j].strip()
+        if _PRICEISH.match(prev):
+            continue                    # a wrapped price, keep looking
+        if j not in used and _name_part(prev):
+            name = _join_name(prev, name)
+            used.add(j)
+        break
+    j = i + 1
+    # A line ending in '-' or '/' OPENS the next name; it never closes this one.
+    # "Saeder-" sits between Ford Americar's row and Krupp-Bentley's, and was
+    # being taken as Americar's tail, leaving the Concordat without its marque.
+    if (j < len(lines) and j not in used and _name_part(lines[j])
+            and not lines[j].strip().endswith(("-", "/"))):
+        name = _join_name(name, lines[j])
+        used.add(j)
+    return name
+
+
 def read_vehicles_text(pdf_path, pages):
     """Token pass over raw text — deep on the single-flow ground/water tables
     (p302) that ruled-table extraction under-reads. Unioned with read_vehicles."""
@@ -117,7 +183,11 @@ def read_vehicles_text(pdf_path, pages):
         for page_no in pages:
             raw = normalize_text(pdf.pages[page_no - 1].extract_text() or "")
             cat = None
-            for line in [l.strip() for l in raw.splitlines() if l.strip()]:
+            # kept as a list, not consumed lazily: a wrapped name needs the
+            # lines either side of the one carrying the stats
+            page_lines = [l.strip() for l in raw.splitlines() if l.strip()]
+            used: set[int] = set()      # line indexes spent on a name
+            for idx, line in enumerate(page_lines):
                 cm = _CATTEXT.match(line)
                 if cm:
                     cat = ALIAS.get(cm.group(1), cm.group(1))
@@ -131,6 +201,7 @@ def read_vehicles_text(pdf_path, pages):
                 name = re.sub(r"^\d+\s+", "", r[0]).strip()
                 if len(name) < 2:
                     continue
+                name = _unwrap(page_lines, idx, name, used)
                 subtype, is_drone = CATS[cat]
                 stats = (r[1][:11] + [""] * 11)[:11]
                 system = {"type": "DRONE" if is_drone else "VEHICLE", "subtype": subtype}
@@ -186,10 +257,42 @@ if __name__ == "__main__":
         for rec in (r or {}).get("found") or []:
             rec["_book"] = book
             byname.setdefault(norm_base(rec["name"]), rec)
+    # Commlink6 is the source of truth: never write a vehicle it already has.
+    #
+    # This phase rewrites vehicles.json wholesale and the authority guard puts
+    # the Commlink6 rows back afterwards, so a row read off a page whose name
+    # Commlink6 already owns does not replace anything — it lands BESIDE the
+    # authoritative row as a second, worse-described copy of the same vehicle.
+    #
+    # Read the names out of the file BEFORE overwriting it. On a first install
+    # there is no file yet and nothing is skipped, which is correct: there is no
+    # authority to defer to.
+    out_path = DATA / LIBRARY / "vehicles" / "vehicles.json"
+    cl6_names = set()
+    if out_path.is_file():
+        try:
+            existing = json.loads(out_path.read_text(encoding="utf-8"))
+            cl6_names = {norm_base(i["name"]) for i in existing.get("items", [])
+                         if (i.get("meta") or {}).get("source") == "commlink6"}
+        except (OSError, ValueError, KeyError) as e:
+            print(f"  (could not read existing vehicles for the Commlink6 check: {e})",
+                  flush=True)
+
+    skipped = [r for k, r in byname.items() if k in cl6_names]
+    byname = {k: r for k, r in byname.items() if k not in cl6_names}
+    if skipped:
+        # Named, not just counted: a silent skip list is how a rule like this
+        # quietly starts swallowing rows it should not.
+        print(f"deferring to Commlink6 on {len(skipped)} vehicle(s):", flush=True)
+        for r in sorted(skipped, key=lambda r: r["name"])[:15]:
+            print(f"    {r['name']}", flush=True)
+        if len(skipped) > 15:
+            print(f"    ... and {len(skipped) - 15} more", flush=True)
+
     recs = sorted(byname.values(), key=lambda r: (r["system"]["subtype"], r["name"]))
     # vehicles are their own site domain (Eden treats them as actors, which are
     # out of scope here — this is browsable reference data, not exported).
-    out = DATA / LIBRARY / "vehicles" / "vehicles.json"
+    out = out_path                      # resolved above, for the Commlink6 check
     out.parent.mkdir(parents=True, exist_ok=True)
     seen = set()
     items = []
