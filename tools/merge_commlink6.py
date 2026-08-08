@@ -28,145 +28,148 @@ from extractor.eden_codes import map_code
 
 # a book's Commlink6 data is only imported if you own the book (its PDF is
 # registered and present) — you must have the PDF to import the data.
-_BOOKS = json.load(open("data/books.json", encoding="utf-8")) if _P("data/books.json").exists() else {}
-def _owned(cl6_book):
-    m = _BOOKS.get(our_book(cl6_book))
-    return bool(m and m.get("pdf") and _P(m["pdf"]).exists())
+if __name__ == "__main__":
+    # Guarded: everything below runs against the library, so an import
+    # of this module to inspect it must not start the job.
+    _BOOKS = json.load(open("data/books.json", encoding="utf-8")) if _P("data/books.json").exists() else {}
+    def _owned(cl6_book):
+        m = _BOOKS.get(our_book(cl6_book))
+        return bool(m and m.get("pdf") and _P(m["pdf"]).exists())
 
-APPLY = "--apply" in sys.argv
-DATA = _P("data/corebook")
-CORR = {os.path.splitext(os.path.basename(f))[0] for f in glob.glob("data/_corrections/*/*.json")}
+    APPLY = "--apply" in sys.argv
+    DATA = _P("data/corebook")
+    CORR = {os.path.splitext(os.path.basename(f))[0] for f in glob.glob("data/_corrections/*/*.json")}
 
-cl6_books = english_books()
-covered_our = {b for b in BOOK_ALIAS if BOOK_ALIAS[b] in cl6_books}
-# our books whose slug IS a cl6 book directly (deadly_arts, double_clutch, …)
-for f in glob.glob("data/corebook/*/*.json"):
-    for it in json.load(open(f, encoding="utf-8")).get("items", []):
-        b = it["meta"].get("book")
-        if b in cl6_books:
-            covered_our.add(b)
+    cl6_books = english_books()
+    covered_our = {b for b in BOOK_ALIAS if BOOK_ALIAS[b] in cl6_books}
+    # our books whose slug IS a cl6 book directly (deadly_arts, double_clutch, …)
+    for f in glob.glob("data/corebook/*/*.json"):
+        for it in json.load(open(f, encoding="utf-8")).get("items", []):
+            b = it["meta"].get("book")
+            if b in cl6_books:
+                covered_our.add(b)
 
-# ---- load our current data, split covered vs gap, index art/corrections ----
-our_files = defaultdict(list)           # (domain,file) -> [item]  (rebuilt)
-hide_count = defaultdict(int)
-gap_count = 0
-art_index = {}                          # (domain, norm_name) -> {img, id}
-desc_index = {}                         # (domain, norm_name) -> our description (cl6-lacks fallback)
-for f in sorted(glob.glob("data/corebook/*/*.json")):
-    dom = f.replace("\\", "/").split("/")[-2]
-    file = f.replace("\\", "/").split("/")[-1][:-5]
-    payload = json.load(open(f, encoding="utf-8"))
-    for it in payload.get("items", []):
-        if it.get("meta", {}).get("source") == "commlink6":
-            continue                      # prior cl6 import — rebuilt fresh below (idempotent)
-        b = it["meta"].get("book")
-        if b in covered_our:
-            it.setdefault("meta", {})["hidden"] = True
-            hide_count[b] += 1
-            key = (dom, norm(it["name"]))
-            if it.get("img") or it["id"] in CORR:
-                art_index[key] = {"img": it.get("img", ""), "id": it["id"]}
-            d = (it["system"].get("description") or "").strip()
-            if d:
-                desc_index.setdefault(key, d)   # our description, for cl6 items that lack one
-        else:
-            gap_count += 1
-        our_files[(dom, file)].append(it)
+    # ---- load our current data, split covered vs gap, index art/corrections ----
+    our_files = defaultdict(list)           # (domain,file) -> [item]  (rebuilt)
+    hide_count = defaultdict(int)
+    gap_count = 0
+    art_index = {}                          # (domain, norm_name) -> {img, id}
+    desc_index = {}                         # (domain, norm_name) -> our description (cl6-lacks fallback)
+    for f in sorted(glob.glob("data/corebook/*/*.json")):
+        dom = f.replace("\\", "/").split("/")[-2]
+        file = f.replace("\\", "/").split("/")[-1][:-5]
+        payload = json.load(open(f, encoding="utf-8"))
+        for it in payload.get("items", []):
+            if it.get("meta", {}).get("source") == "commlink6":
+                continue                      # prior cl6 import — rebuilt fresh below (idempotent)
+            b = it["meta"].get("book")
+            if b in covered_our:
+                it.setdefault("meta", {})["hidden"] = True
+                hide_count[b] += 1
+                key = (dom, norm(it["name"]))
+                if it.get("img") or it["id"] in CORR:
+                    art_index[key] = {"img": it.get("img", ""), "id": it["id"]}
+                d = (it["system"].get("description") or "").strip()
+                if d:
+                    desc_index.setdefault(key, d)   # our description, for cl6 items that lack one
+            else:
+                gap_count += 1
+            our_files[(dom, file)].append(it)
 
-# ---- convert Commlink6 items ----
-cl6_by_target = defaultdict(list)
-catchall = defaultdict(int)
-carried = 0
-backfilled = 0                         # our descriptions applied where cl6 has none
-skipped_books = []                     # covered cl6 books with no owned PDF (not imported)
-seen_ids = set()                       # a cl6 id can appear in several books; first wins
-for cb in sorted(cl6_books):
-    if not _owned(cb):
-        skipped_books.append(cb)
-        continue                       # no PDF for this book -> don't import its data
-    for rec in read_book(cb).values():
-        if not rec["name"] or rec["id"] in seen_ids:
-            continue
-        seen_ids.add(rec["id"])
-        if not target(rec["category"]):
-            catchall[rec["category"]] += 1     # retained losslessly in commlink6_extra
-        conv = to_item(rec, cb)
-        if not conv:
-            continue
-        domain, file, item = conv
-        key = (domain, norm(item["name"]))
-        art = art_index.get(key)
-        if art and art["img"]:
-            item["img"] = art["img"]          # carry our artwork onto the cl6 item
-            carried += 1
-        if not (item["system"].get("description") or "").strip() and key in desc_index:
-            item["system"]["description"] = desc_index[key]   # cl6 lacks one -> use ours
-            item["meta"]["descriptionFrom_text"] = "our-extraction"
-            backfilled += 1
-        cl6_by_target[(domain, file)].append(item)
+    # ---- convert Commlink6 items ----
+    cl6_by_target = defaultdict(list)
+    catchall = defaultdict(int)
+    carried = 0
+    backfilled = 0                         # our descriptions applied where cl6 has none
+    skipped_books = []                     # covered cl6 books with no owned PDF (not imported)
+    seen_ids = set()                       # a cl6 id can appear in several books; first wins
+    for cb in sorted(cl6_books):
+        if not _owned(cb):
+            skipped_books.append(cb)
+            continue                       # no PDF for this book -> don't import its data
+        for rec in read_book(cb).values():
+            if not rec["name"] or rec["id"] in seen_ids:
+                continue
+            seen_ids.add(rec["id"])
+            if not target(rec["category"]):
+                catchall[rec["category"]] += 1     # retained losslessly in commlink6_extra
+            conv = to_item(rec, cb)
+            if not conv:
+                continue
+            domain, file, item = conv
+            key = (domain, norm(item["name"]))
+            art = art_index.get(key)
+            if art and art["img"]:
+                item["img"] = art["img"]          # carry our artwork onto the cl6 item
+                carried += 1
+            if not (item["system"].get("description") or "").strip() and key in desc_index:
+                item["system"]["description"] = desc_index[key]   # cl6 lacks one -> use ours
+                item["meta"]["descriptionFrom_text"] = "our-extraction"
+                backfilled += 1
+            cl6_by_target[(domain, file)].append(item)
 
-cl6_total = sum(len(v) for v in cl6_by_target.values())
+    cl6_total = sum(len(v) for v in cl6_by_target.values())
 
-if not APPLY:
-    print("=" * 66)
-    print("COMMLINK6 MERGE — DRY RUN (no writes)")
-    print("=" * 66)
-    print(f"covered books (import cl6 + hide ours): {len(covered_our)}")
-    print(f"  {', '.join(sorted(covered_our))}")
-    print(f"\ncl6 items to import (lossless): {cl6_total}")
-    dom_tot = defaultdict(int)
-    for (d, f), items in cl6_by_target.items():
-        dom_tot[d] += len(items)
-    for d, n in sorted(dom_tot.items(), key=lambda x: -x[1]):
-        print(f"    {d:16} +{n}")
-    print(f"\nour items to HIDE (covered books): {sum(hide_count.values())}")
-    print(f"our GAP-book items kept+converted: {gap_count}")
-    print(f"art/icons carried onto cl6 items: {carried}")
-    if skipped_books:
-        print(f"cl6 books SKIPPED (no owned PDF): {len(skipped_books)} -> {', '.join(skipped_books)}")
-    if catchall:
-        print(f"\ncatch-all -> commlink6_extra (retained losslessly): {sum(catchall.values())} items")
-        for c, n in sorted(catchall.items(), key=lambda x: -x[1])[:20]:
-            print(f"    {c:28} {n}")
-    # sample converted items (structure only)
-    print("\n--- sample converted items (structure; desc lengths, not text) ---")
-    shown = 0
-    for (d, f), items in cl6_by_target.items():
-        for it in items:
-            s = it["system"]
-            derived = [k for k in s if k not in ("_cl6", "description", "notes", "wifi")]
-            print(f"  [{d}/{f}] {it['name'][:26]:26} id={it['id']}")
-            print(f"     type={s['type']}/{s.get('subtype')}  derived={derived}")
-            print(f"     _cl6.stats keys={list(s['_cl6']['stats'].keys())}  desc={len(s['description'])}c wifi={len(s['wifi'])}c")
-            shown += 1
+    if not APPLY:
+        print("=" * 66)
+        print("COMMLINK6 MERGE — DRY RUN (no writes)")
+        print("=" * 66)
+        print(f"covered books (import cl6 + hide ours): {len(covered_our)}")
+        print(f"  {', '.join(sorted(covered_our))}")
+        print(f"\ncl6 items to import (lossless): {cl6_total}")
+        dom_tot = defaultdict(int)
+        for (d, f), items in cl6_by_target.items():
+            dom_tot[d] += len(items)
+        for d, n in sorted(dom_tot.items(), key=lambda x: -x[1]):
+            print(f"    {d:16} +{n}")
+        print(f"\nour items to HIDE (covered books): {sum(hide_count.values())}")
+        print(f"our GAP-book items kept+converted: {gap_count}")
+        print(f"art/icons carried onto cl6 items: {carried}")
+        if skipped_books:
+            print(f"cl6 books SKIPPED (no owned PDF): {len(skipped_books)} -> {', '.join(skipped_books)}")
+        if catchall:
+            print(f"\ncatch-all -> commlink6_extra (retained losslessly): {sum(catchall.values())} items")
+            for c, n in sorted(catchall.items(), key=lambda x: -x[1])[:20]:
+                print(f"    {c:28} {n}")
+        # sample converted items (structure only)
+        print("\n--- sample converted items (structure; desc lengths, not text) ---")
+        shown = 0
+        for (d, f), items in cl6_by_target.items():
+            for it in items:
+                s = it["system"]
+                derived = [k for k in s if k not in ("_cl6", "description", "notes", "wifi")]
+                print(f"  [{d}/{f}] {it['name'][:26]:26} id={it['id']}")
+                print(f"     type={s['type']}/{s.get('subtype')}  derived={derived}")
+                print(f"     _cl6.stats keys={list(s['_cl6']['stats'].keys())}  desc={len(s['description'])}c wifi={len(s['wifi'])}c")
+                shown += 1
+                if shown >= 4:
+                    break
             if shown >= 4:
                 break
-        if shown >= 4:
-            break
-    print("\n(dry run — re-run with --apply to write, then tools/apply_corrections.py)")
-else:
-    # rebuild each file: cl6 items (visible) + our items (gap kept / covered hidden)
-    changed = set()
-    for key in set(our_files) | set(cl6_by_target):
-        dom, file = key
-        items = list(cl6_by_target.get(key, [])) + list(our_files.get(key, []))
-        path = DATA / dom / f"{file}.json"
-        if path.exists():
-            payload = json.load(open(path, encoding="utf-8"))
-        else:
-            payload = {"book": "corebook", "domain": dom, "category": file, "items": []}
-        for it in items:                       # adopt Eden codes on every item (gap items too)
-            s = it.get("system", {})
-            if s.get("type"):                  # only items that carry a type (gear-like)
-                s["type"], s["subtype"] = map_code(s.get("type") or "", s.get("subtype") or "")
-            if s.get("type") is None:          # heal null keys a prior pass may have added
-                s.pop("type", None)
-            if s.get("subtype") is None:
-                s.pop("subtype", None)
-        payload["items"] = items
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-        changed.add(str(path))
-    print(f"APPLY — wrote {len(changed)} files; imported {cl6_total} cl6 items, "
-          f"hid {sum(hide_count.values())}, carried {carried} art. "
-          f"Run tools/apply_corrections.py next.")
+        print("\n(dry run — re-run with --apply to write, then tools/apply_corrections.py)")
+    else:
+        # rebuild each file: cl6 items (visible) + our items (gap kept / covered hidden)
+        changed = set()
+        for key in set(our_files) | set(cl6_by_target):
+            dom, file = key
+            items = list(cl6_by_target.get(key, [])) + list(our_files.get(key, []))
+            path = DATA / dom / f"{file}.json"
+            if path.exists():
+                payload = json.load(open(path, encoding="utf-8"))
+            else:
+                payload = {"book": "corebook", "domain": dom, "category": file, "items": []}
+            for it in items:                       # adopt Eden codes on every item (gap items too)
+                s = it.get("system", {})
+                if s.get("type"):                  # only items that carry a type (gear-like)
+                    s["type"], s["subtype"] = map_code(s.get("type") or "", s.get("subtype") or "")
+                if s.get("type") is None:          # heal null keys a prior pass may have added
+                    s.pop("type", None)
+                if s.get("subtype") is None:
+                    s.pop("subtype", None)
+            payload["items"] = items
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+            changed.add(str(path))
+        print(f"APPLY — wrote {len(changed)} files; imported {cl6_total} cl6 items, "
+              f"hid {sum(hide_count.values())}, carried {carried} art. "
+              f"Run tools/apply_corrections.py next.")

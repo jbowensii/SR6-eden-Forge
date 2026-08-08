@@ -89,9 +89,23 @@ SCAN_JOBS = {
 }
 
 
-#: Scripts that rewrite the shared library. Importing one of these must not run
-#: it — see the test below for why this list exists.
-LIBRARY_WRITERS = ["images_all", "rebuild_all"]
+#: Scripts that do their work against the library at module level. Importing one
+#: of these must not run it — see the test below for why this list exists.
+#:
+#: Tier B (the nine phases import_library dispatches) is deliberately NOT here.
+#: Those stayed unguarded until a guard can be proven through the frozen build,
+#: because a guard the dispatcher fails to enter is a phase that reports success
+#: and does nothing — the exact shape of Gap 2.
+LIBRARY_WRITERS = [
+    "images_all", "rebuild_all",
+    "align_content_eden", "backfill_metatype", "commlink6_report",
+    "extract_all_images", "fill_critter_powers", "fill_descriptions",
+    "fix_qualities_eden", "gen_newtype_schemas", "ingest_adept_powers",
+    "ingest_all", "ingest_critters", "ingest_drugs_toxins", "ingest_lifestyles",
+    "ingest_npcs", "ingest_qualities", "ingest_rituals", "ingest_skills",
+    "ingest_spells", "ingest_spirits", "merge_chemicals", "merge_commlink6",
+    "recover_electronics_names", "reingest_books", "search_critter_powers",
+]
 
 
 @pytest.mark.parametrize("name", LIBRARY_WRITERS)

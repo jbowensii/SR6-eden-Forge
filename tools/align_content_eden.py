@@ -17,32 +17,35 @@ from extractor.eden_align import spell, quality, adeptpower, ritual
 RAW = ("cost", "gameEffect", "keywords", "descriptor", "spellType", "damage")
 
 # domain -> (aligner, needs-alignment marker). `quality`/`lifestyle` take (s,name)
-JOBS = {
-    "spells": (spell, lambda s: "descriptor" in s or "spellType" in s),
-    "qualities": (lambda s: quality(s), lambda s: "gameEffect" in s or isinstance(s.get("cost"), str)),
-    "adept_powers": (adeptpower, lambda s: isinstance(s.get("cost"), str) or "category" in s),
-    "rituals": (ritual, lambda s: "keywords" in s or "category" in s or isinstance(s.get("threshold"), str)),
-}
+if __name__ == "__main__":
+    # Guarded: everything below runs against the library, so an import
+    # of this module to inspect it must not start the job.
+    JOBS = {
+        "spells": (spell, lambda s: "descriptor" in s or "spellType" in s),
+        "qualities": (lambda s: quality(s), lambda s: "gameEffect" in s or isinstance(s.get("cost"), str)),
+        "adept_powers": (adeptpower, lambda s: isinstance(s.get("cost"), str) or "category" in s),
+        "rituals": (ritual, lambda s: "keywords" in s or "category" in s or isinstance(s.get("threshold"), str)),
+    }
 
 
-def _keep(s):
-    return {k: v for k, v in s.items() if k not in RAW}
+    def _keep(s):
+        return {k: v for k, v in s.items() if k not in RAW}
 
 
-for domain, (align, needs) in JOBS.items():
-    fixed = 0
-    for f in glob.glob(f"data/corebook/{domain}/*.json"):
-        payload = json.load(open(f, encoding="utf-8"))
-        dirty = False
-        for it in payload["items"]:
-            s = it["system"]
-            if not needs(s):
-                continue
-            # qualities/adept keep category via aligner output; spells set it too
-            it["system"] = {**_keep(s), **align(s)}
-            dirty = True
-            fixed += 1
-        if dirty:
-            Path(f).write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"{domain:14} aligned {fixed} item(s)")
-print("done")
+    for domain, (align, needs) in JOBS.items():
+        fixed = 0
+        for f in glob.glob(f"data/corebook/{domain}/*.json"):
+            payload = json.load(open(f, encoding="utf-8"))
+            dirty = False
+            for it in payload["items"]:
+                s = it["system"]
+                if not needs(s):
+                    continue
+                # qualities/adept keep category via aligner output; spells set it too
+                it["system"] = {**_keep(s), **align(s)}
+                dirty = True
+                fixed += 1
+            if dirty:
+                Path(f).write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        print(f"{domain:14} aligned {fixed} item(s)")
+    print("done")

@@ -25,10 +25,6 @@
       "items": {
         "$ref": "#/$defs/item"
       }
-    },
-    "_notice": {
-      "type": "string",
-      "description": "Optional provenance/licensing notice. Used on the sample files in examples/ to state that they contain no copyrighted content."
     }
   },
   "$defs": {
@@ -55,7 +51,7 @@
         },
         "system": {
           "type": "object",
-          "additionalProperties": true,
+          "additionalProperties": false,
           "properties": {
             "category": {
               "type": "string"
@@ -84,9 +80,6 @@
               "additionalProperties": {
                 "type": "boolean"
               }
-            },
-            "_cl6": {
-              "type": "object"
             }
           }
         },

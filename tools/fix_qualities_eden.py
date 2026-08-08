@@ -16,22 +16,25 @@ def _num(s):
 
 
 changed = 0
-for f in glob.glob("data/corebook/qualities/*.json"):
-    payload = json.load(open(f, encoding="utf-8"))
-    dirty = False
-    for it in payload["items"]:
-        s = it["system"]
-        if "cost" in s or "gameEffect" in s:
-            if s.get("value") in (None, "") and s.get("cost") not in (None, ""):
-                v = _num(s["cost"])
-                s["value"] = -abs(v) if s.get("category") == "negative" else v
-            if s.get("explain") in (None, "") and s.get("gameEffect") not in (None, ""):
-                s["explain"] = s["gameEffect"]
-            s.pop("cost", None)
-            s.pop("gameEffect", None)
-            dirty = True
-    if dirty:
-        Path(f).write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-        changed += 1
-        print("fixed", Path(f).name)
-print(f"done — {changed} file(s)")
+if __name__ == "__main__":
+    # Guarded: everything below runs against the library, so an import
+    # of this module to inspect it must not start the job.
+    for f in glob.glob("data/corebook/qualities/*.json"):
+        payload = json.load(open(f, encoding="utf-8"))
+        dirty = False
+        for it in payload["items"]:
+            s = it["system"]
+            if "cost" in s or "gameEffect" in s:
+                if s.get("value") in (None, "") and s.get("cost") not in (None, ""):
+                    v = _num(s["cost"])
+                    s["value"] = -abs(v) if s.get("category") == "negative" else v
+                if s.get("explain") in (None, "") and s.get("gameEffect") not in (None, ""):
+                    s["explain"] = s["gameEffect"]
+                s.pop("cost", None)
+                s.pop("gameEffect", None)
+                dirty = True
+        if dirty:
+            Path(f).write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+            changed += 1
+            print("fixed", Path(f).name)
+    print(f"done — {changed} file(s)")
