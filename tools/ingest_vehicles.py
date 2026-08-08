@@ -178,7 +178,13 @@ if __name__ == "__main__":
               f"({seen_n[0]}/{len(jobs)})", flush=True)
 
     for r in map_jobs(vehicle_scan_book, jobs, workers, on_done=landed):
+        # Stamp the book onto each record. The worker knows which book it read
+        # but the records do not carry it, and the writer below used to label
+        # EVERY vehicle "corebook" — so a Double Clutch drone claimed a corebook
+        # page number that points at something else entirely.
+        book = (r or {}).get("book") or LIBRARY
         for rec in (r or {}).get("found") or []:
+            rec["_book"] = book
             byname.setdefault(norm_base(rec["name"]), rec)
     recs = sorted(byname.values(), key=lambda r: (r["system"]["subtype"], r["name"]))
     # vehicles are their own site domain (Eden treats them as actors, which are
@@ -193,12 +199,16 @@ if __name__ == "__main__":
         while s in seen:
             s = f"{sid}_{k}"; k += 1
         seen.add(s)
+        # The book this row was actually read from. The corebook table passes
+        # above leave _book unset, and LIBRARY is "corebook", so they are still
+        # labelled correctly; only the stat-block books change.
+        book = r.get("_book", LIBRARY)
         items.append({"id": s, "name": r["name"], "system": r["system"],
-                      "meta": {"book": "corebook", "page": r["page"],
-                               "sources": [{"book": "corebook", "page": r["page"]}],
+                      "meta": {"book": book, "page": r["page"],
+                               "sources": [{"book": book, "page": r["page"]}],
                                "extractedAt": date.today().isoformat(),
                                "extractorVersion": extractor.__version__, "qaStatus": "extracted",
-                               "descriptionFrom": "corebook"}})
+                               "descriptionFrom": book}})
     out.write_text(json.dumps({"book": LIBRARY, "domain": "vehicles", "category": "vehicles", "items": items},
                               indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"wrote {len(items)} vehicles/drones")

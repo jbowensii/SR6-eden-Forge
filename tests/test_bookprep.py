@@ -187,3 +187,20 @@ def test_a_degenerate_table_box_is_skipped_not_cropped():
     from extractor.vehicle_scan import _pad
 
     assert _pad((900.0, 100.0, 950.0, 120.0), PAGE) is None
+
+
+def test_a_vehicle_keeps_the_book_it_was_read_from():
+    """ingest_vehicles labelled every vehicle "corebook", whatever book it came
+    from — so a Double Clutch drone carried a corebook page number pointing at
+    something else. The writer must read `_book` off the record.
+
+    Checked as source text: the writer lives inside the script's __main__ guard
+    and importing it to call it would run the whole phase against the library.
+    """
+    src = (Path(__file__).resolve().parent.parent
+           / "tools" / "ingest_vehicles.py").read_text(encoding="utf-8")
+    assert '"book": "corebook"' not in src, (
+        "ingest_vehicles is hard-coding the book again — statblock vehicles "
+        "will all claim to come from the corebook")
+    assert 'r.get("_book", LIBRARY)' in src
+    assert 'rec["_book"] = book' in src
