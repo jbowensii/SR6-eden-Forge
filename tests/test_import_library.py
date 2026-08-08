@@ -479,3 +479,33 @@ def test_the_pipeline_console_survives_replacement_characters():
         src = (root / rel).read_text(encoding="utf-8")
         assert "_utf8_console" in src, rel
         assert 'errors="replace"' in src, rel
+
+
+def test_every_phase_actually_does_something_when_dispatched():
+    """Gap 2, root cause. Three phases ran and produced nothing, silently.
+
+    A phase does its work either as top-level code or in a main() under
+    `if __name__ == "__main__"`. The dispatcher IMPORTED the module, which
+    fires only the first; a phase with a guard and no main() therefore did
+    nothing — and "no main()" was treated as success, so it exited 0 without a
+    word. run_module(run_name="__main__") satisfies both shapes.
+    """
+    import ast
+
+    root = Path(__file__).resolve().parent.parent
+    disp = (root / "build" / "catalog_builder" / "__main__.py").read_text(encoding="utf-8")
+    assert 'run_module(module_name, run_name="__main__"' in disp, \
+        "importing a phase only runs top-level code"
+
+    # and every phase must still be dispatchable by one of the two shapes
+    scripts = [s for _l, s, _a in
+               import_library.POST_PHASES + [import_library.CORRECTIONS_PHASE]]
+    for script in scripts:
+        src = (root / "tools" / script).read_text(encoding="utf-8")
+        tree = ast.parse(src)
+        guarded = any(
+            isinstance(n, ast.If) and "__main__" in ast.dump(n) for n in tree.body)
+        top_level_work = any(
+            isinstance(n, (ast.For, ast.Expr)) for n in tree.body)
+        funcs = {n.name for n in tree.body if isinstance(n, ast.FunctionDef)}
+        assert guarded or top_level_work or funcs, f"{script} has no entry point"

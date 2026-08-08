@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import importlib
 import multiprocessing
+import runpy
 import sys
 from pathlib import Path
 
@@ -78,23 +79,24 @@ def main() -> int:
         module_name = sys.argv[2]
         # the module parses sys.argv itself, so present the argv it expects
         sys.argv = [module_name, *sys.argv[3:]]
+        # runpy, not import.
+        #
+        # A phase runs its work in one of two ways: top-level code, or a main()
+        # under `if __name__ == "__main__"`. Importing the module only fires
+        # the first. Three phases had a guard and no main(), so importing them
+        # did NOTHING -- and because "no main()" was treated as success they
+        # exited 0 in silence. That is the whole of "Gap 2": the new-types,
+        # content and vehicle phases never ran in an installed build.
+        #
+        # run_module with run_name="__main__" executes the module exactly as
+        # `python -m module` does: top-level code runs AND the guard fires. It
+        # satisfies both shapes, so a phase cannot be silently skipped for
+        # having structured itself the other way.
         try:
-            mod = importlib.import_module(module_name)
-        except SystemExit as e:
-            # a top-level script that finished by raising SystemExit
-            return 0 if e.code in (None, 0) else int(e.code)
-
-        fn = getattr(mod, "main", None)
-        if fn is None:
-            # Not an error. Most pipeline phases are plain scripts that do
-            # their work at module level, so importing them HAS run them —
-            # treating that as a failure would report every phase as broken.
-            return 0
-        try:
-            result = fn()
+            runpy.run_module(module_name, run_name="__main__", alter_sys=True)
         except SystemExit as e:
             return 0 if e.code in (None, 0) else int(e.code)
-        return 0 if result is None else int(result)
+        return 0
 
     return _load_app().main()
 
