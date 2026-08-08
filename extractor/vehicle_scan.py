@@ -43,6 +43,29 @@ _DESCRIPTION = ("Handling {handling}, Accel {accel}, Speed Interval "
                 "Avail {availability}, Cost {price}¥")
 
 
+def _pad(bbox, page):
+    """Widen a table's box a little, without leaving the page.
+
+    The 11-value row sits just under the ruled header, so the crop is padded
+    down 18pt and out 2pt to catch it. pdfplumber REFUSES a crop that is not
+    fully inside the page and raises ValueError, which the worker's except
+    turns into "this book has no vehicles" — five books lost their entire scan
+    to one bad table that way, three of them because find_tables() reported a
+    NEGATIVE top on a rotated page.
+
+    Clamping is the whole fix: a table cannot extend past the page it is on, so
+    a box that claims to is wrong at the edges and right in the middle.
+    """
+    px0, ptop, px1, pbottom = page.bbox
+    x0 = max(px0, min(bbox[0] - 2, px1))
+    top = max(ptop, min(bbox[1] - 2, pbottom))
+    x1 = max(px0, min(bbox[2] + 2, px1))
+    bottom = max(ptop, min(bbox[3] + 18, pbottom))
+    if x1 - x0 < 1 or bottom - top < 1:
+        return None
+    return (x0, top, x1, bottom)
+
+
 def read_statblock_vehicles(pdf_path, pages) -> list[dict]:
     """Splatbook stat blocks (Double Clutch etc.).
 
@@ -85,8 +108,14 @@ def read_statblock_vehicles(pdf_path, pages) -> list[dict]:
                 if pm:
                     parens.append((min(w["top"] for w in ln), pm.group(1).strip()))
             for tb in page.find_tables():
-                x0, top, x1, bottom = tb.bbox
-                crop = page.crop((x0 - 2, top - 2, x1 + 2, bottom + 18))
+                # the table's own top, NOT the clamped one: it is what decides
+                # which headings count as "above the table", and clamping that
+                # would drag the cutoff onto the page edge
+                top = tb.bbox[1]
+                box = _pad(tb.bbox, page)
+                if box is None:
+                    continue        # degenerate table box — nothing to read
+                crop = page.crop(box)
                 vals = None
                 for line in (crop.extract_text() or "").splitlines():
                     toks = normalize_text(line).strip().split()

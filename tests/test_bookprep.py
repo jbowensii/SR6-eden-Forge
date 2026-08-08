@@ -138,3 +138,52 @@ def test_a_scan_worker_reports_a_bad_pdf_rather_than_raising(name):
     assert r["book"] == "ghost"
     assert r[err_key]                      # reported, not raised
     assert not r["found"]
+
+
+# ---------- the vehicle table crop ----------
+
+class _Page:
+    """Just enough of a pdfplumber page for _pad."""
+    def __init__(self, bbox):
+        self.bbox = bbox
+
+
+PAGE = _Page((0.0, 0.0, 612.0, 765.0))
+
+
+def test_padding_a_table_box_stays_on_the_page():
+    """pdfplumber raises on a crop that leaves the page.
+
+    The 11-value row sits under the ruled header, so the box is padded out 2pt
+    and down 18pt. On a table that touches the edge that padding lands outside
+    the page, pdfplumber raises ValueError, and the worker's except reports it
+    as "this book has no vehicles". Five books lost their whole vehicle scan to
+    one such table; krime_katalog alone was hiding 12.
+    """
+    from extractor.vehicle_scan import _pad
+
+    x0, top, x1, bottom = _pad((0.0, 48.0, 612.0, 490.0), PAGE)
+    assert x0 >= 0.0 and x1 <= 612.0
+    assert top >= 0.0 and bottom <= 765.0
+
+
+def test_a_negative_table_top_is_clamped_not_refused():
+    """find_tables() reports a negative top on some rotated pages."""
+    from extractor.vehicle_scan import _pad
+
+    box = _pad((-2.2, -941.0, 752.0, 1894.0), _Page((0, 0.0, 750, 938.88)))
+    assert box == (0, 0.0, 750, 938.88)
+
+
+def test_padding_keeps_a_normal_box_intact():
+    """Clamping must not disturb a table that was already on the page."""
+    from extractor.vehicle_scan import _pad
+
+    assert _pad((100.0, 200.0, 400.0, 300.0), PAGE) == (98.0, 198.0, 402.0, 318.0)
+
+
+def test_a_degenerate_table_box_is_skipped_not_cropped():
+    """A zero-width box off the page edge would crop to nothing."""
+    from extractor.vehicle_scan import _pad
+
+    assert _pad((900.0, 100.0, 950.0, 120.0), PAGE) is None
