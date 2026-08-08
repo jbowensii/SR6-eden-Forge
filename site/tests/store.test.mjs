@@ -109,7 +109,9 @@ describe("artwork survives a re-import", () => {
     const rec = JSON.parse(readFileSync(
       join(root, "_corrections", "gear", `${ITEM.id}.json`), "utf8"));
     expect(rec.id).toBe(ITEM.id);
-    expect(rec.img).toBe(`corebook/${ITEM.id}.png`);
+    // the edit itself lives under `changed` now, with `ref` to re-find the item
+    expect(rec.changed.img).toBe(`corebook/${ITEM.id}.png`);
+    expect(rec.ref.name).toBe(ITEM.name);
   });
 
   it("records a correction when an icon from the user's sets is assigned", () => {
@@ -126,6 +128,6 @@ describe("artwork survives a re-import", () => {
 
     const rec = JSON.parse(readFileSync(
       join(root, "_corrections", "gear", `${ITEM.id}.json`), "utf8"));
-    expect(rec.img).toBe(`corebook/lib/${ITEM.id}.png`);
+    expect(rec.changed.img).toBe(`corebook/lib/${ITEM.id}.png`);
   });
 });

@@ -57,10 +57,25 @@ else:
         if not target:
             continue  # item no longer produced by extraction; skip (tombstone would remove anyway)
         path, payload, it = target
-        for k, v in (rec.get("system") or {}).items():
+
+        # Two shapes. New corrections store only what CHANGED under "changed",
+        # plus a "ref" for finding the item again if its id moves. Older ones
+        # stored the whole item at the top level, which made every edit a
+        # wholesale replacement — re-applying one overwrote fields the user had
+        # never touched, including Commlink6's. Both are honoured so the
+        # corrections already on disk keep working.
+        edit = rec.get("changed") if isinstance(rec.get("changed"), dict) else rec
+        gaps_only = bool(rec.get("gapsOnly"))
+
+        for k, v in (edit.get("system") or {}).items():
+            # gapsOnly: an old PDF-era edit re-keyed onto a Commlink6 row fills
+            # what Commlink6 left empty and never overwrites what it stated
+            if gaps_only and (it["system"].get(k) not in (None, "", [], {})):
+                continue
             if it["system"].get(k) != v:
                 field_changes[f"{domain}.{k}"] += 1
             it["system"][k] = v
+        rec = {**rec, **{k: v for k, v in edit.items() if k != "system"}}
         if it["system"].get("type"):     # keep type/subtype on the Eden vocabulary
             it["system"]["type"], it["system"]["subtype"] = map_code(
                 it["system"].get("type") or "", it["system"].get("subtype") or "")

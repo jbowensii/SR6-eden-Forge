@@ -826,3 +826,30 @@ def test_no_personal_path_is_baked_into_the_shipped_review_app():
     src = (Path(__file__).resolve().parent.parent
            / "site" / "server" / "app.mjs").read_text(encoding="utf-8")
     assert "Users/johnb" not in src and "Users\johnb" not in src
+
+
+# ---------- corrections store a delta, not the whole item ----------
+
+def test_a_correction_records_only_what_changed():
+    """A correction used to hold the whole item.
+
+    That made every edit a wholesale replacement: re-applying one overwrote
+    fields the user had never touched, including Commlink6's. It also left
+    nothing to re-find the item by, so 55 corrections were orphaned when
+    Commlink6 re-keyed rows to cl6_* ids.
+    """
+    src = (Path(__file__).resolve().parent.parent
+           / "site" / "server" / "store.mjs").read_text(encoding="utf-8")
+    assert "changed" in src and "ref:" in src
+    assert "JSON.stringify(v) !== JSON.stringify(sysBefore[k])" in src, \
+        "the delta must be computed against the item as it was"
+    assert "recordCorrection(dataRoot, domain, category, item, { before })" in src
+
+
+def test_apply_corrections_honours_both_shapes_and_gaps_only():
+    src = (Path(__file__).resolve().parent.parent
+           / "tools" / "apply_corrections.py").read_text(encoding="utf-8")
+    # new shape, old shape, and the fill-gaps rule for re-keyed edits
+    assert 'rec.get("changed")' in src
+    assert 'gaps_only = bool(rec.get("gapsOnly"))' in src
+    assert 'if gaps_only and (it["system"].get(k) not in (None, "", [], {}))' in src

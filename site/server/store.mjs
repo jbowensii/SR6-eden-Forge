@@ -202,14 +202,45 @@ export function readCategory(dataRoot, book, domain, category) {
 // data/_corrections/<domain>/<id>.json. tools/apply_corrections.py re-applies
 // them after any re-import, so a manual edit survives re-extraction until it is
 // edited again. Deleting an item records a tombstone so it isn't re-added.
-export function recordCorrection(dataRoot, domain, category, item, { deleted = false } = {}) {
+export function recordCorrection(dataRoot, domain, category, item, { deleted = false, before = null } = {}) {
   const dir = join(dataRoot, "_corrections", domain);
   if (!SEGMENT.test(domain) || !SEGMENT.test(item.id)) return;
   mkdirSync(dir, { recursive: true });
-  const rec = deleted
-    ? { domain, category, id: item.id, deleted: true, correctedAt: new Date().toISOString() }
-    : { domain, category, id: item.id, correctedAt: new Date().toISOString(),
-        name: item.name, img: item.img, system: item.system, qaStatus: item.meta?.qaStatus };
+
+  let rec;
+  if (deleted) {
+    rec = { domain, category, id: item.id, deleted: true, correctedAt: new Date().toISOString() };
+  } else {
+    // Store only what CHANGED, plus enough to find the item again.
+    //
+    // A correction used to hold the whole item. That made every edit a
+    // wholesale replacement: re-applying one overwrote every field, including
+    // values from Commlink6 the user never touched. It also made corrections
+    // brittle — when Commlink6 re-keyed rows to cl6_* ids, 55 corrections lost
+    // their anchor and there was nothing in the file to re-find the item by.
+    //
+    // `ref` is that anchor. `changed` is the edit itself.
+    const changed = {};
+    const sysBefore = (before && before.system) || {};
+    const sysNow = item.system || {};
+    const sysDelta = {};
+    for (const [k, v] of Object.entries(sysNow)) {
+      if (JSON.stringify(v) !== JSON.stringify(sysBefore[k])) sysDelta[k] = v;
+    }
+    if (Object.keys(sysDelta).length) changed.system = sysDelta;
+    if (!before || item.name !== before.name) changed.name = item.name;
+    if (!before || item.img !== before.img) changed.img = item.img;
+    const qa = item.meta?.qaStatus;
+    if (!before || qa !== before.meta?.qaStatus) changed.qaStatus = qa;
+
+    rec = {
+      domain, category, id: item.id,
+      correctedAt: new Date().toISOString(),
+      ref: { name: item.name, book: item.meta?.book },
+      changed,
+    };
+  }
+
   const path = join(dir, `${item.id}.json`);
   const tmp = `${path}.tmp`;
   writeFileSync(tmp, JSON.stringify(rec, null, 2) + "\n", "utf8");
@@ -221,12 +252,14 @@ export function writeItem(dataRoot, book, domain, category, itemId, item) {
   const payload = readCategory(dataRoot, book, domain, category);
   const index = payload.items.findIndex((i) => i.id === itemId);
   if (index === -1) throw new StoreError("not-found", itemId);
+  // the item as it WAS, so the correction can record only what changed
+  const before = payload.items[index];
   payload.items[index] = item;
   const path = categoryPath(dataRoot, book, domain, category);
   const tmpPath = `${path}.tmp`;
   writeFileSync(tmpPath, JSON.stringify(payload, null, 2) + "\n", "utf8");
   renameSync(tmpPath, path);
-  recordCorrection(dataRoot, domain, category, item);
+  recordCorrection(dataRoot, domain, category, item, { before });
   return item;
 }
 
