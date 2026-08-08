@@ -25,6 +25,10 @@ from datetime import date
 import pdfplumber
 
 import extractor
+from extractor.bookprep import env_workers, map_jobs
+from extractor.newtype_scan import (MARTIAL, MARTIAL_BOOKS,
+                                    MARTIAL_RANGES, SKIP, XBOOK,
+                                    scan_book)
 from extractor.paths import data_root, positional
 from extractor.autodetect import _valid_name
 from extractor.emit import slugify
@@ -79,19 +83,11 @@ COREBOOK = {
 
 # other books: only domains whose per-entry signature is reliable enough to scan
 # blind. (Adventure/plot books mostly have none of this, so yields are small.)
-XBOOK = {
-    "complexforms": (read_complexforms, S(r"FADE\s+VALUE\s+DURATION")),
-    "contacts": (read_contacts, S(r"(?:Connection|Loyalty)\s*(?:Rating)?\s*[:=]?\s*\d")),
-}
 # Martial arts (Deadly Arts): BEST-EFFORT import over the technique chapter by
 # range (font+size detection isolates 13pt display-font entry names). The chapter
 # interleaves cyberweapon/polearm gear in the same font and SR6 has no clean style
 # catalog, so martial_techniques carries some gear names that need a human review
 # pass. Styles stay empty (the "styles" chapter is motivation essays, not a catalog).
-MARTIAL_BOOKS = {"deadly_arts"}
-MARTIAL = {"martial_techniques": (read_martial_techs, None)}
-MARTIAL_RANGES = {"deadly_arts": {"martial_techniques": list(range(33, 48)) + list(range(49, 52))}}
-SKIP = {"gun_rack", "rides"}   # not real content books
 
 
 def merge_write(domain, collected, base_fields, group_by):
@@ -190,35 +186,28 @@ if __name__ == "__main__":
                 print(f"  corebook/{domain}: {e}")
         print("scanned corebook (curated ranges)")
 
-    # other books: reliable-signature scan only
-    for book, pdf in books:
-        if book == "corebook":
-            continue
-        with pdfplumber.open(pdf) as p:
-            texts = [(i, dedouble(page.extract_text() or "")) for i, page in enumerate(p.pages, 1)]
-        npages = len(texts)
-        active = dict(XBOOK)
-        if book in MARTIAL_BOOKS:
-            active.update(MARTIAL)
-        for domain, (reader, sig) in active.items():
-            override = MARTIAL_RANGES.get(book, {}).get(domain)
-            if override:
-                pages = [x for x in override if 1 <= x <= npages]
-            else:
-                pages = set()
-                for i, t in texts:
-                    if sig.search(t):
-                        pages.update((i - 1, i, i + 1))
-                pages = sorted(x for x in pages if 1 <= x <= npages)
-            if not pages:
-                continue
-            try:
-                for rec in reader(pdf, pages):
-                    rec["_book"] = book
-                    collected[domain].append(rec)
-            except Exception as e:
-                print(f"  {book}/{domain}: {e}")
-        print(f"scanned {book}")
+    # Other books: reliable-signature scan, several at a time.
+    #
+    # This phase only began doing any work in 0.9.2 -- the frozen dispatcher
+    # never ran it before, so it looked instant because it did nothing. Reading
+    # every page of every owned book on one core is twenty minutes that nobody
+    # had budgeted for. The scan depends on nothing but the PDF; the merge
+    # below still happens once, here.
+    jobs = [(b, pdf) for b, pdf in books if b != "corebook"]
+    workers = env_workers()
+    print(f"scanning {len(jobs)} book(s) with {workers} worker(s)", flush=True)
+
+    seen = [0]
+
+    def landed(r):
+        seen[0] += 1
+        for err in r.get("errors", []):
+            print(f"  {err}", flush=True)
+        print(f"scanned {r.get('book', '?')}  ({seen[0]}/{len(jobs)})", flush=True)
+
+    for r in map_jobs(scan_book, jobs, workers, on_done=landed):
+        for domain, recs in ((r or {}).get("found") or {}).items():
+            collected.setdefault(domain, []).extend(recs)
 
     for domain in sorted(collected):
         merge_write(domain, collected[domain], BASE.get(domain, ("description",)), "category")

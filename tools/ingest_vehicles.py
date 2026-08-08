@@ -12,7 +12,9 @@ from collections import Counter
 from datetime import date
 import pdfplumber
 import extractor
+from extractor.bookprep import env_workers, map_jobs
 from extractor.paths import data_root, positional
+from extractor.vehicle_scan import scan_book as vehicle_scan_book
 from extractor.emit import slugify
 from extractor.ingest import LIBRARY, load_registry
 from extractor.normalize import normalize_text
@@ -206,6 +208,10 @@ def read_statblock_vehicles(pdf_path, pages):
 
 
 if __name__ == "__main__":
+    # workers are spawned; without this each child re-runs this script
+    import multiprocessing
+
+    multiprocessing.freeze_support()
     reg = load_registry(DATA)
     from extractor.merge import norm_base
     from extractor.autodetect import _valid_name
@@ -219,23 +225,27 @@ if __name__ == "__main__":
         byname[norm_base(r["name"])] = r
     for r in (read_vehicles_text(core, range(301, 307)) if _P(core).is_file() else []):
         byname.setdefault(norm_base(r["name"]), r)
-    # every other book: stat-block vehicles (fine subtypes from parens)
-    import pdfplumber as _pp
-    for book, meta in reg.items():
-        pdf = meta.get("pdf", "")
-        if book in ("corebook", "gun_rack", "rides") or not _P(pdf).is_file():
-            continue
-        try:
-            with _pp.open(pdf) as p:
-                pages = [i for i, pg in enumerate(p.pages, 1) if _HDR.search(pg.extract_text() or "")]
-            if not pages:
-                continue
-            for r in read_statblock_vehicles(pdf, pages):
-                if _valid_name(r["name"]):
-                    byname.setdefault(norm_base(r["name"]), r)
-            print(f"scanned {book} ({len(pages)} stat pages)", flush=True)
-        except Exception as e:
-            print(f"  {book}: {e}", flush=True)
+    # Every other book: stat-block vehicles (fine subtypes from parens), read
+    # several at a time. Merging stays here, one book at a time, so first-wins
+    # order is unchanged.
+    jobs = [(b, m.get("pdf", "")) for b, m in reg.items()
+            if b not in ("corebook", "gun_rack", "rides")
+            and _P(m.get("pdf", "")).is_file()]
+    workers = env_workers()
+    print(f"scanning {len(jobs)} book(s) with {workers} worker(s)", flush=True)
+
+    seen_n = [0]
+
+    def landed(r):
+        seen_n[0] += 1
+        for err in r.get("errors", []):
+            print(f"  {err}", flush=True)
+        print(f"scanned {r.get('book', '?')} ({r.get('pages', 0)} stat pages) "
+              f"({seen_n[0]}/{len(jobs)})", flush=True)
+
+    for r in map_jobs(vehicle_scan_book, jobs, workers, on_done=landed):
+        for rec in (r or {}).get("found") or []:
+            byname.setdefault(norm_base(rec["name"]), rec)
     recs = sorted(byname.values(), key=lambda r: (r["system"]["subtype"], r["name"]))
     # vehicles are their own site domain (Eden treats them as actors, which are
     # out of scope here — this is browsable reference data, not exported).
