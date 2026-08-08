@@ -293,6 +293,36 @@ def test_entry_can_load_the_window_module():
     assert _load_app().__name__.endswith("catalog_builder.app")
 
 
+def test_the_window_only_calls_functions_that_exist():
+    """Every ``module.name(...)`` in app.py resolves.
+
+    The window is not exercised by tests — Tk needs a display — so a call into
+    a pipeline module is checked by nothing until a user clicks the button that
+    reaches it. That is a runtime AttributeError in the installed build, which
+    is the most expensive place to find one. Parsing the source costs nothing
+    and closes the gap for the mechanical half: names that are simply not
+    there.
+    """
+    import ast
+
+    from catalog_builder import (books, commlink6, cores, identify, ports,
+                                 publish, theme)
+    known = {"books": books, "commlink6": commlink6, "cores": cores,
+             "identify": identify, "ports": ports, "publish": publish,
+             "theme": theme}
+
+    src = (Path(__file__).resolve().parent.parent
+           / "build" / "catalog_builder" / "app.py").read_text(encoding="utf-8")
+    missing = []
+    for node in ast.walk(ast.parse(src)):
+        if (isinstance(node, ast.Attribute)
+                and isinstance(node.value, ast.Name)
+                and node.value.id in known
+                and not hasattr(known[node.value.id], node.attr)):
+            missing.append(f"{node.value.id}.{node.attr} (line {node.lineno})")
+    assert not missing, "app.py calls names that do not exist: " + ", ".join(missing)
+
+
 # ---------- the workspace ----------
 
 def test_workspace_folders_are_created_not_asked_about(tmp_path):
@@ -825,7 +855,7 @@ def test_no_personal_path_is_baked_into_the_shipped_review_app():
     """
     src = (Path(__file__).resolve().parent.parent
            / "site" / "server" / "app.mjs").read_text(encoding="utf-8")
-    assert "Users/johnb" not in src and "Users\johnb" not in src
+    assert "Users/johnb" not in src and r"Users\johnb" not in src
 
 
 # ---------- corrections store a delta, not the whole item ----------

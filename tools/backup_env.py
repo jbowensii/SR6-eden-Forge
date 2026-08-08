@@ -98,7 +98,7 @@ def create(repo: Path, with_assets: bool = True) -> Path:
     # the artwork: mirrored, because 2.7 GB through gzip is a waste of a morning
     src = data / ASSETS
     if with_assets and src.is_dir():
-        print(f"  _assets            mirroring (this is the slow part)")
+        print("  _assets            mirroring (this is the slow part)")
         _robocopy(src, dest / ASSETS)
         print(f"  _assets            {_size(dest / ASSETS)}")
 

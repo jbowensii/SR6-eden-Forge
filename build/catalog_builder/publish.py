@@ -41,7 +41,7 @@ def foundry_running() -> bool:
     try:
         out = subprocess.run(
             ["tasklist", "/FI", "IMAGENAME eq Foundry Virtual Tabletop.exe"],
-            capture_output=True, text=True, timeout=8,
+            capture_output=True, text=True, timeout=8, check=False,
             creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0)).stdout
         return "Foundry" in out
     except Exception:

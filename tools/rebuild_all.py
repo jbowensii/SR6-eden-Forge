@@ -53,13 +53,18 @@ STEPS = [
     ("Re-apply manual corrections", "apply_corrections.py", []),
 ]
 
-failed = []
-for label, script, args in STEPS:
-    print(f"\n===== {label} =====", flush=True)
-    r = subprocess.run([sys.executable, "-u", f"tools/{script}", *args], cwd=str(ROOT))
-    if r.returncode != 0:
-        print(f"  !! {script} exited {r.returncode}", flush=True)
-        failed.append(script)
+if __name__ == "__main__":
+    # Guarded: this runs every extraction phase against the library, so an
+    # `import tools.rebuild_all` to inspect the module used to launch the whole
+    # rebuild. STEPS above stays importable so other code can read the order.
+    failed = []
+    for label, script, args in STEPS:
+        print(f"\n===== {label} =====", flush=True)
+        r = subprocess.run([sys.executable, "-u", f"tools/{script}", *args],
+                           cwd=str(ROOT), check=False)   # rc handled below
+        if r.returncode != 0:
+            print(f"  !! {script} exited {r.returncode}", flush=True)
+            failed.append(script)
 
-print("\n" + ("REBUILD COMPLETE" if not failed else f"REBUILD FINISHED WITH ERRORS: {failed}"), flush=True)
-print("done", flush=True)
+    print("\n" + ("REBUILD COMPLETE" if not failed else f"REBUILD FINISHED WITH ERRORS: {failed}"), flush=True)
+    print("done", flush=True)

@@ -27,7 +27,7 @@ def _node(script: str, args: list[str]) -> int:
     """Run one of the Node build scripts, streaming its output."""
     argv = ["node", str(REPO / script), *args]
     print(f"    $ {' '.join(argv[1:])}")
-    p = subprocess.run(argv, cwd=str(REPO), text=True,
+    p = subprocess.run(argv, cwd=str(REPO), text=True, check=False,
                        capture_output=True, encoding="utf-8", errors="replace")
     for line in (p.stdout or "").splitlines():
         print(f"      {line}")

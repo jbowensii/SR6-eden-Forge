@@ -25,13 +25,15 @@ from tkinter import filedialog, messagebox, ttk
 # relative import there fails only in the packaged build — the worst place to
 # find out. See __main__.py.
 try:
-    from catalog_builder import books, commlink6, cores, ports, publish, theme
+    from catalog_builder import (books, commlink6, cores, identify, ports,
+                                 publish, theme)
     from catalog_builder.runner import Job, Progress, pipeline_command
     from catalog_builder.settings import (
         Settings, default_workspace, detect_commlink6, detect_foundry_data,
         ensure_workspace, sync_review_settings)
 except ImportError:                       # installed under a different root
-    from build.catalog_builder import books, commlink6, cores, ports, publish, theme
+    from build.catalog_builder import (books, commlink6, cores, identify,
+                                       ports, publish, theme)
     from build.catalog_builder.runner import Job, Progress, pipeline_command
     from build.catalog_builder.settings import (
         Settings, default_workspace, detect_commlink6, detect_foundry_data,
@@ -75,6 +77,8 @@ class App(tk.Tk):
         self.review_port: int = 0
         self.progress: Progress | None = None
         self.scan_result: dict | None = None
+        self._deep_key: str | None = None    # folder the content scan covered
+        self._c6_job: threading.Thread | None = None   # Commlink6 download
 
         self._style()
         self._build()
@@ -176,6 +180,12 @@ class App(tk.Tk):
         self.publish_btn.pack(side="left")
         self.cancel_btn = ttk.Button(actions, text="Stop", command=self._cancel)
         self.cancel_btn.pack(side="right")
+        # Enabled only once the content scan has found files whose names do not
+        # match the retail pattern — an offer, never something that happens on
+        # its own, because it changes files on disk.
+        self.rename_btn = ttk.Button(actions, text="Rename files…",
+                                     command=self._rename_files, state="disabled")
+        self.rename_btn.pack(side="right", padx=(0, 8))
 
         self.pbar = ttk.Progressbar(pad, mode="determinate", maximum=1000)
         self.pbar.grid(row=4, column=0, sticky="ew")
@@ -215,6 +225,95 @@ class App(tk.Tk):
         self.geometry(f"{w}x{h}+{x}+{y}")
         # the floor is what the fields need, not a number someone liked
         self.minsize(min(need_w, max_w), min(need_h, max_h))
+
+    # ---------- identifying books by what is inside them ----------
+    def _start_deep_scan(self, pdf_dir: Path, registry: dict) -> None:
+        """Confirm the filename guess against the contents, off the UI thread.
+
+        A filename is a convention; the Catalyst product code printed in the
+        book is a fact. Reading fifty PDFs takes a minute or two the first time,
+        so it happens in a worker thread and the answer replaces the filename
+        one when it lands. Signals are cached by path+size+mtime, so every scan
+        after the first is instant.
+
+        Only one runs at a time, and a stale one is discarded: the folder box
+        fires this on every keystroke.
+        """
+        key = str(pdf_dir)
+        if getattr(self, "_deep_key", None) == key:
+            return                              # already done or in flight
+        self._deep_key = key
+
+        def work():
+            try:
+                cache = identify.SignalCache(identify.default_cache_path())
+                result = books.scan(
+                    pdf_dir, registry,
+                    identify_fn=lambda p: identify.identify(p, registry, cache))
+                cache.save()
+            except Exception as e:              # never take the window down
+                self.after(0, lambda: self._write(
+                    f"!! could not read the PDFs: {type(e).__name__}: {e}"))
+                return
+            self.after(0, lambda: self._deep_scan_done(key, result))
+
+        threading.Thread(target=work, daemon=True).start()
+
+    def _deep_scan_done(self, key: str, result: dict) -> None:
+        """Adopt the content-based result, if the folder has not moved on."""
+        if getattr(self, "_deep_key", None) != key:
+            return                              # the user changed folder
+        self.scan_result = result
+        n = len(result["matched"])
+        by_content = sum(1 for m in result["matched"]
+                         if "filename" not in (m.get("how") or ""))
+        self.pdf_status.configure(
+            text=f"{books.summary(result)}   ({by_content} identified from "
+                 f"inside the file)",
+            foreground=OK if n else WARN)
+        self._refresh_rename_button()
+
+    def _refresh_rename_button(self) -> None:
+        plan = self._rename_plan()
+        self.rename_btn.configure(
+            text=f"Rename {len(plan)} file(s)…" if plan else "Rename files…",
+            state="normal" if plan else "disabled")
+
+    def _rename_plan(self) -> list:
+        if not self.scan_result:
+            return []
+        try:
+            return identify.plan_renames(self.scan_result["matched"],
+                                         books.load_registry(repo_root()))
+        except Exception:
+            return []
+
+    def _rename_files(self) -> None:
+        """Offer to rename recognised books to the retail naming pattern."""
+        plan = self._rename_plan()
+        if not plan:
+            messagebox.showinfo(APP_TITLE, "Every recognised book is already "
+                                           "named the standard way.")
+            return
+
+        clashes = [p for p in plan if p["collision"]]
+        preview = NL2.join(f"{p['from']}\n    -> {p['to']}" for p in plan[:12])
+        more = f"{NL2}...and {len(plan) - 12} more" if len(plan) > 12 else ""
+        warn = (f"{NL2}{len(clashes)} will be SKIPPED — a different file "
+                f"already has that name." if clashes else "")
+
+        if not messagebox.askyesno(
+                APP_TITLE,
+                f"Rename {len(plan)} file(s) on disk?{NL2}{preview}{more}{warn}"):
+            return
+
+        out = identify.apply_renames(plan)
+        self._write(f"=== renamed {len(out['renamed'])} file(s), "
+                    f"skipped {len(out['skipped'])}")
+        for s in out["skipped"]:
+            self._write(f"    skipped {s['from']}: {s['why']}")
+        self._deep_key = None                   # paths changed; scan afresh
+        self._refresh_state()
 
     def _on_close(self) -> None:
         """Ask about the review server before the window disappears.
@@ -294,14 +393,23 @@ class App(tk.Tk):
         pdf = Path(self.pdf_var.get().strip() or ".")
         if self.pdf_var.get().strip() and pdf.is_dir():
             reg = books.load_registry(repo_root())
+            # The FAST answer, from filenames only. This runs on every keystroke
+            # in the folder box, so it must not open a single PDF — reading
+            # fifty of them here would freeze the window mid-type.
             self.scan_result = books.scan(pdf, reg)
             n = len(self.scan_result["matched"])
             self.pdf_status.configure(
                 text=books.summary(self.scan_result),
                 foreground=OK if n else WARN)
+            # ...then confirm it against what is INSIDE the files, off-thread.
+            self._start_deep_scan(pdf, reg)
         else:
             self.scan_result = None
             self.pdf_status.configure(text="No folder chosen.", foreground=MUTED)
+        # Offered off the filename scan as well, not only the content one: a
+        # stale "Rename 12 file(s)…" left on the button after the folder is
+        # cleared is an offer to rename files that are no longer in view.
+        self._refresh_rename_button()
 
         jar = self.jar_var.get().strip()
         if jar:

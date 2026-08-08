@@ -159,6 +159,11 @@ def subtype_for_page(markers, page: int) -> str | None:
 
 def read_hierarchy(pdf_path, pages, sample=None) -> dict[str, tuple[str, str, str, int]]:
     """`{norm(name): (name, section, description, page)}` for every item heading."""
+    # pylint: disable=cell-var-from-loop
+    #   flush() reads the `section` and `page_no` of the column it belongs to
+    #   and is always called before the loop rebinds them, so late binding is
+    #   never observed. Passing them as arguments would mean threading the
+    #   nonlocal writes back out by hand for no behavioural gain.
     out: dict[str, tuple[str, str, str, int]] = {}
     pg_words = sample if sample is not None else extract_sample(pdf_path, pages)
     _body, item_size = _heading_sizes([w for _, w in pg_words])

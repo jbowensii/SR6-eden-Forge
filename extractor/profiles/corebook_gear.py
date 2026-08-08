@@ -22,7 +22,10 @@ def firearm(subtype: str) -> RowSpec:
     return RowSpec(columns=FIREARM, defaults={"type": "WEAPON_FIREARMS", "subtype": subtype, "skill": "firearms"})
 
 
-def melee(subtype: str, columns=MELEE) -> RowSpec:
+# MELEE is shared across calls, and deliberately: RowSpec only ever reads
+# `columns` (regex() builds a pattern from it), so there is nothing to mutate
+# and a per-call copy of four strings would be noise.
+def melee(subtype: str, columns=MELEE) -> RowSpec:  # pylint: disable=dangerous-default-value
     return RowSpec(columns=columns, defaults={"type": "WEAPON_CLOSE_COMBAT", "subtype": subtype, "skill": "close_combat"})
 
 

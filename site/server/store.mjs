@@ -1,3 +1,18 @@
+// The review app's disk layer: read a domain's items, write an edited one back,
+// and catalogue the edit so a re-import cannot quietly undo it.
+//
+// Two things live here that the rest of the server relies on and neither is
+// obvious from the function names:
+//
+//   * Every path segment that reaches the filesystem goes through SEGMENT and
+//     checkSegments first. Domain, category and item id all arrive from the
+//     browser, and none of them may become "..".
+//
+//   * Writing an item ALSO writes a correction record (recordCorrection). The
+//     library is regenerated from the PDFs on every import; the correction file
+//     is the only reason a manual edit is still there afterwards. Anything that
+//     saves an item and skips the record has silently made that edit temporary.
+//     tools/apply_corrections.py is the other half of that contract.
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { extname, join } from "node:path";
 

@@ -96,6 +96,9 @@ _ECHO_ITEM = re.compile(r"^([A-Z][A-Za-z0-9 /'\-]{1,38}?):\s+(.*\S)$")
 def read_echoes(pdf_path, pages):
     """Echoes are a bullet list; also accept 'Increased Maximum Resonance'-style
     heading echoes. Bullets can wrap, so lowercase continuations append."""
+    # pylint: disable=unsubscriptable-object,unsupported-assignment-operation
+    #   `cur` is None between bullets and a dict inside one; every use is behind
+    #   `if cur`. Pylint infers only the None arm.
     import pdfplumber
     items, cur = [], None
 
@@ -198,8 +201,10 @@ def _read_martial_font(pdf_path, pages, category, name_lo=12.5, name_hi=14.5):
     at ~13pt over 10pt Sabon body; 15-21pt are section titles. Detect entry names
     by 'display font + ~13pt', take following body lines as the description. Called
     on TOC-bounded page ranges so the cyberweapon/gear chapter is excluded."""
+    # pylint: disable=unsubscriptable-object
+    #   `cur` is None between entries and a dict inside one; every use is
+    #   behind `if cur is not None`. Pylint infers only the None arm.
     import pdfplumber
-    from collections import Counter as _C
     items = []
     with pdfplumber.open(str(pdf_path)) as pdf:
         for page_no in pages:
@@ -208,13 +213,13 @@ def _read_martial_font(pdf_path, pages, category, name_lo=12.5, name_hi=14.5):
                      if w.get("upright", True)]
             if not words:
                 continue
-            body_font = _C((w["fontname"], round(w["size"])) for w in words).most_common(1)[0][0]
+            body_font = Counter((w["fontname"], round(w["size"])) for w in words).most_common(1)[0][0]
             mid = page.width / 2
             for lo, hi in ((0, mid), (mid, page.width)):
                 cur = None
                 for ln in _lines([w for w in words if lo <= (w["x0"] + w["x1"]) / 2 < hi]):
                     sz = max(w["size"] for w in ln)
-                    font = _C(w["fontname"] for w in ln).most_common(1)[0][0]
+                    font = Counter(w["fontname"] for w in ln).most_common(1)[0][0]
                     text = normalize_text(" ".join(w["text"] for w in ln)).strip()
                     if not text:
                         continue

@@ -17,7 +17,7 @@ class RowSpec:
     allow_tail: bool = False
 
     def regex(self) -> re.Pattern:
-        parts = [f"(?P<name>.+?)"]
+        parts = ["(?P<name>.+?)"]
         for i, key in enumerate(self.columns):
             parts.append(f"(?P<c{i}>{resolve(key).pattern})")
         tail = r"(?:\s+\S.*)?" if self.allow_tail else ""

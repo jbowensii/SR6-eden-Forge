@@ -292,7 +292,7 @@ def run(data_root: _P, jar: _P | None, only: str | None, apply: bool,
 
     skipped = [p["book"] for p in plan if p["source"] == "skip"]
     if skipped:
-        print(f"\nnot imported (no PDF, so ownership is not established):")
+        print("\nnot imported (no PDF, so ownership is not established):")
         for b in skipped:
             print(f"    {b}")
 

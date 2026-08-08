@@ -1,8 +1,32 @@
-"""Re-apply catalogued manual corrections after a re-import. Every site edit is
-saved under data/_corrections/<domain>/<id>.json (by store.mjs); this overlays
-them onto the freshly-imported library so a manual edit survives re-extraction
-until it is edited again. Deletion tombstones remove re-added items. Runs as the
-final step of tools/rebuild_all.py.
+"""Re-apply catalogued manual corrections after a re-import.
+
+Every site edit is saved under ``data/_corrections/<domain>/<id>.json`` by
+store.mjs; this overlays them onto the freshly-imported library so a manual
+edit survives re-extraction until it is edited again. Deletion tombstones
+remove re-added items.
+
+**When this runs.** Last, after every extraction phase AND after the Commlink6
+guard has restored its rows. That order is the whole point: the guard undoes
+what the derived phases overwrote, and a manual correction is the one thing
+allowed to sit on top of Commlink6, because a human put it there deliberately.
+Running before the guard would see the correction wiped by the restore.
+
+**Two record shapes, both honoured.**
+
+``{"system": {...}, "name": ...}``
+    The original shape: the whole edited object. Records written before
+    2026-08-08 look like this and are still applied field by field.
+
+``{"changed": {"system": {...}}, "ref": {"name", "book"}, "gapsOnly": bool}``
+    The current shape from store.mjs: only the fields that actually differ from
+    what was on screen, plus enough reference data to recognise the item if its
+    id changes. Storing the whole object meant a correction to one field
+    carried a snapshot of every other field with it, and re-applying that
+    snapshot silently reverted later extractor improvements.
+
+``gapsOnly`` fills a field only where the imported item has nothing there, so a
+correction that existed to supply a missing value stops fighting an extractor
+that has since learned to read it.
 
 Also prints a diff summary (which fields were manually changed) so recurring
 corrections can guide extractor improvements."""

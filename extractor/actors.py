@@ -184,6 +184,14 @@ def read_npc_blocks(pdf_path, pages, category="NPC") -> list[dict]:
     name is the last title-like line seen before it. Then read the EDG attribute
     array and the labelled fields (Skills, Gear, Weapons, …). Book-agnostic and
     multi-per-page."""
+    # pylint: disable=unsubscriptable-object
+    #   st["cur"] is None between blocks and a dict inside one, and every read
+    #   is guarded by `if cur`. Pylint infers only the None arm and calls each
+    #   subscript an error. The alternative is a class per block, which buys a
+    #   clean report and nothing else.
+    # pylint: disable=cell-var-from-loop
+    #   flush() closes over the `st` of its own column and is called before the
+    #   next iteration rebinds it. Late binding is never reached.
     import pdfplumber
     items = []
 

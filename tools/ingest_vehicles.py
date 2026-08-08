@@ -8,12 +8,12 @@ from pathlib import Path as _P
 sys.path.insert(0, str(_P(__file__).resolve().parent.parent))
 import json
 import re
-from collections import Counter
 from datetime import date
 import pdfplumber
 import extractor
 from extractor.bookprep import env_workers, map_jobs
-from extractor.paths import data_root, positional
+from extractor.paths import data_root
+from extractor.vehicle_scan import FIELDS
 from extractor.vehicle_scan import scan_book as vehicle_scan_book
 from extractor.emit import slugify
 from extractor.ingest import LIBRARY, load_registry
@@ -33,8 +33,9 @@ def _column_lines(page):
     return out
 
 DATA = data_root()
-FIELDS = ["handling", "accel", "speedInterval", "topSpeed", "body", "armor",
-          "pilot", "sensor", "seats", "availability", "price"]
+# FIELDS is imported from extractor.vehicle_scan, not defined twice: the worker
+# builds records with it and this script reads them back, so a column order
+# that drifted between the two would mislabel every stat silently.
 CATS = {  # section header -> (subtype, is_drone)
     "BIKES": ("BIKE", False), "CARS": ("CAR", False), "TRUCKS AND VANS": ("TRUCK", False),
     "BOATS": ("BOAT", False), "SUBMARINES": ("SUBMARINE", False),
@@ -142,71 +143,6 @@ def read_vehicles_text(pdf_path, pages):
     return items
 
 
-_PAREN = re.compile(r"^\(([^)]{2,40})\)\s*$")
-_VALUES = re.compile(r"^[\d]+(?:/\d+)?(?:\s+[\d,]+(?:/\d+)?){9,10}[¥�]?$")
-
-
-def read_statblock_vehicles(pdf_path, pages):
-    """Splatbook stat blocks (Double Clutch etc.): the HAND ACC …/COST table is a
-    ruled table interleaved with prose, so find_tables() locates it and a crop
-    just below the header isolates the 11-value row (no prose bleed). The vehicle
-    name is the nearest 15pt display-font (Njord) heading above the table; the
-    subtype is a '(racing motorcycle)'-style line near it."""
-    from extractor.describe import _lines as _L
-    items = []
-    with pdfplumber.open(str(pdf_path)) as pdf:
-        for page_no in pages:
-            page = pdf.pages[page_no - 1]
-            words = [w for w in page.extract_words(extra_attrs=["fontname", "size", "upright"])
-                     if w.get("upright", True)]
-            if not words:
-                continue
-            body = Counter(round(w["size"]) for w in words).most_common(1)[0][0]
-            # names are display-font (Njord) words ~1.3x body; filter to those
-            # first, then group into heading lines (prose shares the y-row otherwise)
-            heads, parens = [], []
-            njord = [w for w in words if "Njord" in w["fontname"] and w["size"] >= body * 1.3]
-            for ln in _L(njord):
-                text = normalize_text(" ".join(w["text"] for w in ln)).strip()
-                text = re.sub(r"\s*\(.*$", "", text).strip()
-                if 1 <= len(text.split()) <= 6 and text[0:1].isupper() and "HAND" not in text and not text.isdigit():
-                    heads.append((min(w["top"] for w in ln), text))
-            for ln in _L(words):
-                text = normalize_text(" ".join(w["text"] for w in ln)).strip()
-                pm = _PAREN.match(text)
-                if pm:
-                    parens.append((min(w["top"] for w in ln), pm.group(1).strip()))
-            for tb in page.find_tables():
-                x0, top, x1, bottom = tb.bbox
-                crop = page.crop((x0 - 2, top - 2, x1 + 2, bottom + 18))
-                vals = None
-                for line in (crop.extract_text() or "").splitlines():
-                    toks = normalize_text(line).strip().split()
-                    stat = [t for t in toks if re.match(r"^[\d,]+(?:/\d+)?[¥�]?$", t)]
-                    if len(stat) >= 10:
-                        vals = stat[:11]
-                        break
-                if not vals:
-                    continue
-                above = [t for t in heads if t[0] < top]
-                name = max(above, key=lambda t: t[0])[1] if above else None
-                if not name or len(name) < 2:
-                    continue
-                name = re.sub(r"^[A-Z]{4,}\s+", "", name).strip()   # drop 'ZZZZZ' sidebar bleed
-                sub = [pp for pp in parens if pp[0] < top]
-                subtype = max(sub, key=lambda t: t[0])[1] if sub else "vehicle"
-                subkey = subtype.upper().replace(" ", "_").replace("/", "_")
-                vals = (vals + [""] * 11)[:11]
-                system = {"type": "DRONE" if "DRONE" in subkey else "VEHICLE", "subtype": subkey}
-                for k, v in zip(FIELDS, vals):
-                    system[k] = v.replace("¥", "").replace("�", "").strip() if k == "price" else v
-                system["description"] = ("Handling {handling}, Accel {accel}, Speed Interval {speedInterval}, "
-                                         "Top Speed {topSpeed}, Body {body}, Armor {armor}, Pilot {pilot}, "
-                                         "Sensor {sensor}, Seats {seats}, Avail {availability}, Cost {price}¥").format(**system)
-                items.append({"name": name, "system": system, "page": page_no})
-    return items
-
-
 if __name__ == "__main__":
     # workers are spawned; without this each child re-runs this script
     import multiprocessing
@@ -214,8 +150,6 @@ if __name__ == "__main__":
     multiprocessing.freeze_support()
     reg = load_registry(DATA)
     from extractor.merge import norm_base
-    from extractor.autodetect import _valid_name
-    _HDR = re.compile(r"HAND\s+ACC(EL)?\b|PILOT\s+SENS")
     byname = {}
     # corebook tables (broad subtypes) first
     # corebook supplies the ruled vehicle tables; without it the stat-block

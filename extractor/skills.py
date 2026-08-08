@@ -19,8 +19,11 @@ _ATTR = {
     "engineering": "Logic", "exotic weapons": "Agility", "firearms": "Agility",
     "influence": "Charisma", "perception": "Intuition", "piloting": "Reaction",
     "sorcery": "Magic", "stealth": "Agility", "tasking": "Resonance",
-    "outdoors": "Intuition", "perception": "Intuition",
+    "outdoors": "Intuition",
 }
+# 19 entries — SR6's full active skill list. Perception was listed twice, both
+# times as Intuition, so nothing was ever lost; removing the second one only
+# stops the count from looking wrong.
 
 
 def _is_name(text, sz):

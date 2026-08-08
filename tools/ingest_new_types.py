@@ -42,7 +42,9 @@ from extractor.newtypes import (
 )
 
 DATA = data_root()          # --data / SR6_DATA / <repo>/data
-S = lambda p: re.compile(p, re.I)
+def S(pattern: str):
+    """Case-insensitive signature pattern — used once per domain below."""
+    return re.compile(pattern, re.I)
 
 META_STOP = {"metamagic", "metamagics", "initiation", "initiate grade", "magic",
              "mentor spirits", "the awakened world", "adept powers", "astral perception",

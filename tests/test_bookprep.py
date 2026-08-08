@@ -7,6 +7,11 @@ merge order is decided in this module.
 """
 from __future__ import annotations
 
+import importlib
+from pathlib import Path
+
+import pytest
+
 from extractor.bookprep import default_workers, prepare_book, prepare_books
 
 
@@ -43,3 +48,79 @@ def test_prepare_book_takes_and_returns_only_plain_data():
     r = prepare_book({"book": "ghost", "pdf": r"C:\nope\missing.pdf",
                       "curated": True, "libText": ""})
     assert pickle.loads(pickle.dumps(r)) == r
+
+
+# ---------- the worker modules ----------
+
+SCANS = ["content_scan", "newtype_scan", "vehicle_scan", "writeup_scan"]
+
+
+@pytest.mark.parametrize("name", SCANS)
+def test_every_scan_module_imports(name):
+    """A worker's imports must resolve, or the phase silently finds nothing.
+
+    vehicle_scan shipped importing ``read_statblock_vehicles`` from a module
+    that does not define it. The worker's broad except — there so one bad book
+    cannot lose the other forty-nine — turned that ImportError into an empty
+    result, per book, and the phase reported success with zero vehicles. The
+    top-level import is checked here; nothing else in the suite loads these
+    modules, because in production only a spawned child ever does.
+    """
+    importlib.import_module(f"extractor.{name}")
+
+
+@pytest.mark.parametrize("name", SCANS)
+def test_every_scan_module_exposes_scan_book(name):
+    """map_jobs calls this name by convention; a rename would fail at spawn."""
+    mod = importlib.import_module(f"extractor.{name}")
+    assert callable(getattr(mod, "scan_book", None))
+
+
+#: ``name -> (job, error-key)``. The three tuple-taking scans and the dict-taking
+#: one are listed out rather than normalised: each has one caller, the shapes
+#: match what that caller already had, and rewriting a working contract to make
+#: this table shorter would be the tail wagging the dog.
+SCAN_JOBS = {
+    "content_scan": (("ghost", r"C:\nope\missing.pdf"), "errors"),
+    "newtype_scan": (("ghost", r"C:\nope\missing.pdf"), "errors"),
+    "vehicle_scan": (("ghost", r"C:\nope\missing.pdf"), "errors"),
+    "writeup_scan": ({"book": "ghost", "pdf": r"C:\nope\missing.pdf",
+                      "wanted": [("x", "Ares Predator", 1)]}, "error"),
+}
+
+
+#: Scripts that rewrite the shared library. Importing one of these must not run
+#: it — see the test below for why this list exists.
+LIBRARY_WRITERS = ["images_all", "rebuild_all"]
+
+
+@pytest.mark.parametrize("name", LIBRARY_WRITERS)
+def test_importing_a_library_writer_does_not_run_it(name):
+    """These two guard their work behind ``if __name__ == "__main__"``.
+
+    Most of tools/ executes at import — they are scripts, and that is fine for
+    a script you run deliberately. These two are different in kind: one rewrites
+    every gear file and re-extracts hundreds of PNGs, the other runs all 21
+    phases. Both were started by accident during a review pass, by nothing more
+    than an ``import`` to look at the module.
+
+    The guard is the fix; this is the thing that notices if it is ever removed.
+    A module-level marker is checked rather than the behaviour itself, because
+    a test that got this wrong would run the pipeline to find out.
+    """
+    src = (Path(__file__).resolve().parent.parent
+           / "tools" / f"{name}.py").read_text(encoding="utf-8")
+    assert '__name__ == "__main__"' in src, (
+        f"tools/{name}.py rewrites the library at import time — restore its "
+        f"__main__ guard")
+
+
+@pytest.mark.parametrize("name", SCANS)
+def test_a_scan_worker_reports_a_bad_pdf_rather_than_raising(name):
+    """An exception escaping a worker takes the whole pool down with it."""
+    mod = importlib.import_module(f"extractor.{name}")
+    job, err_key = SCAN_JOBS[name]
+    r = mod.scan_book(job)
+    assert r["book"] == "ghost"
+    assert r[err_key]                      # reported, not raised
+    assert not r["found"]
