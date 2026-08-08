@@ -78,8 +78,22 @@ DOMAINS = {
     # see tools/merge_chemicals.py. Do not re-add them here.
 }
 
-#: Books with no prose content worth scanning.
-SKIP = {"gun_rack", "rides", "corebook"}
+#: Books with no prose content worth scanning: card decks, not sourcebooks.
+#:
+#: ``corebook`` used to be here as well. The reason was to protect the
+#: hand-curated corebook content in the development repo from being overwritten
+#: by a machine re-read -- but that protection is not needed and never was on
+#: this path: the merge is additive. An item whose name already exists gains a
+#: source reference and is never touched (``if key in existing: ... continue``
+#: in tools/ingest_content_all.py), so scanning corebook can only ADD names
+#: that are missing.
+#:
+#: What the skip did instead was silently exclude the largest sourcebook in the
+#: game from a fresh install, which has no curated seed to protect. Measured
+#: against the curated library that cost roughly 167 items: 72 spells, 44
+#: qualities, 30 critter powers and 21 adept powers, none of which a new
+#: workspace could ever produce.
+SKIP = {"gun_rack", "rides"}
 
 
 def scan_book(job: tuple[str, str]) -> dict:

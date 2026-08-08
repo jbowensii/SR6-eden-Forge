@@ -247,10 +247,29 @@ def run_post_phases(data_root: _P, phases, on_line=print,
         else:
             argv = [sys.executable, "-u", str(path), *args]
 
-        r = subprocess.run(argv, cwd=str(data_root.parent), env=env)
-        if r.returncode:
+        # Capture and forward, rather than letting the child inherit stdout.
+        #
+        # Not one line of any phase's output reached the log: the phases print
+        # per book and per domain, and the window showed only the headings this
+        # function writes. A frozen build starts each phase as a fresh copy of
+        # the exe with no console, so an inherited handle goes nowhere — and a
+        # print() to a dead handle can take the phase down with it, silently,
+        # which is consistent with a phase that ran and produced nothing.
+        #
+        # Reading the pipe also means a phase's own diagnostics are visible
+        # when something goes wrong, instead of having to be reproduced by hand.
+        proc = subprocess.Popen(
+            argv, cwd=str(data_root.parent), env=env,
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            text=True, encoding="utf-8", errors="replace", bufsize=1)
+        for line in proc.stdout:
+            line = line.rstrip()
+            if line:
+                on_line(line)
+        proc.wait()
+        if proc.returncode:
             # one bad phase must not lose the rest, but it must be VISIBLE
-            on_line(f"    !! {script} exited {r.returncode}")
+            on_line(f"    !! {script} exited {proc.returncode}")
             failed.append(script)
     return failed
 

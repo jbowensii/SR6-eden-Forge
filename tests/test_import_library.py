@@ -124,6 +124,30 @@ def test_installer_still_excludes_the_dev_tree():
     ).read_text(encoding="utf-8")
 
 
+
+class _FakeProc:
+    """Enough of Popen for run_post_phases: a readable stdout and a code."""
+
+    def __init__(self, returncode=0, lines=()):
+        self.returncode = returncode
+        self.stdout = iter(lines)
+
+    def wait(self):
+        return self.returncode
+
+
+def _capture_popen(monkeypatch, seen, returncode=0, lines=()):
+    import subprocess
+
+    def fake(argv, cwd=None, env=None, **kw):
+        seen["argv"] = argv
+        seen["cwd"] = cwd
+        seen["env"] = env or {}
+        return _FakeProc(returncode, lines)
+
+    monkeypatch.setattr(subprocess, "Popen", fake)
+
+
 # ---------- the two rules the pipeline exists to enforce ----------
 
 def test_merge_commlink6_is_never_run_as_a_phase():
@@ -167,17 +191,7 @@ def test_post_phases_pin_both_the_cwd_and_the_data_root(tmp_path, monkeypatch):
     user's workspace — silently, because both paths exist on a dev machine.
     """
     seen = {}
-
-    class _R:
-        returncode = 0
-
-    def fake_run(argv, cwd=None, env=None):
-        seen["cwd"] = cwd
-        seen["SR6_DATA"] = (env or {}).get("SR6_DATA")
-        return _R()
-
-    import subprocess
-    monkeypatch.setattr(subprocess, "run", fake_run)
+    _capture_popen(monkeypatch, seen)
 
     data = tmp_path / "ws" / "data"
     data.mkdir(parents=True)
@@ -185,16 +199,13 @@ def test_post_phases_pin_both_the_cwd_and_the_data_root(tmp_path, monkeypatch):
     import_library.run_post_phases(
         data, [("x", "apply_corrections.py", [])], on_line=lambda _s: None)
 
-    assert seen["SR6_DATA"] == str(data)
+    assert seen["env"]["SR6_DATA"] == str(data)
     assert seen["cwd"] == str(data.parent)
 
 
 def test_a_failing_phase_is_reported_not_swallowed(tmp_path, monkeypatch):
-    class _R:
-        returncode = 2
-
-    import subprocess
-    monkeypatch.setattr(subprocess, "run", lambda *a, **k: _R())
+    seen = {}
+    _capture_popen(monkeypatch, seen, returncode=2)
 
     data = tmp_path / "data"
     data.mkdir()
@@ -258,16 +269,7 @@ def test_frozen_builds_never_hand_a_script_path_to_the_exe(tmp_path, monkeypatch
     repo, where sys.executable really is python.
     """
     seen = {}
-
-    class _R:
-        returncode = 0
-
-    def fake_run(argv, cwd=None, env=None):
-        seen["argv"] = argv
-        return _R()
-
-    import subprocess
-    monkeypatch.setattr(subprocess, "run", fake_run)
+    _capture_popen(monkeypatch, seen)
     monkeypatch.setattr(import_library.sys, "frozen", True, raising=False)
 
     data = tmp_path / "ws" / "data"
@@ -286,13 +288,7 @@ def test_frozen_builds_never_hand_a_script_path_to_the_exe(tmp_path, monkeypatch
 
 def test_source_runs_still_call_the_script_directly(tmp_path, monkeypatch):
     seen = {}
-
-    class _R:
-        returncode = 0
-
-    import subprocess
-    monkeypatch.setattr(subprocess, "run",
-                        lambda argv, cwd=None, env=None: (seen.update(argv=argv), _R())[1])
+    _capture_popen(monkeypatch, seen)
     monkeypatch.setattr(import_library.sys, "frozen", False, raising=False)
 
     data = tmp_path / "ws" / "data"
@@ -445,3 +441,26 @@ def test_the_worker_target_lives_in_a_module_not_the_script():
 
     assert callable(writeup_scan.scan_book)
     assert writeup_scan.scan_book.__module__ == "extractor.writeup_scan"
+
+
+def test_phase_output_reaches_the_log(tmp_path, monkeypatch):
+    """Not one line of any phase's output appeared in the window.
+
+    The phases print per book and per domain; the log showed only the headings
+    run_post_phases writes itself. A frozen build starts each phase as a fresh
+    copy of the exe with no console, so an inherited stdout handle goes
+    nowhere — and printing to a dead handle can kill the phase outright.
+    """
+    seen = {}
+    _capture_popen(monkeypatch, seen,
+                   lines=["scanned companion  (1/50)\n",
+                          "contacts           +114 new, 4 refs\n"])
+
+    data = tmp_path / "ws" / "data"
+    data.mkdir(parents=True)
+    lines = []
+    import_library.run_post_phases(
+        data, [("x", "apply_corrections.py", [])], on_line=lines.append)
+
+    assert any("scanned companion" in ln for ln in lines)
+    assert any("+114 new" in ln for ln in lines)
