@@ -73,19 +73,24 @@ def main() -> int:
     pairs = domains_of(data)
     print(f"matching icons from {library} over {len(pairs)} book/domain pair(s)")
 
-    total = 0
+    matched = generic = missing = 0
     for book, domain in pairs:
         try:
             stats = match_icons(_P(library), data, book, domain, args.min_score)
         except Exception as e:            # one domain must not lose the rest
             print(f"  {book}/{domain}: {type(e).__name__}: {e}")
             continue
-        n = stats.get("assigned", 0) if isinstance(stats, dict) else 0
-        if n:
-            total += n
-            print(f"  {book}/{domain}: +{n}")
+        # match_icons returns {matched, generic, still_missing, library} --
+        # there is no "assigned" key, so reading one reported 0 icons over a
+        # run that had just matched hundreds. Count what it actually returns.
+        if not isinstance(stats, dict):
+            continue
+        matched += int(stats.get("matched") or 0)
+        generic += int(stats.get("generic") or 0)
+        missing += int(stats.get("still_missing") or 0)
 
-    print(f"assigned {total} icon(s)")
+    print(f"matched {matched} by name, {generic} by type/subtype default; "
+          f"{missing} still without art")
     return 0
 
 
