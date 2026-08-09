@@ -259,3 +259,65 @@ def test_a_vehicle_keeps_the_book_it_was_read_from():
         "will all claim to come from the corebook")
     assert 'r.get("_book", LIBRARY)' in src
     assert 'rec["_book"] = book' in src
+
+
+# ---------- Commlink6 names the vehicle, the page supplies its stats ----------
+
+def _auth(vid="cl6_krime_dix", name="Krime Dix Prime Mover", **system):
+    sysd = {"type": "VEHICLE", "subtype": "TRUCK", "price": 200000,
+            "handling": "", "accel": "", "body": ""}
+    sysd.update(system)
+    return {"id": vid, "name": name, "system": sysd,
+            "meta": {"book": "krime_katalog", "page": 37, "source": "commlink6"}}
+
+
+def _page(name="Krime Dix", **system):
+    sysd = {"handling": "2/3", "accel": "4", "body": "15", "price": "200,000"}
+    sysd.update(system)
+    return {"name": name, "system": sysd, "page": 99}
+
+
+def test_the_page_fills_the_stats_commlink6_leaves_empty():
+    """Commlink6 has NO vehicle stat line — 421 of its vehicles carry none.
+
+    The page-read row is the only place those numbers exist, so folding must
+    fill them rather than discard the row as a duplicate.
+    """
+    iv = _iv()
+    merged, folded = iv.fold_into_authority({"k": _page()}, {"k": _auth()})
+    row = merged["k"]
+    assert row["system"]["handling"] == "2/3"
+    assert row["system"]["body"] == "15"
+    assert folded == [("Krime Dix", "Krime Dix Prime Mover", 3)]
+
+
+def test_commlink6_keeps_every_value_it_states():
+    """price is 200000 upstream and '200,000' off the page — upstream wins."""
+    iv = _iv()
+    merged, _ = iv.fold_into_authority({"k": _page()}, {"k": _auth()})
+    assert merged["k"]["system"]["price"] == 200000
+
+
+def test_a_folded_row_keeps_the_commlink6_identity():
+    """A fresh id would let the guard resurrect the original beside it, and
+    every correction keyed to that id would stop finding its target."""
+    iv = _iv()
+    merged, _ = iv.fold_into_authority({"k": _page()}, {"k": _auth()})
+    assert merged["k"]["_id"] == "cl6_krime_dix"
+    assert merged["k"]["name"] == "Krime Dix Prime Mover"
+    assert merged["k"]["_meta"]["source"] == "commlink6"
+
+
+def test_a_vehicle_commlink6_does_not_have_passes_through():
+    iv = _iv()
+    merged, folded = iv.fold_into_authority({"k": _page(name="Ford Dasher")}, {})
+    assert folded == [] and merged["k"]["name"] == "Ford Dasher"
+    assert "_id" not in merged["k"]
+
+
+def test_folding_never_mutates_the_authority_row():
+    """The caller's rows are read again later; folding must not scribble on them."""
+    iv = _iv()
+    auth = _auth()
+    iv.fold_into_authority({"k": _page()}, {"k": auth})
+    assert auth["system"]["handling"] == ""

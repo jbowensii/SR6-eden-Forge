@@ -171,6 +171,42 @@ def _unwrap(lines, i, name, used):
     return name
 
 
+def fold_into_authority(byname: dict, cl6_by_name: dict):
+    """Merge page-read vehicles into the Commlink6 rows that already name them.
+
+    Commlink6 owns the identity; the page owns the stats. Commlink6 carries NO
+    vehicle stat line at all — 421 of its vehicles have no handling, accel, top
+    speed, body or armour — so the page-read row is the only place those numbers
+    exist. Dropping it as "a duplicate" would delete the sole copy of the stats
+    and leave a correctly-named, empty vehicle.
+
+    So a page row whose name Commlink6 already owns is folded INTO that row: it
+    keeps Commlink6's id, name and every field Commlink6 states, and fills only
+    what Commlink6 leaves empty. That is the same asymmetry the authority guard
+    applies, decided here where both rows are in hand.
+
+    Returns ``(merged, folded)``; folded is ``[(read_as, kept_as, fields_filled)]``.
+    """
+    merged, folded = {}, []
+    for key, r in byname.items():
+        auth = cl6_by_name.get(key)
+        if auth is None:
+            merged[key] = r
+            continue
+        row = json.loads(json.dumps(auth))          # never mutate the caller's row
+        filled = [k for k, v in r["system"].items()
+                  if str(row["system"].get(k, "") or "").strip() == ""
+                  and str(v or "").strip() != ""]
+        for k in filled:
+            row["system"][k] = r["system"][k]
+        merged[key] = {"name": row["name"], "system": row["system"],
+                       "page": (row.get("meta") or {}).get("page") or r.get("page"),
+                       "_id": row["id"], "_meta": row.get("meta"),
+                       "_book": (row.get("meta") or {}).get("book")}
+        folded.append((r["name"], row["name"], len(filled)))
+    return merged, folded
+
+
 def read_vehicles_text(pdf_path, pages):
     """Token pass over raw text — deep on the single-flow ground/water tables
     (p302) that ruled-table extraction under-reads. Unioned with read_vehicles."""
@@ -257,37 +293,37 @@ if __name__ == "__main__":
         for rec in (r or {}).get("found") or []:
             rec["_book"] = book
             byname.setdefault(norm_base(rec["name"]), rec)
-    # Commlink6 is the source of truth: never write a vehicle it already has.
+    # Commlink6 owns the identity of any vehicle it names; the page owns the
+    # stats. See fold_into_authority — the two are merged, NOT deduplicated,
+    # because Commlink6 has no stat line at all and dropping the page row would
+    # delete the only copy of the numbers.
     #
-    # This phase rewrites vehicles.json wholesale and the authority guard puts
-    # the Commlink6 rows back afterwards, so a row read off a page whose name
-    # Commlink6 already owns does not replace anything — it lands BESIDE the
-    # authoritative row as a second, worse-described copy of the same vehicle.
-    #
-    # Read the names out of the file BEFORE overwriting it. On a first install
-    # there is no file yet and nothing is skipped, which is correct: there is no
-    # authority to defer to.
+    # Read the existing rows BEFORE overwriting the file. On a first install
+    # there is nothing to read and nothing is folded, which is correct: there is
+    # no authority to defer to yet.
     out_path = DATA / LIBRARY / "vehicles" / "vehicles.json"
-    cl6_names = set()
+    cl6_by_name = {}
     if out_path.is_file():
         try:
             existing = json.loads(out_path.read_text(encoding="utf-8"))
-            cl6_names = {norm_base(i["name"]) for i in existing.get("items", [])
-                         if (i.get("meta") or {}).get("source") == "commlink6"}
+            cl6_by_name = {norm_base(i["name"]): i for i in existing.get("items", [])
+                           if (i.get("meta") or {}).get("source") == "commlink6"
+                           and (i.get("name") or "").strip()}
         except (OSError, ValueError, KeyError) as e:
             print(f"  (could not read existing vehicles for the Commlink6 check: {e})",
                   flush=True)
 
-    skipped = [r for k, r in byname.items() if k in cl6_names]
-    byname = {k: r for k, r in byname.items() if k not in cl6_names}
-    if skipped:
-        # Named, not just counted: a silent skip list is how a rule like this
+    byname, folded = fold_into_authority(byname, cl6_by_name)
+    if folded:
+        # Named, not just counted: a silent merge is how a rule like this
         # quietly starts swallowing rows it should not.
-        print(f"deferring to Commlink6 on {len(skipped)} vehicle(s):", flush=True)
-        for r in sorted(skipped, key=lambda r: r["name"])[:15]:
-            print(f"    {r['name']}", flush=True)
-        if len(skipped) > 15:
-            print(f"    ... and {len(skipped) - 15} more", flush=True)
+        print(f"folded {len(folded)} page-read vehicle(s) into their Commlink6 row "
+              f"(Commlink6 keeps every value it states):", flush=True)
+        for was, now, n in sorted(folded, key=lambda t: t[1])[:15]:
+            note = "" if was == now else f"   (read as {was!r})"
+            print(f"    {now:38} +{n} field(s){note}", flush=True)
+        if len(folded) > 15:
+            print(f"    ... and {len(folded) - 15} more", flush=True)
 
     recs = sorted(byname.values(), key=lambda r: (r["system"]["subtype"], r["name"]))
     # vehicles are their own site domain (Eden treats them as actors, which are
@@ -297,6 +333,15 @@ if __name__ == "__main__":
     seen = set()
     items = []
     for r in recs:
+        if r.get("_id"):
+            # Folded into a Commlink6 row: keep ITS id and meta. A fresh id here
+            # would leave the authority guard free to resurrect the original
+            # alongside this one, and every manual correction keyed to that id
+            # would stop finding its target.
+            seen.add(r["_id"])
+            items.append({"id": r["_id"], "name": r["name"],
+                          "system": r["system"], "meta": r["_meta"]})
+            continue
         sid = slugify(r["name"]) or "vehicle"
         k, s = 2, sid
         while s in seen:
