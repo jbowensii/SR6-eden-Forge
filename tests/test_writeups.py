@@ -1,3 +1,5 @@
+import pytest
+
 from extractor.writeups import (
     LineRec,
     clean_block,
@@ -115,3 +117,52 @@ def test_read_book_lines_marks_heading_by_font(monkeypatch):
     lines = read_book_lines("dummy.pdf")
     assert lines[0].is_head and lines[0].text == "Synaptic Booster"
     assert not lines[1].is_head and lines[1].text == "A cyber"
+
+
+# ---------- is a description a sentence, or a table row? ----------
+
+def _rd():
+    """Load rebuild_descriptions without running it (work is behind __main__)."""
+    import importlib.util
+    from pathlib import Path
+    spec = importlib.util.spec_from_file_location(
+        "rd", Path(__file__).resolve().parent.parent / "tools" / "rebuild_descriptions.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+PROSE = [
+    "This costs 200\u00a5 and requires an Engineering test to install correctly.",
+    "Troll sized combined fragmentation and flash-bang grenade "
+    "(does additional 10S, 8S, 6S in 15m)",
+    "A rating 1 PA scores zero hits, rating 2-3 scores 1 hit on any Matrix test.",
+]
+
+STAT_ROWS = [
+    "3/5 18 30 180 14 8 3 3 4 3 65,000\u00a5",
+    "4 10 30 260 22 10 2 3 2/16 2",
+    "Rotor 15 25 350 70 Gravtech 20 200 1,000 1,000",
+]
+
+
+@pytest.mark.parametrize("desc", PROSE)
+def test_prose_that_quotes_a_price_is_not_a_leak(desc):
+    """The old check flagged any nuyen sign and declared a target of zero.
+
+    That target was unreachable, because quoting a price in a sentence is not
+    a defect. Every description it flagged at the end of the 0.9.4 import was
+    correct English, so the number measured nothing and a real leak would have
+    been invisible among the false alarms.
+    """
+    assert not _rd().desc_is_table_row(desc)
+
+
+@pytest.mark.parametrize("desc", STAT_ROWS)
+def test_a_table_row_in_a_description_is_caught(desc):
+    """What actually goes wrong: short, and mostly numbers."""
+    assert _rd().desc_is_table_row(desc)
+
+
+def test_an_empty_description_is_not_a_leak():
+    assert not _rd().desc_is_table_row("")

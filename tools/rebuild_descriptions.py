@@ -20,7 +20,38 @@ DATA = _P("data")
 APPLY = "--apply" in sys.argv
 CORR = {os.path.splitext(os.path.basename(f))[0]
         for f in glob.glob("data/_corrections/*/*.json")}  # all domains; ids unique
-_SMELL = re.compile(r"¥|\b\d+[PS]\b|\b\d/\d\b")
+#: A single stat-looking token: a price, a damage code, a fraction, a bare number.
+_STAT_TOKEN = re.compile(r"^(?:[\d,]+¥?|\d+[PS]|\d+/\d+|\d+)$")
+
+
+def desc_is_table_row(desc: str) -> bool:
+    """Does this description look like a TABLE ROW rather than a sentence?
+
+    Deliberately NOT extractor.writeups.is_stat_line, which answers a different
+    question: whether a raw PDF *line* should be skipped while reading a page.
+    That one treats an empty line as a stat line and any nuyen sign as
+    disqualifying — correct there, wrong here, where an empty description is
+    merely missing and a quoted price is normal English.
+
+    The old test flagged any description containing a nuyen sign, a damage code
+    or a fraction, with a stated target of zero. That target was unreachable
+    because it is not a defect: "This costs 200¥ and requires an Engineer" and
+    "does additional 10S, 8S, 6S in 15m" are correct, useful sentences. Every
+    one of the descriptions it flagged at the end of the 0.9.4 import was
+    legitimate prose, so the number it printed measured nothing and a real
+    leak would have been invisible in the noise.
+
+    What actually goes wrong is a stat ROW landing in the description field —
+    short, and mostly numbers. So: flag a short description in which stat
+    tokens outnumber the words. Real prose is long and mostly words, however
+    many prices it happens to quote.
+    """
+    toks = [t.strip("().,;:") for t in (desc or "").split()]
+    toks = [t for t in toks if t]
+    if not toks or len(toks) > 14:
+        return False                      # long enough to be a real sentence
+    stats = sum(1 for t in toks if _STAT_TOKEN.match(t))
+    return stats >= 4 and stats * 2 >= len(toks)
 
 
 def notes_prose(item):
@@ -98,11 +129,11 @@ def main():
                              encoding="utf-8")
 
     smell = sum(1 for p in payloads.values() for it in p.get("items", [])
-                if _SMELL.search(it["system"].get("description", "")))
+                if desc_is_table_row(it["system"].get("description", "")))
     print(f"\n{'APPLY' if APPLY else 'DRY RUN'} — "
           f"book={counts['book']} notes={counts['notes']} empty={counts['empty']} "
           f"skipped={counts['skipped']}")
-    print(f"smell-check (desc containing nuyen/dice): {smell}  (target 0)")
+    print(f"descriptions that are really a stat row: {smell}  (target 0)")
     if not APPLY:
         print("(dry run — re-run with --apply, then tools/apply_corrections.py)")
 
