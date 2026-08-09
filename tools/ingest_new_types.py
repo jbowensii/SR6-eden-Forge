@@ -143,6 +143,10 @@ def harvest_powers(actor_domain, out_domain, category):
             for field in ("powers", "optionalPowers"):
                 blob = it["system"].get(field) or ""
                 for raw in re.split(r"[,;]", blob):
+                    # "Ele- mental Attack" -> "Elemental Attack". The page broke
+                    # the word across a line and dehyphenation missed it, so the
+                    # power arrived under a name no glossary will ever match.
+                    raw = re.sub(r"(\w)-\s+(\w)", r"\1\2", raw)
                     nm = re.sub(r"\s*\([^)]*\)", "", raw).strip()          # drop "(rating)" notes
                     nm = re.sub(r"\s+\d+$", "", nm).strip(" .")            # drop trailing rating
                     if nm.endswith("-") or len(nm) < 3:
@@ -150,6 +154,24 @@ def harvest_powers(actor_domain, out_domain, category):
                     if not (3 <= len(nm) <= 40) or not _valid_name(nm) or nm[0].isdigit():
                         continue
                     names.setdefault(norm_base(nm), (nm, it["meta"]["book"], it["meta"]["page"]))
+
+    # Drop a name that is only the OPENING WORDS of another harvested name.
+    #
+    # A critter's powers field is often cut off mid-list, so the last entry is
+    # half a name: "..., Psychokinesis, Elemental" with the "Attack" lost over
+    # the edge. Harvested alone it becomes a power called "Elemental" that
+    # matches no glossary entry, so it can never be given a description — six
+    # of these were sitting in the library (Innate, Elemental, Natural,
+    # Paralyzing, Mist, Mystic), each shadowing a complete power.
+    #
+    # Only ever drops when the fuller name is present in the SAME harvest, so
+    # nothing is invented and nothing unique is lost.
+    words = {k: tuple(v[0].split()) for k, v in names.items()}
+    truncated = {k for k, w in words.items()
+                 if any(other != w and other[:len(w)] == w for other in words.values())}
+    for k in truncated:
+        del names[k]
+
     recs = [{"name": nm, "system": {"category": category}, "page": pg, "_book": bk}
             for nm, bk, pg in names.values()]
     return recs

@@ -166,3 +166,59 @@ def test_a_table_row_in_a_description_is_caught(desc):
 
 def test_an_empty_description_is_not_a_leak():
     assert not _rd().desc_is_table_row("")
+
+
+# ---------- harvesting power names out of critter stat blocks ----------
+
+def _int(tmp_path, actors):
+    """ingest_new_types with its data root pointed at a temp library."""
+    import importlib.util
+    import json
+    from pathlib import Path
+    lib = tmp_path / "corebook" / "critters"
+    lib.mkdir(parents=True)
+    (lib / "critters.json").write_text(
+        json.dumps({"book": "corebook", "domain": "critters",
+                    "category": "critters", "items": actors}),
+        encoding="utf-8")
+    spec = importlib.util.spec_from_file_location(
+        "int_", Path(__file__).resolve().parent.parent / "tools" / "ingest_new_types.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    mod.DATA = tmp_path
+    return mod
+
+
+def _critter(name, powers):
+    return {"id": name.lower(), "name": name,
+            "system": {"powers": powers},
+            "meta": {"book": "corebook", "page": 1}}
+
+
+def test_a_power_name_cut_off_mid_list_is_dropped(tmp_path):
+    """A critter's powers field is often truncated, so the last entry is half
+    a name: "..., Psychokinesis, Elemental" with "Attack" lost over the edge.
+
+    Harvested on its own that becomes a power called "Elemental" which matches
+    no glossary entry, so it can never be given a description. Six such rows
+    were in the library, each shadowing a complete power.
+    """
+    m = _int(tmp_path, [_critter("Sylph", "Psychokinesis, Elemental"),
+                        _critter("Drake", "Elemental Attack, Guard")])
+    got = {r["name"] for r in m.harvest_powers("critters", "critter_powers", "CRITTER_POWER")}
+    assert "Elemental Attack" in got
+    assert "Elemental" not in got
+
+
+def test_a_unique_short_name_is_kept(tmp_path):
+    """Only drop when the fuller name is present in the SAME harvest."""
+    m = _int(tmp_path, [_critter("Sylph", "Psychokinesis, Elemental")])
+    got = {r["name"] for r in m.harvest_powers("critters", "critter_powers", "CRITTER_POWER")}
+    assert "Elemental" in got          # nothing longer to prefer, so it stays
+
+
+def test_a_word_broken_across_a_line_is_repaired(tmp_path):
+    """'Ele- mental Attack' arrived under a name no glossary can match."""
+    m = _int(tmp_path, [_critter("Pterosaur", "Guard, Ele- mental Attack, Movement")])
+    got = {r["name"] for r in m.harvest_powers("critters", "critter_powers", "CRITTER_POWER")}
+    assert "Elemental Attack" in got
