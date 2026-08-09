@@ -94,6 +94,44 @@ def _i18n(z: zipfile.ZipFile, book: str) -> dict:
     return out
 
 
+#: Every English display name in the jar, keyed by id — built once per jar.
+#: See :func:`_all_english_names`.
+_ALL_NAMES: dict[str, dict[str, str]] = {}
+
+
+def _all_english_names(z: zipfile.ZipFile, jar_key: str) -> dict:
+    """``id -> name`` across EVERY English properties file in the jar.
+
+    A book's data XML routinely references entries whose display name lives in
+    another book's properties file. The Dodge Scoot is defined in Double
+    Clutch's data but named in the core rulebook's; MapMaster's drone is named
+    in core_seattle's. Looking only in ``<book>.properties`` left 82 items in
+    the library with an EMPTY name — they reached Foundry as blank rows and
+    printed as ``[prose] qualities/`` with nothing after the slash.
+
+    The book's own file still wins; this is only consulted when that misses, so
+    a name deliberately overridden per book keeps its override.
+
+    German files (``*_de.properties``) are excluded on purpose. Importing a
+    German name for a book whose German PDF is not owned would import data the
+    ownership rule says we may not have.
+    """
+    if jar_key in _ALL_NAMES:
+        return _ALL_NAMES[jar_key]
+    out: dict[str, str] = {}
+    for n in z.namelist():
+        if not (n.endswith(".properties") and "/i18n/" in n):
+            continue
+        if n.rsplit("/", 1)[-1][:-len(".properties")].endswith("_de"):
+            continue
+        for ln in decode_props(z.read(n)).splitlines():
+            m = _NAMEKEY.match(ln)
+            if m:
+                out.setdefault(m.group(1), m.group(2).strip())
+    _ALL_NAMES[jar_key] = out
+    return out
+
+
 def _stats(z: zipfile.ZipFile, book: str) -> dict:
     """id -> {category, tag, attrs{}, stats{}} from every category XML."""
     out: dict = {}
@@ -132,13 +170,23 @@ def read_book(book: str, jar: Path = DEFAULT_JAR) -> dict:
     with zipfile.ZipFile(jar) as z:
         text = _i18n(z, book)
         stats = _stats(z, book)
+        everywhere = _all_english_names(z, str(jar))
     lower = {k.lower(): v for k, v in text.items()}
     recs = {}
     for iid, s in stats.items():
         t = text.get(iid) or lower.get(iid.lower()) or {}   # ids can differ in case (mrJohnson)
+        # This book's own file first; the rest of the jar only as a fallback.
+        name = t.get("name") or everywhere.get(iid) or everywhere.get(iid.lower(), "")
+        if not name:
+            # No English name anywhere in the jar. 132 such entries existed —
+            # German-only ids like 'taliskraemerin' and 'adeptenausbildung',
+            # absent even from the German properties. They were imported as
+            # nameless rows. An item with no name is not data, and the
+            # ownership rule already says German-only content stays out.
+            continue
         a = s["attrs"]
         recs[iid] = {
-            "id": iid, "name": t.get("name", ""), "page": t.get("page", ""),
+            "id": iid, "name": name, "page": t.get("page", ""),
             "desc": t.get("desc", ""), "wifi": t.get("wifi", ""),
             "category": s["category"], "tag": s["tag"],
             "type": a.get("type", ""), "subtype": a.get("subtype", ""),

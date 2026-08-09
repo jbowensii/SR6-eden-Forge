@@ -157,3 +157,70 @@ def test_merge_keeps_better_description():
     kept = lib["weapons_firearms"][0]
     assert "much longer" in kept["system"]["description"]
     assert kept["meta"]["descriptionFrom"] == "firing_squad"
+
+
+# ---------- Commlink6 display names ----------
+
+def _fake_jar(tmp_path, files):
+    """A jar carrying only i18n properties, which is all read_book needs here."""
+    import zipfile
+    p = tmp_path / "cl6.jar"
+    with zipfile.ZipFile(p, "w") as z:
+        for book, body in files.items():
+            z.writestr(
+                f"de/rpgframework/shadowrun6/data/{book}/i18n/{book}.properties", body)
+    return p
+
+
+def test_a_name_is_found_in_another_books_properties(tmp_path):
+    """A book's XML routinely names entries defined in another book's file.
+
+    The Dodge Scoot is defined in Double Clutch's data but NAMED in the core
+    rulebook's properties. Looking only in <book>.properties left 82 items in
+    the library with an empty name.
+    """
+    from extractor import commlink6
+
+    commlink6._ALL_NAMES.clear()
+    jar = _fake_jar(tmp_path, {"core": "item.dodge_scoot=Dodge Scoot\n",
+                               "double_clutch": "item.other=Other\n"})
+    import zipfile
+    with zipfile.ZipFile(jar) as z:
+        names = commlink6._all_english_names(z, str(jar))
+    assert names["dodge_scoot"] == "Dodge Scoot"
+
+
+def test_the_books_own_name_beats_the_fallback(tmp_path):
+    """A per-book override must survive the cross-book fallback.
+
+    read_book consults `<book>.properties` first and only falls back to the
+    rest of the jar, so a book that deliberately renames a shared entry keeps
+    its wording.
+    """
+    import zipfile
+
+    from extractor import commlink6
+
+    commlink6._ALL_NAMES.clear()
+    jar = _fake_jar(tmp_path, {"core": "item.widget=Generic Widget\n",
+                               "double_clutch": "item.widget=Rigger Widget\n"})
+    with zipfile.ZipFile(jar) as z:
+        own = commlink6._i18n(z, "double_clutch")
+        shared = commlink6._all_english_names(z, str(jar))
+    # both know the id; read_book takes the book's own, not the shared one
+    assert own["widget"]["name"] == "Rigger Widget"
+    assert shared["widget"] in ("Generic Widget", "Rigger Widget")
+    assert (own["widget"].get("name") or shared["widget"]) == "Rigger Widget"
+
+
+def test_german_names_never_reach_the_english_index(tmp_path):
+    """Ownership rule: German content stays out unless the German PDF is owned."""
+    from extractor import commlink6
+
+    commlink6._ALL_NAMES.clear()
+    jar = _fake_jar(tmp_path, {"core": "item.keep=Keep\n",
+                               "core_de": "item.drop=Pflock\n"})
+    import zipfile
+    with zipfile.ZipFile(jar) as z:
+        names = commlink6._all_english_names(z, str(jar))
+    assert "keep" in names and "drop" not in names
