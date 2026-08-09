@@ -1,4 +1,7 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
+import { needsAttention as itemNeedsAttention } from "../../shared/edenSpec.mjs";
+
+const EMPTY = new Set();
 
 // number embedded in a stat string like "1,200¥" / "8R" -> comparable number
 const num = (v) => {
@@ -32,8 +35,15 @@ const COLUMNS = [
   { key: "qa", label: "QA", get: (it) => QA_ORDER[it.meta.qaStatus] ?? 0, type: "num" },
 ];
 
-export default function CategoryTable({ payload, issues, onEdit }) {
+export default function CategoryTable({
+  payload, issues, onEdit,
+  selectedIds = EMPTY, onSelectionChange, needsAttention, onContextMenu,
+}) {
   const [sort, setSort] = useState({ key: null, dir: 1 });
+  // Anchor for shift-ranges. Held here rather than in App because it only
+  // means anything against THIS table's current sort order — re-sort and the
+  // range a user sees is different from the range an index-based anchor gives.
+  const anchor = useRef(null);
 
   const issueMap = useMemo(() => {
     const m = new Map();
@@ -44,7 +54,11 @@ export default function CategoryTable({ payload, issues, onEdit }) {
   }, [issues]);
 
   const rows = useMemo(() => {
-    const items = [...payload.items];
+    let items = [...payload.items];
+    if (needsAttention) {
+      items = items.filter((it) =>
+        itemNeedsAttention(it, payload.domain, issueMap.get(it.id)?.length ?? 0));
+    }
     if (!sort.key) return items;
     if (sort.key === "issues") {
       items.sort((a, b) => ((issueMap.get(a.id)?.length ?? 0) - (issueMap.get(b.id)?.length ?? 0)) * sort.dir);
@@ -57,10 +71,49 @@ export default function CategoryTable({ payload, issues, onEdit }) {
       return cmp * sort.dir;
     });
     return items;
-  }, [payload.items, sort, issueMap]);
+  }, [payload.items, payload.domain, sort, issueMap, needsAttention]);
 
   const toggle = (key) => setSort((s) => (s.key === key ? { key, dir: -s.dir } : { key, dir: 1 }));
   const caret = (key) => (sort.key === key ? (sort.dir === 1 ? " ▲" : " ▼") : "");
+
+  // Plain click  — open this one, selection becomes just it.
+  // Ctrl / Cmd    — add or remove one, keeping the rest.
+  // Shift         — extend from the last plain-clicked row, in the order the
+  //                 rows are CURRENTLY sorted, which is the order on screen.
+  const clickRow = (item, index, e) => {
+    if (e.shiftKey && anchor.current !== null) {
+      const [lo, hi] = [anchor.current, index].sort((a, b) => a - b);
+      const range = rows.slice(lo, hi + 1).map((r) => r.id);
+      onSelectionChange?.(new Set(range), item);
+      return;
+    }
+    if (e.ctrlKey || e.metaKey) {
+      const next = new Set(selectedIds);
+      if (next.has(item.id)) next.delete(item.id);
+      else next.add(item.id);
+      anchor.current = index;
+      // Editing follows the row just clicked while it is still selected;
+      // ctrl-clicking a row OFF should not leave the editor showing it.
+      onSelectionChange?.(next, next.has(item.id) ? item : null);
+      return;
+    }
+    anchor.current = index;
+    onSelectionChange?.(new Set([item.id]), item);
+    onEdit?.(item);
+  };
+
+  const rightClick = (item, index, e) => {
+    e.preventDefault();
+    // Right-clicking outside the selection acts on the row under the cursor,
+    // which is what every file manager does. Inside it, the selection stands.
+    let ids = selectedIds;
+    if (!selectedIds.has(item.id)) {
+      ids = new Set([item.id]);
+      anchor.current = index;
+      onSelectionChange?.(ids, item);
+    }
+    onContextMenu?.({ x: e.clientX, y: e.clientY, ids });
+  };
 
   return (
     <table className="cat-table">
@@ -75,8 +128,13 @@ export default function CategoryTable({ payload, issues, onEdit }) {
         </tr>
       </thead>
       <tbody>
-        {rows.map((item) => (
-          <tr key={item.id} onClick={() => onEdit(item)}>
+        {rows.map((item, index) => (
+          <tr
+            key={item.id}
+            className={selectedIds.has(item.id) ? "row-selected" : undefined}
+            onClick={(e) => clickRow(item, index, e)}
+            onContextMenu={(e) => rightClick(item, index, e)}
+          >
             <td className="cell-name">
               {item.img && <span className="has-img" title={item.img}>◈</span>}
               {item.name}

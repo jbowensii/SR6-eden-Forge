@@ -16,8 +16,25 @@ const LONG_FIELDS = new Set([
   "effect", "attacks", "contacts", "cyberware", "bioware", "augmentations",
 ]);
 
-export default function ItemEditor({ item, domain, bookTitle, books = {}, categoryName, pdfAvailable, pdfHref, onSave, onDelete, onAssignIcon, onAssignRender }) {
+export default function ItemEditor({ item, domain, bookTitle, books = {}, categoryName, pdfAvailable, pdfHref, onSave, onDelete, onAssignIcon, onAssignRender, selectedItems = [], onDirtyChange, onBulkSave }) {
   const [draft, setDraft] = useState(() => structuredClone(item));
+  // Which fields the user has actually touched. Bulk edits write ONLY these,
+  // so a value that merely differs across the selection is left alone rather
+  // than flattened to whatever this editor happened to be showing.
+  //
+  // It doubles as the dirty flag: before this existed, selecting another row
+  // remounted the editor and rebuilt the draft, discarding unsaved work with
+  // no warning at all.
+  const [touched, setTouched] = useState(() => new Set());
+  const mark = (path) => setTouched((t) => (t.has(path) ? t : new Set(t).add(path)));
+
+  useEffect(() => { onDirtyChange?.(touched.size > 0); }, [touched, onDirtyChange]);
+
+  const bulk = selectedItems.length > 1;
+  // A field is "mixed" when the selected items disagree about it — shown as a
+  // placeholder rather than a value, so nothing is silently levelled.
+  const mixed = (field) => bulk && new Set(
+    selectedItems.map((i) => JSON.stringify(i.system?.[field]))).size > 1;
   const [picking, setPicking] = useState(false);
   const [browsing, setBrowsing] = useState(false);
   const [searchingArt, setSearchingArt] = useState(false);
@@ -31,7 +48,33 @@ export default function ItemEditor({ item, domain, bookTitle, books = {}, catego
     setRenderExists(true);
   }, [item.img, item.id]);
 
-  const setSystem = (field, value) => setDraft((d) => ({ ...d, system: { ...d.system, [field]: value } }));
+  const setSystem = (field, value) => {
+    mark(`system.${field}`);
+    setDraft((d) => ({ ...d, system: { ...d.system, [field]: value } }));
+  };
+
+  // The delta to send when several items are selected: only touched fields.
+  const changes = () => {
+    const out = {};
+    for (const path of touched) {
+      if (path.startsWith("system.")) {
+        const f = path.slice(7);
+        out.system = { ...(out.system ?? {}), [f]: draft.system[f] };
+      } else if (path === "name") out.name = draft.name;
+      else if (path === "img") out.img = draft.img;
+      else if (path === "qaStatus") out.qaStatus = draft.meta?.qaStatus;
+    }
+    return out;
+  };
+
+  async function saveClicked() {
+    if (bulk) {
+      await onBulkSave?.(changes());
+    } else {
+      await onSave(draft);
+    }
+    setTouched(new Set());
+  }
 
   // Pasting book text carries hard line breaks from the PDF columns; collapse
   // CRs/newlines to single spaces so descriptions stay one clean paragraph.
@@ -160,6 +203,31 @@ export default function ItemEditor({ item, domain, bookTitle, books = {}, catego
           </span>
           <span className="ref-id">{draft.id}</span>
         </div>
+      <div className="editor-actions">
+        <button className="primary" onClick={saveClicked}>
+          {bulk ? `Save ${selectedItems.length} items` : "Save"}
+        </button>
+        {touched.size > 0 && <span className="unsaved" title="Unsaved changes">● unsaved</span>}
+        <button
+          className="ghost danger"
+          title="Delete this item from the library"
+          onClick={() => {
+            if (window.confirm(`Delete "${draft.name}"? This removes it from the library.`)) onDelete(draft);
+          }}
+        >
+          Delete
+        </button>
+        {pdfHref && (
+          <button
+            className="ghost"
+            disabled={!pdfAvailable}
+            title={pdfAvailable ? `Open ${bookTitle} at page ${draft.meta?.page}` : "Add the PDF path to data/books.json"}
+            onClick={() => window.open(pdfHref, "sr6pdf", "width=980,height=1200,left=120,top=40")}
+          >
+            Open PDF · p. {draft.meta?.page}
+          </button>
+        )}
+      </div>
       </div>
 
       {spec && (
@@ -198,7 +266,8 @@ export default function ItemEditor({ item, domain, bookTitle, books = {}, catego
       )}
 
       <label>
-        Name <input type="text" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+        Name <input type="text" value={draft.name} placeholder={mixed("name") ? "— mixed —" : undefined}
+               onChange={(e) => { mark("name"); setDraft({ ...draft, name: e.target.value }); }} />
       </label>
 
       <label>
@@ -206,7 +275,7 @@ export default function ItemEditor({ item, domain, bookTitle, books = {}, catego
         <select
           className={`qa-select qa-${draft.meta.qaStatus}`}
           value={draft.meta.qaStatus}
-          onChange={(e) => setDraft({ ...draft, meta: { ...draft.meta, qaStatus: e.target.value } })}
+          onChange={(e) => { mark("qaStatus"); setDraft({ ...draft, meta: { ...draft.meta, qaStatus: e.target.value } }); }}
         >
           {QA.map((s) => (
             <option key={s}>{s}</option>
@@ -329,28 +398,6 @@ export default function ItemEditor({ item, domain, bookTitle, books = {}, catego
         />
       )}
 
-      <div className="editor-actions">
-        <button className="primary" onClick={() => onSave(draft)}>Save</button>
-        <button
-          className="ghost danger"
-          title="Delete this item from the library"
-          onClick={() => {
-            if (window.confirm(`Delete "${draft.name}"? This removes it from the library.`)) onDelete(draft);
-          }}
-        >
-          Delete
-        </button>
-        {pdfHref && (
-          <button
-            className="ghost"
-            disabled={!pdfAvailable}
-            title={pdfAvailable ? `Open ${bookTitle} at page ${draft.meta?.page}` : "Add the PDF path to data/books.json"}
-            onClick={() => window.open(pdfHref, "sr6pdf", "width=980,height=1200,left=120,top=40")}
-          >
-            Open PDF · p. {draft.meta?.page}
-          </button>
-        )}
-      </div>
     </div>
   );
 }

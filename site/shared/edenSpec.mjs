@@ -67,3 +67,18 @@ export function missingRequired(domain, system = {}) {
   if (!spec) return [];
   return spec.req.filter((f) => isBlank(system[f]));
 }
+
+/** Does this item still want a human's attention?
+ *
+ * True when a required Eden field is blank, or validation reported an issue
+ * against it. Deliberately NOT qaStatus: almost the whole library is
+ * `extracted`, so counting that would flag nearly every row and the filter
+ * would tell you nothing.
+ *
+ * Shared so the table's filter and the editor's readiness panel cannot drift
+ * apart and disagree about what "needs attention" means.
+ */
+export function needsAttention(item, domain, issueCount = 0) {
+  if (issueCount > 0) return true;
+  return missingRequired(domain, item?.system ?? {}).length > 0;
+}

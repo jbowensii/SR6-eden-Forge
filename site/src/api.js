@@ -60,3 +60,13 @@ export const assignIcon = (payload) =>
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   }).then(json);
+
+// Bulk operations. Both send `targets` — a full {book, domain, category, id}
+// per item — because a selection can span books and domains, and the server
+// needs all four to find each file.
+export const patchItems = (targets, changes) =>
+  fetch("/api/items", { method: "PATCH", headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ targets, changes }) }).then(json);
+export const deleteItems = (targets) =>
+  fetch("/api/items", { method: "DELETE", headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ targets }) }).then(json);

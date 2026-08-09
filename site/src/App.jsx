@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import CategoryTable from "./components/CategoryTable.jsx";
 import ItemEditor from "./components/ItemEditor.jsx";
 import Preview from "./components/Preview.jsx";
 import TypeTree from "./components/TypeTree.jsx";
 import SetupPanel from "./components/SetupPanel.jsx";
-import { applyCorrections, assignIcon, assignRender, deleteItem, exportModule, getBooks, getCategory, getDomains, getItems, getTypeTree, putItem, searchItems, validate } from "./api.js";
+import { applyCorrections, assignIcon, assignRender, deleteItem, deleteItems, exportModule, getBooks, getCategory, getDomains, getItems, getTypeTree, patchItems, putItem, searchItems, validate } from "./api.js";
 
 export default function App() {
   const [tree, setTree] = useState([]);      // primary -> secondary tree for the domain
@@ -16,6 +16,16 @@ export default function App() {
   const [setupOpen, setSetupOpen] = useState(false);
   const [payload, setPayload] = useState(null);
   const [editing, setEditing] = useState(null); // item
+  const [selectedIds, setSelectedIds] = useState(() => new Set());
+  const [attentionOnly, setAttentionOnly] = useState(false);
+  const [menu, setMenu] = useState(null);       // {x, y, ids} right-click menu
+  // Whether the editor is holding unsaved changes. A ref, not state: the guard
+  // is read inside event handlers, and a stale closure here would wave through
+  // exactly the edit it exists to protect.
+  const dirtyRef = useRef(false);
+  // Stable, so the editor's dirty-reporting effect fires when the flag
+  // changes rather than on every render.
+  const noteDirty = useCallback((d) => { dirtyRef.current = d; }, []);
   const [doc, setDoc] = useState(null);
   const [issues, setIssues] = useState(null);
   const [status, setStatus] = useState("");
@@ -191,6 +201,105 @@ export default function App() {
     }
   }
 
+  // ── the one door in and out of the editor ────────────────────────────────
+  //
+  // Every user-driven change of what is being edited goes through here. The
+  // bug this exists to stop: ItemEditor is keyed by item id, so selecting a
+  // different row remounted it and rebuilt the draft from the new item —
+  // silently discarding anything typed and not saved. There was no dirty flag
+  // anywhere in the app, so nothing could have noticed.
+  //
+  // Returns false when the user declines, and callers must respect that.
+  // Programmatic updates after a save or delete set `editing` directly: they
+  // are not navigation, and there is nothing unsaved left to protect.
+  function requestSelection(next) {
+    if (dirtyRef.current && next?.id !== editing?.id) {
+      if (!window.confirm("You have unsaved changes. Discard them?")) return false;
+    }
+    dirtyRef.current = false;
+    setEditing(next ?? null);
+    setDoc(null);
+    return true;
+  }
+
+  // Closing the tab is the other way to lose an edit, and the only one the app
+  // cannot draw its own dialog for.
+  useEffect(() => {
+    const warn = (e) => {
+      if (!dirtyRef.current) return;
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, []);
+
+  // A right-click menu that survives the next click would be its own bug.
+  useEffect(() => {
+    if (!menu) return;
+    const close = () => setMenu(null);
+    window.addEventListener("click", close);
+    window.addEventListener("keydown", close);
+    return () => {
+      window.removeEventListener("click", close);
+      window.removeEventListener("keydown", close);
+    };
+  }, [menu]);
+
+  // Apply ONE delta to every selected item. `changes` holds only the fields
+  // the user actually touched, so values that merely differ across the
+  // selection are left alone rather than flattened to whatever the editor
+  // happened to be showing.
+  async function bulkSave(changes) {
+    const chosen = (payload?.items ?? []).filter((i) => selectedIds.has(i.id));
+    if (!chosen.length || !Object.keys(changes).length) return;
+    const targets = chosen.map((i) => ({
+      book: i._book ?? i.meta.book, domain: i._domain ?? payload.domain,
+      category: i._category ?? payload.category, id: i.id,
+    }));
+    setStatus(`saving ${targets.length}…`);
+    try {
+      const res = await patchItems(targets, changes);
+      dirtyRef.current = false;
+      await refreshPayload();
+      setTree(await getTypeTree(domain));
+      setStatus(res.failed?.length
+        ? `saved ${res.updated}, ${res.failed.length} failed`
+        : `saved ${res.updated} item(s)`);
+    } catch (err) {
+      setStatus(`bulk save failed — ${err.message}`);
+    }
+  }
+
+  async function deleteSelected(ids) {
+    const chosen = (payload?.items ?? []).filter((i) => ids.has(i.id));
+    if (!chosen.length) return;
+    const names = chosen.slice(0, 12).map((i) => `  • ${i.name}`).join("\n");
+    const more = chosen.length > 12 ? `\n  …and ${chosen.length - 12} more` : "";
+    // Named, not just counted. Deleting is the one correction that cannot be
+    // checked afterwards by looking at the library, because the evidence of a
+    // mistake is an absence.
+    if (!window.confirm(`Delete ${chosen.length} item(s)?\n\n${names}${more}`)) return;
+
+    const targets = chosen.map((i) => ({
+      book: i._book ?? i.meta.book, domain: i._domain ?? payload.domain,
+      category: i._category ?? payload.category, id: i.id,
+    }));
+    setStatus(`deleting ${targets.length}…`);
+    try {
+      const res = await deleteItems(targets);
+      dirtyRef.current = false;
+      setEditing(null);
+      setSelectedIds(new Set());
+      await refreshPayload();
+      setStatus(res.failed?.length
+        ? `deleted ${res.deleted}, ${res.failed.length} failed`
+        : `deleted ${res.deleted}`);
+    } catch (err) {
+      setStatus(`delete failed — ${err.message}`);
+    }
+  }
+
   // the library is a merged namespace: each item's real source is meta.book,
   // not the selected library folder. Show the title/PDF for the item's own book.
   const bookInfo = editing?.meta?.book ? books[editing.meta.book] : null;
@@ -297,14 +406,28 @@ export default function App() {
       <main>
         <div className="status" data-live={Boolean(status)}>{status || "ready"}</div>
         {payload ? (
-          <CategoryTable
-            payload={payload}
-            issues={issues}
-            onEdit={(item) => {
-              setEditing(item);
-              setDoc(null);
-            }}
-          />
+          <>
+            <label className="attention-filter">
+              <input
+                type="checkbox"
+                checked={attentionOnly}
+                onChange={(e) => setAttentionOnly(e.target.checked)}
+              />
+              Show only incomplete / warnings
+            </label>
+            <CategoryTable
+              payload={payload}
+              issues={issues}
+              needsAttention={attentionOnly}
+              selectedIds={selectedIds}
+              onSelectionChange={(ids, focus) => {
+                if (!requestSelection(focus)) return;   // dirty and declined
+                setSelectedIds(ids);
+              }}
+              onContextMenu={setMenu}
+              onEdit={() => setDoc(null)}
+            />
+          </>
         ) : (
           <div className="empty-slate">
             <div className="empty-glyph">⬡</div>
@@ -318,6 +441,9 @@ export default function App() {
           <ItemEditor
             key={editing.id}
             item={editing}
+            selectedItems={(payload?.items ?? []).filter((i) => selectedIds.has(i.id))}
+            onDirtyChange={noteDirty}
+            onBulkSave={bulkSave}
             domain={editing._domain ?? domain}
             bookTitle={bookInfo?.title ?? editing?.meta?.book ?? selected?.book}
             books={books}
@@ -332,6 +458,16 @@ export default function App() {
         )}
         {doc && <Preview doc={doc} />}
       </section>
+      {menu && (
+        // Positioned where the cursor was. Dismissed by the window listener
+        // above, so any click anywhere closes it.
+        <ul className="ctx-menu" style={{ left: menu.x, top: menu.y }}
+            onClick={(e) => e.stopPropagation()}>
+          <li onClick={() => { setMenu(null); deleteSelected(menu.ids); }}>
+            Delete {menu.ids.size} selected
+          </li>
+        </ul>
+      )}
       {setupOpen && <SetupPanel onClose={() => setSetupOpen(false)} />}
     </div>
   );

@@ -388,7 +388,11 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
     if (rebuild.running) return res.status(409).json({ error: "already-running" });
     rebuild.running = true; rebuild.log = []; rebuild.code = null; rebuild.startedAt = Date.now();
     const py = process.env.PYTHON || "python";
-    const child = spawn(py, ["-u", join("tools", "rebuild_all.py")], { cwd: repoRoot });
+    // SR6_DATA, exactly as /api/corrections/apply below does it. Without it
+    // the phases resolve their own data root and rebuild <repo>/data — the
+    // development copy — rather than the workspace this server is serving.
+    const child = spawn(py, ["-u", join("tools", "rebuild_all.py")],
+                        { cwd: repoRoot, env: { ...process.env, SR6_DATA: dataRoot } });
     const push = (buf) => {
       for (const line of buf.toString().split(/\r?\n/)) if (line.trim()) rebuild.log.push(line);
       if (rebuild.log.length > 500) rebuild.log = rebuild.log.slice(-500);

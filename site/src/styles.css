@@ -12,6 +12,7 @@
   --ink: #d7dbe6;
   --ink-dim: #8a91a5;
   --magenta: #e5177b;
+  --magenta-deep: #c2135f;   /* passes AA behind white text */
   --magenta-soft: #ff4fa3;
   --cyan: #21d0d6;
   --amber: #e8a33d;
@@ -206,15 +207,11 @@ aside {
 .ghost.danger:hover { background: rgba(229, 23, 123, 0.14); }
 
 /* modal + extracted-graphics gallery */
-.modal-backdrop {
-  position: fixed; inset: 0; background: rgba(4, 6, 10, 0.72);
-  display: flex; align-items: center; justify-content: center; z-index: 50;
-}
-.modal {
-  background: var(--bg-panel); border: 1px solid var(--line-bright);
-  border-radius: 6px; padding: 16px; max-width: 80vw; max-height: 84vh;
-  overflow: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-}
+/* One backdrop. There were two — .modal-backdrop at z-index 50 and
+   .modal-overlay at 100 — styled differently for the same purpose. */
+.modal-backdrop, /* .modal itself is defined once, further down — it was declared twice with
+   conflicting border, radius and clip-path, so modals rendered as a mix of
+   both. Only the book-images sizing belongs here. */
 .modal header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .modal header h3 { font-family: var(--font-display); font-size: 15px; letter-spacing: 0.04em; }
 .modal .muted { color: var(--ink-dim); }
@@ -299,7 +296,7 @@ main { padding: 14px 18px; overflow-y: auto; }
   text-align: center;
   color: var(--ink-dim);
 }
-.empty-glyph { font-size: 64px; color: var(--line-bright); text-shadow: 0 0 30px rgba(33, 208, 214, 0.25); }
+.empty-glyph { font-size: 64px; color: var(--ink-dim); text-shadow: 0 0 30px rgba(33, 208, 214, 0.25); }
 
 table { border-collapse: collapse; width: 100%; }
 thead th {
@@ -322,8 +319,8 @@ tbody tr:hover { background: rgba(33, 208, 214, 0.06); box-shadow: inset 2px 0 0
 .cell-name { color: #fff; }
 .has-img { color: var(--cyan); margin-right: 6px; }
 .cell-subtype { color: var(--ink-dim); font-family: var(--font-mono); font-size: 11px; }
-.cell-num, .cell-ref { font-family: var(--font-mono); font-size: 12px; }
-.cell-ref { color: var(--ink-dim); }
+.cell-num { font-family: var(--font-mono); font-size: 12px; }
+.cell-ref { font-family: var(--font-mono); font-size: 12px; color: var(--ink-dim); }
 .cell-issues { color: var(--amber); font-family: var(--font-mono); font-size: 11px; }
 
 .qa-chip {
@@ -349,6 +346,7 @@ tbody tr:hover { background: rgba(33, 208, 214, 0.06); box-shadow: inset 2px 0 0
 
 .editor {
   background: var(--bg-panel);
+  overflow: visible;              /* never clip art or buttons in the pane */
   clip-path: var(--chamfer);
   border: 1px solid var(--line);
   padding: 14px 14px 16px;
@@ -394,6 +392,7 @@ tbody tr:hover { background: rgba(33, 208, 214, 0.06); box-shadow: inset 2px 0 0
   box-shadow: 0 0 0 1px rgba(229, 23, 123, 0.35);
 }
 .editor textarea { resize: vertical; font-family: var(--font-body); }
+
 .editor input[type="checkbox"] { accent-color: var(--magenta); width: auto; }
 
 .field-grid { margin-top: 12px; border-top: 1px dashed var(--line); padding-top: 6px; }
@@ -415,8 +414,12 @@ tbody tr:hover { background: rgba(33, 208, 214, 0.06); box-shadow: inset 2px 0 0
   margin: 4px 0;
 }
 
-.editor-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: center; }
-.editor { overflow: visible; }                 /* never clip art/buttons in the pane */
+.editor-actions {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  margin: 10px 0 4px;            /* directly under the ref-line */
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--line);
+}
 .editor > * { min-width: 0; }
 
 /* ── buttons ───────────────────────────────────────────────── */
@@ -442,12 +445,14 @@ button:hover:not(:disabled), .button:hover:not(.disabled) {
   background: rgba(229, 23, 123, 0.14);
 }
 button.primary, .button.primary {
-  background: var(--magenta);
+  /* --magenta-deep, not --magenta: white on #e5177b measures 4.43 against a
+     4.5 requirement. This clears it without changing the colour's character. */
+  background: var(--magenta-deep);
   border-color: var(--magenta);
   color: #fff;
   text-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
 }
-button.primary:hover { background: var(--magenta-soft); }
+button.primary:hover { background: var(--magenta); }
 button.ghost, .button.ghost { color: var(--cyan); border-color: var(--cyan); }
 button.ghost:hover:not(:disabled), .button.ghost:hover { background: rgba(33, 208, 214, 0.12); color: #fff; }
 button:disabled, .button.disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
@@ -501,15 +506,12 @@ button:disabled, .button.disabled { opacity: 0.35; cursor: not-allowed; pointer-
 button.mini { padding: 1px 8px 2px; font-size: 10px; margin-left: 4px; }
 
 /* icon picker modal */
-.modal-overlay {
-  position: fixed; inset: 0; background: rgba(6, 8, 12, 0.75);
-  display: grid; place-items: center; z-index: 100;
-  backdrop-filter: blur(2px);
-}
 .modal {
   width: min(720px, 92vw); max-height: 84vh; overflow-y: auto;
   background: var(--bg-panel); border: 1px solid var(--magenta);
-  clip-path: var(--chamfer); padding: 16px;
+  /* no clip-path: this box scrolls, and clipping cuts the content and the
+     scrollbar off at the chamfered corners */
+  padding: 16px;
   box-shadow: 0 0 40px rgba(229, 23, 123, 0.25);
 }
 .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -544,7 +546,6 @@ button.mini { padding: 1px 8px 2px; font-size: 10px; margin-left: 4px; }
 }
 .img-empty.clickable { cursor: pointer; }
 .img-empty.clickable:hover { border-color: var(--magenta); color: var(--ink); }
-.art-row { align-items: flex-start; }
 .art-row > button { align-self: center; }
 
 /* ── Eden export readiness ──────────────────────────────────────────────── */
@@ -636,3 +637,42 @@ button.ghost.tiny { padding: 1px 7px; font-size: 11px; }
 
 th.sortable { cursor: pointer; user-select: none; white-space: nowrap; }
 th.sortable:hover { color: var(--magenta-soft); }
+
+/* ── multi-select, the attention filter, and the row context menu ────────── */
+
+.attention-filter {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin: 0 0 8px; color: var(--ink-dim); font-size: 12px; cursor: pointer;
+}
+.attention-filter input { accent-color: var(--magenta); }
+.attention-filter:hover { color: var(--ink); }
+
+/* A selected row reads down the cyan side, so it stays distinct from the
+   magenta hover the table already uses. */
+tbody tr.row-selected {
+  background: rgba(33, 208, 214, 0.12);
+  box-shadow: inset 3px 0 0 var(--cyan);
+}
+tbody tr.row-selected:hover { background: rgba(33, 208, 214, 0.18); }
+tbody tr.row-selected .cell-name { color: #fff; }
+
+.ctx-menu {
+  position: fixed; z-index: 200; margin: 0; padding: 4px;
+  list-style: none; min-width: 190px;
+  background: var(--bg-panel); border: 1px solid var(--magenta);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+.ctx-menu li {
+  padding: 7px 12px; cursor: pointer; font-size: 12px;
+  font-family: var(--font-display); letter-spacing: 0.08em; text-transform: uppercase;
+}
+.ctx-menu li:hover { background: rgba(229, 23, 123, 0.18); color: #fff; }
+
+.unsaved {
+  color: var(--amber); font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+/* Keyboard focus must stay visible. Several inputs set outline:none and lean
+   on a border-colour change, which is easy to miss when tabbing. */
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 1px; }
