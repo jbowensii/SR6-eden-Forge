@@ -24,7 +24,7 @@ def dump(book, pdf):
     out = DATA / "_assets" / book / "_inbox"
     out.mkdir(parents=True, exist_ok=True)
     doc = fitz.open(str(pdf))
-    seen, saved, skipped_full, skipped_small = set(), 0, 0, 0
+    seen, saved, skipped_full, skipped_small, failed = set(), 0, 0, 0, 0
     for pno in range(doc.page_count):
         page = doc[pno]
         parea = abs(page.rect) or 1.0
@@ -46,13 +46,29 @@ def dump(book, pdf):
                 continue
             try:
                 pix = fitz.Pixmap(doc, xref)
-                if pix.n >= 5:                 # CMYK / with alpha -> RGB(A)
+                # PNG carries grayscale and RGB only. `pix.n >= 5` was meant to
+                # catch CMYK, but plain DeviceCMYK has n == 4 and alpha 0, so it
+                # sailed through and pix.save raised "unsupported colorspace for
+                # 'png'" — swallowed by the bare except below. Scotophobia and
+                # The Needle's Eye are ENTIRELY CMYK: 468 and 447 illustrations
+                # each, every one lost, both books reporting saved=0 as though
+                # they simply had no art.
+                #
+                # Test the colorspace instead of the component count: anything
+                # that is not 1-channel gray or 3-channel RGB is converted.
+                cs = pix.colorspace
+                if cs is None or cs.n not in (1, 3):
                     pix = fitz.Pixmap(fitz.csRGB, pix)
                 pix.save(str(dest))
                 saved += 1
-            except Exception:
-                pass
-    return saved, skipped_full, skipped_small
+            except Exception as e:
+                # COUNTED, never silent. A bare `pass` here is what let 915
+                # images disappear without a single line of output.
+                failed += 1
+                if failed <= 3:
+                    print(f"    {book}: could not extract xref {xref} — "
+                          f"{type(e).__name__}: {e}", flush=True)
+    return saved, skipped_full, skipped_small, failed
 
 
 if __name__ == "__main__":
@@ -66,9 +82,11 @@ if __name__ == "__main__":
         if not pdf.is_file():
             continue
         try:
-            s, f, sm = dump(book, pdf)
+            s, f, sm, bad = dump(book, pdf)
             grand += s
-            print(f"{book:22} saved={s:>4} (skipped full={f:>4} small={sm:>4})", flush=True)
+            note = f" FAILED={bad}" if bad else ""
+            print(f"{book:22} saved={s:>4} (skipped full={f:>4} small={sm:>4})"
+                  f"{note}", flush=True)
         except Exception as e:
             print(f"{book:22} ERROR {e}", flush=True)
     print(f"TOTAL illustrations={grand}")
