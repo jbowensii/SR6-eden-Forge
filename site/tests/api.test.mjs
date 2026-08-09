@@ -258,3 +258,122 @@ describe("icon library", () => {
     expect(badMode.status).toBe(400);
   });
 });
+
+// ── bulk operations ────────────────────────────────────────────────────────
+
+function makeBulkApp() {
+  const root = mkdtempSync(join(tmpdir(), "forge-bulk-"));
+  const gear = join(root, "corebook", "gear");
+  const vehicles = join(root, "corebook", "vehicles");
+  mkdirSync(gear, { recursive: true });
+  mkdirSync(vehicles, { recursive: true });
+  const mk = (id, name, system = {}) => ({
+    id, name, system: { type: "WEAPON_FIREARMS", ...system },
+    meta: { book: "corebook", page: 1, extractedAt: "2026-08-09",
+            extractorVersion: "0.1.0", qaStatus: "extracted" },
+  });
+  writeFileSync(join(gear, "weapons_firearms.json"), JSON.stringify(
+    { book: "corebook", domain: "gear", category: "weapons_firearms",
+      items: [mk("a_one", "A One"), mk("b_two", "B Two", { subtype: "PISTOLS_HEAVY" })] }, null, 2) + "\n");
+  writeFileSync(join(vehicles, "vehicles.json"), JSON.stringify(
+    { book: "corebook", domain: "vehicles", category: "vehicles",
+      items: [mk("c_three", "C Three", { type: "VEHICLE" })] }, null, 2) + "\n");
+  const schemasDir = mkdtempSync(join(tmpdir(), "forge-schemas-"));
+  writeFileSync(join(schemasDir, "gear.schema.json"), JSON.stringify({ title: "gear stub" }));
+  return { app: buildApp(root, { schemasDir, validate: async () => ({ ok: true, issues: [] }) }), root };
+}
+
+const T = (id, domain = "gear", category = "weapons_firearms") =>
+  ({ book: "corebook", domain, category, id });
+
+describe("PATCH /api/items", () => {
+  it("writes only the fields present in changes", async () => {
+    const { app, root } = makeBulkApp();
+    const res = await request(app).patch("/api/items").send({
+      targets: [T("a_one"), T("b_two")],
+      changes: { system: { subtype: "PISTOLS_LIGHT" } },
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.updated).toBe(2);
+    const items = JSON.parse(readFileSync(
+      join(root, "corebook", "gear", "weapons_firearms.json"), "utf8")).items;
+    // subtype set on both...
+    expect(items.map((i) => i.system.subtype)).toEqual(["PISTOLS_LIGHT", "PISTOLS_LIGHT"]);
+    // ...and nothing else touched
+    expect(items.map((i) => i.name)).toEqual(["A One", "B Two"]);
+    expect(items.every((i) => i.system.type === "WEAPON_FIREARMS")).toBe(true);
+  });
+
+  it("spans books and domains in one call", async () => {
+    const { app, root } = makeBulkApp();
+    const res = await request(app).patch("/api/items").send({
+      targets: [T("a_one"), T("c_three", "vehicles", "vehicles")],
+      changes: { qaStatus: "reviewed" },
+    });
+    expect(res.body.updated).toBe(2);
+    const veh = JSON.parse(readFileSync(
+      join(root, "corebook", "vehicles", "vehicles.json"), "utf8")).items[0];
+    expect(veh.meta.qaStatus).toBe("reviewed");
+  });
+
+  it("records one correction per item, as a delta", async () => {
+    const { app, root } = makeBulkApp();
+    await request(app).patch("/api/items").send({
+      targets: [T("a_one"), T("b_two")],
+      changes: { system: { subtype: "PISTOLS_LIGHT" } },
+    });
+    const rec = JSON.parse(readFileSync(
+      join(root, "_corrections", "gear", "a_one.json"), "utf8"));
+    expect(rec.changed.system.subtype).toBe("PISTOLS_LIGHT");
+    expect(rec.changed.system.type).toBeUndefined();   // untouched, so not recorded
+    expect(rec.ref.name).toBe("A One");
+  });
+
+  it("one bad target does not lose the rest of the batch", async () => {
+    const { app } = makeBulkApp();
+    const res = await request(app).patch("/api/items").send({
+      targets: [T("a_one"), T("ghost"), T("b_two")],
+      changes: { system: { subtype: "PISTOLS_LIGHT" } },
+    });
+    expect(res.body.updated).toBe(2);
+    expect(res.body.failed).toHaveLength(1);
+    expect(res.body.failed[0].id).toBe("ghost");
+  });
+
+  it("refuses an empty batch rather than silently doing nothing", async () => {
+    const { app } = makeBulkApp();
+    expect((await request(app).patch("/api/items").send({ targets: [], changes: {} })).status).toBe(400);
+  });
+});
+
+describe("DELETE /api/items", () => {
+  it("removes every target and reports the count", async () => {
+    const { app, root } = makeBulkApp();
+    const res = await request(app).delete("/api/items").send({ targets: [T("a_one"), T("b_two")] });
+    expect(res.body.deleted).toBe(2);
+    const items = JSON.parse(readFileSync(
+      join(root, "corebook", "gear", "weapons_firearms.json"), "utf8")).items;
+    expect(items).toHaveLength(0);
+  });
+
+  it("leaves a tombstone carrying name and book, not just an id", async () => {
+    // The rows worth deleting have the least stable ids in the library — junk
+    // names slug straight into the id. Without ref, improving the reader that
+    // produced the name changes the id and the deletion silently undoes itself.
+    const { app, root } = makeBulkApp();
+    await request(app).delete("/api/items").send({ targets: [T("a_one")] });
+    const rec = JSON.parse(readFileSync(
+      join(root, "_corrections", "gear", "a_one.json"), "utf8"));
+    expect(rec.deleted).toBe(true);
+    expect(rec.ref).toEqual({ name: "A One", book: "corebook" });
+  });
+
+  it("one missing target does not stop the others", async () => {
+    const { app } = makeBulkApp();
+    const res = await request(app).delete("/api/items").send({
+      targets: [T("a_one"), T("ghost")],
+    });
+    expect(res.body.deleted).toBe(1);
+    expect(res.body.failed).toHaveLength(1);
+  });
+});

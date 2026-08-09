@@ -156,6 +156,73 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
     });
   });
 
+  // ── bulk operations ──────────────────────────────────────────────────────
+  //
+  // Both take `targets`: a full {book, domain, category, id} locator per item,
+  // never bare ids. writeItem needs all four to find a file, and a selection
+  // made from search results can span books and domains — ids alone would make
+  // the server guess, or scan every domain to find out.
+  //
+  // One bad target must not lose the rest of the batch: each is attempted on
+  // its own and reported, because the alternative is a user selecting forty
+  // rows and being told only that "something" failed.
+
+  const eachTarget = (targets, fn) => {
+    const ok = [], failed = [];
+    for (const t of targets ?? []) {
+      try {
+        ok.push(fn(t));
+      } catch (err) {
+        failed.push({ id: t?.id ?? null, error: String(err.message ?? err) });
+      }
+    }
+    return { ok, failed };
+  };
+
+  // Apply the SAME delta to every target. Only fields present in `changes` are
+  // written; everything else on each item is left exactly as it was, so a bulk
+  // edit cannot flatten values that merely differ across the selection.
+  app.patch("/api/items", (req, res) => {
+    handle(res, () => {
+      const { targets, changes } = req.body ?? {};
+      if (!Array.isArray(targets) || !targets.length) {
+        throw new StoreError("bad-request", "no targets");
+      }
+      if (!changes || typeof changes !== "object") {
+        throw new StoreError("bad-request", "no changes");
+      }
+      const { ok, failed } = eachTarget(targets, (t) => {
+        const payload = readCategory(dataRoot, t.book, t.domain, t.category);
+        const current = payload.items.find((i) => i.id === t.id);
+        if (!current) throw new StoreError("not-found", t.id);
+        const merged = {
+          ...current,
+          ...(changes.name !== undefined ? { name: changes.name } : {}),
+          ...(changes.img !== undefined ? { img: changes.img } : {}),
+          system: { ...current.system, ...(changes.system ?? {}) },
+          meta: { ...current.meta,
+                  ...(changes.qaStatus !== undefined ? { qaStatus: changes.qaStatus } : {}) },
+        };
+        // writeItem records the correction, diffing against what was there —
+        // so a bulk edit leaves the same delta records a single edit would.
+        return writeItem(dataRoot, t.book, t.domain, t.category, t.id, merged);
+      });
+      return { updated: ok.length, failed };
+    });
+  });
+
+  app.delete("/api/items", (req, res) => {
+    handle(res, () => {
+      const { targets } = req.body ?? {};
+      if (!Array.isArray(targets) || !targets.length) {
+        throw new StoreError("bad-request", "no targets");
+      }
+      const { ok, failed } = eachTarget(targets, (t) =>
+        deleteItem(dataRoot, t.book, t.domain, t.category, t.id));
+      return { deleted: ok.length, failed };
+    });
+  });
+
   app.post("/api/validate", async (req, res) => {
     try {
       res.json(await validate(dataRoot));

@@ -224,7 +224,20 @@ export function recordCorrection(dataRoot, domain, category, item, { deleted = f
 
   let rec;
   if (deleted) {
-    rec = { domain, category, id: item.id, deleted: true, correctedAt: new Date().toISOString() };
+    // A tombstone carries `ref` for the same reason an edit does, and more
+    // urgently. It is matched on id, and the rows worth deleting have the
+    // LEAST stable ids in the library: junk names slug straight into the id,
+    // so "OFF ROAD) INTERVAL Dodge Scoot Harley-Davidson" becomes
+    // off_road_interval_dodge_scoot_harley_davidson. Improve the reader that
+    // produced that name and the id changes, the tombstone stops matching,
+    // and a row deleted months ago quietly comes back.
+    //
+    // Seen for real on 2026-08-08: rejoining wrapped vehicle names turned
+    // krupp_bentley into cl6_saeder_krupp_bentley_concordat and three
+    // corrections lost their target.
+    rec = { domain, category, id: item.id, deleted: true,
+            ref: { name: item.name ?? null, book: item.meta?.book ?? null },
+            correctedAt: new Date().toISOString() };
   } else {
     // Store only what CHANGED, plus enough to find the item again.
     //
@@ -328,14 +341,17 @@ export function assignRender(dataRoot, book, domain, category, itemId, imagePath
 
 export function deleteItem(dataRoot, book, domain, category, itemId) {
   const payload = readCategory(dataRoot, book, domain, category);
-  const before = payload.items.length;
+  // Captured BEFORE the filter: the tombstone records the item's name and book
+  // so it can still be matched after a reader improvement changes its id, and
+  // once the row is gone there is nothing left to read them from.
+  const doomed = payload.items.find((i) => i.id === itemId);
+  if (!doomed) throw new StoreError("not-found", itemId);
   payload.items = payload.items.filter((i) => i.id !== itemId);
-  if (payload.items.length === before) throw new StoreError("not-found", itemId);
   const path = categoryPath(dataRoot, book, domain, category);
   const tmpPath = `${path}.tmp`;
   writeFileSync(tmpPath, JSON.stringify(payload, null, 2) + "\n", "utf8");
   renameSync(tmpPath, path);
-  recordCorrection(dataRoot, domain, category, { id: itemId }, { deleted: true });
+  recordCorrection(dataRoot, domain, category, doomed, { deleted: true });
   return { deleted: itemId };
 }
 

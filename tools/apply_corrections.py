@@ -53,7 +53,7 @@ def _load_domain(domain):
     return out
 
 
-applied = deleted = 0
+applied = deleted = rematched = 0
 field_changes = Counter()
 if not CORR.is_dir():
     print("no corrections to apply")
@@ -71,12 +71,41 @@ else:
                     break
             if target:
                 break
+
+        # The id moved? Fall back to the reference the record carries.
+        #
+        # An id is derived from the name, so improving a reader changes it:
+        # rejoining wrapped vehicle names turned krupp_bentley into
+        # cl6_saeder_krupp_bentley_concordat and three corrections lost their
+        # target. That matters most for DELETIONS, because the rows worth
+        # deleting are junk extractions whose names — and therefore ids — are
+        # the least stable in the library.
+        #
+        # Matched on name AND book, and only when exactly one row answers to
+        # that pair. A name alone repeats across books; two candidates mean we
+        # cannot tell which was meant, and re-applying an edit to the wrong
+        # item is worse than not applying it.
+        ref = rec.get("ref") or {}
+        if target is None and ref.get("name"):
+            want = (ref["name"].strip().casefold(), ref.get("book"))
+            hits = [(path, payload, it)
+                    for stem, (path, payload) in files.items()
+                    for it in payload["items"]
+                    if (it.get("name", "").strip().casefold(),
+                        (it.get("meta") or {}).get("book")) == want]
+            if len(hits) == 1:
+                target = hits[0]
+                rematched += 1
+
         if rec.get("deleted"):
             if target:
                 path, payload, it = target
-                payload["items"] = [i for i in payload["items"] if i["id"] != cid]
+                gone = it["id"]
+                payload["items"] = [i for i in payload["items"] if i is not it]
                 path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
                 deleted += 1
+                if gone != cid:
+                    print(f"    deleted {gone} (tombstone was {cid}; matched on name)")
             continue
         if not target:
             continue  # item no longer produced by extraction; skip (tombstone would remove anyway)
@@ -112,7 +141,8 @@ else:
         path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         applied += 1
 
-    print(f"applied {applied} correction(s), {deleted} deletion(s)")
+    note = f", {rematched} re-matched by name after an id change" if rematched else ""
+    print(f"applied {applied} correction(s), {deleted} deletion(s){note}")
     if field_changes:
         print("most-corrected fields (extractor-improvement hints):")
         for k, n in field_changes.most_common(12):
