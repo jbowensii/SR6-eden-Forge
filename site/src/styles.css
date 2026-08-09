@@ -676,3 +676,17 @@ tbody tr.row-selected .cell-name { color: #fff; }
 /* Keyboard focus must stay visible. Several inputs set outline:none and lean
    on a border-colour change, which is easy to miss when tabbing. */
 :focus-visible { outline: 2px solid var(--cyan); outline-offset: 1px; }
+
+/* ── duplicate-name review ──────────────────────────────────────────────── */
+.modal.dupes { width: min(860px, 94vw); }
+.dupe-list { max-height: 56vh; overflow-y: auto; border: 1px solid var(--line); padding: 6px; background: var(--bg); }
+.dupe { border-bottom: 1px dashed var(--line); padding: 6px 4px 8px; }
+.dupe:last-child { border-bottom: 0; }
+.dupe.skipped { opacity: 0.4; }
+.dupe-head { display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 4px; }
+.dupe-head input { accent-color: var(--magenta); }
+.dupe-name { color: #fff; font-size: 13px; }
+.dupe-row { display: flex; align-items: center; gap: 8px; padding: 2px 0 2px 24px; font-size: 11px; font-family: var(--font-mono); }
+.dupe-row code { background: var(--bg-raise); border: 1px solid var(--line); padding: 0 5px; color: var(--ink); }
+.dupe-row.keep { color: var(--green); }
+.dupe-row.drop { color: var(--amber); }

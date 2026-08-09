@@ -365,7 +365,9 @@ describe("DELETE /api/items", () => {
     const rec = JSON.parse(readFileSync(
       join(root, "_corrections", "gear", "a_one.json"), "utf8"));
     expect(rec.deleted).toBe(true);
-    expect(rec.ref).toEqual({ name: "A One", book: "corebook" });
+    // page too: 36 of the 43 id-collisions are separated only by book,
+    // and the rest need the page to pin down which row was meant.
+    expect(rec.ref).toEqual({ name: "A One", book: "corebook", page: 1 });
   });
 
   it("one missing target does not stop the others", async () => {
@@ -375,5 +377,95 @@ describe("DELETE /api/items", () => {
     });
     expect(res.body.deleted).toBe(1);
     expect(res.body.failed).toHaveLength(1);
+  });
+});
+
+// ── duplicates, and deleting ONE of a pair ────────────────────────────────
+
+function makeTwinApp() {
+  const root = mkdtempSync(join(tmpdir(), "forge-twin-"));
+  const gear = join(root, "corebook", "gear");
+  mkdirSync(gear, { recursive: true });
+  const row = (id, name, book, page, system = {}, source = "commlink6") => ({
+    id, name, system: { type: "WEAPON_ACCESSORY", ...system },
+    meta: { book, page, source, qaStatus: "extracted",
+            extractedAt: "2026-08-09", extractorVersion: "0.1.0" },
+  });
+  writeFileSync(join(gear, "weapon_accessories.json"), JSON.stringify({
+    book: "corebook", domain: "gear", category: "weapon_accessories",
+    items: [
+      // the Folding Stock case: ONE id, two books, one fuller
+      row("cl6_folding_stock", "Folding Stock", "corebook", 1, { price: 30 }),
+      row("cl6_folding_stock", "Folding Stock", "firing_squad", 2,
+          { price: 30, description: "Folding stock." }),
+      // the other common shape: same name, different ids, mixed sources
+      row("cl6_power_clip", "Power Clip", "deadly_arts", 3, { price: 500 }),
+      row("power_clip", "Power Clip", "deadly_arts", 3, { price: 500 }, "pdf"),
+    ],
+  }, null, 2) + "\n");
+  const schemasDir = mkdtempSync(join(tmpdir(), "forge-schemas-"));
+  writeFileSync(join(schemasDir, "gear.schema.json"), JSON.stringify({ title: "stub" }));
+  return { app: buildApp(root, { schemasDir, validate: async () => ({ ok: true, issues: [] }) }), root };
+}
+
+const rowsOf = (root) => JSON.parse(readFileSync(
+  join(root, "corebook", "gear", "weapon_accessories.json"), "utf8")).items;
+
+describe("deleting one of two rows sharing an id", () => {
+  it("removes ONE row, not every row with that id", async () => {
+    // Deleting by id took both copies of Folding Stock: two on screen, none
+    // after. Commlink6 reuses ids across books, so this is not an edge case.
+    const { app, root } = makeTwinApp();
+    const res = await request(app).delete("/api/items").send({
+      targets: [{ book: "corebook", domain: "gear", category: "weapon_accessories",
+                  id: "cl6_folding_stock", srcBook: "corebook", srcPage: 1 }],
+    });
+    expect(res.body.deleted).toBe(1);
+    const left = rowsOf(root).filter((i) => i.id === "cl6_folding_stock");
+    expect(left).toHaveLength(1);
+    expect(left[0].meta.book).toBe("firing_squad");     // the one we kept
+  });
+
+  it("the tombstone records which twin went", async () => {
+    const { app, root } = makeTwinApp();
+    await request(app).delete("/api/items").send({
+      targets: [{ book: "corebook", domain: "gear", category: "weapon_accessories",
+                  id: "cl6_folding_stock", srcBook: "corebook", srcPage: 1 }],
+    });
+    const rec = JSON.parse(readFileSync(
+      join(root, "_corrections", "gear", "cl6_folding_stock.json"), "utf8"));
+    expect(rec.ref).toEqual({ name: "Folding Stock", book: "corebook", page: 1 });
+  });
+});
+
+describe("GET /api/duplicates", () => {
+  it("finds name-collisions and picks a survivor", async () => {
+    const { app } = makeTwinApp();
+    const res = await request(app).get("/api/duplicates");
+    expect(res.status).toBe(200);
+    expect(res.body.names).toBe(2);
+    expect(res.body.redundant).toBe(2);
+  });
+
+  it("keeps the Commlink6 row over a page-extracted twin", async () => {
+    const { app } = makeTwinApp();
+    const g = (await request(app).get("/api/duplicates")).body.groups
+      .find((x) => x.name === "Power Clip");
+    expect(g.keep.source).toBe("commlink6");
+    expect(g.drop[0].source).toBe("pdf");
+  });
+
+  it("keeps the fuller row when both come from Commlink6", async () => {
+    const { app } = makeTwinApp();
+    const g = (await request(app).get("/api/duplicates")).body.groups
+      .find((x) => x.name === "Folding Stock");
+    expect(g.keep.book).toBe("firing_squad");     // it has the description
+    expect(g.drop[0].book).toBe("corebook");
+  });
+
+  it("changes nothing on its own", async () => {
+    const { app, root } = makeTwinApp();
+    await request(app).get("/api/duplicates");
+    expect(rowsOf(root)).toHaveLength(4);
   });
 });

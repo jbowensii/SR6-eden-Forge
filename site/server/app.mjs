@@ -10,7 +10,7 @@ import { toFoundryDoc } from "../shared/edenTransform.mjs";
 import { EDEN } from "../shared/edenSpec.mjs";
 import { loadBooks } from "./exportModule.mjs";
 import { assignIcon, libraryRoots, loadSettings, resolveLibraryFile, searchIcons } from "./iconLibrary.mjs";
-import { SEGMENT, StoreError, assignRender, deleteItem, domains, itemsByType, listBookImages, readCategory, searchItems, tree, typeTree, writeItem } from "./store.mjs";
+import { SEGMENT, StoreError, assignRender, deleteItem, domains, findDuplicates, itemsByType, listBookImages, readCategory, searchItems, tree, typeTree, writeItem } from "./store.mjs";
 
 const EXPORT_STATUSES = new Set(["approved", "reviewed", "all"]);
 
@@ -217,11 +217,27 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
       if (!Array.isArray(targets) || !targets.length) {
         throw new StoreError("bad-request", "no targets");
       }
+      // `pick` narrows to one row when a target's id is shared by its twin.
       const { ok, failed } = eachTarget(targets, (t) =>
-        deleteItem(dataRoot, t.book, t.domain, t.category, t.id));
+        deleteItem(dataRoot, t.book, t.domain, t.category, t.id,
+                   t.pick ?? (t.srcBook === undefined ? null
+                              : { book: t.srcBook, page: t.srcPage })));
       return { deleted: ok.length, failed };
     });
   });
+
+  // Name-collisions and which row should survive. Read-only: the UI shows the
+  // list and the user confirms before anything is removed, because a delete
+  // aimed at the wrong twin is not visible afterwards.
+  app.get("/api/duplicates", (_req, res) => handle(res, () => {
+    const books = loadBooks(dataRoot);
+    // Earliest publication first, so corebook beats a splatbook reprint.
+    const order = Object.keys(books).sort((a, b) =>
+      String(books[a]?.date ?? "").localeCompare(String(books[b]?.date ?? "")));
+    const groups = findDuplicates(dataRoot, order);
+    return { groups, names: groups.length,
+             redundant: groups.reduce((n, g) => n + g.drop.length, 0) };
+  }));
 
   app.post("/api/validate", async (req, res) => {
     try {

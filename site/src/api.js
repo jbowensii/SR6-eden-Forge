@@ -70,3 +70,4 @@ export const patchItems = (targets, changes) =>
 export const deleteItems = (targets) =>
   fetch("/api/items", { method: "DELETE", headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ targets }) }).then(json);
+export const getDuplicates = () => fetch("/api/duplicates").then(json);

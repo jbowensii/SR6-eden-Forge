@@ -101,6 +101,11 @@ else:
             if target:
                 path, payload, it = target
                 gone = it["id"]
+                # ONE row, by identity — not every row answering to this id.
+                # Commlink6 reuses ids across books: 43 name-collisions in the
+                # library share one, so filtering by id removes the twin the
+                # tombstone was never about. Folding Stock lost both copies to
+                # exactly that.
                 payload["items"] = [i for i in payload["items"] if i is not it]
                 path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
                 deleted += 1

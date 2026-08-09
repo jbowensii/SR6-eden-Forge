@@ -235,8 +235,14 @@ export function recordCorrection(dataRoot, domain, category, item, { deleted = f
     // Seen for real on 2026-08-08: rejoining wrapped vehicle names turned
     // krupp_bentley into cl6_saeder_krupp_bentley_concordat and three
     // corrections lost their target.
+    // page as well as name and book: 43 name-collisions in the library share an
+    // id, and 36 of those are separated only by which book they came from. The
+    // remaining 7 are true clones (same id, book and page), for which "remove
+    // one occurrence" is still well defined — which is what apply_corrections
+    // now does, rather than removing every row with the id.
     rec = { domain, category, id: item.id, deleted: true,
-            ref: { name: item.name ?? null, book: item.meta?.book ?? null },
+            ref: { name: item.name ?? null, book: item.meta?.book ?? null,
+                   page: item.meta?.page ?? null },
             correctedAt: new Date().toISOString() };
   } else {
     // Store only what CHANGED, plus enough to find the item again.
@@ -339,20 +345,36 @@ export function assignRender(dataRoot, book, domain, category, itemId, imagePath
   return { img: rel };
 }
 
-export function deleteItem(dataRoot, book, domain, category, itemId) {
+export function deleteItem(dataRoot, book, domain, category, itemId, pick = null) {
   const payload = readCategory(dataRoot, book, domain, category);
-  // Captured BEFORE the filter: the tombstone records the item's name and book
-  // so it can still be matched after a reader improvement changes its id, and
-  // once the row is gone there is nothing left to read them from.
-  const doomed = payload.items.find((i) => i.id === itemId);
-  if (!doomed) throw new StoreError("not-found", itemId);
-  payload.items = payload.items.filter((i) => i.id !== itemId);
+
+  // Remove ONE row, not every row that answers to this id.
+  //
+  // Commlink6 reuses ids across books — 43 name-collisions in the library share
+  // one — so filtering by id deletes the twin as well. That is exactly what
+  // happened to Folding Stock: one delete, both copies gone, because corebook's
+  // and firing_squad's printings carry the same id.
+  //
+  // `pick` narrows to a specific row when the caller knows which one it means
+  // (de-duplication does). Without it the first match goes, which is the right
+  // reading of "delete this item" when the id is unique.
+  const matches = payload.items.filter((i) => i.id === itemId);
+  if (!matches.length) throw new StoreError("not-found", itemId);
+  const doomed = (pick
+    ? matches.find((i) => (pick.book === undefined || (i.meta ?? {}).book === pick.book)
+                       && (pick.page === undefined || (i.meta ?? {}).page === pick.page))
+    : matches[0]) ?? matches[0];
+
+  // Captured before removal: the tombstone records name, book and page so the
+  // row can still be identified after a reader improvement changes its id, and
+  // once it is gone there is nothing left to read them from.
+  payload.items = payload.items.filter((i) => i !== doomed);
   const path = categoryPath(dataRoot, book, domain, category);
   const tmpPath = `${path}.tmp`;
   writeFileSync(tmpPath, JSON.stringify(payload, null, 2) + "\n", "utf8");
   renameSync(tmpPath, path);
   recordCorrection(dataRoot, domain, category, doomed, { deleted: true });
-  return { deleted: itemId };
+  return { deleted: itemId, remaining: payload.items.filter((i) => i.id === itemId).length };
 }
 
 export function rewriteDomain(dataRoot, book, domain, mutate) {
@@ -378,4 +400,68 @@ export function rewriteDomain(dataRoot, book, domain, mutate) {
     }
   }
   return updated;
+}
+
+/** Name-collisions within a category file, with the row that should survive.
+ *
+ * Precedence, in order:
+ *   1. a Commlink6 row beats a page-extracted one — it is the source of truth
+ *   2. then the fuller row, counting non-empty system fields and weighting a
+ *      description, because that is what "most complete" means in practice
+ *   3. then the earliest book, so corebook beats a splatbook reprint
+ *
+ * Nothing is deleted here. The caller previews first: given what a mis-aimed
+ * delete costs, the list is shown before it acts.
+ */
+export function findDuplicates(dataRoot, bookOrder = []) {
+  const rank = new Map(bookOrder.map((b, i) => [b, i]));
+  const groups = new Map();
+  for (const entry of tree(dataRoot)) {
+    if (entry.error) continue;
+    let payload;
+    try { payload = readCategory(dataRoot, entry.book, entry.domain, entry.category); }
+    catch { continue; }
+    for (const item of payload.items ?? []) {
+      const name = (item.name ?? "").trim().toLowerCase();
+      if (!name) continue;
+      const key = `${entry.book}|${entry.domain}|${entry.category}|${name}`;
+      if (!groups.has(key)) groups.set(key, { ...entry, name: item.name, rows: [] });
+      groups.get(key).rows.push(item);
+    }
+  }
+
+  const score = (i) => {
+    const sys = i.system ?? {};
+    let n = Object.values(sys).filter((v) => String(v ?? "").trim() !== "").length;
+    if (String(sys.description ?? "").trim()) n += 3;
+    if (String(i.img ?? "").trim()) n += 1;
+    return n;
+  };
+  const better = (a, b) => {
+    const aCl6 = (a.meta ?? {}).source === "commlink6";
+    const bCl6 = (b.meta ?? {}).source === "commlink6";
+    if (aCl6 !== bCl6) return aCl6 ? a : b;              // Commlink6 wins
+    const as = score(a), bs = score(b);
+    if (as !== bs) return as > bs ? a : b;               // then the fuller row
+    const ar = rank.get((a.meta ?? {}).book) ?? Number.MAX_SAFE_INTEGER;
+    const br = rank.get((b.meta ?? {}).book) ?? Number.MAX_SAFE_INTEGER;
+    return ar <= br ? a : b;                             // then the earliest book
+  };
+
+  const out = [];
+  for (const g of groups.values()) {
+    if (g.rows.length < 2) continue;
+    const keep = g.rows.reduce(better);
+    out.push({
+      book: g.book, domain: g.domain, category: g.category, name: g.name,
+      keep: { id: keep.id, book: (keep.meta ?? {}).book, page: (keep.meta ?? {}).page,
+              source: (keep.meta ?? {}).source ?? "pdf", fields: score(keep) },
+      drop: g.rows.filter((r) => r !== keep).map((r) => ({
+        id: r.id, book: (r.meta ?? {}).book, page: (r.meta ?? {}).page,
+        source: (r.meta ?? {}).source ?? "pdf", fields: score(r),
+      })),
+    });
+  }
+  out.sort((a, b) => a.domain.localeCompare(b.domain) || a.name.localeCompare(b.name));
+  return out;
 }

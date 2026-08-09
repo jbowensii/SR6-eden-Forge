@@ -4,6 +4,7 @@ import ItemEditor from "./components/ItemEditor.jsx";
 import Preview from "./components/Preview.jsx";
 import TypeTree from "./components/TypeTree.jsx";
 import SetupPanel from "./components/SetupPanel.jsx";
+import Duplicates from "./components/Duplicates.jsx";
 import { applyCorrections, assignIcon, assignRender, deleteItem, deleteItems, exportModule, getBooks, getCategory, getDomains, getItems, getTypeTree, patchItems, putItem, searchItems, validate } from "./api.js";
 
 export default function App() {
@@ -19,6 +20,7 @@ export default function App() {
   const [selectedIds, setSelectedIds] = useState(() => new Set());
   const [attentionOnly, setAttentionOnly] = useState(false);
   const [menu, setMenu] = useState(null);       // {x, y, ids} right-click menu
+  const [dupesOpen, setDupesOpen] = useState(false);
   // Whether the editor is holding unsaved changes. A ref, not state: the guard
   // is read inside event handlers, and a stale closure here would wave through
   // exactly the edit it exists to protect.
@@ -352,6 +354,7 @@ export default function App() {
         </header>
         <div className="actions">
           <button onClick={runValidate}>Validate</button>
+          <button onClick={() => setDupesOpen(true)} title="Find items sharing a name">Duplicates</button>
           <button onClick={runApplyCorrections} disabled={applyingCorr} title="Re-overlay every manual correction (data/_corrections) onto the data files">
             {applyingCorr ? "Applying…" : "Apply corrections"}
           </button>
@@ -467,6 +470,23 @@ export default function App() {
             Delete {menu.ids.size} selected
           </li>
         </ul>
+      )}
+      {dupesOpen && (
+        <Duplicates
+          onClose={() => setDupesOpen(false)}
+          onRemove={async (targets) => {
+            setStatus(`removing ${targets.length} duplicate row(s)…`);
+            const res = await deleteItems(targets);
+            dirtyRef.current = false;
+            setEditing(null);
+            setSelectedIds(new Set());
+            await refreshPayload();
+            setTree(await getTypeTree(domain));
+            setStatus(res.failed?.length
+              ? `removed ${res.deleted}, ${res.failed.length} failed`
+              : `removed ${res.deleted} duplicate row(s)`);
+          }}
+        />
       )}
       {setupOpen && <SetupPanel onClose={() => setSetupOpen(false)} />}
     </div>
