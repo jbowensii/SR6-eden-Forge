@@ -14,6 +14,47 @@ EXTS = {".png", ".webp", ".svg", ".jpg", ".jpeg"}
 STOPWORDS = {"icon", "icons", "the", "and", "for", "with", "set", "pack", "final", "new", "copy", "png", "webp", "svg", "jpg", "jpeg"}
 MIN_SCORE = 3
 
+#: Longest edge, in pixels, for an icon copied into the library. Icon sets are
+#: commonly authored at 1024px; Foundry draws these as small tiles on a sheet,
+#: so the full-size original costs ~1.9 MB apiece — roughly half a gigabyte
+#: across one set — for detail no one will ever see. 256 still looks sharp on a
+#: high-DPI display at the sizes actually used.
+MAX_ICON_PX = 256
+
+#: WebP quality for icons entering the library. Everything shipped is WebP; at
+#: 90 it is indistinguishable from the source and a fraction of the bytes.
+ICON_QUALITY = 90
+
+
+def install_icon(source: Path, dest_dir: Path, stem: str,
+                 max_px: int = MAX_ICON_PX, quality: int = ICON_QUALITY) -> Path:
+    """Put an icon into the library as WebP, shrunk to ``max_px``.
+
+    Returns the file actually written — the extension is NOT the source's, so
+    callers must build the stored ``img`` path from the returned name rather
+    than assuming one. Getting this wrong records a path that does not exist.
+
+    Vector art is copied verbatim (an SVG has no pixels to shrink or re-encode),
+    and if Pillow cannot read the source the original is copied through
+    unchanged: an icon that arrives in the wrong format beats no icon at all.
+    """
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    if source.suffix.lower() != ".svg":
+        try:
+            from PIL import Image                      # optional at import time
+            with Image.open(source) as im:
+                im = im.convert("RGBA" if im.mode in ("RGBA", "LA", "P") else "RGB")
+                if max_px and max(im.size) > max_px:
+                    im.thumbnail((max_px, max_px), Image.LANCZOS)
+                dest = dest_dir / f"{stem}.webp"
+                im.save(dest, format="WEBP", quality=quality, method=4)
+                return dest
+        except Exception:                              # noqa: BLE001 - see above
+            pass
+    dest = dest_dir / f"{stem}{source.suffix.lower()}"
+    shutil.copyfile(source, dest)
+    return dest
+
 
 def tokens(text: str) -> set[str]:
     return {
@@ -84,8 +125,7 @@ def match_icons(lib_root: Path, data_root: Path, book: str, domain: str, min_sco
                 continue
             source, score = best_match(item, lib, min_score)
             if source is not None:
-                dest = dest_dir / f"{item['id']}{source.suffix.lower()}"
-                shutil.copyfile(source, dest)
+                dest = install_icon(source, dest_dir, item["id"])
                 item["img"] = f"{book}/lib/{dest.name}"
                 print(f"  {item['name']} <- {source.name} (score {score})")
                 matched += 1
@@ -95,6 +135,13 @@ def match_icons(lib_root: Path, data_root: Path, book: str, domain: str, min_sco
             # freshly-picked generic (which is then remembered)
             itype = str(item["system"].get("type", ""))
             subtype = str(item["system"].get("subtype", ""))
+            if not itype and not subtype:
+                # An item with no classification has no category to share an
+                # icon with. Grouping all of them together produced a generic
+                # named ".svg" — an empty slug — which then got stamped onto a
+                # hundred unrelated items as if it meant something.
+                missing += 1
+                continue
             key = f"{itype}/{subtype}"
             if key in defaults and (data_root / "_assets" / defaults[key]).is_file():
                 item["img"] = defaults[key]
@@ -107,9 +154,7 @@ def match_icons(lib_root: Path, data_root: Path, book: str, domain: str, min_sco
                     generic_cache[key] = None
                 else:
                     slug = re.sub(r"[^a-z0-9]+", "_", f"{itype}_{subtype}".lower()).strip("_")
-                    gdest = data_root / "_assets" / "generic" / f"{slug}{pick.suffix.lower()}"
-                    gdest.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copyfile(pick, gdest)
+                    gdest = install_icon(pick, data_root / "_assets" / "generic", slug)
                     generic_cache[key] = f"generic/{gdest.name}"
                     defaults[key] = generic_cache[key]
                     defaults_changed = True

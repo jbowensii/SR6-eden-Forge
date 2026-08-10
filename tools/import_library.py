@@ -178,13 +178,29 @@ POST_PHASES: list[tuple[str, str, list[str]]] = [
     ("Subtypes: firearms from source tables",
      "subtype_firearms_from_book.py", ["--apply"]),
     ("Subtypes: infer blank gear subtypes", "infer_gear_subtypes.py", ["--apply"]),
+    # Everything outside gear — contacts, adept powers, traditions, the
+    # Commlink6 reference tables — arrives with no type at all. Classified here,
+    # BEFORE the artwork phases, so the items it names can be given a category
+    # icon in the same run rather than waiting for the next one.
+    ("Types: classify the unclassified", "infer_missing_types.py", []),
     # Artwork LAST of the derived phases, and part of the run rather than
     # opt-in: art and icons are the things most likely to have changed since
     # the previous import, and leaving them out meant a library that looked
     # finished but had pictures on 110 items out of five thousand.
     ("Book graphics", "dump_book_images.py", []),
     ("Auto-pair artwork", "pair_art.py", []),
+    # The extractors write PNG/JPEG straight out of the PDFs; this re-encodes
+    # them and moves every reference with them. Placed after the art phases and
+    # before the icon ones, which write WebP themselves.
+    ("Artwork: re-encode as WebP", "convert_art_to_webp.py", []),
     ("Match icons from your icon sets", "match_icons_all.py", []),
+    # AFTER the matcher, deliberately. The matcher fills anything still blank,
+    # first from a name match and then from an icon it picks itself; this phase
+    # replaces only those self-picked placeholders with the hand-made icon for
+    # the item's type/subtype. Running it first would leave every item with art
+    # already, and the name matching -- which is more specific and should win --
+    # would never happen.
+    ("Category icons by type/subtype", "install_category_icons.py", []),
 ]
 
 #: Run alone, after everything else INCLUDING the Commlink6 guard.
@@ -202,7 +218,9 @@ GRAPHICS_PHASES: list[tuple[str, str, list[str]]] = []
 #: The artwork phases, by script name — skippable with --no-graphics because
 #: extracting every illustration from fifty PDFs is the slowest thing here and
 #: does not change item counts.
-GRAPHICS_SCRIPTS = {"dump_book_images.py", "pair_art.py", "match_icons_all.py"}
+GRAPHICS_SCRIPTS = {"dump_book_images.py", "pair_art.py", "match_icons_all.py",
+                    "convert_art_to_webp.py",
+                    "install_category_icons.py"}
 
 
 def run_post_phases(data_root: _P, phases, on_line=print,
