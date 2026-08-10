@@ -512,16 +512,33 @@ export async function imageSearch(q, cfg = {}) {
     if (j.error) return { results: [], error: j.error.message ?? "bing error" };
     return { results: (j.value ?? []).map((v) => ({ full: v.contentUrl, thumb: v.thumbnailUrl })) };
   }
-  // keyless scrape of Bing image results
-  const url = `https://www.bing.com/images/search?q=${encodeURIComponent(query)}&form=HDRSC2`;
-  const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" } });
-  const html = await r.text();
-  const seen = new Set(); const results = [];
-  const re = /m="\{[^}]*&quot;murl&quot;:&quot;(.*?)&quot;[^}]*&quot;turl&quot;:&quot;(.*?)&quot;/g;
-  let m;
-  while ((m = re.exec(html)) && results.length < 24) {
-    const full = m[1].replace(/&amp;/g, "&"); const thumb = m[2].replace(/&amp;/g, "&");
-    if (!seen.has(full)) { seen.add(full); results.push({ full, thumb }); }
+  // Keyless search, via DuckDuckGo. Bing's HTML was scraped here until it
+  // stopped returning image results to a plain fetch: the regex still matched
+  // something, so the panel filled with confident, unrelated stock photography
+  // -- plumbing and meeting-room pictures for a pistol -- and looked like a bad
+  // query rather than a dead scraper. DDG hands out a token and then answers
+  // with JSON, which either works or fails loudly.
+  const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    + "(KHTML, like Gecko) Chrome/120 Safari/537.36";
+  // a link to the same search in a real browser, for when a keyless scrape is
+  // not good enough. udm=2 is Google's image tab.
+  const searchUrl = `https://www.google.com/search?udm=2&q=${encodeURIComponent(query)}`;
+  try {
+    const seed = await fetch(`https://duckduckgo.com/?q=${encodeURIComponent(query)}&iax=images&ia=images`,
+                             { headers: { "User-Agent": UA } });
+    const html = await seed.text();
+    const m = html.match(/vqd=\"?([-0-9a-zA-Z]+)\"?&/) || html.match(/vqd='([^']+)'/)
+      || html.match(/vqd=([0-9-]+)/);
+    if (!m) return { results: [], error: "search token not issued", searchUrl };
+    const r = await fetch(
+      `https://duckduckgo.com/i.js?l=us-en&o=json&q=${encodeURIComponent(query)}&vqd=${m[1]}&f=,,,&p=1`,
+      { headers: { "User-Agent": UA, Referer: "https://duckduckgo.com/" } });
+    const j = await r.json();
+    const results = (j.results ?? []).slice(0, 24).map((it) => ({
+      full: it.image, thumb: it.thumbnail || it.image, title: it.title ?? "",
+    }));
+    return { results, searchUrl, query };
+  } catch (err) {
+    return { results: [], error: String(err.message ?? err), searchUrl };
   }
-  return { results, searchUrl: url };
 }

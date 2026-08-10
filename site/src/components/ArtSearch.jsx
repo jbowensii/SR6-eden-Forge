@@ -15,6 +15,11 @@ export default function ArtSearch({ item, onAssigned, onClose }) {
   const [results, setResults] = useState([]);
   const [status, setStatus] = useState("");
   const [searchUrl, setSearchUrl] = useState("");
+  // Paste route. A keyless image search is a best effort and for a made-up
+  // product name it is often wrong; searching Google Images by hand and pasting
+  // the picture back is the reliable path, so it is a supported one rather than
+  // something to work around.
+  const [paste, setPaste] = useState("");
 
   const run = async () => {
     setStatus("searching…"); setResults([]);
@@ -48,7 +53,18 @@ export default function ArtSearch({ item, onAssigned, onClose }) {
           <input value={q} onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && run()} placeholder="search terms" />
           <button className="primary" onClick={run}>Search</button>
-          {searchUrl && <a className="ghost" href={searchUrl} target="_blank" rel="noreferrer">open in browser ↗</a>}
+          {searchUrl && (
+            <a className="ghost" href={searchUrl} target="_blank" rel="noreferrer"
+               title="The same search on Google Images, which is better at this than any keyless scrape">
+              Google Images ↗
+            </a>
+          )}
+        </div>
+        <div className="art-search-bar">
+          <input value={paste} onChange={(e) => setPaste(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && paste.trim() && pick(paste.trim())}
+            placeholder="…or paste an image URL and press Enter" />
+          <button className="ghost" disabled={!paste.trim()} onClick={() => pick(paste.trim())}>Use this</button>
         </div>
         {status && <p className="setup-hint">{status}</p>}
         <div className="art-grid">

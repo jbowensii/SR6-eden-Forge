@@ -313,8 +313,21 @@ export function listBookImages(dataRoot, book) {
     }
   };
   scan(base, `${book}/`);
+  const named = out.length;
   scan(join(base, "_inbox"), `${book}/_inbox/`);
-  return out;
+  // Two different piles, and showing them as one was the problem. The top level
+  // holds art that was identified and named after the thing it depicts
+  // (ares_black_sky.webp). _inbox is everything else the extractor pulled off
+  // the page -- p003_x4714.webp -- which is mostly borders, chapter furniture
+  // and whatever else happened to be a separate image, including book artwork
+  // nobody wants to scroll past while picking a picture of a pistol.
+  return out.map((path, i) => ({
+    path,
+    identified: i < named,
+    label: i < named
+      ? path.split("/").pop().replace(/\.[a-z]+$/i, "").replace(/_/g, " ")
+      : path.split("/").pop(),
+  }));
 }
 
 //: An `img` that is an icon rather than a picture of the item itself. Kept in

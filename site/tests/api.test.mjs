@@ -148,7 +148,7 @@ describe("books and pdf", () => {
     writeFileSync(pdf, "%PDF-1.4 fake");
     const { app } = makeAppWithBooks({ corebook: { title: "Core", pdf } });
     const res = await request(app).get("/api/books");
-    expect(res.body.corebook).toEqual({ title: "Core", pdf: true });
+    expect(res.body.corebook).toEqual({ title: "Core", pdf: true, pageOffset: 0 });
   });
 
   it("GET /api/pdf/:book streams when configured, 404 otherwise", async () => {
