@@ -33,6 +33,26 @@ from extractor.paths import data_root                 # noqa: E402
 #: because they record a human choice about a picture.
 ART_META = ("render", "icon")
 
+#: An `img` that is a shared icon. Those ARE re-derived every import by the icon
+#: phases, so recording them would only add noise; a picture from a book is not
+#: re-derived and is exactly what gets lost.
+SHARED_ICON = ("generic/", "iconsets/")
+
+
+def book_art(item) -> str:
+    """The item's `img`, if it is a picture from a book rather than an icon.
+
+    This was the gap that cost 53 pairings. The ingest phases rewrite a domain's
+    whole JSON from the books, and `img` is not something the extractor
+    produces — so it is dropped, and the icon phases then fill the empty slot
+    with a category icon. Only a correction survives that, and pair_book_art.py
+    wrote none.
+    """
+    img = str(item.get("img") or "")
+    if not img or img.startswith(SHARED_ICON) or "/lib/" in img:
+        return ""
+    return img
+
 
 def existing(data: _P) -> dict[str, dict]:
     out = {}
@@ -64,10 +84,13 @@ def main() -> int:
                 for item in json.loads(path.read_text(encoding="utf-8")).get("items", []):
                     meta = item.get("meta") or {}
                     mine = {k: meta[k] for k in ART_META if meta.get(k)}
-                    if not mine:
+                    art = book_art(item)
+                    if not mine and not art:
                         continue
-                    prior = (have.get(item["id"]) or {}).get("meta") or {}
-                    if all(prior.get(k) == v for k, v in mine.items()):
+                    known = have.get(item["id"]) or {}
+                    prior = known.get("meta") or {}
+                    if (all(prior.get(k) == v for k, v in mine.items())
+                            and (not art or known.get("img") == art)):
                         continue            # already protected
                     record = json.loads(json.dumps(item))
                     record.update(domain=domain.name, category=path.stem,
@@ -81,6 +104,7 @@ def main() -> int:
 
     print(f"library: {data}")
     print(f"{written} artwork choice(s) recorded as corrections")
+    print("   (book-art img, meta.render and meta.icon — the three a rebuild drops)")
     if args.dry_run:
         print("(dry run — nothing written)")
     return 0

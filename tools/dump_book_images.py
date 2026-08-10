@@ -6,6 +6,7 @@ just pulls raster art via PyMuPDF. Full-page images (>90% page area) are skipped
 — those are page-scan backgrounds, not discrete art. Dedup by xref. Idempotent:
 existing files are left alone. Pass book slugs as argv to limit."""
 
+import json
 import sys
 from pathlib import Path as _P
 sys.path.insert(0, str(_P(__file__).resolve().parent.parent))
@@ -24,11 +25,27 @@ MIN_DIM = 150          # px; smaller = decorative rule/icon, skip
 MAX_COVER = 0.90       # fraction of page area; larger = full-page background/scan
 
 
+def _pruned(book):
+    """Graphics deleted on purpose, from ``_assets/_pruned.json``.
+
+    Without this, "is the file already there?" is the only skip rule, so
+    deleting a useless illustration achieves nothing: the next import extracts
+    it again and reports success. An import once put 3,115 discarded images back
+    for exactly this reason. tools/record_pruned_art.py writes the ledger.
+    """
+    try:
+        led = json.loads((DATA / "_assets" / "_pruned.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return set()
+    return set(led.get(book, ()))
+
+
 def dump(book, pdf):
     # Straight into <book>/, not <book>/_inbox/. The graphics ARE the book's
     # art; an inbox implies a queue waiting to be filed, and it split the
     # gallery into two piles that had to be reconciled afterwards.
     out = DATA / "_assets" / book
+    skip = _pruned(book)
     out.mkdir(parents=True, exist_ok=True)
     doc = fitz.open(str(pdf))
     seen, saved, skipped_full, skipped_small, failed = set(), 0, 0, 0, 0
@@ -51,6 +68,8 @@ def dump(book, pdf):
             # onto it later, so a file already carrying this suffix counts as
             # present however it is now named
             tag = f"p{pno + 1:03d}_x{xref}"
+            if tag in skip:
+                continue                    # thrown away on purpose; leave it out
             if any(out.glob(f"*{tag}.*")):
                 saved += 1
                 continue

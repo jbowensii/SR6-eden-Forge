@@ -360,6 +360,35 @@ if __name__ == "__main__":
                   flush=True)
 
     byname, folded = fold_into_authority(byname, cl6_by_name)
+
+    # Stats a PREVIOUS run read, kept for rows this run did not manage to read.
+    #
+    # The page reader is the only source of vehicle statistics — Commlink6 has
+    # none — and its output is rebuilt from scratch every import. So a vehicle
+    # whose stat block is read on Monday and missed on Tuesday (a caption that
+    # scanned differently, a name that folded elsewhere) silently loses numbers
+    # that were correct and are still printed in the book. 22 vehicles lost
+    # theirs exactly this way. Re-reading is allowed to IMPROVE a row, never to
+    # empty one.
+    kept_stats = 0
+    if out_path.is_file():
+        try:
+            prior = json.loads(out_path.read_text(encoding="utf-8")).get("items", [])
+        except (OSError, ValueError):
+            prior = []
+        by_prior = {norm_base(i.get("name", "")): i for i in prior if i.get("name")}
+        for key, rec in byname.items():
+            was = (by_prior.get(key) or {}).get("system") or {}
+            for field in FIELDS:
+                if str(rec["system"].get(field) or "").strip():
+                    continue                    # this run read it; that wins
+                if str(was.get(field) or "").strip():
+                    rec["system"][field] = was[field]
+                    kept_stats += 1
+    if kept_stats:
+        print(f"kept {kept_stats} stat value(s) an earlier run had read and this "
+              f"one did not", flush=True)
+
     if folded:
         # Named, not just counted: a silent merge is how a rule like this
         # quietly starts swallowing rows it should not.

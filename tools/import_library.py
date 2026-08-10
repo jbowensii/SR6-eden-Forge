@@ -202,6 +202,12 @@ POST_PHASES: list[tuple[str, str, list[str]]] = [
     # would never happen.
     ("Category icons by type/subtype", "install_category_icons.py",
      ["--replace-item-icons"]),
+    # LAST of the art phases, and the reason any of it survives. The ingest
+    # phases rewrite a domain's whole JSON from the books and `img` is not
+    # something the extractor produces, so a picture paired to an item is
+    # dropped on the next run unless it is in the corrections layer. 53 book-art
+    # pairings were lost exactly this way.
+    ("Artwork: record choices as corrections", "record_art_corrections.py", []),
 ]
 
 #: Run alone, after everything else INCLUDING the Commlink6 guard.

@@ -430,3 +430,111 @@ def test_a_short_name_never_matches_by_suffix():
     merged, folded = iv.fold_into_authority(page, cl6)
     assert folded == []
     assert set(merged) == {"van", "fordvan"}
+
+
+# ---------- deleting a graphic has to mean something ----------
+
+def test_the_extractor_reads_the_pruned_ledger():
+    """The skip rule used to be "is the file already there?", so removing a
+    useless illustration achieved nothing — the next import put it back and
+    reported success. One import restored 3,115 discarded images that way.
+
+    This asserts the wiring, not just the helper: an earlier attempt patched the
+    file with a string replacement whose anchor no longer matched, printed
+    success, and changed nothing.
+    """
+    import json as _json
+    from pathlib import Path
+
+    src = Path(__file__).resolve().parent.parent / "tools" / "dump_book_images.py"
+    text = src.read_text(encoding="utf-8")
+    assert "_pruned.json" in text, "the ledger is never read"
+    assert "skip = _pruned(book)" in text, "dump() never loads the ledger"
+    assert "if tag in skip:" in text, "the ledger is loaded but never consulted"
+    # and the consultation must come BEFORE the already-on-disk shortcut,
+    # or a pruned graphic is re-extracted whenever it is absent — which is
+    # precisely when it has been pruned
+    assert text.index("if tag in skip:") < text.index("if any(out.glob("), \
+        "the ledger is checked after the file-exists shortcut"
+
+
+def test_pruned_ledger_lookup_is_per_book():
+    """A key pruned from one book must not suppress the same page/object id in
+    another — different PDFs number their objects independently."""
+    import importlib.util
+    from pathlib import Path
+    import json as _json, tempfile
+
+    src = Path(__file__).resolve().parent.parent / "tools" / "dump_book_images.py"
+    spec = importlib.util.spec_from_file_location("_dbi", src)
+    mod = importlib.util.module_from_spec(spec)
+    try:
+        spec.loader.exec_module(mod)
+    except Exception:                       # needs fitz/registry at import time
+        import pytest
+        pytest.skip("dump_book_images needs its runtime deps")
+    with tempfile.TemporaryDirectory() as tmp:
+        data = Path(tmp)
+        (data / "_assets").mkdir()
+        (data / "_assets" / "_pruned.json").write_text(
+            _json.dumps({"corebook": ["p003_x99"]}), encoding="utf-8")
+        mod.DATA = data
+        assert mod._pruned("corebook") == {"p003_x99"}
+        assert mod._pruned("double_clutch") == set()
+        assert mod._pruned("nonexistent") == set()
+
+
+# ---------- re-reading may improve a vehicle, never empty it ----------
+
+def test_a_reread_that_misses_a_stat_block_keeps_the_old_numbers(tmp_path, monkeypatch):
+    """The page reader is the ONLY source of vehicle stats — Commlink6 has none
+    — and its output is rebuilt from scratch every import. A vehicle read on one
+    run and missed on the next lost numbers that were correct and still printed
+    in the book; 22 did exactly that."""
+    import json
+    iv = _iv()
+    from extractor.merge import norm_base
+
+    prior = {"items": [{"id": "cl6_ford", "name": "Ford Americar",
+                        "system": {"handling": "4/5", "topSpeed": "160", "body": "11"},
+                        "meta": {"book": "corebook", "source": "commlink6"}}]}
+    out = tmp_path / "vehicles.json"
+    out.write_text(json.dumps(prior), encoding="utf-8")
+
+    # this run read the row but got no stats off the page
+    byname = {norm_base("Ford Americar"): {
+        "name": "Ford Americar", "system": {"handling": "", "topSpeed": "", "body": ""},
+        "page": 296}}
+    by_prior = {norm_base(i["name"]): i for i in prior["items"]}
+    kept = 0
+    for key, rec in byname.items():
+        was = (by_prior.get(key) or {}).get("system") or {}
+        for field in iv.FIELDS:
+            if str(rec["system"].get(field) or "").strip():
+                continue
+            if str(was.get(field) or "").strip():
+                rec["system"][field] = was[field]
+                kept += 1
+    assert kept == 3
+    assert byname[norm_base("Ford Americar")]["system"]["handling"] == "4/5"
+    assert byname[norm_base("Ford Americar")]["system"]["topSpeed"] == "160"
+
+
+def test_a_fresh_read_still_wins_over_the_old_value():
+    """Preserving must not freeze a bad early reading in place."""
+    iv = _iv()
+    rec = {"system": {"handling": "3/3"}}
+    was = {"handling": "9/9"}
+    for field in ("handling",):
+        if not str(rec["system"].get(field) or "").strip() and str(was.get(field) or "").strip():
+            rec["system"][field] = was[field]
+    assert rec["system"]["handling"] == "3/3"
+
+
+def test_the_preservation_runs_after_the_fold():
+    """Rows carried through from Commlink6 are created BY the fold, so preserving
+    before it would leave exactly those rows unprotected."""
+    from pathlib import Path
+    src = Path(__file__).resolve().parent.parent / "tools" / "ingest_vehicles.py"
+    text = src.read_text(encoding="utf-8")
+    assert text.index("fold_into_authority(byname, cl6_by_name)") < text.index("Stats a PREVIOUS run read")

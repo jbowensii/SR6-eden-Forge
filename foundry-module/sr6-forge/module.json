@@ -2,7 +2,7 @@
   "id": "sr6-forge",
   "title": "SR6 Forge — Character Generation & Advancement",
   "description": "Full character generation and karma advancement for Shadowrun 6th World on the shadowrun6-eden system. Five creation methods (Priority, Sum-to-Ten, Point Buy, Karma, Life Path), itemised budgets, and an append-only advancement ledger.",
-  "version": "0.9.9",
+  "version": "0.9.10",
   "compatibility": {
     "minimum": "14",
     "verified": "14.365",
