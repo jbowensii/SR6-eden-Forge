@@ -200,7 +200,8 @@ POST_PHASES: list[tuple[str, str, list[str]]] = [
     # the item's type/subtype. Running it first would leave every item with art
     # already, and the name matching -- which is more specific and should win --
     # would never happen.
-    ("Category icons by type/subtype", "install_category_icons.py", []),
+    ("Category icons by type/subtype", "install_category_icons.py",
+     ["--replace-item-icons"]),
 ]
 
 #: Run alone, after everything else INCLUDING the Commlink6 guard.

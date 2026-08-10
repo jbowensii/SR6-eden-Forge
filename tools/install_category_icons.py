@@ -16,13 +16,18 @@ Icons are shrunk to ``--max-px`` on the way in (see ``icon_match.MAX_ICON_PX``).
 A 1024px set costs about half a gigabyte installed, all of it detail Foundry
 never draws; the originals in your icon folder are left alone.
 
-Art that is specific to one item is never touched: anything under
-``<book>/lib/`` (a name match, or an icon chosen by hand in the review app) and
-anything extracted from a PDF keeps what it has. Only the shared placeholders
-are replaced, so hand-made choices survive.
+Artwork extracted from the books is never touched — a photograph of a bear is
+not an icon standing in for one. Per-item icons under ``<book>/lib/`` are left
+alone too, unless ``--replace-item-icons`` is given: those are name matches the
+importer picked out of the icon library because a word in a file name happened
+to match a word in an item name, and a consistent category icon is usually
+better. An icon chosen by hand in the review app is recorded as a correction,
+and corrections are re-applied after this runs, so a deliberate choice survives
+either way.
 
     python tools/install_category_icons.py --dry-run
     python tools/install_category_icons.py
+    python tools/install_category_icons.py --replace-item-icons
     python tools/install_category_icons.py --icons "D:\\icons\\Category Icons"
 """
 from __future__ import annotations
@@ -104,10 +109,24 @@ def payloads(data: _P):
             yield from sorted(domain.glob("*.json"))
 
 
-def replaceable(img: str) -> bool:
-    """A shared placeholder or nothing at all — safe to re-point. Item-specific
-    art (``<book>/lib/...``) and PDF extractions are not."""
-    return not img or img.startswith("generic/")
+def replaceable(img: str, item_icons: bool = False) -> bool:
+    """Whether this image may be swapped for the category icon.
+
+    Always: nothing at all, and a shared placeholder from a previous run.
+
+    With ``item_icons``: also the per-item icons under ``<book>/lib/``. Those
+    are name matches the importer picked out of the icon library — scrappy
+    clipart chosen because a word in the file name happened to match a word in
+    the item name — and a consistent category icon beats them. An icon picked by
+    hand in the review app is recorded as a correction, and corrections are
+    re-applied after this runs, so a deliberate choice still wins.
+
+    Never: artwork extracted from the books, which is a picture of the thing
+    rather than an icon standing in for it.
+    """
+    if not img or img.startswith("generic/"):
+        return True
+    return item_icons and "/lib/" in img
 
 
 def main() -> int:
@@ -116,6 +135,10 @@ def main() -> int:
     ap.add_argument("--data", type=_P, default=None)
     ap.add_argument("--icons", default="", help=f"folder of icons (default: <library>/{DEFAULT_SUBDIR})")
     ap.add_argument("--dry-run", action="store_true", help="report, change nothing")
+    ap.add_argument("--replace-item-icons", action="store_true",
+                    help="also replace the importer's per-item name-matched icons "
+                         "(<book>/lib/...) with the category icon; extracted book "
+                         "art is still left alone")
     ap.add_argument("--max-px", type=int, default=MAX_ICON_PX,
                     help=f"shrink icons to this longest edge (default {MAX_ICON_PX}; 0 keeps the original)")
     args = ap.parse_args()
@@ -191,7 +214,7 @@ def main() -> int:
             img = installed.get(pair)
             if img is None:
                 continue
-            if not replaceable(str(item.get("img") or "")):
+            if not replaceable(str(item.get("img") or ""), args.replace_item_icons):
                 kept += 1
                 continue
             if item.get("img") == img:
