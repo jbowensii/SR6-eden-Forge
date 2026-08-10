@@ -5,7 +5,13 @@ import { artSearch, artDownload } from "../api.js";
 // Search the internet for artwork (Shadowrun/cyberpunk + item name) and assign a
 // pick to the item's art (render) slot. This game has decades of art out there.
 export default function ArtSearch({ item, onAssigned, onClose }) {
-  const [q, setQ] = useState(item?.name ?? "");
+  // The name alone is not a search. "Ares Predator VI" against a general image
+  // index returns fitness programmes; the words that say what the thing IS have
+  // to go in with it. Subtype beats type ("PISTOLS_HEAVY" -> "pistols heavy"),
+  // and the user can still edit the box before searching.
+  const context = (item?.system?.subtype || item?.system?.type || "")
+    .toLowerCase().replace(/_/g, " ").trim();
+  const [q, setQ] = useState([item?.name, context].filter(Boolean).join(" "));
   const [results, setResults] = useState([]);
   const [status, setStatus] = useState("");
   const [searchUrl, setSearchUrl] = useState("");

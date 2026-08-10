@@ -319,6 +319,23 @@ export function listBookImages(dataRoot, book) {
 
 //: An `img` that is an icon rather than a picture of the item itself. Kept in
 //: step with the same test in the editor, which decides which slot to draw it in.
+//: The graphic, as the first thing in an item's description.
+//:
+//: Foundry renders the description as HTML, so the picture chosen for an item
+//: can lead its write-up instead of only sitting in a sheet corner. Marked with
+//: a data attribute rather than matched by src: re-picking a graphic has to
+//: REPLACE the previous one, and a second assignment that appended would leave
+//: the item carrying both.
+const RENDER_TAG = /^\s*<p[^>]*data-sr6-render[^>]*>.*?<\/p>\s*/is;
+
+export function withRender(description, rel) {
+  const body = String(description ?? "").replace(RENDER_TAG, "");
+  const src = `modules/sr6-forge-corebook/${rel}`;
+  const tag = `<p data-sr6-render="1"><img src="${src}" alt=""/></p>`;
+  return body ? `${tag}
+${body}` : tag;
+}
+
 export const ICON_ASSET = /^(iconsets|generic)\/|\/lib\//;
 
 export function assignRender(dataRoot, book, domain, category, itemId, imagePath) {
@@ -345,6 +362,8 @@ export function assignRender(dataRoot, book, domain, category, itemId, imagePath
   if (prev && prev !== rel && ICON_ASSET.test(prev)) item.meta.icon = prev;
   item.meta.render = rel;
   item.img = rel;
+  item.system ??= {};
+  item.system.description = withRender(item.system.description, rel);
   const path = categoryPath(dataRoot, book, domain, category);
   const tmp = `${path}.tmp`;
   writeFileSync(tmp, JSON.stringify(payload, null, 2) + "\n", "utf8");

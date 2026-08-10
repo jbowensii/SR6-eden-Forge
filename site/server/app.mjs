@@ -71,7 +71,14 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
     handle(res, () => {
       const books = loadBooks(dataRoot);
       return Object.fromEntries(
-        Object.entries(books).map(([slug, b]) => [slug, { title: b.title ?? slug, pdf: Boolean(b.pdf && existsSync(b.pdf)) }]),
+        // pageOffset travels with the book: an item records the number PRINTED
+        // on its page and a PDF viewer counts file pages, so the editor needs
+        // the difference to build a link that lands on the right one.
+        Object.entries(books).map(([slug, b]) => [slug, {
+          title: b.title ?? slug,
+          pdf: Boolean(b.pdf && existsSync(b.pdf)),
+          pageOffset: Number(b.pageOffset ?? 0),
+        }]),
       );
     });
   });

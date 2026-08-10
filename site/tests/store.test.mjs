@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, mkdirSync, readdirSync, writeFileSync } from
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { SEGMENT, StoreError, assignRender, readCategory, tree, writeItem } from "../server/store.mjs";
+import { SEGMENT, StoreError, assignRender, readCategory, tree, writeItem, withRender } from "../server/store.mjs";
 import { assignIcon } from "../server/iconLibrary.mjs";
 
 const ITEM = {
@@ -129,5 +129,30 @@ describe("artwork survives a re-import", () => {
     const rec = JSON.parse(readFileSync(
       join(root, "_corrections", "gear", `${ITEM.id}.json`), "utf8"));
     expect(rec.changed.img).toBe(`corebook/lib/${ITEM.id}.png`);
+  });
+});
+
+describe("a chosen book graphic leads the description", () => {
+  it("puts the picture first and keeps the write-up", () => {
+    const out = withRender("An old pistol.", "corebook/x.webp");
+    expect(out.startsWith("<p data-sr6-render")).toBe(true);
+    expect(out).toContain("modules/sr6-forge-corebook/corebook/x.webp");
+    expect(out).toContain("An old pistol.");
+  });
+
+  it("replaces the previous graphic instead of stacking another one", () => {
+    // matched on the marker, not the src: appending would leave the item
+    // carrying every graphic ever picked for it
+    const once = withRender("Body.", "corebook/x.webp");
+    const twice = withRender(once, "corebook/y.webp");
+    expect((twice.match(/data-sr6-render/g) || []).length).toBe(1);
+    expect(twice).toContain("corebook/y.webp");
+    expect(twice).not.toContain("corebook/x.webp");
+    expect(twice).toContain("Body.");
+  });
+
+  it("copes with an item that has no description at all", () => {
+    expect(withRender("", "corebook/z.webp")).toContain("corebook/z.webp");
+    expect(withRender(undefined, "corebook/z.webp")).not.toContain("undefined");
   });
 });

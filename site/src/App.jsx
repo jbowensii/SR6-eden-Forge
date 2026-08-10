@@ -452,7 +452,10 @@ export default function App() {
             books={books}
             categoryName={(editing?._category ?? selected?.category ?? selected?.subtype ?? selected?.type)?.replace(/_/g, " ")}
             pdfAvailable={Boolean(bookInfo?.pdf)}
-            pdfHref={editing.meta ? `/api/pdf/${editing.meta.book}?i=${encodeURIComponent(editing.id)}#page=${editing.meta.page}` : null}
+            // meta.page is the number PRINTED on the page; a PDF viewer counts
+            // files pages. books.json carries the measured difference per book
+            // (tools/detect_page_offsets.py), 0 when it could not be read.
+            pdfHref={editing.meta ? `/api/pdf/${editing.meta.book}?i=${encodeURIComponent(editing.id)}#page=${Number(editing.meta.page || 0) + Number(books[editing.meta.book]?.pageOffset || 0)}` : null}
             onSave={save}
             onDelete={remove}
             onAssignIcon={handleAssignIcon}
