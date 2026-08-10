@@ -182,11 +182,18 @@ export default function ItemEditor({ item, domain, bookTitle, books = {}, catego
   // iconsets/, a shared generic/ icon, or a per-item <book>/lib/ pick); a
   // PDF-extracted render must never appear here — it belongs to the book-render
   // slot below, which loads <book>/<id>.png directly.
-  const isIconAsset = draft.img && (
-    draft.img.startsWith("iconsets/") || draft.img.startsWith("generic/") || draft.img.includes("/lib/")
-  );
-  const imgSrc = isIconAsset ? `/assets/${draft.img}` : null;
-  const renderPath = `${draft.meta?.book}/${draft.id}.png`;
+  const isIcon = (p) => !!p && (p.startsWith("iconsets/") || p.startsWith("generic/") || p.includes("/lib/"));
+  // The icon slot falls back to meta.icon: assigning a book graphic moves `img`
+  // to the graphic, and without this the icon it replaced would simply vanish
+  // from the editor even though it is still recorded.
+  const iconPath = isIcon(draft.img) ? draft.img : draft.meta?.icon;
+  const imgSrc = iconPath ? `/assets/${iconPath}` : null;
+  // NOT "<book>/<id>.png". The render keeps the extension of the graphic it was
+  // copied from, and every extracted graphic is WebP now, so a hard-coded .png
+  // made a correctly-saved render read as "none" in a slot that had just been
+  // filled. meta.render is what assignRender actually wrote; the old path is
+  // still tried for items assigned before it was recorded.
+  const renderPath = draft.meta?.render || `${draft.meta?.book}/${draft.id}.png`;
 
   return (
     <div className="editor">
@@ -313,7 +320,7 @@ export default function ItemEditor({ item, domain, bookTitle, books = {}, catego
       </label>
       <div className="art-row">
         <figure>
-          {imgSrc && draft.img !== renderPath ? (
+          {imgSrc ? (
             <img
               className="img-preview clickable"
               src={imgSrc}

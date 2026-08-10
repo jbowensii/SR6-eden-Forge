@@ -317,6 +317,10 @@ export function listBookImages(dataRoot, book) {
   return out;
 }
 
+//: An `img` that is an icon rather than a picture of the item itself. Kept in
+//: step with the same test in the editor, which decides which slot to draw it in.
+export const ICON_ASSET = /^(iconsets|generic)\/|\/lib\//;
+
 export function assignRender(dataRoot, book, domain, category, itemId, imagePath) {
   /** Copy an extracted book image to <sourceBook>/<itemId>.<ext> (the render
    * slot) and point the item's img at it. */
@@ -332,6 +336,14 @@ export function assignRender(dataRoot, book, domain, category, itemId, imagePath
   const src = item.meta?.book ?? book;
   const rel = `${src}/${itemId}${extname(imagePath) || ".png"}`;
   copyFileSync(source, join(dataRoot, "_assets", rel));
+  // Remember BOTH. There is one `img` field and it is what Foundry draws, so
+  // choosing a book graphic used to overwrite the icon and lose it. The icon is
+  // kept in meta.icon and the graphic recorded in meta.render, so each slot in
+  // the editor still has something to show and either can be re-selected.
+  item.meta ??= {};
+  const prev = item.img;
+  if (prev && prev !== rel && ICON_ASSET.test(prev)) item.meta.icon = prev;
+  item.meta.render = rel;
   item.img = rel;
   const path = categoryPath(dataRoot, book, domain, category);
   const tmp = `${path}.tmp`;
