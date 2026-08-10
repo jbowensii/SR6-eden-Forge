@@ -306,22 +306,17 @@ const _IMG = /\.(png|jpe?g|webp)$/i;
 const PAGE_GRAPHIC = /^p\d{2,4}_x\d+\./i;
 
 export function listBookImages(dataRoot, book) {
-  /** Graphics extracted from the book itself, as paths relative to _assets
-   * (served at /assets/<path>). Downloaded art is deliberately excluded: this
-   * gallery exists to surface what came OUT of the PDF. */
+  /** Every graphic extracted from a PDF, as paths relative to _assets. The
+   * `book` argument is kept for the route's shape and no longer filters:
+   * the library is one flat folder now, so a book's art cannot be told from
+   * another's by its location. */
   if (!SEGMENT.test(book)) throw new StoreError("bad-segment", book);
-  const base = join(dataRoot, "_assets", book);
-  const out = [];
-  const scan = (dir, prefix) => {
-    let names = [];
-    try { names = readdirSync(dir); } catch { return; }
-    for (const n of names.sort()) {
-      if (_IMG.test(n) && PAGE_GRAPHIC.test(n)) out.push(`${prefix}${n}`);
-    }
-  };
-  scan(base, `${book}/`);
-  scan(join(base, "_inbox"), `${book}/_inbox/`);
-  return out.map((path) => ({ path, label: path.split("/").pop() }));
+  const base = join(dataRoot, "_assets");
+  let names = [];
+  try { names = readdirSync(base); } catch { return []; }
+  return names.sort()
+    .filter((n) => _IMG.test(n))
+    .map((path) => ({ path, label: path.replace(/\.[a-z]+$/i, "").replace(/_/g, " ") }));
 }
 
 //: The graphic, as the first thing in an item's description.

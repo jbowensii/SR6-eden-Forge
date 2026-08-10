@@ -17,6 +17,10 @@ export default function App() {
   const [setupOpen, setSetupOpen] = useState(false);
   const [payload, setPayload] = useState(null);
   const [editing, setEditing] = useState(null); // item
+  // Which column the middle pane is sorted by. Lives here so it outlives the
+  // table: choose a column once and every category you open afterwards keeps
+  // it, until another is chosen or the page is reloaded.
+  const [sort, setSort] = useState({ key: "name", dir: 1 });
   const [selectedIds, setSelectedIds] = useState(() => new Set());
   const [attentionOnly, setAttentionOnly] = useState(false);
   const [menu, setMenu] = useState(null);       // {x, y, ids} right-click menu
@@ -438,6 +442,8 @@ export default function App() {
               Show only incomplete / warnings
             </label>
             <CategoryTable
+              sort={sort}
+              onSortChange={setSort}
               payload={payload}
               issues={issues}
               needsAttention={attentionOnly}

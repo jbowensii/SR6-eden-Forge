@@ -37,9 +37,14 @@ const COLUMNS = [
 
 export default function CategoryTable({
   payload, issues, onEdit,
-  selectedIds = EMPTY, onSelectionChange, needsAttention, onContextMenu,
-}) {
-  const [sort, setSort] = useState({ key: null, dir: 1 });
+  selectedIds = EMPTY, onSelectionChange, needsAttention, onContextMenu, sort: propSort, onSortChange }) {
+  // Sorted by name unless told otherwise, and the choice is the APP's, not this
+  // component's: picking another category re-renders (and can remount) this
+  // table, and a sort held here would silently snap back to name every time.
+  // Held in memory only — a reload starts from name again, as asked.
+  const [ownSort, setOwnSort] = useState({ key: "name", dir: 1 });
+  const sort = propSort ?? ownSort;
+  const setSort = onSortChange ?? setOwnSort;
   // Anchor for shift-ranges. Held here rather than in App because it only
   // means anything against THIS table's current sort order — re-sort and the
   // range a user sees is different from the range an index-based anchor gives.
@@ -73,7 +78,7 @@ export default function CategoryTable({
     return items;
   }, [payload.items, payload.domain, sort, issueMap, needsAttention]);
 
-  const toggle = (key) => setSort((s) => (s.key === key ? { key, dir: -s.dir } : { key, dir: 1 }));
+  const toggle = (key) => setSort(sort.key === key ? { key, dir: -sort.dir } : { key, dir: 1 });
   const caret = (key) => (sort.key === key ? (sort.dir === 1 ? " ▲" : " ▼") : "");
 
   // Plain click  — open this one, selection becomes just it.

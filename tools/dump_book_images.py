@@ -13,15 +13,22 @@ sys.path.insert(0, str(_P(__file__).resolve().parent.parent))
 import fitz
 
 from extractor.ingest import load_registry
+from extractor.paths import data_root
 
-DATA = _P("data")
+# NOT _P("data"). That is the developer's scratch copy; once the builder is
+# installed the real library is elsewhere, and extracting into the wrong one
+# looks like a successful run that produced nothing.
+DATA = data_root()
 SKIP = {"gun_rack", "rides"}
 MIN_DIM = 150          # px; smaller = decorative rule/icon, skip
 MAX_COVER = 0.90       # fraction of page area; larger = full-page background/scan
 
 
 def dump(book, pdf):
-    out = DATA / "_assets" / book / "_inbox"
+    # Straight into <book>/, not <book>/_inbox/. The graphics ARE the book's
+    # art; an inbox implies a queue waiting to be filed, and it split the
+    # gallery into two piles that had to be reconciled afterwards.
+    out = DATA / "_assets" / book
     out.mkdir(parents=True, exist_ok=True)
     doc = fitz.open(str(pdf))
     seen, saved, skipped_full, skipped_small, failed = set(), 0, 0, 0, 0
@@ -40,10 +47,14 @@ def dump(book, pdf):
                 skipped_full += 1
                 continue
             seen.add(xref)
-            dest = out / f"p{pno + 1:03d}_x{xref}.png"
-            if dest.exists():
+            # page and object id are the identity; an item name may be prefixed
+            # onto it later, so a file already carrying this suffix counts as
+            # present however it is now named
+            tag = f"p{pno + 1:03d}_x{xref}"
+            if any(out.glob(f"*{tag}.*")):
                 saved += 1
                 continue
+            dest = out / f"{tag}.png"
             try:
                 pix = fitz.Pixmap(doc, xref)
                 # PNG carries grayscale and RGB only. `pix.n >= 5` was meant to
