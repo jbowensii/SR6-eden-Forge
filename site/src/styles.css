@@ -207,9 +207,36 @@ aside {
 .ghost.danger:hover { background: rgba(229, 23, 123, 0.14); }
 
 /* modal + extracted-graphics gallery */
-/* One backdrop. There were two — .modal-backdrop at z-index 50 and
-   .modal-overlay at 100 — styled differently for the same purpose. */
-.modal-backdrop, /* .modal itself is defined once, further down — it was declared twice with
+
+/* One backdrop, under two names. There were two rules — .modal-backdrop at
+   z-index 50 and .modal-overlay at 100 — styled differently for the same job,
+   and consolidating them deleted BOTH declaration blocks while leaving
+   ".modal-backdrop," dangling in front of the next selector. The result shipped
+   as
+       .modal-backdrop, .modal header { display: flex; ... }
+   so the backdrop inherited a header's styling and no positioning at all: it
+   collapsed to a 34px speck in normal flow, taking the modal inside it with it.
+   "Book graphics…" and "Find art…" opened correctly every time — the gallery
+   was built, the images were fetched — and none of it had any size on screen.
+   Nothing logged an error, which is why it read as a dead button.
+
+   Both names are kept because both are in use: .modal-overlay by the icon
+   picker and the duplicate finder, .modal-backdrop by the graphics gallery, the
+   art search and the setup panel. */
+.modal-backdrop,
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(4, 6, 12, 0.72);
+  backdrop-filter: blur(2px);
+}
+
+/* .modal itself is defined once, further down — it was declared twice with
    conflicting border, radius and clip-path, so modals rendered as a mix of
    both. Only the book-images sizing belongs here. */
 .modal header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
