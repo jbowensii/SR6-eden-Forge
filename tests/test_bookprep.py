@@ -179,7 +179,9 @@ def test_padding_keeps_a_normal_box_intact():
     """Clamping must not disturb a table that was already on the page."""
     from extractor.vehicle_scan import _pad
 
-    assert _pad((100.0, 200.0, 400.0, 300.0), PAGE) == (98.0, 198.0, 402.0, 318.0)
+    # 90pt to the LEFT: find_tables() only boxes the right-hand columns, so the
+    # crop has to reach back to Handling for the row to be complete
+    assert _pad((100.0, 200.0, 400.0, 300.0), PAGE) == (10.0, 198.0, 404.0, 318.0)
 
 
 def test_a_degenerate_table_box_is_skipped_not_cropped():
@@ -321,3 +323,30 @@ def test_folding_never_mutates_the_authority_row():
     auth = _auth()
     iv.fold_into_authority({"k": _page()}, {"k": auth})
     assert auth["system"]["handling"] == ""
+
+
+# ---------- vehicles Commlink6 names but no book describes ----------
+
+def test_unmatched_commlink6_vehicles_are_carried_through():
+    """The fold's result is written over vehicles.json, so anything left out of
+    it is deleted. Commlink6 lists hundreds of vehicles no stat table we own
+    describes; dropping them cost 423 of 485 rows the first time this phase ran
+    on its own."""
+    iv = _iv()
+    page = {"ford": {"name": "Ford Americar", "system": {"handling": "4/5"}, "page": 296}}
+    cl6 = {
+        "ford": {"id": "cl6_ford", "name": "Ford Americar", "system": {"price": "16000"},
+                 "meta": {"book": "corebook", "page": 296, "source": "commlink6"}},
+        "obscure": {"id": "cl6_obscure", "name": "Obscure Hovercraft", "system": {"price": "9000"},
+                    "meta": {"book": "corebook", "page": 300, "source": "commlink6"}},
+    }
+    merged, folded = iv.fold_into_authority(page, cl6)
+
+    assert set(merged) == {"ford", "obscure"}          # nothing dropped
+    assert merged["ford"]["system"]["handling"] == "4/5"   # page filled the gap
+    assert merged["ford"]["system"]["price"] == "16000"    # Commlink6 kept its own
+    assert merged["ford"]["_id"] == "cl6_ford"
+    # the untouched one keeps its identity so corrections still find it
+    assert merged["obscure"]["_id"] == "cl6_obscure"
+    assert merged["obscure"]["system"]["price"] == "9000"
+    assert [f[1] for f in folded] == ["Ford Americar"]     # only the match is a fold

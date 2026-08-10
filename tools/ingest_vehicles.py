@@ -204,6 +204,19 @@ def fold_into_authority(byname: dict, cl6_by_name: dict):
                        "_id": row["id"], "_meta": row.get("meta"),
                        "_book": (row.get("meta") or {}).get("book")}
         folded.append((r["name"], row["name"], len(filled)))
+
+    # Every Commlink6 vehicle the page reader did NOT find has to come through
+    # too. This function's result is what gets written over vehicles.json, so
+    # leaving them out silently deleted them: 423 of the 485 vehicles vanished
+    # the moment this phase ran on its own, because Commlink6 lists hundreds
+    # that no stat table in any book we own describes.
+    for key, auth in cl6_by_name.items():
+        if key in merged:
+            continue
+        merged[key] = {"name": auth["name"], "system": auth["system"],
+                       "page": (auth.get("meta") or {}).get("page"),
+                       "_id": auth["id"], "_meta": auth.get("meta"),
+                       "_book": (auth.get("meta") or {}).get("book")}
     return merged, folded
 
 
