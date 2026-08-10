@@ -12,6 +12,31 @@ function coerceNum(v) {
   return m ? Number(m[0]) : 0;
 }
 
+/** One of our effect records as a Foundry ActiveEffect.
+ *
+ * The library stores the shape the extractor produced; Foundry wants a few
+ * fields it does not care about set explicitly, and a null priority omitted
+ * rather than sent as null. `transfer: true` is what makes an effect apply to
+ * the actor carrying the item rather than sitting inert on the item itself —
+ * without it the whole feature looks fine on the sheet and changes nothing.
+ */
+export function toActiveEffect(effect) {
+  return {
+    name: effect.name ?? "",
+    img: effect.img || "icons/svg/upgrade.svg",
+    disabled: Boolean(effect.disabled),
+    transfer: effect.transfer !== false,
+    description: effect.description ?? "",
+    duration: {},
+    changes: (effect.changes ?? []).map((c) => ({
+      key: c.key,
+      mode: c.mode ?? 2,                 // ADD — modifiers stack, never replace
+      value: String(c.value ?? ""),      // Foundry parses; a number here is fine but a string is what its own UI writes
+      ...(c.priority == null ? {} : { priority: c.priority }),
+    })),
+  };
+}
+
 export function toFoundryDoc(item, { product, domain } = {}) {
   const dom = domain ?? item._domain;
   const spec = edenFor(dom);
@@ -118,6 +143,6 @@ function _wrap(item, type, system, product, domain) {
   };
   // actors carry an embedded-items array; items carry an effects array
   if (isActor) doc.items = [];
-  else doc.effects = [];
+  else doc.effects = (item.effects ?? []).map(toActiveEffect);
   return doc;
 }

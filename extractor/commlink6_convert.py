@@ -10,6 +10,7 @@ import re
 from datetime import date
 
 from extractor.eden_codes import map_code
+from extractor.effects import build_effects
 
 _TODAY = date.today().isoformat()
 
@@ -291,12 +292,19 @@ def to_item(rec, cl6_book):
     # the RAW upstream id, because eden's own importer matches items on it
     # system.catalog_id, and the chargen engine references qualities the same way.
     sysd["genesisID"] = rec["id"]
+    name = fix_name(rec["name"])
     item = {
         "id": f"cl6_{rec['id']}".replace("-", "_").lower(),   # slug: lowercase, no '-'
-        "name": fix_name(rec["name"]),
+        "name": name,
         "system": sysd,
         "meta": {"book": our_book(cl6_book), "page": _int(rec["page"]) or 1,
                  "source": "commlink6", "qaStatus": "extracted",
                  "extractedAt": _TODAY, "extractorVersion": "commlink6-1.14.0"},
     }
+    # What the item DOES, as Foundry ActiveEffects. Only set when there is
+    # something to say: an empty array on every item would be noise, and the
+    # exporter already supplies one for items that have none.
+    effects = build_effects(name, rec.get("mods") or [])
+    if effects:
+        item["effects"] = effects
     return domain, file, item

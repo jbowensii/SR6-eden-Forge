@@ -152,13 +152,21 @@ def _stats(z: zipfile.ZipFile, book: str) -> dict:
                 continue
             # flatten first-level stat children (weapon/armor/vehicle/…) attrs
             stats = {}
+            mods = []
             for child in el:
-                if child.tag in ("modifications", "choices"):
+                if child.tag == "choices":
+                    continue
+                if child.tag == "modifications":
+                    # What the item DOES: "+1 Body", "-1 to Con". Kept as plain
+                    # dicts — extractor.effects turns the ones Eden can express
+                    # into ActiveEffects. Skipping this is why every exported
+                    # item modified nothing when equipped.
+                    mods.extend({"tag": m.tag, **m.attrib} for m in child)
                     continue
                 for k, v in child.attrib.items():
                     stats[f"{child.tag}.{k}"] = v
             out[iid] = {"category": category, "tag": el.tag,
-                        "attrs": dict(el.attrib), "stats": stats}
+                        "attrs": dict(el.attrib), "stats": stats, "mods": mods}
     return out
 
 
@@ -188,7 +196,7 @@ def read_book(book: str, jar: Path = DEFAULT_JAR) -> dict:
         recs[iid] = {
             "id": iid, "name": name, "page": t.get("page", ""),
             "desc": t.get("desc", ""), "wifi": t.get("wifi", ""),
-            "category": s["category"], "tag": s["tag"],
+            "category": s["category"], "tag": s["tag"], "mods": s.get("mods") or [],
             "type": a.get("type", ""), "subtype": a.get("subtype", ""),
             "price": a.get("price", ""), "avail": a.get("avail", ""),
             "attrs": a, "stats": s["stats"],
