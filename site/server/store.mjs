@@ -299,9 +299,16 @@ export function writeItem(dataRoot, book, domain, category, itemId, item) {
 
 const _IMG = /\.(png|jpe?g|webp)$/i;
 
+//: A graphic the extractor lifted off a page: "p042_x5709.webp". Everything
+//: else at a book's top level was DOWNLOADED -- by the art search or the bulk
+//: art tool -- and saved under the item's name. Those are not book graphics,
+//: and listing them here is why the gallery was full of photographs of buses.
+const PAGE_GRAPHIC = /^p\d{2,4}_x\d+\./i;
+
 export function listBookImages(dataRoot, book) {
-  /** Every graphic extracted from a book — top-level renders and the unpaired
-   * _inbox pile — as paths relative to _assets (served at /assets/<path>). */
+  /** Graphics extracted from the book itself, as paths relative to _assets
+   * (served at /assets/<path>). Downloaded art is deliberately excluded: this
+   * gallery exists to surface what came OUT of the PDF. */
   if (!SEGMENT.test(book)) throw new StoreError("bad-segment", book);
   const base = join(dataRoot, "_assets", book);
   const out = [];
@@ -309,29 +316,14 @@ export function listBookImages(dataRoot, book) {
     let names = [];
     try { names = readdirSync(dir); } catch { return; }
     for (const n of names.sort()) {
-      if (_IMG.test(n)) out.push(`${prefix}${n}`);
+      if (_IMG.test(n) && PAGE_GRAPHIC.test(n)) out.push(`${prefix}${n}`);
     }
   };
   scan(base, `${book}/`);
-  const named = out.length;
   scan(join(base, "_inbox"), `${book}/_inbox/`);
-  // Two different piles, and showing them as one was the problem. The top level
-  // holds art that was identified and named after the thing it depicts
-  // (ares_black_sky.webp). _inbox is everything else the extractor pulled off
-  // the page -- p003_x4714.webp -- which is mostly borders, chapter furniture
-  // and whatever else happened to be a separate image, including book artwork
-  // nobody wants to scroll past while picking a picture of a pistol.
-  return out.map((path, i) => ({
-    path,
-    identified: i < named,
-    label: i < named
-      ? path.split("/").pop().replace(/\.[a-z]+$/i, "").replace(/_/g, " ")
-      : path.split("/").pop(),
-  }));
+  return out.map((path) => ({ path, label: path.split("/").pop() }));
 }
 
-//: An `img` that is an icon rather than a picture of the item itself. Kept in
-//: step with the same test in the editor, which decides which slot to draw it in.
 //: The graphic, as the first thing in an item's description.
 //:
 //: Foundry renders the description as HTML, so the picture chosen for an item
@@ -345,11 +337,27 @@ export function withRender(description, rel) {
   const body = String(description ?? "").replace(RENDER_TAG, "");
   const src = `modules/sr6-forge-corebook/${rel}`;
   const tag = `<p data-sr6-render="1"><img src="${src}" alt=""/></p>`;
-  return body ? `${tag}
-${body}` : tag;
+  return body ? `${tag}\n${body}` : tag;
 }
 
+//: An `img` that is an icon standing in for the item, rather than a picture of
+//: it. Kept in step with the same test in the editor.
 export const ICON_ASSET = /^(iconsets|generic)\/|\/lib\//;
+
+//: Point an item at a picture, keeping what a previous choice recorded.
+//: Shared by the book-graphics gallery and the art search, which used to do
+//: this differently: the search only set `img`, so a picked image never
+//: appeared in the render slot and the icon it displaced was simply gone.
+export function applyRender(item, rel) {
+  item.meta ??= {};
+  const prev = item.img;
+  if (prev && prev !== rel && ICON_ASSET.test(prev)) item.meta.icon = prev;
+  item.meta.render = rel;
+  item.img = rel;
+  item.system ??= {};
+  item.system.description = withRender(item.system.description, rel);
+  return item;
+}
 
 export function assignRender(dataRoot, book, domain, category, itemId, imagePath) {
   /** Copy an extracted book image to <sourceBook>/<itemId>.<ext> (the render
@@ -370,13 +378,7 @@ export function assignRender(dataRoot, book, domain, category, itemId, imagePath
   // choosing a book graphic used to overwrite the icon and lose it. The icon is
   // kept in meta.icon and the graphic recorded in meta.render, so each slot in
   // the editor still has something to show and either can be re-selected.
-  item.meta ??= {};
-  const prev = item.img;
-  if (prev && prev !== rel && ICON_ASSET.test(prev)) item.meta.icon = prev;
-  item.meta.render = rel;
-  item.img = rel;
-  item.system ??= {};
-  item.system.description = withRender(item.system.description, rel);
+  applyRender(item, rel);
   const path = categoryPath(dataRoot, book, domain, category);
   const tmp = `${path}.tmp`;
   writeFileSync(tmp, JSON.stringify(payload, null, 2) + "\n", "utf8");

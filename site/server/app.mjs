@@ -10,7 +10,7 @@ import { toFoundryDoc } from "../shared/edenTransform.mjs";
 import { EDEN } from "../shared/edenSpec.mjs";
 import { loadBooks } from "./exportModule.mjs";
 import { assignIcon, libraryRoots, loadSettings, resolveLibraryFile, searchIcons } from "./iconLibrary.mjs";
-import { SEGMENT, StoreError, assignRender, deleteItem, domains, findDuplicates, itemsByType, listBookImages, readCategory, searchItems, tree, typeTree, writeItem } from "./store.mjs";
+import { SEGMENT, StoreError, applyRender, assignRender, deleteItem, domains, findDuplicates, itemsByType, listBookImages, readCategory, searchItems, tree, typeTree, writeItem } from "./store.mjs";
 
 const EXPORT_STATUSES = new Set(["approved", "reviewed", "all"]);
 
@@ -396,9 +396,13 @@ export function buildApp(dataRoot, { schemasDir, validate, exporter }) {
       const { mkdirSync } = await import("node:fs");
       mkdirSync(join(dataRoot, "_assets", src), { recursive: true });
       writeFileSync(dest, buf);
-      item.img = rel;
+      // the SAME treatment a graphic picked from the gallery gets: recorded as
+      // the render, the displaced icon kept, and the picture put at the head of
+      // the description. Setting only `img` is why a searched image never
+      // showed up in the render slot.
+      applyRender(item, rel);
       writeItem(dataRoot, book, domain, category, id, item);   // persists + records correction
-      res.json({ img: rel });
+      res.json({ img: rel, render: rel });
     } catch (err) {
       res.status(500).json({ error: String(err.message ?? err) });
     }
