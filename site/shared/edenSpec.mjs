@@ -39,9 +39,18 @@ export const EDEN = {
   martial_arts:  { type: "martialartstyle", req: [], opt: ["techniques", "styleCategory"] },
   martial_techniques: { type: "martialarttech", req: [], opt: ["style", "choice"] },
   // actors — exported as Foundry Actors, not Items (separate pack type)
-  npcs:          { type: "npc", actor: true, req: ["attributes"], opt: ["metatype", "activeSkills", "qualities", "gear", "weapons"] },
-  critters:      { type: "critter", actor: true, req: ["attributes"], opt: ["skills", "powers", "movement"] },
-  spirits:       { type: "spirit", actor: true, req: ["attributes"], opt: ["powers", "optionalPowers", "attacks"] },
+  npcs:          { type: "NPC", actor: true, req: ["attributes"], opt: ["metatype", "activeSkills", "qualities", "gear", "weapons"] },
+  // Actor types are capitalized in Eden's template.json — "Critter", not
+  // "critter". We emitted the lowercase form, which is not a type Eden defines,
+  // so every actor we exported was a document Foundry could not place.
+  critters:      { type: "Critter", actor: true, req: ["attributes"], opt: ["skills", "powers", "movement"] },
+  spirits:       { type: "Spirit", actor: true, req: ["attributes"], opt: ["powers", "optionalPowers", "attacks"] },
+  // Vehicles are an ACTOR in Eden, not an item — which is why this domain had
+  // no mapping and its 485 rows were silently skipped by every export. The
+  // field names below are Eden's own; the extractor already reads them.
+  vehicles:      { type: "Vehicle", actor: true, req: [],
+                   opt: ["handlOn", "handlOff", "accOn", "accOff", "spdiOn", "spdiOff",
+                         "tspd", "bod", "arm", "pil", "sen", "sea", "vtype"] },
 };
 
 export function edenFor(domain) {

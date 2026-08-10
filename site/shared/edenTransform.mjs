@@ -126,14 +126,68 @@ function _nestAttributes(system) {
   system.attributes = nested;
 }
 
+// Eden's Actor subtypes, exactly as its template.json spells them. Matched by
+// value rather than by a lowercase guess, because a document whose type is not
+// one of these is one Foundry cannot place.
+const ACTOR_TYPES = new Set(["Player", "NPC", "Critter", "Spirit", "Vehicle"]);
+
+// our vehicle subtype -> Eden's `vtype` enum, which has exactly three values
+const _VTYPE = [
+  [/BOAT|SHIP|SUBMARINE|POWERBOAT|HOVERCRAFT|WATER/i, "watercraft"],
+  [/AIR|PLANE|FIXED_WING|ROTORCRAFT|VTOL|LTAV|JET|DRONE_(MICRO|MINI)/i, "aircraft"],
+];
+
+// our extracted stat name -> Eden's. The books print one figure for most stats
+// and an "on-road/off-road" pair for handling, acceleration and speed interval,
+// which Eden splits into two fields apiece.
+const _VEHICLE_STATS = [
+  ["handling", "handlOn", "handlOff"],
+  ["accel", "accOn", "accOff"],
+  ["speedInterval", "spdiOn", "spdiOff"],
+  ["topSpeed", "tspd"],
+  ["body", "bod"],
+  ["armor", "arm"],
+  ["pilot", "pil"],
+  ["sensor", "sen"],
+  ["seats", "sea"],
+];
+
+function _vehicleFields(system) {
+  // Eden keys the sheet off `vtype`; without one every vehicle renders as a
+  // ground craft, so a submarine would get road handling.
+  if (!system.vtype) {
+    const hint = `${system.subtype ?? ""} ${system.type ?? ""}`;
+    system.vtype = (_VTYPE.find(([re]) => re.test(hint)) ?? [null, "ground_craft"])[1];
+  }
+  // The stats are extracted under our own names. Nothing mapped them across, so
+  // every vehicle reached Foundry with an empty stat block while the data sat
+  // in the library one key away.
+  for (const [ours, on, off] of _VEHICLE_STATS) {
+    const raw = system[ours];
+    if (raw === undefined || raw === "" || raw === null) continue;
+    const [a, b] = String(raw).split("/");        // "5/7" = on-road / off-road
+    if (system[on] === undefined) system[on] = coerceNum(a);
+    if (off && system[off] === undefined) system[off] = coerceNum(b ?? a);
+  }
+  for (const [, on, off] of _VEHICLE_STATS) {
+    for (const f of [on, off]) {
+      if (f && system[f] !== undefined && system[f] !== "") system[f] = coerceNum(system[f]);
+    }
+  }
+  system.vehicle ??= { belongs: "", opMode: "manual", offRoad: false, speed: 0 };
+}
+
 function _wrap(item, type, system, product, domain) {
   system.description ??= "";
   system.genesisID ??= item.id;
   // reference location: book title + printed page travel with the document
   system.product ??= product ?? item.meta?.book ?? "";
   system.page ??= item.meta?.page ?? 0;
-  const isActor = EDEN[domain]?.actor || ["npc", "critter", "spirit"].includes(type);
-  if (isActor) { _nestAttributes(system); _actorSubstructures(system); }
+  const isActor = EDEN[domain]?.actor || ACTOR_TYPES.has(type);
+  if (isActor) {
+    if (type === "Vehicle") _vehicleFields(system);
+    else { _nestAttributes(system); _actorSubstructures(system); }
+  }
   const doc = {
     name: item.name,
     type,

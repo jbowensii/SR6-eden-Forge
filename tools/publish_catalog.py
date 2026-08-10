@@ -41,8 +41,9 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--foundry", required=True, help="Foundry's Data folder")
-    ap.add_argument("--data", default=str(REPO / "data"),
-                    help="the extracted library")
+    # not <repo>/data: that is the developer's scratch copy, and once the
+    # builder is installed the real library lives in its workspace
+    ap.add_argument("--data", default=None, help="the extracted library")
     ap.add_argument("--book", default="corebook")
     ap.add_argument("--version", default="0.5.0")
     args = ap.parse_args()
@@ -56,8 +57,14 @@ def main() -> int:
         return 2
 
     print("[1/3] compiling compendium packs (this takes a minute)")
+    # --data was accepted and then never passed on, so the export always ran
+    # against <repo>/data no matter what was asked for
+    from extractor.paths import data_root                # noqa: E402
+    library = _P(args.data) if args.data else data_root([])
+    print(f"    library: {library}")
     rc = _node("site/scripts/export_all.mjs",
-               ["--book", args.book, "--status", "all", "--version", args.version])
+               ["--book", args.book, "--status", "all", "--version", args.version,
+                "--data", str(library)])
     if rc != 0:
         print("failed while compiling packs")
         return rc

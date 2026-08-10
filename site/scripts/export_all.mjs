@@ -13,10 +13,18 @@ const { values } = parseArgs({
     book: { type: "string", default: "corebook" },
     status: { type: "string", default: "all" },
     version: { type: "string", default: "0.1.0" },
+    data: { type: "string" },
   },
 });
+// Which library to export, same order the rest of the toolchain uses: --data,
+// then SR6_DATA, then the repo's own copy. This was pinned to <repo>/data,
+// which is a developer's scratch copy — once the installed builder is in use it
+// is a different, older library, and the module would be built from it without
+// a word. The path is printed so a wrong one is obvious immediately.
+const dataRoot = values.data ?? process.env.SR6_DATA ?? join(repoRoot, "data");
 try {
-  const res = await exportAll(join(repoRoot, "data"), join(repoRoot, "export"), values);
+  console.log(`library: ${dataRoot}`);
+  const res = await exportAll(dataRoot, join(repoRoot, "export"), values);
   console.log(`\nmodule -> ${res.moduleDir}`);
   console.log(`${res.packs} pack(s):`);
   let items = 0, actors = 0;

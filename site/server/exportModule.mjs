@@ -32,7 +32,7 @@ export function statusAllows(filter, qaStatus) {
 
 // domains that become Foundry Actors (compendium type "Actor", key prefix
 // !actors!) rather than Items. Everything else is an Item.
-export const ACTOR_DOMAINS = new Set(["npcs", "critters", "spirits"]);
+export const ACTOR_DOMAINS = new Set(["npcs", "critters", "spirits", "vehicles"]);
 
 /** Display name of the generated compendium module. The generator that reads
  *  it is SR6 Forge; this is the library it reads FROM, and naming it after the
