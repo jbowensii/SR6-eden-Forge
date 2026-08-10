@@ -198,4 +198,12 @@ def _build(item_id, name, inc, book, page, version, extracted_at) -> dict:
         item["meta"]["descriptionFrom"] = book
     if inc.get("img"):
         item["img"] = inc["img"]
+    # What the item DOES, as Foundry ActiveEffects. Carried like img: this
+    # function rebuilds the item from named fields rather than copying it, so
+    # anything not listed here is dropped on the way into the library. Without
+    # this line every effect the Commlink6 reader builds is discarded before it
+    # is ever written, and the export ships empty effect arrays exactly as it
+    # did before the feature existed.
+    if inc.get("effects"):
+        item["effects"] = inc["effects"]
     return item

@@ -131,3 +131,58 @@ def test_the_target_table_still_matches_the_installed_system():
         j += 1
     live = set(re.findall(r"^\s{8}([A-Za-z0-9_]+)\s*:", src[i:j], re.M))
     assert live == set(targets()), "Eden's effect list changed — regenerate eden_effect_targets.json"
+
+
+# ---------- surviving the pipeline ----------
+
+def test_effects_survive_the_merge_into_the_library():
+    """_build rebuilds an item from named fields rather than copying it.
+
+    Anything not listed there is dropped on the way in — so without an explicit
+    line every effect the reader builds is discarded before it is written, and
+    the export ships empty arrays exactly as it did before the feature existed.
+    Caught by testing rather than by reading.
+    """
+    from extractor.merge import merge_book
+
+    eff = [{"name": "Muscle Toner", "disabled": False, "transfer": True,
+            "description": "",
+            "changes": [{"key": "system.attributes.agility.mod", "mode": 2, "value": 2}]}]
+    inc = {"id": "cl6_mt", "name": "Muscle Toner", "page": 1,
+           "system": {"type": "BIOWARE", "price": 32000},
+           "meta": {"book": "corebook", "page": 1, "source": "commlink6"},
+           "effects": eff}
+    out, _ = merge_book({}, {"bioware": [inc]}, "corebook",
+                        {"corebook": "2019-08"}, "0.1.0", "2026-08-09")
+    assert out["bioware"][0].get("effects") == eff
+
+
+def test_the_authority_guard_puts_effects_back(tmp_path):
+    """Effects are a TOP-LEVEL field, so the guard's system-field loop cannot
+    see them. A phase that rewrites an item without them would revert every
+    modifier to nothing, and the guard would report success."""
+    import json as _json
+
+    from extractor.authority import restore, snapshot
+
+    d = tmp_path / "corebook" / "gear"
+    d.mkdir(parents=True)
+    eff = [{"name": "MT", "disabled": False, "transfer": True, "description": "",
+            "changes": [{"key": "system.attributes.agility.mod", "mode": 2, "value": 2}]}]
+    item = {"id": "cl6_mt", "name": "MT",
+            "system": {"type": "BIOWARE", "description": "x"},
+            "meta": {"book": "corebook", "page": 1, "source": "commlink6"},
+            "effects": eff}
+    f = d / "bioware.json"
+    f.write_text(_json.dumps({"book": "corebook", "domain": "gear",
+                              "category": "bioware", "items": [item]}), encoding="utf-8")
+
+    snap = snapshot(tmp_path)
+    doc = _json.loads(f.read_text(encoding="utf-8"))
+    doc["items"][0].pop("effects")                      # a phase loses them
+    f.write_text(_json.dumps(doc), encoding="utf-8")
+
+    report = restore(tmp_path, snap)
+    back = _json.loads(f.read_text(encoding="utf-8"))["items"][0]
+    assert back["effects"] == eff
+    assert report["fields"]["effects"] == 1

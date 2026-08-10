@@ -23,6 +23,7 @@ doing its job; a phase that overwrites the authority is not.
 """
 from __future__ import annotations
 
+import copy
 import json
 from pathlib import Path
 
@@ -81,7 +82,6 @@ def snapshot(data_root: Path) -> dict[str, dict]:
     store drops one of each colliding pair, which is how 29 vehicles stayed
     dead after the guard reported them restored.
     """
-    import copy
 
     fields: dict[str, dict] = {}
     rows: dict[str, list] = {}
@@ -98,6 +98,12 @@ def snapshot(data_root: Path) -> dict[str, dict]:
             sysd = item.get("system") or {}
             kept = {k: sysd[k] for k in GUARDED
                     if k in sysd and _filled(sysd[k])}
+            # Effects live at the TOP level, not under system, so the loop above
+            # cannot see them. They are Commlink6's statement of what an item
+            # does; a phase that rewrites an item without them would silently
+            # revert every modifier to nothing.
+            if item.get("effects"):
+                kept["__effects"] = copy.deepcopy(item["effects"])
             fields.setdefault(item["id"], kept)
             # EVERY row, not one per id. Commlink6 reuses an id across rows —
             # 385 vehicle rows share only 356 ids — so an id-keyed store
@@ -140,6 +146,13 @@ def restore(data_root: Path, snap: dict[str, dict]) -> dict:
             sysd = item.setdefault("system", {})
             hit = False
             for field, value in was.items():
+                if field == "__effects":                 # top level, not system
+                    if item.get("effects") != value:
+                        item["effects"] = copy.deepcopy(value)
+                        per_field["effects"] += 1
+                        restored += 1
+                        hit = True
+                    continue
                 if sysd.get(field) != value:
                     sysd[field] = value
                     per_field[field] += 1
