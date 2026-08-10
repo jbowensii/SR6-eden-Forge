@@ -171,6 +171,35 @@ def _unwrap(lines, i, name, used):
     return name
 
 
+#: How much of a name has to match before a suffix counts as the same vehicle.
+#: "Patroller" is eight characters and distinctive; anything shorter starts
+#: matching things like "Van" or "Bus" to real vehicles.
+_SUFFIX_MIN = 8
+
+
+def _by_suffix(page_key: str, cl6_by_name: dict, claimed: set):
+    """The Commlink6 row a page name belongs to when only the maker differs.
+
+    Commlink6 records the full trade name and the books print the model alone:
+    "Spinrad Global Street Rocket EX" against a heading of "Street Rocket EX",
+    "Nissan Johnny Patroller" against "Patroller". An exact-name fold misses
+    every one of those, so the stats stay stranded on a second row while the
+    named row shows none.
+
+    Only ever taken when exactly ONE unclaimed Commlink6 row ends with the name.
+    "Bazoo Chrome" ends both "Krime Bazoo Chrome" and "Krime Big Bazoo Chrome",
+    and guessing between them would attach a vehicle's stats to its larger
+    sibling — so an ambiguous suffix is left alone rather than resolved.
+    """
+    if len(page_key) < _SUFFIX_MIN:
+        return page_key, None
+    hits = [k for k in cl6_by_name
+            if k not in claimed and k != page_key and k.endswith(page_key)]
+    if len(hits) != 1:
+        return page_key, None
+    return hits[0], cl6_by_name[hits[0]]
+
+
 def fold_into_authority(byname: dict, cl6_by_name: dict):
     """Merge page-read vehicles into the Commlink6 rows that already name them.
 
@@ -188,11 +217,15 @@ def fold_into_authority(byname: dict, cl6_by_name: dict):
     Returns ``(merged, folded)``; folded is ``[(read_as, kept_as, fields_filled)]``.
     """
     merged, folded = {}, []
+    claimed: set[str] = set()
     for key, r in byname.items():
         auth = cl6_by_name.get(key)
         if auth is None:
+            key, auth = _by_suffix(key, cl6_by_name, claimed)
+        if auth is None:
             merged[key] = r
             continue
+        claimed.add(key)
         row = json.loads(json.dumps(auth))          # never mutate the caller's row
         filled = [k for k, v in r["system"].items()
                   if str(row["system"].get(k, "") or "").strip() == ""

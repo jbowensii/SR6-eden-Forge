@@ -350,3 +350,53 @@ def test_unmatched_commlink6_vehicles_are_carried_through():
     assert merged["obscure"]["_id"] == "cl6_obscure"
     assert merged["obscure"]["system"]["price"] == "9000"
     assert [f[1] for f in folded] == ["Ford Americar"]     # only the match is a fold
+
+
+# ---------- Commlink6 names the maker, the book names the model ----------
+
+def test_a_distinctive_suffix_folds_onto_the_commlink6_row():
+    """Commlink6 records the full trade name and the books print the model
+    alone, so an exact-name fold strands the stats on a second row."""
+    iv = _iv()
+    page = {"streetrocketex": {"name": "Street Rocket EX",
+                               "system": {"handling": "1/1"}, "page": 44}}
+    cl6 = {"spinradglobalstreetrocketex": {
+        "id": "cl6_srex", "name": "Spinrad Global Street Rocket EX",
+        "system": {"price": "1500000"},
+        "meta": {"book": "double_clutch", "page": 44, "source": "commlink6"}}}
+    merged, folded = iv.fold_into_authority(page, cl6)
+
+    assert set(merged) == {"spinradglobalstreetrocketex"}      # one row, not two
+    row = merged["spinradglobalstreetrocketex"]
+    assert row["name"] == "Spinrad Global Street Rocket EX"     # Commlink6 owns the name
+    assert row["system"]["handling"] == "1/1"                   # the page brought the stats
+    assert row["_id"] == "cl6_srex"
+    assert folded == [("Street Rocket EX", "Spinrad Global Street Rocket EX", 1)]
+
+
+def test_an_ambiguous_suffix_is_left_alone():
+    """'Bazoo Chrome' ends both 'Krime Bazoo Chrome' and 'Krime Big Bazoo
+    Chrome'. Guessing would hand one vehicle's stats to its larger sibling."""
+    iv = _iv()
+    page = {"bazoochrome": {"name": "Bazoo Chrome", "system": {"handling": "2/4"}, "page": 31}}
+    cl6 = {
+        "krimebazoochrome": {"id": "a", "name": "Krime Bazoo Chrome", "system": {},
+                             "meta": {"book": "krime_katalog", "source": "commlink6"}},
+        "krimebigbazoochrome": {"id": "b", "name": "Krime Big Bazoo Chrome", "system": {},
+                                "meta": {"book": "krime_katalog", "source": "commlink6"}},
+    }
+    merged, folded = iv.fold_into_authority(page, cl6)
+    assert folded == []                                   # nothing guessed
+    assert "bazoochrome" in merged                        # the page row survives on its own
+    assert {"krimebazoochrome", "krimebigbazoochrome"} <= set(merged)   # both kept
+
+
+def test_a_short_name_never_matches_by_suffix():
+    """'Van' ending 'Ford Van' would attach stats to the wrong thing."""
+    iv = _iv()
+    page = {"van": {"name": "Van", "system": {"handling": "3"}, "page": 1}}
+    cl6 = {"fordvan": {"id": "c", "name": "Ford Van", "system": {},
+                       "meta": {"book": "corebook", "source": "commlink6"}}}
+    merged, folded = iv.fold_into_authority(page, cl6)
+    assert folded == []
+    assert set(merged) == {"van", "fordvan"}
