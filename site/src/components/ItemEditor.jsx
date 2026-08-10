@@ -16,7 +16,7 @@ const LONG_FIELDS = new Set([
   "effect", "attacks", "contacts", "cyberware", "bioware", "augmentations",
 ]);
 
-export default function ItemEditor({ item, domain, bookTitle, books = {}, categoryName, pdfAvailable, pdfHref, onSave, onDelete, onAssignIcon, onAssignRender, selectedItems = [], onDirtyChange, onBulkSave }) {
+export default function ItemEditor({ item, domain, bookTitle, books = {}, categoryName, pdfAvailable, pdfHref, onSave, onDelete, onAssignIcon, onAssignRender, onArtAssigned, selectedItems = [], onDirtyChange, onBulkSave }) {
   const [draft, setDraft] = useState(() => structuredClone(item));
   // Which fields the user has actually touched. Bulk edits write ONLY these,
   // so a value that merely differs across the selection is left alone rather
@@ -400,7 +400,7 @@ export default function ItemEditor({ item, domain, bookTitle, books = {}, catego
       {searchingArt && (
         <ArtSearch
           item={draft}
-          onAssigned={(img) => setDraft((d) => ({ ...d, img }))}
+          onAssigned={() => onArtAssigned?.(draft)}
           onClose={() => setSearchingArt(false)}
         />
       )}

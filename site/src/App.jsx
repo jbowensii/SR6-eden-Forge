@@ -159,16 +159,37 @@ export default function App() {
     }
   }
 
+  // Re-read an item from disk and put it back in the right pane.
+  //
+  // Anything that changes an item on the server has to end here. Patching the
+  // local draft instead looks like it worked and is not the same thing: the art
+  // search did that, so a downloaded picture updated `img` in the pane while
+  // meta.render, the displaced icon and the rewritten description -- all set by
+  // the server -- never arrived, and the render slot stayed empty until a reload.
+  async function reloadEditing(item) {
+    const book = item._book ?? selected?.book;
+    const domain = item._domain ?? selected?.domain;
+    const category = item._category ?? selected?.category;
+    if (!book || !domain || !category) return;
+    await refreshPayload();
+    setTree(await getTypeTree(domain));       // art/counts show in the left pane too
+    const fresh = (await getCategory(book, domain, category)).items.find((i) => i.id === item.id);
+    if (fresh) setEditing({ ...fresh, _book: book, _domain: domain, _category: category });
+  }
+
   async function handleAssignIcon(item, hit, mode) {
     const book = item._book ?? selected.book;
     const domain = item._domain ?? selected.domain;
     const category = item._category ?? selected.category;
     const res = await assignIcon({ book, domain, category, itemId: item.id, root: hit.r, libraryPath: hit.p, mode });
     setStatus(mode === "generic" ? `generic icon updated (${res.updated} item(s))` : `icon set for ${item.id}`);
-    await refreshPayload();
-    setTree(await getTypeTree(domain));  // counts/art may shift -> refresh the left pane
-    const fresh = (await getCategory(book, domain, category)).items.find((i) => i.id === item.id);
-    if (fresh) setEditing({ ...fresh, _book: book, _domain: domain, _category: category });
+    await reloadEditing(item);
+  }
+
+  // the art search assigns on the server too, so it refreshes the same way
+  async function handleArtAssigned(item) {
+    await reloadEditing(item);
+    setStatus(`artwork set for ${item.id}`);
   }
 
   async function handleAssignRender(item, imagePath) {
@@ -177,9 +198,7 @@ export default function App() {
     const category = item._category ?? selected?.category;
     try {
       await assignRender({ book, domain, category, itemId: item.id, imagePath });
-      await refreshPayload();
-      const fresh = (await getCategory(book, domain, category)).items.find((i) => i.id === item.id);
-      if (fresh) setEditing({ ...fresh, _book: book, _domain: domain, _category: category });
+      await reloadEditing(item);
       setStatus(`render set for ${item.id}`);
     } catch (e) {
       setStatus(`error: ${e.message ?? e}`);
@@ -460,6 +479,7 @@ export default function App() {
             onDelete={remove}
             onAssignIcon={handleAssignIcon}
             onAssignRender={handleAssignRender}
+            onArtAssigned={handleArtAssigned}
           />
         )}
         {doc && <Preview doc={doc} />}
