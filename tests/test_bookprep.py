@@ -151,44 +151,74 @@ class _Page:
 PAGE = _Page((0.0, 0.0, 612.0, 765.0))
 
 
-def test_padding_a_table_box_stays_on_the_page():
-    """pdfplumber raises on a crop that leaves the page.
-
-    The 11-value row sits under the ruled header, so the box is padded out 2pt
-    and down 18pt. On a table that touches the edge that padding lands outside
-    the page, pdfplumber raises ValueError, and the worker's except reports it
-    as "this book has no vehicles". Five books lost their whole vehicle scan to
-    one such table; krime_katalog alone was hiding 12.
-    """
-    from extractor.vehicle_scan import _pad
-
-    x0, top, x1, bottom = _pad((0.0, 48.0, 612.0, 490.0), PAGE)
-    assert x0 >= 0.0 and x1 <= 612.0
-    assert top >= 0.0 and bottom <= 765.0
+# ---------- the caption band replaces the ruled table ----------
+#
+# The crop-and-pad tests that used to live here went with `_pad`. They asserted
+# that a box derived from find_tables() was nudged left and down without leaving
+# the page — machinery the reader no longer has, because for 35% of Double
+# Clutch's stat blocks find_tables() returns no box to nudge.
 
 
-def test_a_negative_table_top_is_clamped_not_refused():
-    """find_tables() reports a negative top on some rotated pages."""
-    from extractor.vehicle_scan import _pad
+def test_captions_printed_with_no_gap_are_split_apart():
+    """pdfplumber joins captions set without a measurable gap."""
+    from extractor.vehicle_scan import _split_caption
 
-    box = _pad((-2.2, -941.0, 752.0, 1894.0), _Page((0, 0.0, 750, 938.88)))
-    assert box == (0, 0.0, 750, 938.88)
-
-
-def test_padding_keeps_a_normal_box_intact():
-    """Clamping must not disturb a table that was already on the page."""
-    from extractor.vehicle_scan import _pad
-
-    # 90pt to the LEFT: find_tables() only boxes the right-hand columns, so the
-    # crop has to reach back to Handling for the row to be complete
-    assert _pad((100.0, 200.0, 400.0, 300.0), PAGE) == (10.0, 198.0, 404.0, 318.0)
+    assert _split_caption("BODYARMPILOT") == ["BODY", "ARM", "PILOT"]
+    assert _split_caption("HANDACC") == ["HAND", "ACC"]
+    assert _split_caption("PILOT") == ["PILOT"]
+    # a word that merely starts like a caption is not one
+    assert _split_caption("SEATBELTFACTORY") == []
 
 
-def test_a_degenerate_table_box_is_skipped_not_cropped():
-    """A zero-width box off the page edge would crop to nothing."""
-    from extractor.vehicle_scan import _pad
+def test_a_column_is_identified_by_its_printed_caption():
+    """The 9-vs-11 column ambiguity that broke every count-based attempt cannot
+    arise: a table missing SPD INT is missing it because the book did not print
+    it, and the caption says so."""
+    from extractor.vehicle_scan import _CAPTION
 
-    assert _pad((900.0, 100.0, 950.0, 120.0), PAGE) is None
+    assert _CAPTION["SPDINT"] == "speedInterval"
+    assert _CAPTION["TOPSPD"] == "topSpeed"
+    # SR5 books (Krime Katalog) print SPEED, which is NOT Speed Interval and
+    # must not be merged into it downstream
+    assert _CAPTION["SPEED"] == "speed"
+    assert _CAPTION["SPD"] == "speed"
+
+
+def test_dashes_and_broken_glyphs_count_as_values():
+    """Both the em dash and the nuyen sign arrive as U+FFFD in these PDFs, and a
+    missing stat still occupies its column."""
+    from extractor.vehicle_scan import _is_value
+
+    assert _is_value("4/6")
+    assert _is_value("2/4*")
+    assert _is_value("—")
+    assert _is_value("16,000�")
+    assert not _is_value("Growler")
+
+
+def test_a_price_or_a_section_label_is_not_a_vehicle_name():
+    """What actually needs rejecting is a price that landed in the name column
+    and the 'krime prowler: sr5 stats' caption over a rules table."""
+    from extractor.vehicle_scan import _named
+
+    assert not _named({"name": "58,000¥"})
+    assert not _named({"name": "1,000"})
+    assert not _named({"name": "krime prowler: sr5 stats"})
+    assert not _named({"name": ""})
+    # ...and NOT these, which the general-purpose gear-name test threw out
+    for real in ("Eurocar Northstar 2.0", "Gaz-Niki P-183", "GD/CAS MacArthur",
+                 "Ranger class battlecruiser", "Honda Rough Rider"):
+        assert _named({"name": real}), real
+
+
+def test_implausible_flags_a_scrambled_row_but_allows_a_capital_ship():
+    """Double Clutch stats out capital ships: Body 200 and 7,000,000,000¥ are
+    printed values, not parse failures."""
+    from extractor.vehicle_scan import implausible
+
+    assert implausible({"handling": "25"})              # a car cannot handle 25
+    assert not implausible({"handling": "4/5", "body": "200",
+                            "price": "7,000,000,000", "seats": "535"})
 
 
 # ---------- vehicle names that wrap across three lines ----------
