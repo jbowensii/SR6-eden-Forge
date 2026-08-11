@@ -538,3 +538,48 @@ def test_the_preservation_runs_after_the_fold():
     src = Path(__file__).resolve().parent.parent / "tools" / "ingest_vehicles.py"
     text = src.read_text(encoding="utf-8")
     assert text.index("fold_into_authority(byname, cl6_by_name)") < text.index("Stats a PREVIOUS run read")
+
+
+# ---------- the extractor must look where the library actually is ----------
+
+def test_the_extractor_writes_flat_into_assets():
+    """It wrote to _assets/<book>/ while the library is one flat folder, so the
+    already-on-disk check never saw the curated file and re-extracted all 1,001
+    of them into 48 recreated folders — on a run where the pruned ledger was
+    working perfectly. Where it writes, where it looks, and where the library
+    lives have to be the same place."""
+    from pathlib import Path
+    src = Path(__file__).resolve().parent.parent / "tools" / "dump_book_images.py"
+    text = src.read_text(encoding="utf-8")
+    assert 'out = DATA / "_assets"\n' in text, "still writing per-book"
+    assert '_assets" / book' not in text, "a per-book path survives"
+    assert 'any(out.glob(f"*{tag}.*"))' in text, "the existing-file check must use the same dir"
+
+
+def test_critters_and_npcs_are_not_given_a_guessed_icon():
+    """This pass runs BEFORE install_category_icons, and used to fill them by
+    name — "Rat" got icon_devil_rat_spirit_4 — so the exclusion downstream had
+    nothing left to protect and 176 items lost their waiting-for-a-portrait
+    state."""
+    from extractor.icon_match import NO_AUTO_ICON
+    assert NO_AUTO_ICON == {"CRITTER", "NPC"}
+
+    from pathlib import Path
+    src = Path(__file__).resolve().parent.parent / "extractor" / "icon_match.py"
+    text = src.read_text(encoding="utf-8")
+    # the guard has to sit before the name match, not after it
+    assert text.index("NO_AUTO_ICON:") < text.index("source, score = best_match("), \
+        "the exclusion runs after the name match"
+
+
+def test_the_two_icon_passes_agree_on_who_is_excluded():
+    """install_category_icons and match_icons keep separate lists; if they drift
+    the earlier pass fills what the later one is trying to protect."""
+    from extractor.icon_match import NO_AUTO_ICON
+    import importlib.util
+    from pathlib import Path
+    src = Path(__file__).resolve().parent.parent / "tools" / "install_category_icons.py"
+    spec = importlib.util.spec_from_file_location("_ici", src)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    assert mod.NO_CATEGORY_ICON == NO_AUTO_ICON

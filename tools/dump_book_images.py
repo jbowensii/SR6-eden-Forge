@@ -41,10 +41,15 @@ def _pruned(book):
 
 
 def dump(book, pdf):
-    # Straight into <book>/, not <book>/_inbox/. The graphics ARE the book's
-    # art; an inbox implies a queue waiting to be filed, and it split the
-    # gallery into two piles that had to be reconciled afterwards.
-    out = DATA / "_assets" / book
+    # Straight into _assets/, flat. Not <book>/_inbox/, and not <book>/ either.
+    #
+    # The library is one flat folder, and this wrote per-book — so the
+    # already-on-disk check looked in _assets/<book>/ and never saw the curated
+    # file sitting in _assets/. Every graphic was therefore "missing" and got
+    # extracted again: 1,001 exact duplicates in 48 recreated folders, on a run
+    # where the pruned ledger was working perfectly. Where the extractor writes
+    # and where it looks have to be the same place as where the library lives.
+    out = DATA / "_assets"
     skip = _pruned(book)
     out.mkdir(parents=True, exist_ok=True)
     doc = fitz.open(str(pdf))

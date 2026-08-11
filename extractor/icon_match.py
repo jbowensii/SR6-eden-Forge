@@ -107,6 +107,15 @@ def save_defaults(data_root: Path, defaults: dict) -> None:
     path.write_text(json.dumps(defaults, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
+#: Types whose items are individuals, not members of a category: each gets a
+#: portrait chosen by hand. install_category_icons.py already excludes them, but
+#: THIS pass runs first and used to fill them by name — "Rat" got
+#: icon_devil_rat_spirit_4, a Generic Encounter Suit got light-bulb.svg — so the
+#: exclusion downstream had nothing left to protect. 176 items lost their
+#: waiting-for-a-portrait state that way.
+NO_AUTO_ICON = {"CRITTER", "NPC"}
+
+
 def match_icons(lib_root: Path, data_root: Path, book: str, domain: str, min_score: int = MIN_SCORE) -> dict:
     domain_dir = data_root / book / domain
     lib = index_library(lib_root)
@@ -122,6 +131,9 @@ def match_icons(lib_root: Path, data_root: Path, book: str, domain: str, min_sco
         changed = False
         for item in payload.get("items", []):
             if item.get("img"):
+                continue
+            if str((item.get("system") or {}).get("type", "")) in NO_AUTO_ICON:
+                missing += 1        # waiting for a portrait, not for a guess
                 continue
             source, score = best_match(item, lib, min_score)
             if source is not None:
