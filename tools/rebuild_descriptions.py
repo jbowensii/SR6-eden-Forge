@@ -15,11 +15,14 @@ from extractor.ingest import LIBRARY, load_registry
 from extractor.bookprep import env_workers, map_jobs
 from extractor.writeup_scan import scan_book
 from extractor.writeups import is_stat_line
+from extractor.paths import data_root
 
-DATA = _P("data")
+# NOT _P("data"). That is the developer's scratch copy; once the builder is
+# installed the real library is elsewhere, and rewriting every description in
+# the wrong one looks like a successful run that changed nothing.
+DATA = data_root()
 APPLY = "--apply" in sys.argv
-CORR = {os.path.splitext(os.path.basename(f))[0]
-        for f in glob.glob("data/_corrections/*/*.json")}  # all domains; ids unique
+CORR = {p.stem for p in (DATA / "_corrections").rglob("*.json")}  # all domains; ids unique
 #: A single stat-looking token: a price, a damage code, a fraction, a bare number.
 _STAT_TOKEN = re.compile(r"^(?:[\d,]+¥?|\d+[PS]|\d+/\d+|\d+)$")
 
@@ -61,14 +64,14 @@ def notes_prose(item):
 
 def main():
     reg = load_registry(DATA)
-    files = sorted(glob.glob(f"data/{LIBRARY}/*/*.json"))
+    files = sorted(str(p) for p in (DATA / LIBRARY).glob("*/*.json"))
     payloads = {f: json.load(open(f, encoding="utf-8")) for f in files}
     by_book = defaultdict(list)
     for f, p in payloads.items():
         for it in p.get("items", []):
             by_book[it["meta"].get("book")].append((f, it))
 
-    counts = dict(book=0, notes=0, empty=0, skipped=0)
+    counts = dict(book=0, notes=0, empty=0, skipped=0, kept=0)
     dirty = set()
 
     # ---- search the books, several at a time -------------------------------
@@ -118,6 +121,23 @@ def main():
                 new = notes_prose(it)
                 src = "notes" if new else "empty"
             new = new or ""
+            if not new:
+                # Never replace something with nothing.
+                #
+                # This wrote "" over any description the re-scan failed to find
+                # again — 1,926 of them in a single run. It looked survivable
+                # only because the Commlink6 guard put 2,073 back afterwards, at
+                # the cost of doing that work every import; the items the guard
+                # does NOT cover just lost their text, and 11 of them did.
+                #
+                # A re-read that comes up empty means the reader did not find
+                # the block this time, not that the book stopped describing the
+                # item. The one thing still worth clearing is a description that
+                # is really a stat row, which is junk however it got there.
+                old = str(it["system"].get("description") or "")
+                if old and not desc_is_table_row(old):
+                    counts["kept"] += 1
+                    continue
             if it["system"].get("description", "") != new:
                 dirty.add(f)
             it["system"]["description"] = new
@@ -132,7 +152,7 @@ def main():
                 if desc_is_table_row(it["system"].get("description", "")))
     print(f"\n{'APPLY' if APPLY else 'DRY RUN'} — "
           f"book={counts['book']} notes={counts['notes']} empty={counts['empty']} "
-          f"skipped={counts['skipped']}")
+          f"skipped={counts['skipped']} kept={counts['kept']}")
     print(f"descriptions that are really a stat row: {smell}  (target 0)")
     if not APPLY:
         print("(dry run — re-run with --apply, then tools/apply_corrections.py)")

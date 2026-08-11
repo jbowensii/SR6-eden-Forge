@@ -205,6 +205,7 @@ def main() -> int:
     changed_items = 0
     kept = 0
     cleared = 0
+    dropped = []
     by_pair: Counter[tuple[str, str]] = Counter()
     for path in payloads(data):
         payload = json.loads(path.read_text(encoding="utf-8"))
@@ -234,6 +235,19 @@ def main() -> int:
                 continue
             if item.get("img") == img:
                 continue
+            # Take the file with it. match_icons installs a per-item icon under
+            # <book>/lib/ for every name it matches and this pass re-points 640
+            # of them away, leaving 651 files nothing in the library refers to —
+            # written, orphaned and rewritten on every single import, invisible
+            # because both phases are correct about their own work.
+            was = str(item.get("img") or "")
+            if "/lib/" in was and not args.dry_run:
+                stale = data / "_assets" / was
+                try:
+                    stale.unlink()
+                    dropped.append(stale)
+                except OSError:
+                    pass
             item["img"] = img
             by_pair[pair] += 1
             changed_items += 1
@@ -255,8 +269,48 @@ def main() -> int:
             del defaults[key]
         save_defaults(data, defaults)
 
+    # pass 4 — sweep per-item icons nothing points at any more.
+    #
+    # Removing the file as an item is re-pointed only stops NEW orphans. 651 were
+    # already stranded by earlier runs, and no item refers to them, so nothing
+    # would ever notice or collect them: match_icons rewrites its 654 every
+    # import and this pass re-points 640 straight off them again. Both phases
+    # report success and both are right about their own work, which is exactly
+    # why this went unseen. Only <book>/lib is swept — the flat library and
+    # generic/ are not per-item scratch space.
+    if not args.dry_run:
+        used = set()
+        for path in payloads(data):
+            for item in json.loads(path.read_text(encoding="utf-8")).get("items", []):
+                if item.get("img"):
+                    used.add(str(item["img"]))
+        assets = data / "_assets"
+        for book in (p for p in assets.iterdir()
+                     if p.is_dir() and p.name != "generic"):
+            for stale in book.rglob("*.*"):
+                if stale.relative_to(assets).as_posix() in used:
+                    continue
+                try:
+                    stale.unlink()
+                    dropped.append(stale)
+                except OSError:
+                    pass
+            for empty in sorted((d for d in book.rglob("*") if d.is_dir()),
+                                reverse=True):
+                try:
+                    empty.rmdir()
+                except OSError:
+                    pass                  # not empty; something still lives there
+            try:
+                book.rmdir()
+            except OSError:
+                pass
+
     missing = [p for p in pairs if p not in installed]
     print(f"\n{changed_items} items re-pointed, {kept} left on their own art")
+    if dropped:
+        print(f"{len(dropped)} orphaned per-item icon(s) removed with the items "
+              f"that stopped pointing at them")
     if cleared:
         print(f"{cleared} placeholder icon(s) cleared from "
               f"{', '.join(sorted(NO_CATEGORY_ICON))} — they await a portrait")

@@ -221,7 +221,54 @@ def rule_graphics_know_their_book(data: _P, items, corrections):
             unknown[:8])
 
 
+def rule_nothing_went_backwards(data: _P, items, corrections):
+    """Coverage may go up. It may not quietly fall.
+
+    This is the rule that does not need me to have seen the bug first. Every
+    other check here names a specific defect; this one notices the SHAPE of all
+    of them — an import that finishes with less than the one before it.
+
+    It is what would have caught rebuild_descriptions writing "" over 1,926
+    descriptions on the day it started doing it, instead of a fortnight later
+    from a backup comparison. Only the Commlink6 guard putting 2,073 of them
+    back made the loss small enough to hide.
+
+    The floor is the best figure seen so far, kept in _assets/_health.json, with
+    2% of slack so ordinary churn does not cry wolf. Deleting things on purpose
+    lowers the floor honestly: the file is rewritten whenever a number improves,
+    and you can delete it to re-baseline after a deliberate cull.
+    """
+    now = {
+        "items": len(items),
+        "descriptions": sum(1 for _, it in items
+                            if str((it.get("system") or {}).get("description") or "").strip()),
+        "images": sum(1 for _, it in items if str(it.get("img") or "").strip()),
+    }
+    path = data / "_assets" / "_health.json"
+    try:
+        floor = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        floor = {}
+    dropped = []
+    for key, value in now.items():
+        was = floor.get(key)
+        if isinstance(was, int) and value < was * 0.98:
+            dropped.append(f"{key}: {was} -> {value} ({was - value} fewer)")
+    # remember the high-water mark, so the floor only ever rises
+    merged = {k: max(v, floor.get(k, 0) if isinstance(floor.get(k), int) else 0)
+              for k, v in now.items()}
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(merged, indent=2) + "\n", encoding="utf-8")
+    except OSError:
+        pass
+    return (not dropped,
+            f"the library finished smaller than it has been before",
+            dropped)
+
+
 RULES = [
+    ("nothing went backwards", rule_nothing_went_backwards),
     ("deletions stick", rule_deletions_stick),
     ("critters and NPCs await a portrait", rule_portraits_are_not_guessed),
     ("no remembered default for those types", rule_no_remembered_default_for_excluded_types),

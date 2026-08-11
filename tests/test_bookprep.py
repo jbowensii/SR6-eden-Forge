@@ -809,3 +809,72 @@ def test_rules_pass_on_a_clean_library(tmp_path):
     for name, rule in mod.RULES:
         ok, message, _ = rule(tmp_path, items, corrections)
         assert ok, f"{name} cannot pass even on a clean library: {message}"
+
+
+# ---------- never replace something with nothing ----------
+
+def _rd():
+    import importlib.util
+    from pathlib import Path
+    src = Path(__file__).resolve().parent.parent / "tools" / "rebuild_descriptions.py"
+    spec = importlib.util.spec_from_file_location("_rd", src)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_a_failed_reread_does_not_erase_a_description():
+    """It wrote "" over any description the re-scan failed to find again — 1,926
+    in one run. It looked survivable only because the Commlink6 guard put 2,073
+    back afterwards, every import; the items the guard does not cover just lost
+    their text."""
+    from pathlib import Path
+    src = Path(__file__).resolve().parent.parent / "tools" / "rebuild_descriptions.py"
+    text = src.read_text(encoding="utf-8")
+    assert "Never replace something with nothing." in text
+    assert 'counts["kept"] += 1' in text
+    assert text.index("if not new:") < text.index('it["system"]["description"] = new'), \
+        "the guard must come before the write"
+
+
+def test_junk_is_still_cleared_but_prose_is_not():
+    """Blanking is right for a stat row that landed in the description field and
+    wrong for a sentence. The distinction is what lets the guard be safe."""
+    mod = _rd()
+    assert mod.desc_is_table_row("4/5 9 20 160 11 4 1 2 4 2 16,000") is True
+    assert mod.desc_is_table_row(
+        "Extra spikes, dark colors, and a generally angry-looking aesthetic.") is False
+
+
+def test_the_description_phase_asks_where_the_library_is():
+    """It used a path relative to the working directory, so from the wrong
+    folder it would rewrite every description in the developer's scratch copy
+    and report success."""
+    from pathlib import Path
+    src = Path(__file__).resolve().parent.parent / "tools" / "rebuild_descriptions.py"
+    text = src.read_text(encoding="utf-8")
+    assert "DATA = data_root()" in text
+    assert 'glob.glob("data/' not in text and 'glob.glob(f"data/' not in text
+
+
+def test_the_ratchet_notices_a_library_that_shrank(tmp_path):
+    """The one rule that does not need the bug to have happened first: it knows
+    the SHAPE of all of them — an import finishing with less than the one
+    before."""
+    import json
+    mod = _verify()
+    (tmp_path / "_assets").mkdir()
+    (tmp_path / "_assets" / "_health.json").write_text(
+        json.dumps({"items": 5000, "descriptions": 4000, "images": 4900}), encoding="utf-8")
+    items = [("gear", {"id": str(i), "name": "x", "system": {"description": "d"}, "img": "a.webp"})
+             for i in range(100)]
+    ok, message, dropped = mod.rule_nothing_went_backwards(tmp_path, items, [])
+    assert not ok and dropped, "a library that lost 98% of its items passed"
+
+    # and the floor only ever rises
+    big = [("gear", {"id": str(i), "name": "x", "system": {"description": "d"}, "img": "a.webp"})
+           for i in range(9000)]
+    ok, _, _ = mod.rule_nothing_went_backwards(tmp_path, big, [])
+    assert ok
+    floor = json.loads((tmp_path / "_assets" / "_health.json").read_text(encoding="utf-8"))
+    assert floor["items"] == 9000, "the high-water mark was not remembered"
