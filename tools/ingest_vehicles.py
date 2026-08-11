@@ -200,6 +200,43 @@ def _by_suffix(page_key: str, cl6_by_name: dict, claimed: set):
     return hits[0], cl6_by_name[hits[0]]
 
 
+def deleted_vehicles(data):
+    """Vehicles the user deleted, from the corrections layer.
+
+    Without this the ingest resurrects them. fold_into_authority carries through
+    EVERY Commlink6 row, so a vehicle deleted in the review app is rebuilt by the
+    next import and stays gone only if a later phase happens to remove it again.
+    Thirty of them were sitting in the library that way, and the count only
+    looked right because apply_corrections had not run since. Deleting something
+    has to survive the thing that rebuilds it — the same rule the pruned-art
+    ledger enforces for graphics.
+
+    Matched on id AND on name, because a fold moves a row's id onto the
+    Commlink6 authority's and a tombstone written before that move would
+    otherwise stop matching.
+
+    Returns ``(ids, names)``; names are norm_base keys.
+    """
+    from extractor.merge import norm_base
+
+    ids, names = set(), set()
+    for path in (data / "_corrections").rglob("*.json"):
+        try:
+            rec = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if not isinstance(rec, dict) or rec.get("domain") != "vehicles":
+            continue
+        if not rec.get("deleted"):
+            continue
+        if rec.get("id"):
+            ids.add(rec["id"])
+        name = ((rec.get("ref") or {}).get("name") or rec.get("name") or "").strip()
+        if name:
+            names.add(norm_base(name))
+    return ids, names
+
+
 def fold_into_authority(byname: dict, cl6_by_name: dict):
     """Merge page-read vehicles into the Commlink6 rows that already name them.
 
@@ -410,6 +447,18 @@ if __name__ == "__main__":
             print(f"    {now:38} +{n} field(s){note}", flush=True)
         if len(folded) > 15:
             print(f"    ... and {len(folded) - 15} more", flush=True)
+
+    # Drop what the user deleted, BEFORE writing. Doing it here rather than
+    # leaving it to apply_corrections is the difference between a deletion that
+    # holds and one that depends on which phase ran last.
+    dead_ids, dead_names = deleted_vehicles(DATA)
+    dropped = [k for k, r in byname.items()
+               if r.get("_id") in dead_ids or k in dead_names]
+    for key in dropped:
+        del byname[key]
+    if dropped:
+        print(f"left out {len(dropped)} vehicle(s) deleted in the review app "
+              f"(they would otherwise be rebuilt every import)", flush=True)
 
     recs = sorted(byname.values(), key=lambda r: (r["system"]["subtype"], r["name"]))
     # vehicles are their own site domain (Eden treats them as actors, which are

@@ -29,3 +29,38 @@ def test_the_corebook_text_readers_still_run_first():
         "the anchored scan now runs before the corebook readers"
     tail = text[text.index("for r in map_jobs(vehicle_scan_book"):]
     assert "byname.setdefault(" in tail, "scanned rows must not overwrite the table rows"
+
+
+# ---------- a deleted vehicle must not come back on the next import ----------
+
+def test_deleted_vehicles_are_read_from_the_corrections_layer(tmp_path):
+    import importlib.util, json
+    src = __import__("pathlib").Path(__file__).resolve().parent.parent / "tools" / "ingest_vehicles.py"
+    spec = importlib.util.spec_from_file_location("_iv_del", src)
+    iv = importlib.util.module_from_spec(spec); spec.loader.exec_module(iv)
+
+    d = tmp_path / "_corrections" / "vehicles"
+    d.mkdir(parents=True)
+    (d / "a.json").write_text(json.dumps(
+        {"domain": "vehicles", "id": "cl6_gmc_bulldog", "deleted": True,
+         "ref": {"name": "GMC Bulldog"}}), encoding="utf-8")
+    (d / "b.json").write_text(json.dumps(
+        {"domain": "vehicles", "id": "cl6_keep_me", "name": "Keeper"}), encoding="utf-8")
+    (d / "c.json").write_text(json.dumps(
+        {"domain": "gear", "id": "g1", "deleted": True}), encoding="utf-8")
+
+    ids, names = iv.deleted_vehicles(tmp_path)
+    assert ids == {"cl6_gmc_bulldog"}, "a live correction or another domain leaked in"
+    assert "gmcbulldog" in names, "the name is needed too — a fold moves the id"
+
+
+def test_the_ingest_drops_deleted_rows_before_writing():
+    """fold_into_authority carries through every Commlink6 row, so a vehicle
+    deleted in the review app is rebuilt by the next import. Thirty were back in
+    the library that way; the count only looked right because apply_corrections
+    had not run since. The deletion has to be applied by the thing that rebuilds
+    the domain, not by a later phase that may or may not follow it."""
+    text = _ingest_src()
+    assert "dead_ids, dead_names = deleted_vehicles(DATA)" in text
+    assert text.index("deleted_vehicles(DATA)") < text.index("recs = sorted(byname.values()"), \
+        "the drop must happen before the rows are written"
