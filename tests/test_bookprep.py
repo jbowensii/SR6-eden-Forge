@@ -929,3 +929,94 @@ def test_the_search_covers_a_commlink6_row_with_no_text():
     assert '.get("description")' in wanted, (
         "the search skips every Commlink6 row instead of only the described ones")
     assert 'name_variants(it["name"])' in wanted
+
+
+# ---------- a correction must follow its item across a domain ----------
+
+def _ac():
+    import importlib.util
+    from pathlib import Path
+    src = Path(__file__).resolve().parent.parent / "tools" / "apply_corrections.py"
+    return src.read_text(encoding="utf-8")
+
+
+def test_a_correction_follows_its_item_to_a_new_domain():
+    """A correction records the domain an item was in, and the lookup only ever
+    searched there. The phases MOVE things: the sprites end up in critters, and
+    Camera, Folding Stock and Stealth are re-filed out of electronics by phases
+    4 to 7. Once an item crosses a domain its tombstone can never find it again
+    — fourteen deletions silently stopped working and the items came back on
+    every import."""
+    text = _ac()
+    assert "def _domains_holding():" in text, "no index of where ids actually live"
+    assert "_MOVED = _domains_holding()" in text, "the index is built but never used"
+    assert "elsewhere = _MOVED.get(cid, set()) - {domain}" in text
+    # the follow must happen BEFORE the deletion branch, or a tombstone whose
+    # item moved still finds nothing
+    assert text.index("elsewhere = _MOVED.get(") < text.index('if rec.get("deleted"):')
+
+
+def test_an_id_in_two_domains_is_left_alone():
+    """Commlink6 reuses ids across books. Guessing which of two items a
+    correction meant is worse than not applying it."""
+    text = _ac()
+    follow = text[text.index("elsewhere = _MOVED.get("):text.index('if rec.get("deleted"):')]
+    assert "len(elsewhere) == 1" in follow, "an ambiguous id would be followed blindly"
+
+
+def test_the_index_is_built_before_anything_is_written():
+    """It maps ids to domains by reading the library. Built lazily, it would see
+    files this run has already rewritten and follow an item to where it was put
+    rather than where it was found."""
+    text = _ac()
+    assert text.index("_MOVED = _domains_holding()") < text.index("for cf in sorted(glob.glob(")
+
+
+# ---------- orphaned icons are swept after the corrections, not before ----------
+
+def test_the_orphan_sweep_is_reusable_and_runs_last():
+    """install_category_icons sweeps during its own run, but corrections are
+    applied later, and a correction that re-points an item away from its icon
+    strands that file behind the sweep. One per import, every import, and no
+    phase is wrong about anything — the file belongs to no item."""
+    from pathlib import Path
+    ici = (Path(__file__).resolve().parent.parent / "tools"
+           / "install_category_icons.py").read_text(encoding="utf-8")
+    assert "def sweep_orphans(data: _P, dry_run: bool = False) -> int:" in ici
+    assert '"--sweep-only"' in ici, "the sweep cannot be run on its own"
+
+    imp = (Path(__file__).resolve().parent.parent / "tools"
+           / "import_library.py").read_text(encoding="utf-8")
+    assert "sweep_orphans(data_root)" in imp, "the import never sweeps"
+    assert imp.index("[CORRECTIONS_PHASE]") < imp.index("sweep_orphans(data_root)"), \
+        "the sweep must run AFTER the corrections that orphan the file"
+    assert imp.index("sweep_orphans(data_root)") < imp.index("_verify.RULES"), \
+        "sweep before the checks, or the check reports what was just fixed"
+
+
+def test_the_sweep_only_touches_per_book_folders(tmp_path):
+    """The flat library and generic/ are not per-item scratch space."""
+    import importlib.util, json
+    from pathlib import Path
+    src = Path(__file__).resolve().parent.parent / "tools" / "install_category_icons.py"
+    spec = importlib.util.spec_from_file_location("_ici3", src)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    d = tmp_path / "corebook" / "gear"
+    d.mkdir(parents=True)
+    (d / "gear.json").write_text(json.dumps({"items": [
+        {"id": "a", "name": "Keeper", "img": "corebook/lib/keep.webp"}]}), encoding="utf-8")
+    assets = tmp_path / "_assets"
+    (assets / "corebook" / "lib").mkdir(parents=True)
+    (assets / "generic").mkdir()
+    (assets / "corebook" / "lib" / "keep.webp").write_bytes(b"x")
+    (assets / "corebook" / "lib" / "orphan.webp").write_bytes(b"x")
+    (assets / "generic" / "shared.webp").write_bytes(b"x")
+    (assets / "p001_x1.webp").write_bytes(b"x")
+
+    assert mod.sweep_orphans(tmp_path) == 1
+    assert (assets / "corebook" / "lib" / "keep.webp").is_file(), "a referenced icon was deleted"
+    assert not (assets / "corebook" / "lib" / "orphan.webp").exists()
+    assert (assets / "generic" / "shared.webp").is_file(), "generic/ must not be swept"
+    assert (assets / "p001_x1.webp").is_file(), "the flat library must not be swept"

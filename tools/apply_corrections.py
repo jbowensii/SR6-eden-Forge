@@ -53,7 +53,31 @@ def _load_domain(domain):
     return out
 
 
+def _domains_holding():
+    """id -> the domains that currently contain a row with that id.
+
+    A correction records the domain an item was in when it was made, and the
+    lookup only ever searched there. But the phases MOVE things: the sprites
+    ended up in critters, and Camera, Folding Stock and Stealth are re-filed out
+    of electronics by phases 4 to 7. Once an item crosses a domain its
+    correction can never find it again — fourteen deletions silently stopped
+    working that way, and the item quietly came back on every import.
+    """
+    index = {}
+    for f in glob.glob(str(DATA / LIBRARY / "*" / "*.json")):
+        path = _P(f)
+        try:
+            doc = json.load(open(f, encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        for it in doc.get("items") or []:
+            if isinstance(it, dict) and it.get("id"):
+                index.setdefault(it["id"], set()).add(path.parent.name)
+    return index
+
+
 applied = deleted = rematched = 0
+_MOVED = _domains_holding()   # id -> domains, so a correction can follow its item
 field_changes = Counter()
 if not CORR.is_dir():
     print("no corrections to apply")
@@ -71,6 +95,25 @@ else:
                     break
             if target:
                 break
+
+        # Not in the domain the record names? Follow it to the domain it is in
+        # now. Only when exactly one domain holds that id — Commlink6 reuses ids
+        # across books, and applying an edit to the wrong item is worse than not
+        # applying it.
+        if target is None:
+            elsewhere = _MOVED.get(cid, set()) - {domain}
+            if len(elsewhere) == 1:
+                moved_to = next(iter(elsewhere))
+                files = _load_domain(moved_to)
+                for stem, (path, payload) in files.items():
+                    for it in payload["items"]:
+                        if it["id"] == cid:
+                            target = (path, payload, it)
+                            break
+                    if target:
+                        break
+                if target:
+                    rematched += 1
 
         # The id moved? Fall back to the reference the record carries.
         #

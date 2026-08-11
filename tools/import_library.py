@@ -490,6 +490,26 @@ def run(data_root: _P, jar: _P | None, only: str | None, apply: bool,
                 if isinstance(doc.get("items"), list):
                     total_items += len(doc["items"])
 
+    # Collect orphaned per-item icons AFTER the corrections, not before.
+    #
+    # install_category_icons sweeps as part of its own run, but corrections are
+    # applied later and a correction that re-points an item away from its icon
+    # orphans that file behind the sweep. One per import, every import, and
+    # nothing would ever have noticed: the file belongs to no item, so no phase
+    # is wrong about anything.
+    try:
+        import importlib.util
+        _spec = importlib.util.spec_from_file_location(
+            "_ici", Path(__file__).resolve().parent / "install_category_icons.py")
+        _ici = importlib.util.module_from_spec(_spec)
+        _spec.loader.exec_module(_ici)
+        swept = _ici.sweep_orphans(data_root)
+        if swept:
+            print(f"\ncollected {swept} orphaned per-item icon(s) left behind by "
+                  f"the corrections", flush=True)
+    except Exception as e:
+        print(f"\n(could not sweep orphaned icons: {e!r})", flush=True)
+
     # The import checks its own work, last of all.
     #
     # Every defect this pipeline has shipped was a phase reporting success while

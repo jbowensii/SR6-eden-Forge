@@ -129,12 +129,60 @@ def replaceable(img: str, item_icons: bool = False) -> bool:
     return item_icons and "/lib/" in img
 
 
+def sweep_orphans(data: _P, dry_run: bool = False) -> int:
+    """Delete per-item icons nothing in the library points at.
+
+    match_icons installs one per name match and install_category_icons re-points
+    most of them away, leaving files nothing refers to — 651 of them, rewritten
+    and re-orphaned every import, invisible because both phases are correct
+    about their own work. Only <book>/lib is swept; the flat library and
+    generic/ are not per-item scratch space.
+    """
+    used = set()
+    for path in payloads(data):
+        for item in json.loads(path.read_text(encoding="utf-8")).get("items", []):
+            if item.get("img"):
+                used.add(str(item["img"]))
+    assets = data / "_assets"
+    if not assets.is_dir():
+        return 0
+    dropped = 0
+    for book in (p for p in assets.iterdir() if p.is_dir() and p.name != "generic"):
+        for stale in list(book.rglob("*.*")):
+            if stale.relative_to(assets).as_posix() in used:
+                continue
+            if dry_run:
+                dropped += 1
+                continue
+            try:
+                stale.unlink()
+                dropped += 1
+            except OSError:
+                pass
+        if dry_run:
+            continue
+        for empty in sorted((d for d in book.rglob("*") if d.is_dir()), reverse=True):
+            try:
+                empty.rmdir()
+            except OSError:
+                pass
+        try:
+            book.rmdir()
+        except OSError:
+            pass
+    return dropped
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--data", type=_P, default=None)
     ap.add_argument("--icons", default="", help=f"folder of icons (default: <library>/{DEFAULT_SUBDIR})")
     ap.add_argument("--dry-run", action="store_true", help="report, change nothing")
+    ap.add_argument("--sweep-only", action="store_true",
+                    help="only collect per-item icons nothing points at; install nothing. "
+                         "Run LAST, after corrections: a correction that re-points an item "
+                         "away from its icon orphans that file after the normal sweep.")
     ap.add_argument("--replace-item-icons", action="store_true",
                     help="also replace the importer's per-item name-matched icons "
                          "(<book>/lib/...) with the category icon; extracted book "
@@ -144,6 +192,11 @@ def main() -> int:
     args = ap.parse_args()
 
     data = args.data or data_root()
+    if args.sweep_only:
+        n = sweep_orphans(data, dry_run=args.dry_run)
+        print(f"{n} orphaned per-item icon(s) removed" if n
+              else "no orphaned per-item icons")
+        return 0
     folder = find_icons(data, args.icons)
     if folder is None:
         print(f"no icon folder found (looked for '{DEFAULT_SUBDIR}' under the configured library)")
