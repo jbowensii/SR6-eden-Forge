@@ -54,6 +54,12 @@ def dump(book, pdf):
     out.mkdir(parents=True, exist_ok=True)
     doc = fitz.open(str(pdf))
     seen, saved, skipped_full, skipped_small, failed = set(), 0, 0, 0, 0
+    # filename -> (book, page). Flat storage threw the book away: p048_x1029.webp
+    # could have come from any of fifty PDFs, and two books really do both have
+    # one. Auto-pairing keys on (book, page), so without this it cannot run at
+    # all — it silently paired 0 items and reported that as a success line.
+    # Recorded for files already on disk too, not just ones written this run.
+    index = {}
     for pno in range(doc.page_count):
         page = doc[pno]
         parea = abs(page.rect) or 1.0
@@ -75,7 +81,10 @@ def dump(book, pdf):
             tag = f"p{pno + 1:03d}_x{xref}"
             if tag in skip:
                 continue                    # thrown away on purpose; leave it out
-            if any(out.glob(f"*{tag}.*")):
+            already = list(out.glob(f"*{tag}.*"))
+            if already:
+                for p in already:
+                    index[p.name] = [book, pno + 1]
                 saved += 1
                 continue
             dest = out / f"{tag}.png"
@@ -95,6 +104,7 @@ def dump(book, pdf):
                 if cs is None or cs.n not in (1, 3):
                     pix = fitz.Pixmap(fitz.csRGB, pix)
                 pix.save(str(dest))
+                index[dest.name] = [book, pno + 1]
                 saved += 1
             except Exception as e:
                 # COUNTED, never silent. A bare `pass` here is what let 915
@@ -103,13 +113,18 @@ def dump(book, pdf):
                 if failed <= 3:
                     print(f"    {book}: could not extract xref {xref} — "
                           f"{type(e).__name__}: {e}", flush=True)
-    return saved, skipped_full, skipped_small, failed
+    return saved, skipped_full, skipped_small, failed, index
 
 
 if __name__ == "__main__":
     reg = load_registry(DATA)
     only = set(sys.argv[1:])
     grand = 0
+    index_path = DATA / "_assets" / "_index.json"
+    try:
+        index = json.loads(index_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        index = {}
     for book, meta in reg.items():
         if book in SKIP or (only and book not in only):
             continue
@@ -117,12 +132,16 @@ if __name__ == "__main__":
         if not pdf.is_file():
             continue
         try:
-            s, f, sm, bad = dump(book, pdf)
+            s, f, sm, bad, idx = dump(book, pdf)
+            index.update(idx)
             grand += s
             note = f" FAILED={bad}" if bad else ""
             print(f"{book:22} saved={s:>4} (skipped full={f:>4} small={sm:>4})"
                   f"{note}", flush=True)
         except Exception as e:
             print(f"{book:22} ERROR {e}", flush=True)
-    print(f"TOTAL illustrations={grand}")
+    index_path.parent.mkdir(parents=True, exist_ok=True)
+    index_path.write_text(json.dumps(index, indent=0, sort_keys=True) + "\n",
+                          encoding="utf-8")
+    print(f"TOTAL illustrations={grand}  (indexed {len(index)} file(s) to their book/page)")
     print("done")

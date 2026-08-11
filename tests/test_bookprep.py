@@ -454,7 +454,7 @@ def test_the_extractor_reads_the_pruned_ledger():
     # and the consultation must come BEFORE the already-on-disk shortcut,
     # or a pruned graphic is re-extracted whenever it is absent — which is
     # precisely when it has been pruned
-    assert text.index("if tag in skip:") < text.index("if any(out.glob("), \
+    assert text.index("if tag in skip:") < text.index("already = list(out.glob("), \
         "the ledger is checked after the file-exists shortcut"
 
 
@@ -553,7 +553,7 @@ def test_the_extractor_writes_flat_into_assets():
     text = src.read_text(encoding="utf-8")
     assert 'out = DATA / "_assets"\n' in text, "still writing per-book"
     assert '_assets" / book' not in text, "a per-book path survives"
-    assert 'any(out.glob(f"*{tag}.*"))' in text, "the existing-file check must use the same dir"
+    assert 'out.glob(f"*{tag}.*")' in text, "the existing-file check must use the same dir"
 
 
 def test_critters_and_npcs_are_not_given_a_guessed_icon():
@@ -599,3 +599,57 @@ def test_a_phase_with_nothing_to_do_finishes_instead_of_crashing():
     line = line[:line.index("left as they were")]
     assert "{ratio}" in line, "the summary does not use the guarded ratio"
     assert "/ before" not in line, "an unguarded division survives in the output line"
+
+
+# ---------- flat storage must not throw the book away ----------
+
+def test_the_extractor_records_which_book_each_graphic_came_from():
+    """Flat storage lost it: p048_x1029.webp could be from any of fifty PDFs,
+    and two books really do both have one. Auto-pairing keys on (book, page), so
+    without this index it cannot run at all — it paired 0 items every time and
+    printed that as a success line."""
+    from pathlib import Path
+    src = Path(__file__).resolve().parent.parent / "tools" / "dump_book_images.py"
+    text = src.read_text(encoding="utf-8")
+    assert "_index.json" in text, "the book/page index is never written"
+    assert "index[dest.name] = [book, pno + 1]" in text, "newly saved files are not indexed"
+    assert "index[p.name] = [book, pno + 1]" in text, \
+        "files already on disk are not indexed — the index would only ever cover a fresh run"
+    assert "return saved, skipped_full, skipped_small, failed, index" in text
+
+
+def test_pairing_asks_where_the_library_is_and_reads_the_index():
+    """Three ways this phase reported 'auto-paired 0' as though it were a result:
+    it globbed 'data/...' relative to the working directory instead of asking
+    data_root(), it looked in _assets/<book>/_inbox/ which no longer exists, and
+    it matched *.png on a library that is entirely WebP."""
+    from pathlib import Path
+    src = Path(__file__).resolve().parent.parent / "tools" / "pair_art.py"
+    text = src.read_text(encoding="utf-8")
+    assert "from extractor.paths import data_root" in text
+    assert "DATA = data_root()" in text
+    assert "_inbox" not in text.split('"""', 2)[-1], "still globbing the old per-book inbox"
+    assert 'glob.glob("data/' not in text and 'glob.glob(f"data/' not in text, \
+        "still reading a path relative to the working directory"
+    assert "_index.json" in text, "pairing does not consult the book/page index"
+
+
+def test_the_index_round_trips_through_the_loader(tmp_path):
+    import json
+    import importlib.util
+    from pathlib import Path
+    src = Path(__file__).resolve().parent.parent / "tools" / "pair_art.py"
+    spec = importlib.util.spec_from_file_location("_pa", src)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    (tmp_path / "_index.json").write_text(json.dumps({
+        "p048_x1029.webp": ["double_clutch", 48],
+        "ares_predator_p012_x77.webp": ["corebook", 12],
+        "junk.webp": "not-a-pair",
+    }), encoding="utf-8")
+    idx = mod.load_index(tmp_path)
+    assert idx["p048_x1029.webp"] == ("double_clutch", 48)
+    assert idx["ares_predator_p012_x77.webp"] == ("corebook", 12)
+    assert "junk.webp" not in idx, "a malformed row must be skipped, not crash the phase"
+    assert mod.load_index(tmp_path / "nope") == {}
