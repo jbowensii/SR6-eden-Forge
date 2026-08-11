@@ -490,6 +490,49 @@ def run(data_root: _P, jar: _P | None, only: str | None, apply: bool,
                 if isinstance(doc.get("items"), list):
                     total_items += len(doc["items"])
 
+    # The import checks its own work, last of all.
+    #
+    # Every defect this pipeline has shipped was a phase reporting success while
+    # doing nothing or while undoing something, and every one was found days
+    # later by a human reading the library — never by the import, which had
+    # already said "done". Each rule in verify_library is one of those bugs
+    # written as a fact that must hold afterwards. Fixing them one at a time
+    # never ended the cycle; this is what ends it.
+    print("\nchecking the finished library", flush=True)
+    try:
+        from tools import verify_library as _verify           # noqa: PLC0415
+    except ImportError:
+        import importlib.util
+        _spec = importlib.util.spec_from_file_location(
+            "_verify", Path(__file__).resolve().parent / "verify_library.py")
+        _verify = importlib.util.module_from_spec(_spec)
+        _spec.loader.exec_module(_verify)
+    try:
+        items = list(_verify._items(data_root))
+        corrections = list(_verify._corrections(data_root))
+        broken = []
+        for rule_name, rule in _verify.RULES:
+            try:
+                ok, message, offenders = rule(data_root, items, corrections)
+            except Exception as e:
+                ok, message, offenders = False, f"the check itself failed — {e!r}", []
+            if ok:
+                continue
+            broken.append(rule_name)
+            print(f"  !! {rule_name}: {message}", flush=True)
+            for line in offenders:
+                print(f"       {line}", flush=True)
+        if broken:
+            # NOT counted as a phase failure: the library is written and usable,
+            # and calling this a crash would train you to ignore it. It is the
+            # part of the run that tells the truth about the rest.
+            print(f"  {len(broken)} check(s) failed — the phases all reported "
+                  f"success, so this is the only place it shows", flush=True)
+        else:
+            print(f"  all {len(_verify.RULES)} checks passed", flush=True)
+    except Exception as e:
+        print(f"  (could not verify the library: {e!r})", flush=True)
+
     print(f"\nTOTALS commlink6={totals['jarItems']} pdf-new={totals['new']} "
           f"descriptions={totals['descriptions']} ids-minted={minted}")
     print(f"LIBRARY {total_items} items in {data_root}")

@@ -733,3 +733,79 @@ def test_the_guard_does_not_protect_a_row_the_user_deleted(tmp_path):
     assert "cl6_ford" in guarded, "a live Commlink6 row must still be guarded"
     assert "cl6_dodge_scoot" not in guarded, "the guard would resurrect a deleted row"
     assert "cl6_dodge_scoot" not in snap["fields"]
+
+
+# ---------- the import checks its own work ----------
+
+def _verify():
+    import importlib.util
+    from pathlib import Path
+    src = Path(__file__).resolve().parent.parent / "tools" / "verify_library.py"
+    spec = importlib.util.spec_from_file_location("_vl", src)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_every_bug_of_this_kind_has_a_rule():
+    """The cycle only ends if each defect leaves a check behind. These are the
+    ones that shipped as successful runs; none may quietly lose its rule."""
+    mod = _verify()
+    names = {n for n, _ in mod.RULES}
+    assert names >= {
+        "deletions stick",                          # guard resurrected 29 vehicles
+        "critters and NPCs await a portrait",       # 216 kept generic/critter.svg
+        "no remembered default for those types",    # defaults.json undid both passes
+        "no art nobody references",                 # 1,001 dupes; 651 orphaned icons
+        "pruned art stays deleted",                 # 3,115 images came back
+        "every image reference resolves",           # WebP migration broke links
+        "graphics know their book",                 # flat names lost the book
+    }
+    assert all(callable(r) for _, r in mod.RULES)
+
+
+def test_the_import_runs_the_checks_at_the_end():
+    """A checker nothing calls is exactly the failure it exists to catch."""
+    from pathlib import Path
+    src = Path(__file__).resolve().parent.parent / "tools" / "import_library.py"
+    text = src.read_text(encoding="utf-8")
+    assert "verify_library" in text, "the import never runs the checks"
+    assert "for rule_name, rule in _verify.RULES:" in text
+    assert text.index("_verify.RULES") < text.index("TOTALS commlink6"), \
+        "the checks must run before the summary that claims success"
+
+
+def test_a_rule_that_raises_counts_as_a_failure():
+    """A check that errors must not read as a pass — that is this whole class of
+    bug wearing a different hat."""
+    mod = _verify()
+    def exploding(data, items, corrections):
+        raise RuntimeError("boom")
+    ok = True
+    try:
+        ok, _, _ = exploding(None, [], [])
+    except Exception:
+        ok = False
+    assert ok is False
+    src = __import__("pathlib").Path(mod.__file__).read_text(encoding="utf-8")
+    assert "the check itself failed" in src
+
+
+def test_rules_pass_on_a_clean_library(tmp_path):
+    """The rules must be satisfiable — a check that can never pass gets ignored."""
+    import json
+    mod = _verify()
+    d = tmp_path / "corebook" / "gear"
+    d.mkdir(parents=True)
+    (tmp_path / "_assets").mkdir()
+    (d / "gear.json").write_text(json.dumps({"book": "corebook", "domain": "gear",
+        "category": "gear", "items": [
+            {"id": "a", "name": "Ares Predator VI", "system": {"type": "WEAPON_FIREARMS"}},
+            {"id": "b", "name": "A Critter", "system": {"type": "CRITTER"}},
+        ]}), encoding="utf-8")
+    items = list(mod._items(tmp_path))
+    corrections = list(mod._corrections(tmp_path))
+    assert len(items) == 2
+    for name, rule in mod.RULES:
+        ok, message, _ = rule(tmp_path, items, corrections)
+        assert ok, f"{name} cannot pass even on a clean library: {message}"
