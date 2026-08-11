@@ -836,9 +836,16 @@ def test_the_reader_does_not_touch_a_commlink6_description():
     from pathlib import Path
     src = Path(__file__).resolve().parent.parent / "tools" / "rebuild_descriptions.py"
     text = src.read_text(encoding="utf-8")
-    assert "if is_authoritative(it):" in text, "the phase still writes over Commlink6"
-    assert text.index("if is_authoritative(it):") < text.index('it["system"]["description"] = new'), \
+    anchor = 'if is_authoritative(it) and str(it["system"].get("description") or "").strip():'
+    assert anchor in text, "the phase still writes over text Commlink6 states"
+    assert text.index(anchor) < text.index('it["system"]["description"] = new'), \
         "the ownership check must come before the write"
+    # Silence is not a claim. Commlink6 has no desc at all for Harley-Davidson
+    # Centaur, Sea Ray Cottonmouth or GTI Anubis — their prose is in the books
+    # and nowhere else, so skipping EVERY Commlink6 row locks the reader out of
+    # the only source those seven have.
+    assert "if is_authoritative(it):\n" not in text, \
+        "a blanket skip vetoes fields Commlink6 never stated"
     # and no history-dependent keep: what the reader finds is what gets written
     assert 'counts["kept"]' not in text, (
         "a value kept from a previous run makes the library depend on its own "
@@ -909,12 +916,16 @@ def test_a_two_model_name_is_searched_for_as_each_model():
     assert mod.name_variants("") == []
 
 
-def test_the_search_skips_commlink6_rows_entirely():
-    """Not just at write time — they must not be searched for either, or every
-    import pays for reading blocks it is forbidden to use."""
+def test_the_search_covers_a_commlink6_row_with_no_text():
+    """The search list must match the write rule exactly. Searching for rows the
+    phase may not write wastes the read; NOT searching for a Commlink6 row that
+    has no description strands the seven whose prose exists only in the books."""
     from pathlib import Path
     src = Path(__file__).resolve().parent.parent / "tools" / "rebuild_descriptions.py"
     text = src.read_text(encoding="utf-8")
-    wanted = text[text.index('"wanted":'):text.index("}", text.index('"wanted":'))]
-    assert "not is_authoritative(it)" in wanted
-    assert "name_variants(it[\"name\"])" in wanted
+    start = text.index('"wanted":')
+    wanted = text[start:text.index("})", start)]
+    assert "is_authoritative(it)" in wanted
+    assert '.get("description")' in wanted, (
+        "the search skips every Commlink6 row instead of only the described ones")
+    assert 'name_variants(it["name"])' in wanted

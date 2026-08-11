@@ -132,7 +132,8 @@ def main():
             # the page actually uses is the one that lands.
             "wanted": [(it["id"], variant, it["meta"].get("page") or 0)
                        for _f, it in entries if it["id"] not in CORR
-                       and not is_authoritative(it)
+                       and not (is_authoritative(it)
+                                and str(it["system"].get("description") or "").strip())
                        for variant in name_variants(it["name"])],
         })
 
@@ -161,13 +162,20 @@ def main():
             if it["id"] in CORR:
                 counts["skipped"] += 1
                 continue
-            if is_authoritative(it):
-                # Commlink6 owns its own text. This phase rewrote it from the
-                # books anyway and the guard put 2,073 descriptions back after
-                # every single import — the phase and the guard fighting over
-                # the same field, one undoing the other, for the whole run.
-                # Precedence says Commlink6 outranks anything a reader inferred,
-                # so the reader does not get to touch it in the first place.
+            if is_authoritative(it) and str(it["system"].get("description") or "").strip():
+                # Commlink6 keeps every value IT STATES — and only those.
+                #
+                # The phase used to rewrite Commlink6's own text from the books,
+                # and the guard put 2,073 descriptions back after every import:
+                # the two fighting over one field for the whole run, which is
+                # also how 1,926 came to be blanked.
+                #
+                # But silence is not a claim. Commlink6 has no desc at all for
+                # Harley-Davidson Centaur, Sea Ray Cottonmouth or GTI Anubis —
+                # their prose is in the books and nowhere else. Skipping every
+                # Commlink6 row, as this did briefly, locked the reader out of
+                # the only source those seven have. A row it has described is
+                # its own; a field it left empty is still the book's to fill.
                 counts["commlink6"] += 1
                 continue
             new = blocks.get(it["id"])
