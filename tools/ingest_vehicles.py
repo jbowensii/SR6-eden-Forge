@@ -315,6 +315,17 @@ if __name__ == "__main__":
     # Every other book: stat-block vehicles (fine subtypes from parens), read
     # several at a time. Merging stays here, one book at a time, so first-wins
     # order is unchanged.
+    #
+    # The corebook stays out, and that is not an oversight. Adding it looks like
+    # a clear win from inside the corebook — this reader finds 45 names on
+    # pp. 301-306 where the two readers above find 37 between them, seemingly 27
+    # nobody has. Merged across the whole library it adds EXACTLY ZERO names:
+    # Double Clutch is the vehicle book, its 90 caption-band pages already carry
+    # all 27, and every one of them is a name this loop reads anyway. Scanning
+    # the corebook a third time buys nothing, costs a book's worth of scan time
+    # on an import that is already slow, and makes which book wins a shared name
+    # depend on worker completion order. Measured, not assumed: with and without,
+    # the pre-fold merge is 316 names both ways and nothing is lost either way.
     jobs = [(b, m.get("pdf", "")) for b, m in reg.items()
             if b not in ("corebook", "gun_rack", "rides")
             and _P(m.get("pdf", "")).is_file()]
