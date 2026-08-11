@@ -94,18 +94,40 @@ def find_iscc() -> Path | None:
     return Path(found) if found else None
 
 
+def is_signed(target: Path) -> bool:
+    """Ask Windows whether the file actually carries a valid signature."""
+    rc = run(["powershell", "-NoProfile", "-Command",
+              f"if ((Get-AuthenticodeSignature '{target}').Status -eq 'Valid')"
+              f" {{ exit 0 }} else {{ exit 1 }}"])
+    return rc == 0
+
+
 def sign(target: Path) -> bool:
-    """Sign one file. Returns False when signing was skipped or failed."""
+    """Sign one file. Returns False when signing was skipped or failed.
+
+    The exit code is NOT the test. sign.bat returns 0 whether or not it signed
+    anything — 0.9.11 was built, packaged, published to GitHub and copied to two
+    desktops as "signed" on the strength of that 0, and was the only unsigned
+    release in the history. The only line that distinguishes the two cases is
+    "Code signed successfully" in output nobody reads.
+
+    So the file is asked, not the tool: Windows either sees a valid signature
+    afterwards or the build stops.
+    """
     if not SIGN_TOOL.is_file():
         print(f"      ! signing tool not found at {SIGN_TOOL} — leaving unsigned")
         return False
     rc = run(["powershell", "-NoProfile", "-Command",
               f"& '{SIGN_TOOL}' '{target}'"])
-    if rc == 0:
-        print(f"      signed {target.name}")
-        return True
-    print(f"      ! signing failed for {target.name} (exit {rc})")
-    return False
+    if rc != 0:
+        print(f"      ! signing failed for {target.name} (exit {rc})")
+        return False
+    if not is_signed(target):
+        print(f"      ! {target.name} is NOT signed even though the signing tool "
+              f"reported success — refusing to call this a signed build")
+        raise SystemExit(f"signing silently did nothing for {target}")
+    print(f"      signed {target.name} (verified)")
+    return True
 
 
 def assert_no_books(app_dir: Path) -> None:
