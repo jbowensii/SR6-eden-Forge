@@ -583,3 +583,19 @@ def test_the_two_icon_passes_agree_on_who_is_excluded():
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     assert mod.NO_CATEGORY_ICON == NO_AUTO_ICON
+
+
+def test_a_phase_with_nothing_to_do_finishes_instead_of_crashing():
+    """convert_art_to_webp divided by the original byte total to report a ratio.
+    On a library that is already fully WebP nothing is read, before is 0, and it
+    took the whole import down at phase 20 of 23 — after forty minutes of work,
+    for a phase that had correctly decided it had nothing to do."""
+    from pathlib import Path
+    src = Path(__file__).resolve().parent.parent / "tools" / "convert_art_to_webp.py"
+    text = src.read_text(encoding="utf-8")
+    assert "if before else" in text, "the ratio is computed without guarding before == 0"
+    # the summary line must use the guarded value and never divide on its own
+    line = text[text.index('print(f"converted '):]
+    line = line[:line.index("left as they were")]
+    assert "{ratio}" in line, "the summary does not use the guarded ratio"
+    assert "/ before" not in line, "an unguarded division survives in the output line"

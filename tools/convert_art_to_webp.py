@@ -199,8 +199,14 @@ def main() -> int:
             continue
         moved[rel.as_posix()] = dest.relative_to(assets).as_posix()
         after += size
+    # "of the original size" is meaningless when there was no original: on a
+    # library that is already fully WebP nothing is read, before is 0, and this
+    # line divided by it and took the whole import down at phase 20 of 23 —
+    # after forty minutes of work, for a phase that had correctly decided it had
+    # nothing to do. A phase with no work must finish, not crash.
+    ratio = f"{after / before * 100:.0f}% of {before / 1e6:.0f} MB" if before else "nothing to convert"
     print(f"converted {len(moved) - len(renamed)}, renamed {len(renamed)} already-WebP, "
-          f"{after / 1e6:.0f} MB ({after / before * 100:.0f}% of {before / 1e6:.0f} MB); "
+          f"{after / 1e6:.0f} MB ({ratio}); "
           f"{failed} left as they were")
 
     if broken:
