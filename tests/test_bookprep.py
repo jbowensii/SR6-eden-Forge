@@ -823,18 +823,26 @@ def _rd():
     return mod
 
 
-def test_a_failed_reread_does_not_erase_a_description():
-    """It wrote "" over any description the re-scan failed to find again — 1,926
-    in one run. It looked survivable only because the Commlink6 guard put 2,073
-    back afterwards, every import; the items the guard does not cover just lost
-    their text."""
+def test_the_reader_does_not_touch_a_commlink6_description():
+    """The phase rewrote Commlink6's own text from the books and the guard put
+    2,073 descriptions back after every import — the two fighting over one field
+    for the whole run, which is also how 1,926 got blanked. Precedence says
+    Commlink6 outranks anything a reader inferred, so the reader does not get to
+    write there at all.
+
+    This is the fix that keeps the library reproducible FROM THE BOOKS: no
+    hand-restored text, no value that survives only because a previous run
+    happened to find it."""
     from pathlib import Path
     src = Path(__file__).resolve().parent.parent / "tools" / "rebuild_descriptions.py"
     text = src.read_text(encoding="utf-8")
-    assert "Never replace something with nothing." in text
-    assert 'counts["kept"] += 1' in text
-    assert text.index("if not new:") < text.index('it["system"]["description"] = new'), \
-        "the guard must come before the write"
+    assert "if is_authoritative(it):" in text, "the phase still writes over Commlink6"
+    assert text.index("if is_authoritative(it):") < text.index('it["system"]["description"] = new'), \
+        "the ownership check must come before the write"
+    # and no history-dependent keep: what the reader finds is what gets written
+    assert 'counts["kept"]' not in text, (
+        "a value kept from a previous run makes the library depend on its own "
+        "history instead of on the books")
 
 
 def test_junk_is_still_cleared_but_prose_is_not():

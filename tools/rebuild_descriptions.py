@@ -16,6 +16,7 @@ from extractor.bookprep import env_workers, map_jobs
 from extractor.writeup_scan import scan_book
 from extractor.writeups import is_stat_line
 from extractor.paths import data_root
+from extractor.authority import is_authoritative
 
 # NOT _P("data"). That is the developer's scratch copy; once the builder is
 # installed the real library is elsewhere, and rewriting every description in
@@ -71,7 +72,7 @@ def main():
         for it in p.get("items", []):
             by_book[it["meta"].get("book")].append((f, it))
 
-    counts = dict(book=0, notes=0, empty=0, skipped=0, kept=0)
+    counts = dict(book=0, notes=0, empty=0, skipped=0, commlink6=0)
     dirty = set()
 
     # ---- search the books, several at a time -------------------------------
@@ -115,29 +116,21 @@ def main():
             if it["id"] in CORR:
                 counts["skipped"] += 1
                 continue
+            if is_authoritative(it):
+                # Commlink6 owns its own text. This phase rewrote it from the
+                # books anyway and the guard put 2,073 descriptions back after
+                # every single import — the phase and the guard fighting over
+                # the same field, one undoing the other, for the whole run.
+                # Precedence says Commlink6 outranks anything a reader inferred,
+                # so the reader does not get to touch it in the first place.
+                counts["commlink6"] += 1
+                continue
             new = blocks.get(it["id"])
             src = "book"
             if not new:
                 new = notes_prose(it)
                 src = "notes" if new else "empty"
             new = new or ""
-            if not new:
-                # Never replace something with nothing.
-                #
-                # This wrote "" over any description the re-scan failed to find
-                # again — 1,926 of them in a single run. It looked survivable
-                # only because the Commlink6 guard put 2,073 back afterwards, at
-                # the cost of doing that work every import; the items the guard
-                # does NOT cover just lost their text, and 11 of them did.
-                #
-                # A re-read that comes up empty means the reader did not find
-                # the block this time, not that the book stopped describing the
-                # item. The one thing still worth clearing is a description that
-                # is really a stat row, which is junk however it got there.
-                old = str(it["system"].get("description") or "")
-                if old and not desc_is_table_row(old):
-                    counts["kept"] += 1
-                    continue
             if it["system"].get("description", "") != new:
                 dirty.add(f)
             it["system"]["description"] = new
@@ -152,7 +145,7 @@ def main():
                 if desc_is_table_row(it["system"].get("description", "")))
     print(f"\n{'APPLY' if APPLY else 'DRY RUN'} — "
           f"book={counts['book']} notes={counts['notes']} empty={counts['empty']} "
-          f"skipped={counts['skipped']} kept={counts['kept']}")
+          f"skipped={counts['skipped']} commlink6-owned={counts['commlink6']}")
     print(f"descriptions that are really a stat row: {smell}  (target 0)")
     if not APPLY:
         print("(dry run — re-run with --apply, then tools/apply_corrections.py)")
