@@ -67,6 +67,24 @@ def _library_files(data_root: Path):
             yield from sorted(domain.glob("*.json"))
 
 
+def deleted_ids(data_root: Path) -> set[str]:
+    """Ids the user has deleted, from the corrections layer.
+
+    A tombstone is the only durable record that a row was thrown away on
+    purpose, and the guard has to know about it or it will faithfully undo the
+    deletion every single import.
+    """
+    out: set[str] = set()
+    for path in (Path(data_root) / "_corrections").rglob("*.json"):
+        try:
+            rec = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if isinstance(rec, dict) and rec.get("deleted") and rec.get("id"):
+            out.add(str(rec["id"]))
+    return out
+
+
 def snapshot(data_root: Path) -> dict[str, dict]:
     """Everything needed to put a Commlink6 row back exactly as it was.
 
@@ -86,6 +104,7 @@ def snapshot(data_root: Path) -> dict[str, dict]:
     fields: dict[str, dict] = {}
     rows: dict[str, list] = {}
     root = Path(data_root)
+    buried = deleted_ids(root)
     for f in _library_files(root):
         try:
             doc = json.loads(f.read_text(encoding="utf-8"))
@@ -94,6 +113,15 @@ def snapshot(data_root: Path) -> dict[str, dict]:
         rel = f.relative_to(root).as_posix()
         for item in doc.get("items") or []:
             if not is_authoritative(item) or not item.get("id"):
+                continue
+            if item["id"] in buried:
+                # The snapshot is taken BEFORE the phases run, so it sees rows
+                # the user deleted but the previous import left behind. Phase 3
+                # then correctly leaves them out and the guard reads that as a
+                # phase having destroyed a Commlink6 row, and puts it back: 29
+                # of the 30 vehicles deleted in the review app returned on the
+                # very import whose log said "left out 30". Deleting something
+                # cannot mean "gone until the guard notices it is gone".
                 continue
             sysd = item.get("system") or {}
             kept = {k: sysd[k] for k in GUARDED

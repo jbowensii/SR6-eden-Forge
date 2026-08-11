@@ -698,3 +698,38 @@ def test_the_remembered_default_is_forgotten_for_an_excluded_type():
     assert defaults["CRITTER_AWAKENED/"] == "generic/critter_awakened.webp"
     assert defaults["CRITTER_POWER/"] == "generic/critter_power.webp"
     assert defaults["VEHICLE/CARS"] == "generic/vehicle_cars.webp"
+
+
+# ---------- the guard must not undo a deliberate deletion ----------
+
+def test_the_guard_does_not_protect_a_row_the_user_deleted(tmp_path):
+    """The snapshot is taken BEFORE the phases run, so it sees rows the user
+    deleted but the previous import left behind. Phase 3 correctly leaves them
+    out, the guard reads that as a phase destroying a Commlink6 row, and puts it
+    back: 29 of the 30 vehicles deleted in the review app returned on the very
+    import whose log said "left out 30"."""
+    import json
+    from extractor import authority
+
+    (tmp_path / "_corrections" / "vehicles").mkdir(parents=True)
+    (tmp_path / "_corrections" / "vehicles" / "a.json").write_text(json.dumps(
+        {"domain": "vehicles", "id": "cl6_dodge_scoot", "deleted": True}), encoding="utf-8")
+    (tmp_path / "_corrections" / "vehicles" / "b.json").write_text(json.dumps(
+        {"domain": "vehicles", "id": "cl6_ford", "name": "Ford"}), encoding="utf-8")
+    assert authority.deleted_ids(tmp_path) == {"cl6_dodge_scoot"}
+
+    d = tmp_path / "corebook" / "vehicles"
+    d.mkdir(parents=True)
+    (d / "vehicles.json").write_text(json.dumps({"book": "corebook", "domain": "vehicles",
+        "category": "vehicles", "items": [
+            {"id": "cl6_dodge_scoot", "name": "Dodge Scoot", "system": {"price": 3000},
+             "meta": {"source": "commlink6"}},
+            {"id": "cl6_ford", "name": "Ford Americar", "system": {"price": 16000},
+             "meta": {"source": "commlink6"}},
+        ]}), encoding="utf-8")
+
+    snap = authority.snapshot(tmp_path)
+    guarded = [i["id"] for rows in snap["rows"].values() for i in rows]
+    assert "cl6_ford" in guarded, "a live Commlink6 row must still be guarded"
+    assert "cl6_dodge_scoot" not in guarded, "the guard would resurrect a deleted row"
+    assert "cl6_dodge_scoot" not in snap["fields"]
