@@ -204,6 +204,7 @@ def main() -> int:
     # pass 2 — re-point the items that are on a placeholder
     changed_items = 0
     kept = 0
+    cleared = 0
     by_pair: Counter[tuple[str, str]] = Counter()
     for path in payloads(data):
         payload = json.loads(path.read_text(encoding="utf-8"))
@@ -211,6 +212,20 @@ def main() -> int:
         for item in payload.get("items", []):
             system = item.get("system") or {}
             pair = (str(system.get("type") or ""), str(system.get("subtype") or ""))
+            if pair[0] in NO_CATEGORY_ICON:
+                # Active, not passive. Declining to ASSIGN a category icon does
+                # nothing about one an earlier run already stamped on: both icon
+                # passes skip an item that has an img at all, so 216 critters and
+                # NPCs kept generic/critter.svg through every import and looked
+                # finished instead of looking like they were waiting for a
+                # portrait. A book graphic chosen by hand is never touched —
+                # replaceable() only clears shared placeholders and name-matched
+                # clipart.
+                if item.get("img") and replaceable(str(item["img"]), True):
+                    item["img"] = ""
+                    cleared += 1
+                    dirty = True
+                continue
             img = installed.get(pair)
             if img is None:
                 continue
@@ -230,10 +245,21 @@ def main() -> int:
     if not args.dry_run and installed:
         defaults = load_defaults(data)
         defaults.update({f"{t}/{s}": img for (t, s), img in installed.items()})
+        # Forget any default remembered for an excluded type. defaults.json still
+        # held CRITTER/ -> generic/critter.svg from before these types were
+        # excluded, and icon_match reads that file — so the exclusion in both
+        # passes was undone by a third place that simply remembered the old
+        # answer. Compared on the whole type, not a prefix: CRITTER_AWAKENED is
+        # its own type and keeps its icon.
+        for key in [k for k in defaults if k.split("/")[0] in NO_CATEGORY_ICON]:
+            del defaults[key]
         save_defaults(data, defaults)
 
     missing = [p for p in pairs if p not in installed]
     print(f"\n{changed_items} items re-pointed, {kept} left on their own art")
+    if cleared:
+        print(f"{cleared} placeholder icon(s) cleared from "
+              f"{', '.join(sorted(NO_CATEGORY_ICON))} — they await a portrait")
     if missing:
         print(f"\n{len(missing)} pairs without an icon "
               f"({sum(pairs[p] for p in missing)} items):")

@@ -653,3 +653,48 @@ def test_the_index_round_trips_through_the_loader(tmp_path):
     assert idx["ares_predator_p012_x77.webp"] == ("corebook", 12)
     assert "junk.webp" not in idx, "a malformed row must be skipped, not crash the phase"
     assert mod.load_index(tmp_path / "nope") == {}
+
+
+# ---------- excluding a type has to be active, not passive ----------
+
+def _ici():
+    import importlib.util
+    from pathlib import Path
+    src = Path(__file__).resolve().parent.parent / "tools" / "install_category_icons.py"
+    spec = importlib.util.spec_from_file_location("_ici2", src)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_a_placeholder_is_cleared_from_an_excluded_type():
+    """Declining to ASSIGN a category icon does nothing about one an earlier run
+    already stamped on, because both icon passes skip an item that has an img at
+    all. 216 critters and NPCs kept generic/critter.svg through every import and
+    looked finished instead of waiting for a portrait."""
+    mod = _ici()
+    src = __import__("pathlib").Path(mod.__file__).read_text(encoding="utf-8")
+    assert 'if pair[0] in NO_CATEGORY_ICON:' in src
+    assert 'item["img"] = ""' in src, "the placeholder is never cleared"
+    # a real book graphic must survive that clearing
+    assert mod.replaceable("generic/critter.svg", True) is True
+    assert mod.replaceable("bodyguard_p100_x453.webp", True) is False
+    assert mod.replaceable("corebook/lib/x.webp", True) is True
+
+
+def test_the_remembered_default_is_forgotten_for_an_excluded_type():
+    """defaults.json held CRITTER/ -> generic/critter.svg from before these types
+    were excluded, and icon_match reads that file — so the exclusion in both
+    passes was undone by a third place that simply remembered the old answer."""
+    mod = _ici()
+    defaults = {"CRITTER/": "generic/critter.svg", "NPC/": "generic/npc.svg",
+                "CRITTER_AWAKENED/": "generic/critter_awakened.webp",
+                "CRITTER_POWER/": "generic/critter_power.webp",
+                "VEHICLE/CARS": "generic/vehicle_cars.webp"}
+    for key in [k for k in defaults if k.split("/")[0] in mod.NO_CATEGORY_ICON]:
+        del defaults[key]
+    assert "CRITTER/" not in defaults and "NPC/" not in defaults
+    # compared on the whole type, not a prefix — these are their own types
+    assert defaults["CRITTER_AWAKENED/"] == "generic/critter_awakened.webp"
+    assert defaults["CRITTER_POWER/"] == "generic/critter_power.webp"
+    assert defaults["VEHICLE/CARS"] == "generic/vehicle_cars.webp"
