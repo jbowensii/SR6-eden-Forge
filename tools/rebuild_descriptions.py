@@ -58,6 +58,46 @@ def desc_is_table_row(desc: str) -> bool:
     return stats >= 4 and stats * 2 >= len(toks)
 
 
+def name_variants(name: str) -> list[str]:
+    """The forms a book might print this item's name in, best first.
+
+    A name carrying two models joined by a slash — "Nissan Samurai/Oni",
+    "Aztechnology Sunrunner/ Nightrunner", "BAE Systems Atlantic/Pacific 28" —
+    is a shape the library produces and no book ever prints. The page describes
+    the Samurai, or the Oni, under its own heading. Searching for the joined
+    string finds neither, so the item lands in the library with no description
+    at all and nothing says why. Eleven did.
+
+    The manufacturer stays attached to the first model and is dropped from the
+    second, because that is how the books set them: "Nissan Samurai/Oni" is one
+    write-up headed Samurai and another headed Oni.
+    """
+    name = (name or "").strip()
+    if not name:
+        return []
+    out = [name]
+    if "/" in name:
+        head, _, tail = name.partition("/")
+        head, tail = head.strip(), tail.strip()
+        # the joined form without the stray space pdfplumber leaves behind
+        if head and tail:
+            out.append(f"{head}/{tail}")
+        if head:
+            out.append(head)
+        if tail:
+            out.append(tail)
+            # "Nissan Samurai/Oni" -> the Oni write-up may be headed "Nissan Oni"
+            maker = head.split()
+            if len(maker) > 1:
+                out.append(f"{maker[0]} {tail}")
+    seen, uniq = set(), []
+    for candidate in out:
+        if candidate and candidate not in seen:
+            seen.add(candidate)
+            uniq.append(candidate)
+    return uniq
+
+
 def notes_prose(item):
     n = (item.get("system", {}).get("notes") or "").strip()
     return n if len(n) >= 40 and not is_stat_line(n) else None
@@ -87,8 +127,13 @@ def main():
         jobs.append({
             "book": book,
             "pdf": pdf if pdf and _P(pdf).is_file() else "",
-            "wanted": [(it["id"], it["name"], it["meta"].get("page") or 0)
-                       for _f, it in entries if it["id"] not in CORR],
+            # One entry per name the book might print. `found` is keyed by id,
+            # so the variants cost nothing but the search itself: whichever form
+            # the page actually uses is the one that lands.
+            "wanted": [(it["id"], variant, it["meta"].get("page") or 0)
+                       for _f, it in entries if it["id"] not in CORR
+                       and not is_authoritative(it)
+                       for variant in name_variants(it["name"])],
         })
 
     workers = env_workers()

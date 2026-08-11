@@ -886,3 +886,35 @@ def test_the_ratchet_notices_a_library_that_shrank(tmp_path):
     assert ok
     floor = json.loads((tmp_path / "_assets" / "_health.json").read_text(encoding="utf-8"))
     assert floor["items"] == 9000, "the high-water mark was not remembered"
+
+
+def test_a_two_model_name_is_searched_for_as_each_model():
+    """"Nissan Samurai/Oni" is a shape the library produces and no book prints:
+    the page describes the Samurai, or the Oni, under its own heading. Searching
+    the joined string finds neither, so 11 items reached the library with no
+    description and nothing said why."""
+    mod = _rd()
+    v = mod.name_variants("Nissan Samurai/Oni")
+    assert "Nissan Samurai" in v and "Oni" in v
+    assert "Nissan Oni" in v, "the maker travels with the second model too"
+    assert v[0] == "Nissan Samurai/Oni", "the printed name must still be tried first"
+
+    # pdfplumber leaves a stray space after the slash
+    v = mod.name_variants("Aztechnology Sunrunner/ Nightrunner")
+    assert "Aztechnology Sunrunner" in v and "Nightrunner" in v
+    assert "Aztechnology Sunrunner/Nightrunner" in v
+
+    # an ordinary name yields exactly itself — no speculative searching
+    assert mod.name_variants("Ares Predator VI") == ["Ares Predator VI"]
+    assert mod.name_variants("") == []
+
+
+def test_the_search_skips_commlink6_rows_entirely():
+    """Not just at write time — they must not be searched for either, or every
+    import pays for reading blocks it is forbidden to use."""
+    from pathlib import Path
+    src = Path(__file__).resolve().parent.parent / "tools" / "rebuild_descriptions.py"
+    text = src.read_text(encoding="utf-8")
+    wanted = text[text.index('"wanted":'):text.index("}", text.index('"wanted":'))]
+    assert "not is_authoritative(it)" in wanted
+    assert "name_variants(it[\"name\"])" in wanted
