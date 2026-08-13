@@ -155,6 +155,57 @@ else:
                 if gone != cid:
                     print(f"    deleted {gone} (tombstone was {cid}; matched on name)")
             continue
+        # A record may say the item belongs in another DOMAIN entirely.
+        #
+        # Everything else here edits or removes what the extractor produced. A
+        # move is the one operation that also has to ADD, and without it a whole
+        # class of correction was simply unrecordable: 42 vehicles were filed
+        # into gear/vehicles.json, and the only durable answers were to change
+        # the reader or to lose them. Delete-then-recreate was not an option —
+        # the delete half persisted and the create half did not, so it would
+        # have destroyed the row on the next import.
+        #
+        # `movedTo: {domain, category}` says where the item should end up. The
+        # record also carries `item`, the whole body, so the move still works on
+        # a run where the extractor did not produce the source row at all.
+        moved = rec.get("movedTo") or {}
+        if moved.get("domain"):
+            to_dom, to_cat = moved["domain"], moved.get("category") or moved["domain"]
+            dest_path = DATA / LIBRARY / to_dom / f"{to_cat}.json"
+            body = None
+            if target:
+                spath, spayload, sit = target
+                if spath == dest_path:
+                    body = None                     # already where it belongs
+                else:
+                    body = sit
+                    spayload["items"] = [i for i in spayload["items"] if i is not sit]
+                    spath.write_text(json.dumps(spayload, indent=2, ensure_ascii=False) + "\n",
+                                     encoding="utf-8")
+            elif isinstance(rec.get("item"), dict):
+                body = json.loads(json.dumps(rec["item"]))   # nothing to move; create it
+            if body is not None:
+                if dest_path.is_file():
+                    dpayload = json.loads(dest_path.read_text(encoding="utf-8"))
+                else:
+                    dpayload = {"book": LIBRARY, "domain": to_dom, "category": to_cat, "items": []}
+                    dest_path.parent.mkdir(parents=True, exist_ok=True)
+                if not any(i.get("id") == body.get("id") for i in dpayload.setdefault("items", [])):
+                    dpayload["items"].append(body)
+                    dest_path.write_text(json.dumps(dpayload, indent=2, ensure_ascii=False) + "\n",
+                                         encoding="utf-8")
+                    print(f"    moved {cid} -> {to_dom}/{to_cat}")
+                # re-point at the row in its new home so `changed` still applies
+                files = _load_domain(to_dom)
+                target = None
+                for stem, (p2, pay2) in files.items():
+                    for i2 in pay2["items"]:
+                        if i2.get("id") == cid:
+                            target = (p2, pay2, i2)
+                            break
+                    if target:
+                        break
+
         if not target:
             continue  # item no longer produced by extraction; skip (tombstone would remove anyway)
         path, payload, it = target

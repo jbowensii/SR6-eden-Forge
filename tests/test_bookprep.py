@@ -1020,3 +1020,25 @@ def test_the_sweep_only_touches_per_book_folders(tmp_path):
     assert not (assets / "corebook" / "lib" / "orphan.webp").exists()
     assert (assets / "generic" / "shared.webp").is_file(), "generic/ must not be swept"
     assert (assets / "p001_x1.webp").is_file(), "the flat library must not be swept"
+
+
+# ---------- a correction can move an item between domains ----------
+
+def test_a_correction_can_move_an_item_to_another_domain():
+    """Everything else in apply_corrections edits or removes what the extractor
+    produced. A move also has to ADD, and without that a whole class was
+    unrecordable: 42 vehicles sat in gear/vehicles.json and the only durable
+    answers were changing the reader or losing them. Delete-then-recreate was
+    not an option — the delete half persists and the create half does not, so it
+    would have destroyed the row on the next import."""
+    from pathlib import Path
+    src = Path(__file__).resolve().parent.parent / "tools" / "apply_corrections.py"
+    text = src.read_text(encoding="utf-8")
+    assert 'moved = rec.get("movedTo") or {}' in text, "movedTo is not honoured"
+    assert 'isinstance(rec.get("item"), dict)' in text, (
+        "the record must carry the whole body, or the move fails on a run where "
+        "the extractor did not produce the source row")
+    # the move has to happen BEFORE the not-found bail-out, or a correction whose
+    # item is absent is skipped and the move never runs
+    assert text.index('rec.get("movedTo")') < text.rindex("if not target:"), \
+        "the move must run before the not-found skip"
