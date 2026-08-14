@@ -717,3 +717,12 @@ tbody tr.row-selected .cell-name { color: #fff; }
 .dupe-row code { background: var(--bg-raise); border: 1px solid var(--line); padding: 0 5px; color: var(--ink); }
 .dupe-row.keep { color: var(--green); }
 .dupe-row.drop { color: var(--amber); }
+
+/* A row someone flagged for review. Amber rather than red: it is "look at
+   this", not "this is broken" — the Issues column already carries errors. */
+.cell-name .flagged {
+  color: #f0a020;
+  margin-right: 0.4em;
+  font-weight: 700;
+  cursor: help;
+}

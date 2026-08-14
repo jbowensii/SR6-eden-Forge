@@ -1035,9 +1035,14 @@ def test_a_correction_can_move_an_item_to_another_domain():
     src = Path(__file__).resolve().parent.parent / "tools" / "apply_corrections.py"
     text = src.read_text(encoding="utf-8")
     assert 'moved = rec.get("movedTo") or {}' in text, "movedTo is not honoured"
-    assert 'isinstance(rec.get("item"), dict)' in text, (
-        "the record must carry the whole body, or the move fails on a run where "
-        "the extractor did not produce the source row")
+    # A correction NEVER creates an item. If the row is absent this library does
+    # not have that source, and conjuring it would ship content the user has no
+    # right to. Missing target means skip — that is what makes the corrections
+    # file safe to distribute alongside the app.
+    assert 'skipped_absent' in text, "a missing target must be counted and skipped"
+    assert 'rec.get("item")' not in text, (
+        "a correction can create an item again — it must only ever move one that "
+        "the extractor already produced")
     # the move has to happen BEFORE the not-found bail-out, or a correction whose
     # item is absent is skipped and the move never runs
     assert text.index('rec.get("movedTo")') < text.rindex("if not target:"), \

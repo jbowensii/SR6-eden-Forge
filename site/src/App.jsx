@@ -439,7 +439,7 @@ export default function App() {
                 checked={attentionOnly}
                 onChange={(e) => setAttentionOnly(e.target.checked)}
               />
-              Show only incomplete / warnings
+              Show only flagged / incomplete / warnings
             </label>
             <CategoryTable
               sort={sort}

@@ -76,7 +76,7 @@ def _domains_holding():
     return index
 
 
-applied = deleted = rematched = 0
+applied = deleted = rematched = skipped_absent = 0
 _MOVED = _domains_holding()   # id -> domains, so a correction can follow its item
 field_changes = Counter()
 if not CORR.is_dir():
@@ -182,8 +182,19 @@ else:
                     spayload["items"] = [i for i in spayload["items"] if i is not sit]
                     spath.write_text(json.dumps(spayload, indent=2, ensure_ascii=False) + "\n",
                                      encoding="utf-8")
-            elif isinstance(rec.get("item"), dict):
-                body = json.loads(json.dumps(rec["item"]))   # nothing to move; create it
+            else:
+                # NOTHING IS EVER CREATED FROM A CORRECTION.
+                #
+                # A correction edits or removes what the extractor produced from
+                # books the user owns. If the row is not there, the user does not
+                # have that source — and a correction that could conjure the item
+                # would be shipping someone else's content into an install that
+                # has no right to it. So a missing target means skip, always.
+                #
+                # This is what makes the corrections file safe to distribute: it
+                # carries decisions ABOUT data, never the data itself.
+                skipped_absent += 1
+                continue
             if body is not None:
                 if dest_path.is_file():
                     dpayload = json.loads(dest_path.read_text(encoding="utf-8"))
@@ -207,7 +218,10 @@ else:
                         break
 
         if not target:
-            continue  # item no longer produced by extraction; skip (tombstone would remove anyway)
+            # The source row is not in this library, so this correction has
+            # nothing to act on. Skipped, never invented — see the note above.
+            skipped_absent += 1
+            continue
         path, payload, it = target
 
         # Two shapes. New corrections store only what CHANGED under "changed",
@@ -241,7 +255,11 @@ else:
         applied += 1
 
     note = f", {rematched} re-matched by name after an id change" if rematched else ""
-    print(f"applied {applied} correction(s), {deleted} deletion(s){note}")
+    # Said out loud, always. A correction that found nothing is the safety
+    # rule working — this library does not have that book — and a silent
+    # skip would look identical to a correction that did its job.
+    absent = f", {skipped_absent} skipped (not in this library)" if skipped_absent else ""
+    print(f"applied {applied} correction(s), {deleted} deletion(s){note}{absent}")
     if field_changes:
         print("most-corrected fields (extractor-improvement hints):")
         for k, n in field_changes.most_common(12):

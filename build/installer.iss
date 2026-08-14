@@ -10,7 +10,7 @@
 #define AppPublisher "John Bowens"
 #define AppURL       "https://github.com/jbowensii/SR6-eden-Forge"
 #ifndef AppVersion
-  #define AppVersion "0.9.17"
+  #define AppVersion "0.9.18"
 #endif
 
 [Setup]
@@ -63,6 +63,7 @@ Source: "dist\SR6CatalogBuilder\*"; DestDir: "{app}"; \
 Source: "..\extractor\*"; DestDir: "{app}\extractor"; \
     Flags: ignoreversion recursesubdirs; Excludes: "__pycache__"
 Source: "..\tools\*.py"; DestDir: "{app}\tools"; Flags: ignoreversion
+Source: "..\data\_corrections\*"; DestDir: "{app}\data\_corrections"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\schemas\*"; DestDir: "{app}\schemas"; Flags: ignoreversion recursesubdirs
 ; The review app: sources, the BUILT front end, and its runtime packages.
 ;

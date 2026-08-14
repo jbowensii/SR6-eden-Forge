@@ -141,6 +141,11 @@ export default function CategoryTable({
             onContextMenu={(e) => rightClick(item, index, e)}
           >
             <td className="cell-name">
+              {/* The reason is the tooltip, so a flagged row explains itself on
+                  hover instead of sending you to the editor to find out why. */}
+              {item.meta?.flagged && (
+                <span className="flagged" title={item.meta.flagged}>⚑</span>
+              )}
               {item.img && <span className="has-img" title={item.img}>◈</span>}
               {item.name}
             </td>

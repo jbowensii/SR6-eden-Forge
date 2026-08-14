@@ -89,5 +89,12 @@ export function missingRequired(domain, system = {}) {
  */
 export function needsAttention(item, domain, issueCount = 0) {
   if (issueCount > 0) return true;
+  // A row someone has flagged for a human to look at. `meta.flagged` holds the
+  // REASON, not a boolean, so the table can say why without a second lookup —
+  // "junk fragment?", "subtype is a guess", "name recovered from the book".
+  // It feeds this one predicate deliberately: the centre pane already has a
+  // filter for rows wanting attention, and a flag is exactly that rather than a
+  // parallel idea needing its own control.
+  if (item?.meta?.flagged) return true;
   return missingRequired(domain, item?.system ?? {}).length > 0;
 }
