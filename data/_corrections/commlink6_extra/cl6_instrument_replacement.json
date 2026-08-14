@@ -1,0 +1,41 @@
+{
+  "id": "cl6_instrument_replacement",
+  "name": "Replacement instrument",
+  "system": {
+    "type": "ELECTRONICS",
+    "subtype": "INSTRUMENT",
+    "price": 1000,
+    "priceDef": "1000",
+    "avail": 1,
+    "availDef": "1",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "instrument_replacement",
+      "category": "gear_instruments",
+      "book": "no_future",
+      "attrs": {
+        "id": "instrument_replacement",
+        "avail": "1",
+        "price": "1000",
+        "type": "ELECTRONICS",
+        "subtype": "INSTRUMENT"
+      },
+      "stats": {},
+      "page": "155"
+    },
+    "genesisID": "instrument_replacement"
+  },
+  "meta": {
+    "book": "no_future",
+    "page": 155,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "replacement_instrument_p155_x5987.webp",
+  "domain": "commlink6_extra",
+  "category": "gear_instruments",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

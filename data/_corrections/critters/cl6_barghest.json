@@ -1,0 +1,49 @@
+{
+  "domain": "critters",
+  "category": "critter",
+  "id": "cl6_barghest",
+  "correctedAt": "2026-07-30T11:51:36.374Z",
+  "name": "Barghest",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 7,
+      "agi": 4,
+      "rea": 5,
+      "str": 5,
+      "wil": 3,
+      "log": 2,
+      "int": 5,
+      "cha": 5,
+      "mag": 5,
+      "ess": 6
+    },
+    "metatype": "",
+    "rating": 0,
+    "initiative": "",
+    "defenserating": "",
+    "description": "A metaspecies of the English mastiff, the barghest stands about eighty-five centimeters at the shoulder and weighs approximately ninety kilograms. Short, sleek fur, either pure white or pure black, lies flat its massively muscled body, creating the illusion of naked hide. Sharp spines protrude along the length of its back. Its eyes shine red, and its teeth slightly in the dark because of luminescent bacteria in their saliva. During breeding season, they alone or in pairs; at other times they hunt in packs of twelve or more. A number of corps have attempted to use barghests as guard animals, with mixed results, especially with the use of the howl. Natural Habitat/Range: Urban areas in North America and northern Europe, particularly British Isles. Barghests have also turned up in tralia, Hong Kong, and Nairobi, pretty much where the British Empire once touched.",
+    "notes": "",
+    "monitor": {
+      "physical": 0,
+      "stun": 0,
+      "overflow": 7,
+      "edge": 0
+    },
+    "movement": {
+      "walk": "",
+      "sprint": "",
+      "perHit": "",
+      "notes": ""
+    },
+    "powers": "Armor 4, Dual Natured, Enhanced Senses (Hearing, Smell, So- nar), Fear, Immunity (Barghest Howls), Natural Weapon, Paralyzing Howl",
+    "skills": "Astral 4, Athletics 5, Close Combat 8, Influence 5 (Intimidation +2),",
+    "weaknesses": ""
+  },
+  "qaStatus": "extracted",
+  "gapsOnly": true,
+  "ref": {
+    "name": "Barghest",
+    "wasId": "barghest"
+  }
+}

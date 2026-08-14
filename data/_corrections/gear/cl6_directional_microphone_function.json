@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "cl6_directional_microphone_function",
+  "deleted": true,
+  "ref": {
+    "name": "Directional microphone",
+    "book": "corebook",
+    "page": 275
+  },
+  "correctedAt": "2026-08-09T18:51:40.778Z"
+}

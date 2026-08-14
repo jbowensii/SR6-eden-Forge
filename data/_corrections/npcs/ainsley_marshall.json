@@ -1,0 +1,64 @@
+{
+  "id": "ainsley_marshall",
+  "name": "Ainsley Marshall",
+  "system": {
+    "category": "NPC",
+    "attributes": {
+      "bod": 3,
+      "agi": 3,
+      "rea": 4,
+      "str": 1,
+      "wil": 5,
+      "log": 4,
+      "int": 4,
+      "cha": 3,
+      "edg": 2,
+      "magres": 6,
+      "ess": 6.0
+    },
+    "powers": "Armor 6, Dual Natured, Enhanced Sense (see in complete black- ness), Fear, Immunity to Normal Weapons, Mimicry, Possession, Psycho- kinesis, Sapience",
+    "description": "(Mom, Force 6) Ainsley is a teacher at the local MCT-sponsored high school. She’s 1.61 meters tall, with brown hair, rounded features, and green eyes. The shadow spirit controlling her is named Cahethlimell, and it enjoys fear induced by the dark.",
+    "qualities": "",
+    "weapons": "",
+    "nuyen": "",
+    "activeSkills": "",
+    "gear": "",
+    "languages": "",
+    "adeptPowers": "",
+    "defenseRating": "",
+    "lifestyle": "",
+    "spells": "",
+    "metatype": "",
+    "conditionMonitors": "",
+    "contacts": "",
+    "knowledgeSkills": "",
+    "initiative": "",
+    "augmentations": "",
+    "complexForms": "",
+    "cyberware": "",
+    "genesisID": "cat28000_npcs_ainsley_marshall",
+    "defenserating": "",
+    "notes": "",
+    "type": "NPC",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "the_third_parallel",
+    "page": 112,
+    "sources": [
+      {
+        "book": "the_third_parallel",
+        "page": 112
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "the_third_parallel",
+    "originalName": "Ainsley Marshall"
+  },
+  "img": "ainsley_marshall_p112_x1448.webp",
+  "domain": "npcs",
+  "category": "npc",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

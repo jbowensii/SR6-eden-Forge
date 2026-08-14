@@ -1,0 +1,70 @@
+{
+  "id": "cl6_krime_heater",
+  "name": "Krime Heater",
+  "system": {
+    "type": "WEAPON_FIREARMS",
+    "subtype": "PISTOLS_HEAVY",
+    "price": 175,
+    "priceDef": "175",
+    "avail": 4,
+    "availDef": "4L",
+    "description": "Troll sized heavy pistol.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "krime_heater",
+      "category": "gear_firearms",
+      "book": "krime",
+      "attrs": {
+        "id": "krime_heater",
+        "avail": "4L",
+        "price": "175",
+        "type": "WEAPON_FIREARMS",
+        "subtype": "PISTOLS_HEAVY"
+      },
+      "stats": {
+        "weapon.dmg": "4P",
+        "weapon.mode": "SS/SA",
+        "weapon.attack": "6,8,6,,",
+        "weapon.ammo": "8(c)",
+        "weapon.skill": "firearms",
+        "weapon.spec": "firearms/pistols_heavy"
+      },
+      "page": "4"
+    },
+    "skill": "firearms",
+    "spec": "firearms/pistols_heavy",
+    "dmg": 4,
+    "stun": false,
+    "dmgDef": "4P",
+    "dmgFlags": [],
+    "modes": {
+      "SS": true,
+      "SA": true,
+      "BF": false,
+      "FA": false
+    },
+    "attackRating": [
+      6,
+      8,
+      6,
+      0,
+      0
+    ],
+    "ammocap": 8,
+    "ammoType": "c",
+    "genesisID": "krime_heater"
+  },
+  "meta": {
+    "book": "krime_katalog",
+    "page": 4,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "krime_heater_p004_x45.webp",
+  "domain": "gear",
+  "category": "weapons_firearms",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

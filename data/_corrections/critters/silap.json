@@ -1,0 +1,50 @@
+{
+  "id": "silap",
+  "name": "Silap",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 8,
+      "agi": 13,
+      "rea": 14,
+      "str": 7,
+      "wil": 10,
+      "log": 10,
+      "int": 10,
+      "cha": 10,
+      "mag": 10,
+      "ess": 10
+    },
+    "skills": "Astral, Athletics, Close Combat, Exotic Ranged Weapon, Perception",
+    "powers": "Accident, Astral Form, Concealment, Confusion, Elemental At- tack (Cold), Energy Aura (Electricity), Materialization, Movement, Search,",
+    "weaknesses": "Allergy (Inhalation Vector Toxins, Severe)",
+    "description": "(Air, (Air, Force 10) A silap is a great beast that lives on the edges of can the metaplanes of water and air, presumably crossing via the cardinal pole. Its shape is that of a dire on bear, approaching five meters tall when standing that on its hind legs. Massive fangs and claws arc with its energy as it charges its prey. It sometimes uses a from storm to separate prey from the pack, though it is 53 known to use the storm tactic to lure hunters off cliffs.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_silap",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 54,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 54
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Silap"
+  },
+  "img": "p054_x604.webp",
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-11T17:37:39.000Z"
+}

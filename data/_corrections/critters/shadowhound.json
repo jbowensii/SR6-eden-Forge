@@ -1,0 +1,50 @@
+{
+  "id": "shadowhound",
+  "name": "Shadowhound",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 3,
+      "agi": 4,
+      "rea": 4,
+      "str": 4,
+      "wil": 2,
+      "log": 2,
+      "int": 3,
+      "cha": 1,
+      "mag": 4,
+      "ess": 6
+    },
+    "powers": "Adaptive Coloration (Shadows), Enhanced Senses (Low-",
+    "weaknesses": "Allergy (Sunlight, Severe), Reflective Eyes",
+    "description": "Packs of roaming coyotes are common throughout the American Southwest. However, those packs have been almost entirely supplanted in the Jemez Mountains by their Awakened counterpart, the shadowhound. Shadowhounds in the southwest reach height of one meter at the shoulder. They have a greybrown short-haired coat with black patches. The patches slowly move and shift like changing ink blots from a Rorschach drawing. Shadowhounds are nocturnal hunters that roam in packs of up to a dozen individuals. Their diet consists mainly of rabbits, young deer, and other small mammals. Attacks on metahumans are extremely rare, with the few reported incidents linked to defense of pups, being cornered with no escape, or ill-advised attempts at domestication. > Locals keep their pets inside at night. Dogs left outside disappear, and their owners reportedly hear nothing. > BerkleyExile > Don’t know which is worse. The eerie silence when these critters are near or the hungry yellow eyes inside pitchblack shadows reflecting nearby lights. > Builds-the-Fire shadowhound (canis umbrae)",
+    "movement": "",
+    "notes": "",
+    "skills": "",
+    "genesisID": "cat28000_critters_shadowhound",
+    "defenserating": "",
+    "metatype": "",
+    "initiative": "",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "los_alamos",
+    "page": 20,
+    "sources": [
+      {
+        "book": "los_alamos",
+        "page": 20
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "los_alamos",
+    "originalName": "Shadowhound"
+  },
+  "img": "p020_x62.webp",
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-11T17:37:39.000Z"
+}

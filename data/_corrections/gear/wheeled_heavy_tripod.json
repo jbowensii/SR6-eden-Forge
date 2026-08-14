@@ -1,0 +1,17 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "wheeled_heavy_tripod",
+  "changed": {
+    "system": {
+      "type": "ACCESSORY",
+      "subtype": "FIREARMS_ACCESSORY"
+    }
+  },
+  "ref": {
+    "name": "Wheeled Heavy Tripod",
+    "book": "deadly_arts",
+    "page": 65
+  },
+  "correctedAt": "2026-08-13T16:04:22.960Z"
+}

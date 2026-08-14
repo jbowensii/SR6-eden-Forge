@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "vehicles",
+  "id": "saab_javelin_878ti",
+  "deleted": true,
+  "ref": {
+    "name": "Saab Javelin 878TI",
+    "book": "double_clutch",
+    "page": 27
+  },
+  "correctedAt": "2026-08-13T00:42:05.563Z"
+}

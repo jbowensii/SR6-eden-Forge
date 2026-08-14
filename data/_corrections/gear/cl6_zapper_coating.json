@@ -1,0 +1,15 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_zapper_coating",
+  "correctedAt": "2026-08-09T11:35:03.666Z",
+  "ref": {
+    "name": "Zapper Coating",
+    "book": "firing_squad"
+  },
+  "changed": {
+    "system": {
+      "subtype": "FIREARMS_ACCESSORY"
+    }
+  }
+}

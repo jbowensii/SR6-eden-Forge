@@ -1,0 +1,48 @@
+{
+  "id": "copy_cat",
+  "name": "Copy Cat",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 2,
+      "agi": 4,
+      "rea": 3,
+      "str": 1,
+      "wil": 1,
+      "log": 1,
+      "int": 4,
+      "cha": 3,
+      "ess": 6
+    },
+    "skills": "Athletics 3, Close Combat 2, Con 2, Influence 2, Outdoors 4, Per- ception 3, Stealth 4",
+    "powers": "Enhanced Senses (Hearing, Low-Light vision), Gestalt Conscious- ness (100 meters), Natural Weapons (Bite/Claws)",
+    "notes": "At the gamemaster's discretion and based on the copy cats' hive size, you may increase each cat's Logic by 1.",
+    "description": "(Felis imitantur) Looking no different than any other city cat, these cats possess an extraordinary ability to communicate, similar to what social adepts can do. They seem to be masters at reading other felines' body language, pheromones, and nonverbal forms of communication, to the point they can even copy their movements. // Copy cats are unlike any other cats in the world. They are highly intelligent, live in harmony with one another, and are known for their impeccable teamwork and coordination. After spending time together, copy cats will form a hive mind and gain a form of sapience. At this point, they will start to develop a community that lives in a sprawling underground network of tunnels and chambers hidPerception den away within some corner of the urban jungle. They work tirelessly, gathering food and resources, caring for their young, and defending their hive against any threats. Large copy cat communities have developed to the point where they can trade with locals or hire outside muscle to deal with things beyond their abilities. M > When dealing with a hive mind of copy cats, don't make assumptions. It will have its own ambitions and goals, just like any other metahuman. More than one city or illegal entity has had to eradicate a hive when it starts to push the boundaries. > Magister 3, Out(50 > I want to put this into everyone's minds: Think about 100 cats working in perfect unison to attack something. Be worried.",
+    "movement": "",
+    "weaknesses": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_copy_cat",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "wild_life",
+    "page": 167,
+    "sources": [
+      {
+        "book": "wild_life",
+        "page": 167
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "wild_life",
+    "originalName": "Copy Cat"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

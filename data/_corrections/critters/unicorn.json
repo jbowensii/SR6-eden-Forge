@@ -1,0 +1,49 @@
+{
+  "id": "unicorn",
+  "name": "Unicorn",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 7,
+      "agi": 5,
+      "rea": 5,
+      "str": 7,
+      "wil": 4,
+      "log": 2,
+      "int": 4,
+      "cha": 4,
+      "mag": 5,
+      "ess": 6
+    },
+    "skills": "Athletics 4, Close Combat 4, Outdoors 4, Perception 5, Sorcery 4",
+    "powers": "Arcane Arrester, Empathy, Immunity (pathogens, poisons), Mag- ical Guard, Natural Weapon (horn), Search a Weakness: Allergy (pollutants, Severe)",
+    "description": "The mythical unicorn ( Unicornus validus ) is popular legend made reality when magic Awakened in the modern world. These majestic animals represent a purity and source of hope for many who have seen them. They have also been the subject of predation by metahumanity, who seek their body parts, especially the horn, for their magical properties. In addition to describing the regular unicorn, we will also discuss the greater unicorn ( Unicornus magus ). Regular unicorns stand 1.5 meters tall and weigh roughly 400 kilograms. Their coat is often described as pearlescent white, as is their long flowing tail and mane. The greater unicorn is a stockier breed with thicker haunches and broader shoulders. They stand about 1.7 meters tall and weigh upward of 550 kilograms. Their coat has a golden sheen to it, and their black main and tail are generally shorter. > There is an interesting variant that has been seen the NAN. This variant has a coat similar to a paint horn has a vibrant copper color. > Zhaganaash // The unicorn is native to the grasslands of North America and Europe. The greater unicorn is more often found in higher-altitude grasslands nearer to the foothills near mountain regions. Unicorns are often part of large herds riding across the grasslands, while the greater unicorn tends toward smaller, family-sized units. Both of these species are diurnal herbivores. The unicorns are generally non-violent, but when backed into a corner, their hooves and horns can wreck even a troll.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_unicorn",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "wild_life",
+    "page": 33,
+    "sources": [
+      {
+        "book": "wild_life",
+        "page": 33
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "wild_life",
+    "originalName": "Unicorn"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

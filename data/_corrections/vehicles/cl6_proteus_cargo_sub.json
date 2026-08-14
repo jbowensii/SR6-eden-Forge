@@ -1,0 +1,61 @@
+{
+  "id": "cl6_proteus_cargo_sub",
+  "name": "Proteus Sea-Class Cargo Submarine",
+  "system": {
+    "type": "VEHICLES",
+    "subtype": "SUBMARINES",
+    "price": 1300000000,
+    "priceDef": "1300000000",
+    "avail": 7,
+    "availDef": "7",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "proteus_cargo_sub",
+      "category": "gear_vehicles",
+      "book": "double_clutch",
+      "attrs": {
+        "id": "proteus_cargo_sub",
+        "avail": "7",
+        "price": "1300000000",
+        "type": "VEHICLES",
+        "subtype": "SUBMARINES"
+      },
+      "stats": {
+        "vehicle.han": "3",
+        "vehicle.acc": "8",
+        "vehicle.spdi": "15",
+        "vehicle.tspd": "40",
+        "vehicle.bod": "44",
+        "vehicle.arm": "16",
+        "vehicle.pil": "3",
+        "vehicle.sen": "5",
+        "vehicle.sea": "93"
+      },
+      "page": "63"
+    },
+    "genesisID": "proteus_cargo_sub",
+    "handling": "3/6",
+    "accel": "8",
+    "speedInterval": "15/10",
+    "topSpeed": "40/30",
+    "body": "44",
+    "armor": "16",
+    "pilot": "3",
+    "sensor": "5",
+    "seats": "93",
+    "availability": "7"
+  },
+  "meta": {
+    "book": "double_clutch",
+    "page": 63,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "proteus_sea_class_cargo_submarine_p064_x1119.webp",
+  "domain": "vehicles",
+  "category": "vehicles",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

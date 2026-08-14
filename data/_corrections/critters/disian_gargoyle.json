@@ -1,0 +1,48 @@
+{
+  "id": "disian_gargoyle",
+  "name": "Disian Gargoyle",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 5,
+      "agi": 4,
+      "rea": 5,
+      "str": 6,
+      "wil": 2,
+      "log": 2,
+      "int": 4,
+      "cha": 3,
+      "ess": 6
+    },
+    "skills": "Athletics 3 (Flying +3), Close Combat 5 (Unarmed Combat +3), Per- ception 6 (Olfactory +2, Visual +3)",
+    "powers": "Armor 6, Corrosive Spit, Enhanced Sense (Low-light, Improved",
+    "description": "The Disian Gargoyle is not unlike the species exists on our metaplane. It has a generalmetahuman body structure that appears to be made of a grainy white stone. Differences include pair of wings on its back and an extra pair arms. Its face has highly angled brows, a broad nose with only a single nostril, and four sets of eyes—two angled up, two angled down, two set straight, and two looking to the sides. Its hands feet have four digits each, and they are all tipped with razor-sharp claws.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_disian_gargoyle",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "the_third_parallel",
+    "page": 96,
+    "sources": [
+      {
+        "book": "the_third_parallel",
+        "page": 96
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "the_third_parallel",
+    "originalName": "Disian Gargoyle"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

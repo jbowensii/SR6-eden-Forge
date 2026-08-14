@@ -1,0 +1,28 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_toyota_gopher",
+  "correctedAt": "2026-07-30T12:04:33.184Z",
+  "name": "Toyota Gopher",
+  "system": {
+    "type": "VEHICLE",
+    "subtype": "CAR",
+    "handling": "4/4",
+    "accel": "15",
+    "speedInterval": "15",
+    "topSpeed": "150",
+    "body": "12",
+    "armor": "6",
+    "pilot": "1",
+    "sensor": "1",
+    "seats": "4",
+    "availability": "2",
+    "price": "25,000"
+  },
+  "qaStatus": "extracted",
+  "gapsOnly": true,
+  "ref": {
+    "name": "Toyota Gopher",
+    "wasId": "toyota_gopher"
+  }
+}

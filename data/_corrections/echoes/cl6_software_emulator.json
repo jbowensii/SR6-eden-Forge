@@ -1,0 +1,16 @@
+{
+  "domain": "echoes",
+  "category": "echoes",
+  "id": "cl6_software_emulator",
+  "changed": {
+    "system": {
+      "category": "ECHO"
+    }
+  },
+  "ref": {
+    "name": "Software Emulator",
+    "book": "hack_slash",
+    "page": 68
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

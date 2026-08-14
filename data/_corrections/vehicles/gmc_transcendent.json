@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "gmc_transcendent",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "TRUCKS"
+    }
+  },
+  "ref": {
+    "name": "GMC Transcendent",
+    "book": "deadly_arts",
+    "page": 137
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

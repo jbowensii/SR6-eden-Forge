@@ -1,0 +1,15 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_cyberspace_designs_dalmatian",
+  "deleted": true,
+  "ref": {
+    "name": "Cyberspace Designs Dalmatian",
+    "book": "double_clutch",
+    "page": 1
+  },
+  "correctedAt": "2026-08-09T18:51:41.211Z",
+  "system": {
+    "description": ""
+  }
+}

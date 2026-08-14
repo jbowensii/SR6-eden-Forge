@@ -1,0 +1,70 @@
+{
+  "id": "cl6_ares_light_fire_70",
+  "name": "Ares Light Fire 70",
+  "system": {
+    "type": "WEAPON_FIREARMS",
+    "subtype": "PISTOLS_LIGHT",
+    "price": 350,
+    "priceDef": "350",
+    "avail": 3,
+    "availDef": "3L",
+    "description": "<p data-sr6-render=\"1\"><img src=\"modules/sr6-forge-corebook/corebook/cl6_ares_light_fire_70.jpg\" alt=\"\"/></p>\nThe Light Fire Series is designed for special operators. The 70 is a street standard, while the 75 is not commonly available through regular dealers and standard legal channels. But what runner uses those? The integration of a barrel-mounted silencer in both designs makes the Light Fire series nearly trid-flick silent.<br/>The 75 comes preloaded with smartlink hardware and software, and both come with a laser sight. The silencer for these models increases the threshold for audio Perception tests by 3 for the Light Fire Series when equipped and costs 750�.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "ares_light_fire_70",
+      "category": "gear_firearms",
+      "book": "core",
+      "attrs": {
+        "id": "ares_light_fire_70",
+        "avail": "3L",
+        "price": "350",
+        "type": "WEAPON_FIREARMS",
+        "subtype": "PISTOLS_LIGHT"
+      },
+      "stats": {
+        "weapon.dmg": "2P",
+        "weapon.attack": "10,7,6,,",
+        "weapon.mode": "SA",
+        "weapon.ammo": "16(c)",
+        "weapon.skill": "firearms",
+        "weapon.spec": "firearms/pistols_light"
+      },
+      "page": "252"
+    },
+    "skill": "firearms",
+    "spec": "firearms/pistols_light",
+    "dmg": 2,
+    "stun": false,
+    "dmgDef": "2P",
+    "dmgFlags": [],
+    "modes": {
+      "SS": false,
+      "SA": true,
+      "BF": false,
+      "FA": false
+    },
+    "attackRating": [
+      10,
+      7,
+      6,
+      0,
+      0
+    ],
+    "ammocap": 16,
+    "ammoType": "c",
+    "genesisID": "ares_light_fire_70"
+  },
+  "meta": {
+    "book": "corebook",
+    "page": 252,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-08",
+    "extractorVersion": "commlink6-1.14.0",
+    "icon": "generic/weapon_firearms_pistols_light.webp"
+  },
+  "domain": "gear",
+  "category": "weapons_firearms",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

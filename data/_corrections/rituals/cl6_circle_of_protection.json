@@ -1,0 +1,16 @@
+{
+  "domain": "rituals",
+  "category": "rituals",
+  "id": "cl6_circle_of_protection",
+  "changed": {
+    "system": {
+      "category": "RITUAL"
+    }
+  },
+  "ref": {
+    "name": "Circle of Protection",
+    "book": "corebook",
+    "page": 144
+  },
+  "correctedAt": "2026-08-13T20:30:49.894Z"
+}

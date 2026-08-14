@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "medium_drone",
+  "changed": {
+    "meta": {
+      "flagged": "subtype is my guess — please confirm"
+    }
+  },
+  "ref": {
+    "name": "MEDIUM DRONE",
+    "book": "30_nights",
+    "page": 77
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

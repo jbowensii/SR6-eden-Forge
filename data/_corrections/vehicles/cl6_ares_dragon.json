@@ -1,0 +1,28 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_ares_dragon",
+  "correctedAt": "2026-07-30T12:06:23.580Z",
+  "name": "Ares Dragon",
+  "system": {
+    "type": "VEHICLE",
+    "subtype": "ROTORCRAFT",
+    "handling": "4",
+    "accel": "10",
+    "speedInterval": "30",
+    "topSpeed": "260",
+    "body": "22",
+    "armor": "10",
+    "pilot": "2",
+    "sensor": "3",
+    "seats": "2/16",
+    "availability": "2",
+    "price": "360,000"
+  },
+  "qaStatus": "extracted",
+  "gapsOnly": true,
+  "ref": {
+    "name": "Ares Dragon",
+    "wasId": "ares_dragon"
+  }
+}

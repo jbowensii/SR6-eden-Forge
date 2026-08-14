@@ -1,0 +1,53 @@
+{
+  "id": "afanc",
+  "name": "Afanc",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 11,
+      "agi": 4,
+      "rea": 4,
+      "str": 10,
+      "wil": 4,
+      "log": 2,
+      "int": 4,
+      "cha": 2,
+      "mag": 4,
+      "ess": 6
+    },
+    "skills": "Athletics 4, Close Combat 8, Perception 5, Stealth 4",
+    "powers": "Dual Natured, Engulf (Water), Enhanced Senses (Low-Light",
+    "description": "The afanc is an Awakened form of the American crocodile preferring to live in environments that range from saltwater to brackish. Specimens up to five meters in length have been found in the swamps of south Florida, and the species is known to be extremely aggressive. The swamps to the south of New Orleans are known to contain numerous nests of afancs. They are known to use their magical capabilities to control the water to drown their prey.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_afanc",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "shadows_new_orleans",
+    "page": 25,
+    "sources": [
+      {
+        "book": "shadows_new_orleans",
+        "page": 25
+      },
+      {
+        "book": "wild_life",
+        "page": 75
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "shadows_new_orleans",
+    "originalName": "Afanc"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

@@ -1,0 +1,48 @@
+{
+  "id": "crocosaurus_rex",
+  "name": "Crocosaurus Rex",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 16,
+      "agi": 8,
+      "rea": 8,
+      "str": 16,
+      "wil": 7,
+      "log": 7,
+      "int": 7,
+      "cha": 7,
+      "mag": 9,
+      "ess": 9
+    },
+    "skills": "Astral, Close Combat, Perception, Stealth",
+    "powers": "Concealment, Enhanced Senses (hearing, low-light vision, smell),",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_crocosaurus_rex",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 144,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 144
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Crocosaurus Rex"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

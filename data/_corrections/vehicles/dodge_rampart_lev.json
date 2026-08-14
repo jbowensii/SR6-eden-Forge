@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "dodge_rampart_lev",
+  "changed": {
+    "meta": {
+      "flagged": "vehicle type/subtype not merged yet"
+    }
+  },
+  "ref": {
+    "name": "Dodge Rampart LEV",
+    "book": "double_clutch",
+    "page": 29
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

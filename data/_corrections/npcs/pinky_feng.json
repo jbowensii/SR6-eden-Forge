@@ -1,0 +1,63 @@
+{
+  "id": "pinky_feng",
+  "name": "Pinky Feng",
+  "system": {
+    "category": "NPC",
+    "metatype": "ork",
+    "attributes": {
+      "bod": 7,
+      "agi": 4,
+      "rea": 3,
+      "str": 7,
+      "wil": 2,
+      "log": 6,
+      "int": 6,
+      "cha": 3,
+      "edg": 5,
+      "magres": 6,
+      "ess": 6.0
+    },
+    "languages": "Cantonese (N), English (E)",
+    "qualities": "Analytical Mind, At Home in the Matrix, Built Tough 1, Compul- sive Archivist, Data Whisperer, Low-Light Vision, Natural Hacker, Voider of",
+    "complexForms": "Cleaner, Data Disguise, Editor, Tattletale, Puppeteer,",
+    "gear": "Armor clothing (DR +2), Sony Emperor commlink, telescoping ladder staff",
+    "weapons": "",
+    "powers": "",
+    "nuyen": "",
+    "activeSkills": "",
+    "adeptPowers": "",
+    "defenseRating": "",
+    "lifestyle": "",
+    "spells": "",
+    "conditionMonitors": "",
+    "contacts": "",
+    "knowledgeSkills": "",
+    "initiative": "",
+    "augmentations": "",
+    "cyberware": "",
+    "genesisID": "cat28000_npcs_pinky_feng",
+    "defenserating": "",
+    "notes": "",
+    "type": "NPC",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "corebook_hongkong",
+    "page": 332,
+    "sources": [
+      {
+        "book": "corebook_hongkong",
+        "page": 332
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "corebook_hongkong",
+    "originalName": "Pinky Feng"
+  },
+  "img": "pinky_feng_p332_x2299.webp",
+  "domain": "npcs",
+  "category": "npc",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

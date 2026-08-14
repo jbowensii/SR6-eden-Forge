@@ -1,0 +1,49 @@
+{
+  "id": "prehistoric_piranha",
+  "name": "Prehistoric Piranha",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 7,
+      "agi": 4,
+      "rea": 3,
+      "str": 7,
+      "wil": 1,
+      "log": 1,
+      "int": 1,
+      "cha": 1,
+      "mag": 3,
+      "ess": 3
+    },
+    "skills": "Astral, Close Combat, Perception",
+    "powers": "Armor 3, Enhanced Senses (hearing, low-light vision, smell),",
+    "description": "(Razorfish, Force 3 Spirit of Beasts) Prehistoric Piranhas DR",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_prehistoric_piranha",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 142,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 142
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Prehistoric Piranha"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

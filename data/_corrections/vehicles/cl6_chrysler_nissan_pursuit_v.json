@@ -1,0 +1,15 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_chrysler_nissan_pursuit_v",
+  "deleted": true,
+  "ref": {
+    "name": "Chrysler-Nissan Pursuit V",
+    "book": "double_clutch",
+    "page": 1
+  },
+  "correctedAt": "2026-08-09T18:51:41.202Z",
+  "system": {
+    "description": ""
+  }
+}

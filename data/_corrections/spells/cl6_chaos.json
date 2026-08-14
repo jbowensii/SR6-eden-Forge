@@ -1,0 +1,20 @@
+{
+  "domain": "spells",
+  "category": "spells",
+  "id": "cl6_chaos",
+  "movedTo": {
+    "domain": "spells",
+    "category": "spells"
+  },
+  "movedFrom": {
+    "domain": "qualities",
+    "category": "qualities"
+  },
+  "why": "Commlink6 files this under spells",
+  "ref": {
+    "name": "Chaos",
+    "book": "smooth_operations",
+    "page": 112
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

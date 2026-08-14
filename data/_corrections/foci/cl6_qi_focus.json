@@ -1,0 +1,16 @@
+{
+  "domain": "foci",
+  "category": "foci",
+  "id": "cl6_qi_focus",
+  "changed": {
+    "system": {
+      "category": "FOCUS"
+    }
+  },
+  "ref": {
+    "name": "Qi focus",
+    "book": "corebook",
+    "page": 155
+  },
+  "correctedAt": "2026-08-14T14:08:17.335Z"
+}

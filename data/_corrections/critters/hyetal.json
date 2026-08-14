@@ -1,0 +1,49 @@
+{
+  "id": "hyetal",
+  "name": "Hyetal",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 5,
+      "agi": 6,
+      "rea": 7,
+      "str": 5,
+      "wil": 5,
+      "log": 5,
+      "int": 5,
+      "cha": 5,
+      "mag": 5,
+      "ess": 5
+    },
+    "skills": "Astral, Athletics (Swimming), Close Combat, Exotic Ranged Weap- on, Perception",
+    "powers": "Accident, Astral Form, Concealment, Confusion, Engulf (Water),",
+    "weaknesses": "Allergy (Fire, Severe)",
+    "description": "(Water, Force 5) Graceful hyetals appear as a pair of cresting waves that can leap a meter or so out of the ter as they crash on the surface. They stay on surface of the water to avoid larger predators skim the surface, feeding on smaller prey. wave span of a hyetal can reach more than three meters, so they could accidentally catch a bystander in their wake.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_hyetal",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 51,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 51
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Hyetal"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

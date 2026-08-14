@@ -1,0 +1,49 @@
+{
+  "id": "gorging_shark",
+  "name": "Gorging Shark",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 20,
+      "agi": 4,
+      "rea": 3,
+      "str": 16,
+      "wil": 3,
+      "log": 1,
+      "int": 3,
+      "cha": 2,
+      "mag": 4,
+      "ess": 6
+    },
+    "skills": "Athletics 4, Close Combat 3, Outdoors 2, Perception 4",
+    "powers": "Durable 8, Engulf (Water), Hardened Armor 12",
+    "description": "This species is a new one to many marine biologists, as they are quite adept at hiding in plain sight. However, due to some strange circumstances, gorging sharks ( Cetorhinus gigantus ) seem to find the waters three hundred kilometers off Land's End to OCEANS, SEAS, AND LAKES // be rather fascinating, as well as the coast along the Norfolk Stinkfens. Both of these locations are very popular for gorging sharks, and their mundane progenitors the basking shark ( Cetorhinus maximus ), to gather in shoals and schools as they go through their summer courtship behaviors (yes, these are the sharks that swim nose to tail in circles for hours at a time). Before the Awakening, the basking shark was the second largest species of shark, behind the whale shark. After the Awakening, the megalodon became the largest species of shark … until recently. The gorging shark is, as far as modern science is aware, the largest species of shark in the world. The largest specimen ever recorded, a male over twenty-three meters in length, was recovered after it was killed by unknown parties off the Norfolk coast in 2078. The average length for this species is twenty meters. and > Unknown parties, my arse! it caused > Pinkie I heard it was trip nearby > They've gotten better since, haven't they? And their jobs are less flashy. Mostly. > eRic The gorging shark, and the basking shark for make when that matter, are cosmopolitan migratory species, constantly traveling the world's temperate oceans, swimming slowly and using their six-meter-wide mouths to filter over a thousand tons of water an a devil jack hour. always wary Gorging sharks are a prey animal of sorts, if you're though only the giants of the oceans even have the being a power to attempt to get through the shark's exbut tremely thick armored skin. Megalodons and leviathans have tried to prey on gorging sharks, but even these modern-day sea monsters have trouble with the sheer size and durability of the gorging shark. The only creatures that, we suspect, can reliably feed on gorging sharks are kraken, as well as groups of megalodons and leviathans. Gorging sharks have the ability to form a swirling vortex in front of them to deal with predators, but for the most part they rely on their thick skin. 5, gorging shark DR I/ID AC CM M 32 6/1 A1,I 2 26 10/20/+3 Weapons: Unarmed Strike [Close Combat, DV 8S, 19/—/—/—/—]",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_gorging_shark",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "wild_life",
+    "page": 153,
+    "sources": [
+      {
+        "book": "wild_life",
+        "page": 153
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "wild_life",
+    "originalName": "Gorging Shark"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

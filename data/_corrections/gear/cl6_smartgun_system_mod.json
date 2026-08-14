@@ -1,0 +1,33 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_smartgun_system_mod",
+  "correctedAt": "2026-08-03T11:30:00.287Z",
+  "name": "Smartgun system (Internal)",
+  "img": "generic/accessory_firearms_accessory.webp",
+  "system": {
+    "type": "ACCESSORY",
+    "subtype": "WEAPON_ACCESSORY",
+    "price": 500,
+    "priceDef": "500",
+    "avail": 1,
+    "availDef": "1L",
+    "description": "This is the firearm or a projectile-weapon side of the smartlink system. The system includes a small cor- camera and range finder.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "smartgun_system_mod",
+      "category": "weapon_modifications",
+      "book": "core",
+      "attrs": {
+        "id": "smartgun_system_mod",
+        "avail": "1L",
+        "price": "500",
+        "size": "0"
+      },
+      "stats": {},
+      "page": "260"
+    }
+  },
+  "qaStatus": "extracted"
+}

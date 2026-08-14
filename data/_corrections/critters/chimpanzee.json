@@ -1,0 +1,47 @@
+{
+  "id": "chimpanzee",
+  "name": "Chimpanzee",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 4,
+      "agi": 4,
+      "rea": 3,
+      "str": 5,
+      "wil": 2,
+      "log": 2,
+      "int": 4,
+      "cha": 3,
+      "ess": 6
+    },
+    "skills": "Athletics 4 (Climbing +2), Close Combat 4, Influence 3,",
+    "powers": "Armor 2",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_chimpanzee",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "body_shop",
+    "page": 157,
+    "sources": [
+      {
+        "book": "body_shop",
+        "page": 157
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "body_shop",
+    "originalName": "Chimpanzee"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

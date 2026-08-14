@@ -1,0 +1,15 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_dynamic_tension_system",
+  "correctedAt": "2026-08-09T11:35:03.679Z",
+  "ref": {
+    "name": "Dynamic Tension System",
+    "book": "firing_squad"
+  },
+  "changed": {
+    "system": {
+      "subtype": "FIREARMS_ACCESSORY"
+    }
+  }
+}

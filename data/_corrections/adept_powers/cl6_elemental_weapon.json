@@ -1,0 +1,16 @@
+{
+  "domain": "adept_powers",
+  "category": "adept_powers",
+  "id": "cl6_elemental_weapon",
+  "changed": {
+    "system": {
+      "category": "ADEPT_POWER"
+    }
+  },
+  "ref": {
+    "name": "Elemental Weapon",
+    "book": "street_wyrd",
+    "page": 80
+  },
+  "correctedAt": "2026-08-13T20:30:49.894Z"
+}

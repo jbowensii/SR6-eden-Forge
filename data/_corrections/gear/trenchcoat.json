@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "clothing",
+  "id": "trenchcoat",
+  "deleted": true,
+  "ref": {
+    "name": "Trenchcoat",
+    "book": "no_future",
+    "page": 159
+  },
+  "correctedAt": "2026-08-09T18:51:40.962Z"
+}

@@ -1,0 +1,49 @@
+{
+  "id": "esker",
+  "name": "Esker",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 3,
+      "agi": 4,
+      "rea": 5,
+      "str": 3,
+      "wil": 3,
+      "log": 3,
+      "int": 3,
+      "cha": 3,
+      "mag": 3,
+      "ess": 3
+    },
+    "skills": "Astral, Athletics (Swimming), Close Combat, Exotic Ranged Weap- on, Perception",
+    "powers": "Astral Form, Concealment, Confusion, Energy Aura (Cold), Mate- rialization, Movement, Search, Weather Control",
+    "weaknesses": "Allergy (fire, Severe)",
+    "description": "(Water, Force 3) Fluttering through the skies of the elemental plane are these gorgeous six-winged butterflies. Eskers are as beautiful as they are fragile, like they made of carnival glass and cotton candy. They prefer to fly from cloud to cloud and flutter among the rainbows.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_esker",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 50,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 50
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Esker"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

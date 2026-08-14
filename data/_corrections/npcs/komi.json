@@ -1,0 +1,62 @@
+{
+  "id": "komi",
+  "name": "Komi",
+  "system": {
+    "category": "NPC",
+    "metatype": "human",
+    "attributes": {
+      "bod": 4,
+      "agi": 3,
+      "rea": 3,
+      "str": 3,
+      "wil": 4,
+      "log": 5,
+      "int": 6,
+      "cha": 5,
+      "edg": 3,
+      "ess": 5.7
+    },
+    "languages": "Cantonese (N), English (S), Japanese (S), Mandarin (S)",
+    "qualities": "AR Vertigo, Bad Luck, Indomitable, Mong Kok Street Courier,",
+    "augmentations": "Cybereyes 3 (image link, low-light vision, thermographic vision, vision enhancement, vision magnification)",
+    "gear": "Commlink (Rating 5, D/F 3/0), DragonThread duster (DR +3)",
+    "weapons": "",
+    "powers": "",
+    "nuyen": "",
+    "activeSkills": "",
+    "adeptPowers": "",
+    "defenseRating": "",
+    "lifestyle": "",
+    "spells": "",
+    "conditionMonitors": "",
+    "contacts": "",
+    "knowledgeSkills": "",
+    "initiative": "",
+    "complexForms": "",
+    "cyberware": "",
+    "genesisID": "cat28000_npcs_komi",
+    "defenserating": "",
+    "notes": "",
+    "type": "NPC",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "corebook_hongkong",
+    "page": 333,
+    "sources": [
+      {
+        "book": "corebook_hongkong",
+        "page": 333
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "corebook_hongkong",
+    "originalName": "Komi"
+  },
+  "img": "komi_p333_x2314.webp",
+  "domain": "npcs",
+  "category": "npc",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

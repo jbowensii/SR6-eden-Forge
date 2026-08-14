@@ -1,0 +1,16 @@
+{
+  "domain": "metamagics",
+  "category": "metamagics",
+  "id": "cl6_sympathetic_linking",
+  "changed": {
+    "system": {
+      "category": "METAMAGIC"
+    }
+  },
+  "ref": {
+    "name": "Sympathetic Linking",
+    "book": "street_wyrd",
+    "page": 124
+  },
+  "correctedAt": "2026-08-14T14:08:17.335Z"
+}

@@ -1,0 +1,16 @@
+{
+  "domain": "complexforms",
+  "category": "complexforms",
+  "id": "cl6_enhance_autosoft",
+  "changed": {
+    "system": {
+      "category": "COMPLEX_FORM"
+    }
+  },
+  "ref": {
+    "name": "Enhance Autosofts",
+    "book": "hack_slash",
+    "page": 64
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

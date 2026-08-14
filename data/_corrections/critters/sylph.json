@@ -1,0 +1,49 @@
+{
+  "id": "sylph",
+  "name": "Sylph",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 2,
+      "agi": 7,
+      "rea": 8,
+      "str": 1,
+      "wil": 4,
+      "log": 4,
+      "int": 4,
+      "cha": 4,
+      "mag": 4,
+      "ess": 4
+    },
+    "skills": "Astral, Athletics, Close Combat, Exotic Ranged Weapon, Perception,",
+    "powers": "Accident, Astral Form, Concealment, Psychokinesis, Elemental",
+    "weaknesses": "Allergy (Inhalation vector toxins, Severe)",
+    "description": "(Air, Force 4) with Sylphs have a semi-translucent humanoid form consisting of clouds or smoky substance. More specifically, the opaque clouds edge and outline mer- the sylph's form. Details such as eyes, mouth, the and ears are hazy. The same for then end of their to limbs as they whip away from their form. When and dealing with metahumans, some sylphs choose to be more opaque, adjusting their form with denser clouds and mimicking metahuman features. Long pointy ears are quite popular with them. Sylphs enjoy traveling to the material plane more than other air elementals.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_sylph",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 55,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 55
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Sylph"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

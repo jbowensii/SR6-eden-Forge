@@ -1,0 +1,15 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_federated_boeing_blackhawk",
+  "deleted": true,
+  "ref": {
+    "name": "Federated Boeing Blackhawk",
+    "book": "corebook",
+    "page": 300
+  },
+  "correctedAt": "2026-08-09T18:51:41.241Z",
+  "system": {
+    "description": ""
+  }
+}

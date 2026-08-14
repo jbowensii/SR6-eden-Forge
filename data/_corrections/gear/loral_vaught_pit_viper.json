@@ -1,0 +1,17 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "loral_vaught_pit_viper",
+  "changed": {
+    "system": {
+      "type": "WEAPON_SPECIAL",
+      "subtype": "MISSILES"
+    }
+  },
+  "ref": {
+    "name": "Loral-Vaught Pit Viper",
+    "book": "deadly_arts",
+    "page": 144
+  },
+  "correctedAt": "2026-08-13T16:02:23.223Z"
+}

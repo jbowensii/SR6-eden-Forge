@@ -1,0 +1,17 @@
+{
+  "domain": "spells",
+  "category": "manipulation",
+  "id": "boosted_defense",
+  "changed": {
+    "system": {
+      "category": "MANIPULATION",
+      "type": "PHYSICAL"
+    }
+  },
+  "ref": {
+    "name": "Boosted Defense",
+    "book": "corebook_berlin",
+    "page": 144
+  },
+  "correctedAt": "2026-08-13T19:00:34.879Z"
+}

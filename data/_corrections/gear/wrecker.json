@@ -1,0 +1,20 @@
+{
+  "domain": "gear",
+  "category": "cyberware",
+  "id": "wrecker",
+  "correctedAt": "2026-07-30T18:22:37.980Z",
+  "name": "Wrecker",
+  "system": {
+    "type": "CYBERWARE",
+    "essence": 0.4,
+    "capacity": 6,
+    "avail": 1,
+    "availDef": "1(I)",
+    "price": 500,
+    "description": "Junkyard-built, extreme close combat weapare limited in form solely by the imaginations those twisted creators who manufacture them. Categorically, any kind of blunt or spiked imweapon is known on the streets as a wreckThey don’t necessarily involve the complete replacement of a user’s forearm and hand, but usually do. Like buzzsaws and crab claws, these weapons are crude, rude, and unwelcome in law-abiding society.",
+    "priceDef": "",
+    "subtype": "CYBER_IMPLANT_WEAPON",
+    "notes": ""
+  },
+  "qaStatus": "extracted"
+}

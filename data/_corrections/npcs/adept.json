@@ -1,0 +1,75 @@
+{
+  "id": "adept",
+  "name": "Adept",
+  "system": {
+    "category": "NPC",
+    "metatype": "human",
+    "attributes": {
+      "bod": 5,
+      "agi": 6,
+      "rea": 5,
+      "str": 5,
+      "wil": 4,
+      "log": 2,
+      "int": 3,
+      "cha": 2,
+      "edg": 7,
+      "magres": 6,
+      "ess": 6.0
+    },
+    "initiative": "8(10) + 3D6/1 Major, 4 Minor",
+    "conditionMonitors": "Condition Monitors (P/S): 11/10",
+    "defenseRating": "9",
+    "activeSkills": "Athletics 3 (Throwing +2), Biotech 2 (First Aid +2), Close",
+    "knowledgeSkills": "Fight Clubs, Fort Lewis Geography",
+    "languages": "English (Native)",
+    "qualities": "AR Vertigo, Guts, Honorbound (Code Duello), Quick Healer,",
+    "adeptPowers": "Combat Sense 2, Critical Strike 2, Improved Reflexes 2,",
+    "contacts": "First Nations ganger (C1/L2), Salish Government Secretary (C2/",
+    "lifestyle": "Low (1 month prepaid)",
+    "gear": "Armor vest, contacts (w/ flare compensation, image link, low-light vision), Sony Emperor commlink (Device Rating 2, D/F 1/1, Program slots",
+    "nuyen": "4,420¥",
+    "weapons": "",
+    "powers": "",
+    "spells": "",
+    "augmentations": "",
+    "complexForms": "",
+    "cyberware": "",
+    "genesisID": "cat28000_npcs_adept",
+    "defenserating": "",
+    "notes": "",
+    "type": "NPC",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "corebook_berlin",
+    "page": 82,
+    "sources": [
+      {
+        "book": "corebook_berlin",
+        "page": 82
+      },
+      {
+        "book": "corebook_hongkong",
+        "page": 82
+      },
+      {
+        "book": "whisper_nets",
+        "page": 144
+      },
+      {
+        "book": "corebook",
+        "page": 82
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "corebook_berlin",
+    "originalName": "Adept"
+  },
+  "img": "adept_p082_x404.webp",
+  "domain": "npcs",
+  "category": "npc",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

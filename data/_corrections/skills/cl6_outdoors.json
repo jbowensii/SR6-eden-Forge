@@ -1,0 +1,16 @@
+{
+  "domain": "skills",
+  "category": "skills",
+  "id": "cl6_outdoors",
+  "changed": {
+    "system": {
+      "category": "PHYSICAL"
+    }
+  },
+  "ref": {
+    "name": "Outdoors",
+    "book": "corebook",
+    "page": 96
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

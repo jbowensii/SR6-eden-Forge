@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "hua_tuo",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "VANS"
+    }
+  },
+  "ref": {
+    "name": "Hua Tuo",
+    "book": "deadly_arts",
+    "page": 135
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

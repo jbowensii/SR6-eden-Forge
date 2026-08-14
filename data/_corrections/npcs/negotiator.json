@@ -1,0 +1,63 @@
+{
+  "id": "negotiator",
+  "name": "Negotiator",
+  "system": {
+    "category": "NPC",
+    "metatype": "elf",
+    "attributes": {
+      "bod": 4,
+      "agi": 6,
+      "rea": 5,
+      "str": 2,
+      "wil": 5,
+      "log": 5,
+      "int": 5,
+      "cha": 8,
+      "edg": 4,
+      "ess": 5.05
+    },
+    "activeSkills": "Athletics 2, Biotech 1, Close Combat 4, Con 4, Electronics 2, is",
+    "knowledgeSkills": "Criminology, HTR Protocols, Psy-ops, Psychology, Theol- ogy",
+    "languages": "English (Native)",
+    "qualities": "Attribute Mastery (Charisma), Injury Prone, Low-Light Vision,",
+    "contacts": "City Official (C6/L4), Company Suit (C4/L4), Gang Boss (C3/L4),",
+    "lifestyle": "Low (1 month prepaid)",
+    "augmentations": "Bone lacing (plastic, alpha), cyber forearm (obvious right, Agility 6, Strength 2; Harden 1, implanted Colt Secret Agent, retract- able spur) in",
+    "gear": "Armanté suit, contacts (rating 3, image link, smartlink), Erika Elite commlink, fake SIN (rating 1; w/ driver's license), fake SIN (rating 6; w/ concealed carry license, cyberware license, driver's license)",
+    "nuyen": "2.530¥ is",
+    "weapons": "",
+    "description": "A negotiator is an individual proficient in the art of reconciling differences and finding common ground among conflicting parties. These professionals are equipped with skill sets that require effective communication and problemsolving abilities. Negotiators often operate in various spheres, applying their expertise to resolve disputes and fostering collaboration. Their skills can start with a formal education and structured foundation, but the only way to hone their skills is through practical experience. With time and practice, they can become the cornerstone of a team and more than authority or control. A negotiator embodies a multifaceted approach, integrating vision, empathy, and shrewdness. A true negotiator navigates complex issues, guiding their team or the conversation with a purpose and a strategy in mind. The negotiating process is not a singular concept and requires someone who can use an amalgamation of diverse styles, each tailored to specific contexts and challenges at hand. For example, distributive negotiation, often called competitive or positional negotiation, focuses on claiming value through a give-and-take process. In contrast, integrative negotiation seeks to create value by exploring collaborative solutions and emphasizing mutual gains.",
+    "powers": "",
+    "adeptPowers": "",
+    "defenseRating": "",
+    "spells": "",
+    "conditionMonitors": "",
+    "initiative": "",
+    "complexForms": "",
+    "cyberware": "",
+    "genesisID": "cat28000_npcs_negotiator",
+    "defenserating": "",
+    "notes": "",
+    "type": "NPC",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "smooth_operations",
+    "page": 104,
+    "sources": [
+      {
+        "book": "smooth_operations",
+        "page": 104
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "smooth_operations",
+    "originalName": "Negotiator"
+  },
+  "img": "negotiator_p103_x498.webp",
+  "domain": "npcs",
+  "category": "npc",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

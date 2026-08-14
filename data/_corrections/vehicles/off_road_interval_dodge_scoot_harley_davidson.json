@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "off_road_interval_dodge_scoot_harley_davidson",
+  "changed": {
+    "meta": {
+      "flagged": "vehicle type/subtype not merged yet"
+    }
+  },
+  "ref": {
+    "name": "OFF ROAD) INTERVAL Dodge Scoot Harley-Davidson",
+    "book": "corebook",
+    "page": 302
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

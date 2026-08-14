@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "kitsune",
+  "changed": {
+    "meta": {
+      "flagged": "subtype is my guess — please confirm"
+    }
+  },
+  "ref": {
+    "name": "Kitsune",
+    "book": "deadly_arts",
+    "page": 67
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

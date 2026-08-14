@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "buzzard_transit",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "BUS"
+    }
+  },
+  "ref": {
+    "name": "buzzard transit",
+    "book": "age_of_rust",
+    "page": 15
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

@@ -1,0 +1,17 @@
+{
+  "domain": "spells",
+  "category": "illusion",
+  "id": "confusion",
+  "changed": {
+    "system": {
+      "category": "ILLUSION",
+      "type": "MANA"
+    }
+  },
+  "ref": {
+    "name": "Confusion",
+    "book": "corebook_berlin",
+    "page": 138
+  },
+  "correctedAt": "2026-08-13T19:00:34.879Z"
+}

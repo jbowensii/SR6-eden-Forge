@@ -1,0 +1,20 @@
+{
+  "domain": "gear",
+  "category": "cyberware",
+  "id": "tesla_coil",
+  "correctedAt": "2026-07-30T18:22:29.353Z",
+  "name": "Tesla Coil",
+  "system": {
+    "type": "CYBERWARE",
+    "essence": 1,
+    "capacity": 8,
+    "avail": 7,
+    "availDef": "7(I)",
+    "price": 15000,
+    "description": "After Ares introduced the Scylla, it didn’t take for other weapons manufacturers to reverse-engineer their marvel of directed lightning. Although term “tesla coil” isn’t strictly accurate, it’s stuck a brand-agnostic description of the cyber implant version of this weapon. A tesla coil projects electrical energy in a spray attack, much like a flamethrower. They prodigiously consume energy and require battery packs; the user’s natural bioelectricurrent is nowhere near sufficient to power this weapon. A tesla coil is not designed to moderate its consumption of battery charges. Once a battery is drained by a tesla coil, it cannot be recharged.",
+    "priceDef": "",
+    "subtype": "CYBER_IMPLANT_WEAPON",
+    "notes": ""
+  },
+  "qaStatus": "extracted"
+}

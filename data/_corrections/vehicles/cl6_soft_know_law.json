@@ -1,0 +1,20 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_soft_know_law",
+  "movedTo": {
+    "domain": "vehicles",
+    "category": "vehicles"
+  },
+  "movedFrom": {
+    "domain": "gear",
+    "category": "software"
+  },
+  "why": "Commlink6 files this under gear_vehicles",
+  "ref": {
+    "name": "Autosoft (Knowledge: Law)",
+    "book": "tarnished_star",
+    "page": 157
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

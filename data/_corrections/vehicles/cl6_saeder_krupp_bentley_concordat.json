@@ -1,0 +1,15 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_saeder_krupp_bentley_concordat",
+  "deleted": true,
+  "ref": {
+    "name": "Saeder-Krupp-Bentley Concordat",
+    "book": "corebook",
+    "page": 296
+  },
+  "correctedAt": "2026-08-09T18:51:41.360Z",
+  "system": {
+    "description": ""
+  }
+}

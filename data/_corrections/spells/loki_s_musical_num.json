@@ -1,0 +1,16 @@
+{
+  "domain": "spells",
+  "category": "illusion",
+  "id": "loki_s_musical_num",
+  "changed": {
+    "meta": {
+      "flagged": "looks like page furniture, not an item — delete?"
+    }
+  },
+  "ref": {
+    "name": "Loki's Musical Num-",
+    "book": "street_wyrd",
+    "page": 44
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

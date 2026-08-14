@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "gravatic",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "GRAV"
+    }
+  },
+  "ref": {
+    "name": "Gravatic",
+    "book": "deadly_arts",
+    "page": 140
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

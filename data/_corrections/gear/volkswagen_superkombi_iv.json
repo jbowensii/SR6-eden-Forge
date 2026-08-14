@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "vehicles",
+  "id": "volkswagen_superkombi_iv",
+  "deleted": true,
+  "ref": {
+    "name": "Volkswagen Superkombi IV",
+    "book": "double_clutch",
+    "page": 35
+  },
+  "correctedAt": "2026-08-13T00:42:05.563Z"
+}

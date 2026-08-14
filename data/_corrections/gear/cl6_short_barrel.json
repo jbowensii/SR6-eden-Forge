@@ -1,0 +1,15 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_short_barrel",
+  "correctedAt": "2026-08-09T11:35:03.573Z",
+  "ref": {
+    "name": "Short Barrel",
+    "book": "firing_squad"
+  },
+  "changed": {
+    "system": {
+      "subtype": "FIREARMS_ACCESSORY"
+    }
+  }
+}

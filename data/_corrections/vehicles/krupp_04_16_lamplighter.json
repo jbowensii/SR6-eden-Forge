@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "krupp_04_16_lamplighter",
+  "changed": {
+    "meta": {
+      "flagged": "subtype is my guess — please confirm"
+    }
+  },
+  "ref": {
+    "name": "Krupp 04 16 Lamplighter",
+    "book": "deadly_arts",
+    "page": 138
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

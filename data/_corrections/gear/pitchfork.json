@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "weapons_close_combat",
+  "id": "pitchfork",
+  "deleted": true,
+  "ref": {
+    "name": "Pitchfork",
+    "book": "no_future",
+    "page": 158
+  },
+  "correctedAt": "2026-08-09T18:51:40.910Z"
+}

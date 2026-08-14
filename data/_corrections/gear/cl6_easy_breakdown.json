@@ -1,0 +1,31 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_easy_breakdown",
+  "correctedAt": "2026-08-03T11:30:53.822Z",
+  "name": "Easy Breakdown",
+  "system": {
+    "type": "ACCESSORY",
+    "subtype": "WEAPON_ACCESSORY",
+    "price": 400,
+    "priceDef": "400",
+    "avail": 3,
+    "availDef": "3I",
+    "description": "Being able to get that pistol, SMG, sniper rifle, or whatever down to its component bits is great when making a quick getaway or attempting to sneak it through scanners. Most sec forces are trained to recognize weapon parts, but it's better than nothing. Bigger arms often come with a case for a little extra (250 nuyen), and for the smaller ones you can usually find something to disguise it as. \\nWireless: AR guides help break down larger arms in a single Major Action and smaller arms in a single Minor Action. \\nNote: It takes two Major Actions to break down SMGs and larger weapons into their components for storage or stealth purposes, and one to break down pistols. When a weapon is broken into component form, increase its concealability threshold by 2. The assembly process takes the same amount of time.",
+    "notes": "",
+    "wifi": "AR guides help break down larger arms in a single Major Action and smaller arms in a single Minor Action.",
+    "_cl6": {
+      "id": "easy_breakdown",
+      "category": "weapon_modifications",
+      "book": "firing_squad",
+      "attrs": {
+        "id": "easy_breakdown",
+        "avail": "3I",
+        "price": "400"
+      },
+      "stats": {},
+      "page": "59"
+    }
+  },
+  "qaStatus": "extracted"
+}

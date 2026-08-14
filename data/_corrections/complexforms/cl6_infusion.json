@@ -1,0 +1,20 @@
+{
+  "domain": "complexforms",
+  "category": "complexforms",
+  "id": "cl6_infusion",
+  "movedTo": {
+    "domain": "complexforms",
+    "category": "complexforms"
+  },
+  "movedFrom": {
+    "domain": "metamagics",
+    "category": "metamagics"
+  },
+  "why": "Commlink6 files this under complexforms",
+  "ref": {
+    "name": "Infusion",
+    "book": "street_wyrd",
+    "page": 84
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

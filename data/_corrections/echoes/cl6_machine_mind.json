@@ -1,0 +1,16 @@
+{
+  "domain": "echoes",
+  "category": "echoes",
+  "id": "cl6_machine_mind",
+  "changed": {
+    "system": {
+      "category": "ECHO"
+    }
+  },
+  "ref": {
+    "name": "Machine Mind",
+    "book": "corebook",
+    "page": 195
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

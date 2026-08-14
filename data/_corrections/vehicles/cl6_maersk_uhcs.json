@@ -1,0 +1,61 @@
+{
+  "id": "cl6_maersk_uhcs",
+  "name": "Maersk Double L-class UHCS",
+  "system": {
+    "type": "VEHICLES",
+    "subtype": "SHIPS",
+    "price": 185389000,
+    "priceDef": "185389000",
+    "avail": 9,
+    "availDef": "9",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "maersk_uhcs",
+      "category": "gear_vehicles",
+      "book": "double_clutch",
+      "attrs": {
+        "id": "maersk_uhcs",
+        "avail": "9",
+        "price": "185389000",
+        "type": "VEHICLES",
+        "subtype": "SHIPS"
+      },
+      "stats": {
+        "vehicle.han": "6",
+        "vehicle.acc": "4",
+        "vehicle.spdi": "8",
+        "vehicle.tspd": "40",
+        "vehicle.bod": "70",
+        "vehicle.arm": "12",
+        "vehicle.pil": "4",
+        "vehicle.sen": "3",
+        "vehicle.sea": "19"
+      },
+      "page": "59"
+    },
+    "genesisID": "maersk_uhcs",
+    "handling": "6",
+    "accel": "4",
+    "speedInterval": "8",
+    "topSpeed": "40",
+    "body": "70",
+    "armor": "12",
+    "pilot": "4",
+    "sensor": "3",
+    "seats": "19",
+    "availability": "9"
+  },
+  "meta": {
+    "book": "double_clutch",
+    "page": 59,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "maersk_double_l_class_uhcs_p061_x1106.webp",
+  "domain": "vehicles",
+  "category": "vehicles",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

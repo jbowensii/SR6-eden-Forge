@@ -1,0 +1,15 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_harley_davidson_scorpion",
+  "deleted": true,
+  "ref": {
+    "name": "Harley-Davidson Scorpion",
+    "book": "corebook",
+    "page": 295
+  },
+  "correctedAt": "2026-08-09T18:51:41.283Z",
+  "system": {
+    "description": ""
+  }
+}

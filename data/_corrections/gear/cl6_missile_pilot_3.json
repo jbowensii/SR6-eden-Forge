@@ -1,0 +1,11 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_missile_pilot_3",
+  "deleted": true,
+  "ref": {
+    "name": "Pilot 3",
+    "book": "deadly_arts"
+  },
+  "correctedAt": "2026-08-09T11:37:35.144Z"
+}

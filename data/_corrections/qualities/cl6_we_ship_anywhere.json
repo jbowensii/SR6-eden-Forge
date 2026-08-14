@@ -1,0 +1,45 @@
+{
+  "id": "cl6_we_ship_anywhere",
+  "name": "We Ship Anywhere",
+  "system": {
+    "type": "NORMAL",
+    "subtype": "NORMAL",
+    "price": 0,
+    "priceDef": "",
+    "avail": 0,
+    "availDef": "",
+    "description": "Wuxing is no stranger to using its global shipping reach and extraterritorial privileges to move cargoes that local governments consider illegal. You have a connection in Wuxing that allows you to move a reasonable amount of cargo between major cities without fear of having it seized by local authorities.<br/><br/>\\",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "we_ship_anywhere",
+      "category": "qualities",
+      "book": "power_plays",
+      "attrs": {
+        "id": "we_ship_anywhere",
+        "karma": "4",
+        "pos": "true",
+        "type": "NORMAL"
+      },
+      "stats": {},
+      "page": "171"
+    },
+    "category": "positive",
+    "value": 4,
+    "genesisID": "we_ship_anywhere",
+    "product": "",
+    "explain": ""
+  },
+  "meta": {
+    "book": "power_plays",
+    "page": 171,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "we_ship_anywhere_p171_x1387.webp",
+  "domain": "qualities",
+  "category": "qualities",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

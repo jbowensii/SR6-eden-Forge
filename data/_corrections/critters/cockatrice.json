@@ -1,0 +1,44 @@
+{
+  "domain": "critters",
+  "category": "critter",
+  "id": "cockatrice",
+  "correctedAt": "2026-07-30T11:50:56.731Z",
+  "name": "Cockatrice",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 3,
+      "agi": 4,
+      "rea": 3,
+      "str": 3,
+      "wil": 3,
+      "log": 1,
+      "int": 2,
+      "cha": 1,
+      "mag": 5,
+      "ess": 6
+    },
+    "metatype": "",
+    "rating": 0,
+    "initiative": "",
+    "defenserating": "",
+    "description": "A metaspecies of the chicken, the cockatrice resembles an emu with a chicken's head and a long blue tail. Standing two meters in height and weighing approximately 45 kilograms, the cockatrice has long blue legs, yellow plumage, a bright red comb on its head, and a sharp, horny beak. They are predatory and carnivorous, often hunting in packs. They hunt by chasing their prey, leaping into the air, and attacking with their tails to paralyze their prey, then tearing them apart and dining at their leisure. They are not at all choosy about their diet and will take on just about anything up to the size of an ork if it looks like it might be tasty. Cockatrices are popular security critters for many corps around the world. Guard specimens are typically imprinted from hatching onto their handlers, of whom they become extremely protective. Natural Habitat/Range: Originally found in open grassland and scrubland in western Europe, the cockatrice can now be found worldwide in a variety of environments.",
+    "notes": "",
+    "monitor": {
+      "physical": 0,
+      "stun": 0,
+      "overflow": 3,
+      "edge": 0
+    },
+    "movement": {
+      "walk": "",
+      "sprint": "",
+      "perHit": "",
+      "notes": ""
+    },
+    "powers": "Armor 1, Immunity (own touch), Natural Weapon, Paralyzing",
+    "skills": "Athletics 7, Close Combat 7, Perception 3, Stealth 5",
+    "weaknesses": ""
+  },
+  "qaStatus": "extracted"
+}

@@ -1,0 +1,17 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "magnetic_gloves_industrial",
+  "changed": {
+    "system": {
+      "type": "SURVIVAL",
+      "subtype": "SURVIVAL_GEAR"
+    }
+  },
+  "ref": {
+    "name": "Magnetic Gloves (Industrial)",
+    "book": "explosive_decompression",
+    "page": 81
+  },
+  "correctedAt": "2026-08-13T16:04:22.960Z"
+}

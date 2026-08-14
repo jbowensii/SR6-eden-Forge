@@ -1,0 +1,28 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_ford_americar",
+  "correctedAt": "2026-07-30T12:03:54.077Z",
+  "name": "Ford Americar",
+  "system": {
+    "type": "VEHICLE",
+    "subtype": "CAR",
+    "handling": "4/5",
+    "accel": "9",
+    "speedInterval": "20",
+    "topSpeed": "160",
+    "body": "11",
+    "armor": "4",
+    "pilot": "1",
+    "sensor": "2",
+    "seats": "4",
+    "availability": "2",
+    "price": "16,000"
+  },
+  "qaStatus": "extracted",
+  "gapsOnly": true,
+  "ref": {
+    "name": "Ford Americar",
+    "wasId": "ford_americar"
+  }
+}

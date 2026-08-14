@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "spin_radical_solar_sailboard_5000_spin_radical_solar_sailboard_5000xl",
+  "changed": {
+    "meta": {
+      "flagged": "name recovered from the printed page — please confirm"
+    }
+  },
+  "ref": {
+    "name": "Spin-Radical Solar Sailboard 5000XL",
+    "book": "explosive_decompression",
+    "page": 99
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

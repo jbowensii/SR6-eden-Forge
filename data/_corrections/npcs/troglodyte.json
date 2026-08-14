@@ -1,0 +1,61 @@
+{
+  "id": "troglodyte",
+  "name": "Troglodyte",
+  "system": {
+    "category": "NPC",
+    "attributes": {
+      "bod": 3,
+      "agi": 3,
+      "rea": 4,
+      "str": 2,
+      "wil": 3,
+      "log": 2,
+      "int": 3,
+      "cha": 2,
+      "edg": 1,
+      "ess": 6.0
+    },
+    "powers": "Armor (2), Concealment, Enhanced Senses (Thermographic Vision),",
+    "weapons": "",
+    "metatype": "troll",
+    "augmentations": "Cyberarm (right, w/ attribute increase 3)",
+    "gear": "Armor vest (+3), Sony Emperor commlink (DR 2, 1/1)",
+    "qualities": "",
+    "nuyen": "",
+    "activeSkills": "",
+    "languages": "",
+    "adeptPowers": "",
+    "defenseRating": "",
+    "lifestyle": "",
+    "spells": "",
+    "conditionMonitors": "",
+    "contacts": "",
+    "knowledgeSkills": "",
+    "initiative": "",
+    "complexForms": "",
+    "cyberware": "",
+    "genesisID": "cat28000_npcs_troglodyte",
+    "defenserating": "",
+    "notes": "",
+    "type": "NPC",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "30_nights",
+    "page": 139,
+    "sources": [
+      {
+        "book": "30_nights",
+        "page": 139
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "30_nights",
+    "originalName": "Troglodyte"
+  },
+  "domain": "npcs",
+  "category": "npc",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

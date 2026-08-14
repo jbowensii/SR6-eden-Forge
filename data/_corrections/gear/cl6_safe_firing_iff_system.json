@@ -1,0 +1,15 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_safe_firing_iff_system",
+  "correctedAt": "2026-08-09T11:35:03.567Z",
+  "ref": {
+    "name": "Safe Firing IFF System",
+    "book": "firing_squad"
+  },
+  "changed": {
+    "system": {
+      "subtype": "FIREARMS_ACCESSORY"
+    }
+  }
+}

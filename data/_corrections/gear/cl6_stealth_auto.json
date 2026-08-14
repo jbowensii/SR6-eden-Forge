@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "software",
+  "id": "cl6_stealth_auto",
+  "deleted": true,
+  "ref": {
+    "name": "Stealth",
+    "book": "corebook",
+    "page": 201
+  },
+  "correctedAt": "2026-08-09T18:51:40.951Z"
+}

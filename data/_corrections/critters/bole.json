@@ -1,0 +1,49 @@
+{
+  "id": "bole",
+  "name": "Bole",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 8,
+      "agi": 2,
+      "rea": 3,
+      "str": 8,
+      "wil": 4,
+      "log": 3,
+      "int": 4,
+      "cha": 4,
+      "mag": 4,
+      "ess": 4
+    },
+    "skills": "Astral, Close Combat, Exotic Ranged Weapon, Perception, Sorcery",
+    "powers": "Astral Form, Binding, Concealment, Innate Spell (Ram [Barrier]),",
+    "weaknesses": "Allergy (Electricity, Severe)",
+    "description": "(Earth, Force 4) Boles are natural predators from the Earth metaplane. Their appearance is a serpentine form (p. of sand. Their bodies make a hissing sound as they rub their coils against the ground. Unlike other and earth elementals, they don't attempt to engulf, but gant instead try to squeeze and grind down their victims as they petrify them.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_bole",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 48,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 48
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Bole"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

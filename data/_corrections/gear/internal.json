@@ -1,0 +1,16 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "internal",
+  "changed": {
+    "meta": {
+      "flagged": "looks like page furniture, not an item — delete?"
+    }
+  },
+  "ref": {
+    "name": "Internal",
+    "book": "hack_slash",
+    "page": 40
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

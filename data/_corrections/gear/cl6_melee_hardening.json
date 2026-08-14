@@ -1,0 +1,32 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_melee_hardening",
+  "correctedAt": "2026-08-03T11:31:24.172Z",
+  "name": "Melee Hardening",
+  "system": {
+    "type": "ACCESSORY",
+    "subtype": "WEAPON_ACCESSORY",
+    "price": 300,
+    "priceDef": "300",
+    "avail": 3,
+    "availDef": "3",
+    "description": "Sometimes in combat, you run out of options and have no other choice than to clobber a fragger with your firearm. And most modern firearms aren't exactly meant to take that kind of punishment without risking damage to the internal electronics or breaking the weapon itself. Or maybe you just like having a gun that doubles as a club. In either case, you'd better modify your weapon with melee hardening. Accomplished through a metallurgic enhancing process called Chemo- Forge™, this treatment structurally enhances the outside and internals, increasing the firearm's structural strength by approximately 150 percent. The process works just as advertised, but there's a drawback. The process permeates the weapon, and while the manufacturer claims the process has no side effects on maintenance or performance, multiple field reports say that after the melee hardening process, firearms are said to feel a bit \"sticky.\" \\nNote: When used as melee weapon: [DV 3S, 4/, /, /, /, ]. This modification takes up two modification slots.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "melee_hardening",
+      "category": "weapon_modifications",
+      "book": "firing_squad",
+      "attrs": {
+        "id": "melee_hardening",
+        "avail": "3",
+        "price": "300",
+        "size": "2"
+      },
+      "stats": {},
+      "page": "61"
+    }
+  },
+  "qaStatus": "extracted"
+}

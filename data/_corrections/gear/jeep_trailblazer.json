@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "vehicles",
+  "id": "jeep_trailblazer",
+  "deleted": true,
+  "ref": {
+    "name": "Jeep Trailblazer",
+    "book": "double_clutch",
+    "page": 31
+  },
+  "correctedAt": "2026-08-13T00:42:05.563Z"
+}

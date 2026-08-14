@@ -1,0 +1,31 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_biometric_gun_lock",
+  "correctedAt": "2026-08-03T11:30:28.676Z",
+  "name": "Biometric Gun Lock",
+  "system": {
+    "type": "ACCESSORY",
+    "subtype": "WEAPON_ACCESSORY",
+    "price": 100,
+    "priceDef": "100",
+    "avail": 2,
+    "availDef": "2L",
+    "description": "On the list of things that absolutely suck during a firefight, having your weapon taken from and then used against you is near the top. Biometric locks (usually) prevent this by locking the weapon in a \"safe\" mode, rendering it inert if anyone other than the weapon's primary (or other authorized) user attempts to use it. Installed in the weapon's grip, biometric locks are programmed to read biometric profiles that are programmed into and then stored in a standard or weapon commlink to remotely activate/deactivate the weapon as needed. Additional profiles can be programmed so that friendlies can use the weapon in emergencies. And for additional fun, the biometric lock can also be linked to a weapon security system to trigger whatever security measures are installed. \\nBe warned: The electronic system can be made wireless, which means it's hackable, which in turn means someone could get in and erase all stored biometric profiles, making the weapon unusable. \\nNote: If not connected to a commlink or tactical network, the biometric gun lock has a device rating of 2.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "biometric_gun_lock",
+      "category": "weapon_modifications",
+      "book": "firing_squad",
+      "attrs": {
+        "id": "biometric_gun_lock",
+        "avail": "2L",
+        "price": "100"
+      },
+      "stats": {},
+      "page": "57"
+    }
+  },
+  "qaStatus": "extracted"
+}

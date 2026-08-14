@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "vehicles",
+  "id": "ares_docwagon_first_responder",
+  "deleted": true,
+  "ref": {
+    "name": "Ares-DocWagon First Responder",
+    "book": "double_clutch",
+    "page": 97
+  },
+  "correctedAt": "2026-08-13T00:42:05.563Z"
+}

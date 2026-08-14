@@ -1,0 +1,16 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "electronic_skin_coatings",
+  "changed": {
+    "meta": {
+      "flagged": "type/subtype ambiguous — needs a human decision"
+    }
+  },
+  "ref": {
+    "name": "Electronic Skin Coatings",
+    "book": "double_clutch",
+    "page": 139
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

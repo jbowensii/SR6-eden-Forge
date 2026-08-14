@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "nightwing_cessna_c750_mct_sikorsky_bell",
+  "changed": {
+    "meta": {
+      "flagged": "vehicle type/subtype not merged yet"
+    }
+  },
+  "ref": {
+    "name": "Nightwing Cessna C750 MCT-Sikorsky-Bell",
+    "book": "corebook",
+    "page": 303
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

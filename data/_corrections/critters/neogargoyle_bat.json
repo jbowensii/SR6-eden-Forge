@@ -1,0 +1,47 @@
+{
+  "id": "neogargoyle_bat",
+  "name": "Neogargoyle (Bat)",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 3,
+      "agi": 2,
+      "rea": 2,
+      "str": 3,
+      "wil": 1,
+      "log": 2,
+      "int": 2,
+      "cha": 1,
+      "ess": 6
+    },
+    "skills": "Athletics 4 (Climbing +2), Close Combat 5, Outdoors 2, Perception R",
+    "powers": "Armor 5, Enhanced Senses (Echolocation, Smell), Natural Weap-",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_neogargoyle_bat",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "wild_life",
+    "page": 162,
+    "sources": [
+      {
+        "book": "wild_life",
+        "page": 162
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "wild_life",
+    "originalName": "Neogargoyle (Bat)"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

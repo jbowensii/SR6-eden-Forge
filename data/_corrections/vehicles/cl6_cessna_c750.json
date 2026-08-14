@@ -1,0 +1,28 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_cessna_c750",
+  "correctedAt": "2026-07-30T12:04:38.916Z",
+  "name": "Cessna C750",
+  "system": {
+    "type": "VEHICLE",
+    "subtype": "FIXED_WING",
+    "handling": "5",
+    "accel": "20",
+    "speedInterval": "25",
+    "topSpeed": "250",
+    "body": "8",
+    "armor": "2",
+    "pilot": "2",
+    "sensor": "1",
+    "seats": "4",
+    "availability": "2",
+    "price": "150,000"
+  },
+  "qaStatus": "extracted",
+  "gapsOnly": true,
+  "ref": {
+    "name": "Cessna C750",
+    "wasId": "cessna_c750"
+  }
+}

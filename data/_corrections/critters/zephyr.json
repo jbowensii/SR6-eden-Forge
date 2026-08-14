@@ -1,0 +1,49 @@
+{
+  "id": "zephyr",
+  "name": "Zephyr",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 4,
+      "agi": 9,
+      "rea": 10,
+      "str": 3,
+      "wil": 6,
+      "log": 6,
+      "int": 6,
+      "cha": 6,
+      "mag": 6,
+      "ess": 6
+    },
+    "skills": "Astral, Athletics, Close Combat, Exotic Ranged Weapon, Perception",
+    "powers": "Accident, Astral Form, Concealment, Confusion, Energy Aura",
+    "weaknesses": "Allergy (Inhalation Vector Toxins, Severe)",
+    "description": "Force 6) Zephyrs appear as great beautiful falcons with colorful cirrus plumage. They are the apex predaof the elemental Plane of Air. Those who get a closer view see that the zephyr's beak is serrated savage teeth. It is a fast flyer, striking from above to take out welkins, wafts, and any traveler wanders too far into their territory.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_zephyr",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 56,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 56
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Zephyr"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

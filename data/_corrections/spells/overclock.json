@@ -1,0 +1,17 @@
+{
+  "domain": "spells",
+  "category": "manipulation",
+  "id": "overclock",
+  "changed": {
+    "system": {
+      "category": "MANIPULATION",
+      "type": "PHYSICAL"
+    }
+  },
+  "ref": {
+    "name": "Overclock",
+    "book": "corebook_berlin",
+    "page": 142
+  },
+  "correctedAt": "2026-08-13T19:00:34.879Z"
+}

@@ -1,0 +1,28 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_gmc_chariot",
+  "correctedAt": "2026-07-30T12:06:52.166Z",
+  "name": "GMC Chariot",
+  "system": {
+    "type": "VEHICLE",
+    "subtype": "SPECIAL_OPERATIONS_VEHICLE",
+    "handling": "3/3",
+    "accel": "20",
+    "speedInterval": "25",
+    "topSpeed": "170",
+    "body": "12",
+    "armor": "6",
+    "pilot": "1",
+    "sensor": "1",
+    "seats": "5",
+    "availability": "8",
+    "price": "60,000"
+  },
+  "qaStatus": "extracted",
+  "gapsOnly": true,
+  "ref": {
+    "name": "GMC Chariot",
+    "wasId": "gmc_chariot"
+  }
+}

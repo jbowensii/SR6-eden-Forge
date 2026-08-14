@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "bae_centurion_ii",
+  "changed": {
+    "meta": {
+      "flagged": "type/subtype ambiguous — needs a human decision"
+    }
+  },
+  "ref": {
+    "name": "BAE Centurion II",
+    "book": "double_clutch",
+    "page": 38
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

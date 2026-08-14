@@ -1,0 +1,15 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_weapon_security_system_add_option",
+  "correctedAt": "2026-08-09T11:35:03.630Z",
+  "ref": {
+    "name": "Weapon Security System (additional option)",
+    "book": "firing_squad"
+  },
+  "changed": {
+    "system": {
+      "subtype": "FIREARMS_ACCESSORY"
+    }
+  }
+}

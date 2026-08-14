@@ -1,0 +1,30 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_ergonomic_optimization",
+  "correctedAt": "2026-08-03T11:30:04.198Z",
+  "name": "Ergonomic Optimization",
+  "system": {
+    "type": "ACCESSORY",
+    "subtype": "WEAPON_ACCESSORY",
+    "price": 350,
+    "priceDef": "350",
+    "avail": 3,
+    "availDef": "3",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "ergonomic_optimization",
+      "category": "weapon_modifications",
+      "book": "deadly_arts",
+      "attrs": {
+        "id": "ergonomic_optimization",
+        "avail": "3",
+        "price": "350"
+      },
+      "stats": {},
+      "page": "31"
+    }
+  },
+  "qaStatus": "extracted"
+}

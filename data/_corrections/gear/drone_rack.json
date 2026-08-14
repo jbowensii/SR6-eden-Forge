@@ -1,0 +1,20 @@
+{
+  "domain": "gear",
+  "category": "cyberware",
+  "id": "drone_rack",
+  "correctedAt": "2026-07-30T18:22:54.465Z",
+  "name": "Drone Rack",
+  "system": {
+    "type": "CYBERWARE",
+    "essence": 1.2,
+    "capacity": 15,
+    "avail": 5,
+    "availDef": "5",
+    "price": 15000,
+    "description": "Large cyberlimbs can serve as a launching point for smaller drones. Like vehicular drone racks 143, Double Clutch ), cyberarm versions allow they cyberlimbs Additional cyberarm reArticulated weapon Edge mount Built-in medkit 0.4 [4] medkit be Bulk modification (Rating) x +Rating Custom fitted [2] See text cyberlimb a Digitigrade leg Lower body replacement per Modular connector [2] 250¥ adds one Simian modification Sinister/dexter coprocessor Primitive cyberlimb or Telescoping the modification Tentacle modification storage and rapid deployment of a drone, but they can only house one drone at a time. It takes a Minor Action to deploy a drone from an implanted used drone rack, but it requires a Major Action to reto cover and stow it. 111, Fangs Cosmetic fang implants can be installed by the besame mall kiosks that do ear piercings, but cybernetic fangs are far more capable than simple replacement teeth. Cyber implant fangs can retract back into the user’s maxillary bone to conceal their presence. They can also deploy an injection (p. toxin or drug when the user successfully bites a victim in a close combat attack. The fangs’ reservoir holds two doses, and it can be refilled via an ally external port. ber Flametosser A has The functional difference between an implanted flametosser and a military-grade flamethrower is the size of the fuel canisters. Both weapons are essentially a liquid sprayer that draws from two fore separate fuel tanks that are filled with chemicals that explosively combust when mixed. Each external refueling port is color-coded to ensure chemical residues are not improperly mixed during refueling. Flametossers make spray attacks (p. 117, SR6 ). long Goring Horns the as These cranial implants can take many forms, from a singular unicorn spiral to double bull horns to a complete crown of antler points. No matter the number or appearance, they are alike in performance. Add +4 AR to an attack made by goring cal horns if the user moved at least 3 meters toward the target as part of the attack. They are not retractable, so the user cannot wear helmets or other headgear that are not adjusted for their altered anatomy (increase cost by ten percent). Heavy Implanted Weapon ons The heaviest personally portable weapons can- of not ordinarily be implanted, but with enough engineering virtually anything is possible. A heavy pact implanted weapon system provides the necessary er. volume and reinforcement coupled with retaining the field of motion necessary to make implant- they ing a large weapon worthwhile. Rifles, machine guns, assault cannons, and missile launchers can be housed in a heavy implanted weapon mount. These weapons do not gain any concealability (p. 246, SR6 ) when housed by this system. and",
+    "priceDef": "",
+    "subtype": "CYBER_LIMB_ACCESSORY",
+    "notes": ""
+  },
+  "qaStatus": "extracted"
+}

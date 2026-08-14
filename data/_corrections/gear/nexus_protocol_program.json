@@ -1,0 +1,34 @@
+{
+  "id": "nexus_protocol_program",
+  "name": "Nexus Protocol Program",
+  "system": {
+    "type": "ELECTRONICS",
+    "price": 1000,
+    "subtype": "TOOLS",
+    "availDef": "",
+    "priceDef": "",
+    "notes": "",
+    "wifi": "",
+    "genesisID": "cat28000_gear_nexus_protocol_program",
+    "dmgDef": "",
+    "description": "Once a copy of the Nexus Protocol is obtained, the setup will depend on whether it’s hooked to a cyberdeck or used by a technomancer. For decker, it will take one optical stack mainframe, or brick (see p. 53), with a rating equal to the vice rating of the cyberdeck for each avatar generated."
+  },
+  "meta": {
+    "book": "hack_slash",
+    "page": 143,
+    "sources": [
+      {
+        "book": "hack_slash",
+        "page": 143
+      }
+    ],
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "originalName": "Nexus Protocol Program"
+  },
+  "img": "nexus_protocol_program_p143_x1571.webp",
+  "domain": "gear",
+  "category": "electronics",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

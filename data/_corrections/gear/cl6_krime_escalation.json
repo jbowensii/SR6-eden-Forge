@@ -1,0 +1,70 @@
+{
+  "id": "cl6_krime_escalation",
+  "name": "Krime Escalation",
+  "system": {
+    "type": "WEAPON_SPECIAL",
+    "subtype": "LAUNCHERS",
+    "price": 2500,
+    "priceDef": "2500",
+    "avail": 5,
+    "availDef": "5I",
+    "description": "Troll sized missile launcher with matrix scanner.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "krime_escalation",
+      "category": "gear_firearms",
+      "book": "krime",
+      "attrs": {
+        "id": "krime_escalation",
+        "avail": "5I",
+        "price": "2500",
+        "type": "WEAPON_SPECIAL",
+        "subtype": "LAUNCHERS"
+      },
+      "stats": {
+        "weapon.dmg": "0P",
+        "weapon.mode": "SS",
+        "weapon.attack": ",4,10,9,6",
+        "weapon.ammo": "1(ml)",
+        "weapon.skill": "exotic_weapons",
+        "weapon.spec": "exotic_weapons/launchers"
+      },
+      "page": "18"
+    },
+    "skill": "exotic_weapons",
+    "spec": "exotic_weapons/launchers",
+    "dmg": 0,
+    "stun": false,
+    "dmgDef": "0P",
+    "dmgFlags": [],
+    "modes": {
+      "SS": true,
+      "SA": false,
+      "BF": false,
+      "FA": false
+    },
+    "attackRating": [
+      0,
+      4,
+      10,
+      9,
+      6
+    ],
+    "ammocap": 1,
+    "ammoType": "ml",
+    "genesisID": "krime_escalation"
+  },
+  "meta": {
+    "book": "krime_katalog",
+    "page": 18,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "krime_escalation_p018_x177.webp",
+  "domain": "gear",
+  "category": "weapons_firearms",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

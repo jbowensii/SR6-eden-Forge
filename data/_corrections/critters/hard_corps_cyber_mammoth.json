@@ -1,0 +1,48 @@
+{
+  "id": "hard_corps_cyber_mammoth",
+  "name": "Hard Corps Cyber-Mammoth",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 12,
+      "agi": 2,
+      "rea": 4,
+      "str": 8,
+      "wil": 3,
+      "log": 18,
+      "int": 3,
+      "cha": 2,
+      "ess": 4
+    },
+    "skills": "Athletics 4, Close Combat 4, Influence 3 (Intimidation +2), Outdoors",
+    "powers": "Armor 8, Enhanced Senses (Hearing), Natural Weapon",
+    "description": "On the mundane side, the Hard Corps cyber-mammoth is a cybernetic bio-drone elephant designed to draw heavy fire and keep on going. It's augmented with a bio-drone harness and exoframe that mounts the heaviest armor available. These critters may seem listless when inactive, but are capable of incredible speed and have no sense of self-preservation when active. In case of catastrophic bio-drone failure (which is ultimately 159 inevitable, given enough time in operation), they equipped with an internal kill switch augmentation that puts them down before they have the opportunity to rampage against their cruel owners. HCCM is the ultimate heavy close-combat drone for those who lack ethical boundaries.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_hard_corps_cyber_mammoth",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "body_shop",
+    "page": 160,
+    "sources": [
+      {
+        "book": "body_shop",
+        "page": 160
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "body_shop",
+    "originalName": "Hard Corps Cyber-Mammoth"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "sport_aquadyne_dpv",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "SUBMARINES"
+    }
+  },
+  "ref": {
+    "name": "Sport AquaDyne DPV",
+    "book": "double_clutch",
+    "page": 63
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

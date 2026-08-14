@@ -1,0 +1,20 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_tires_large",
+  "movedTo": {
+    "domain": "vehicles",
+    "category": "vehicles"
+  },
+  "movedFrom": {
+    "domain": "gear",
+    "category": "weapon_accessories"
+  },
+  "why": "Commlink6 files this under gear_vehicle_accessories",
+  "ref": {
+    "name": "Speciality Tires",
+    "book": "double_clutch",
+    "page": 121
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

@@ -1,0 +1,16 @@
+{
+  "domain": "skills",
+  "category": "skills",
+  "id": "cl6_athletics",
+  "changed": {
+    "system": {
+      "category": "PHYSICAL"
+    }
+  },
+  "ref": {
+    "name": "Athletics",
+    "book": "corebook",
+    "page": 93
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

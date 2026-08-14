@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "evomars_voidsearcher",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "SPACECRAFT"
+    }
+  },
+  "ref": {
+    "name": "Evomars voidsearcher",
+    "book": "explosive_decompression",
+    "page": 91
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

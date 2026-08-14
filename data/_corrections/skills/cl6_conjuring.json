@@ -1,0 +1,16 @@
+{
+  "domain": "skills",
+  "category": "skills",
+  "id": "cl6_conjuring",
+  "changed": {
+    "system": {
+      "category": "MAGIC"
+    }
+  },
+  "ref": {
+    "name": "Conjuring",
+    "book": "corebook",
+    "page": 94
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

@@ -1,0 +1,16 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "difficult",
+  "changed": {
+    "meta": {
+      "flagged": "looks like page furniture, not an item — delete?"
+    }
+  },
+  "ref": {
+    "name": "Difficult",
+    "book": "double_clutch",
+    "page": 134
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

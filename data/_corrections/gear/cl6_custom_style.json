@@ -1,0 +1,31 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_custom_style",
+  "correctedAt": "2026-08-03T11:30:36.379Z",
+  "name": "Custom Style",
+  "system": {
+    "type": "ACCESSORY",
+    "subtype": "WEAPON_ACCESSORY",
+    "price": 250,
+    "priceDef": "250",
+    "avail": 2,
+    "availDef": "2",
+    "description": "We all know most weapons carry an inherent level of social threat, but with the right touches, colors, and accents an instrument of death can easily become a work of art, while remaining deadly. The direction and purpose of that artistic flair can easily translate into a bit of social nudging. Which direction the nudge goes is all based on the user's desires. Plate it in gold to show your flashy side, matte black and some red highlights for some intimidation, or covered in expensive filigree to show your peers how elegant lethality can be, or a nice patriotic jade green and white to show your status within MCT. \\nNote: There are four individual styles to choose from, each associated with an Influence skill specialization: Etiquette, Intimidation, Leadership, and Negotiations (sorry, no way to use your weapon to make you a better Instructor). When presenting the weapon, whether for display or attack, the character gains a bonus Edge for the associated Social test (but not for any other tests).",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "custom_style",
+      "category": "weapon_modifications",
+      "book": "firing_squad",
+      "attrs": {
+        "id": "custom_style",
+        "avail": "2",
+        "price": "250"
+      },
+      "stats": {},
+      "page": "58"
+    }
+  },
+  "qaStatus": "extracted"
+}

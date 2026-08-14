@@ -1,0 +1,16 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "laser",
+  "changed": {
+    "meta": {
+      "flagged": "looks like page furniture, not an item — delete?"
+    }
+  },
+  "ref": {
+    "name": "Laser",
+    "book": "deadly_arts",
+    "page": 64
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

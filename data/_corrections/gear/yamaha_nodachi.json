@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "vehicles",
+  "id": "yamaha_nodachi",
+  "deleted": true,
+  "ref": {
+    "name": "Yamaha Nodachi",
+    "book": "double_clutch",
+    "page": 25
+  },
+  "correctedAt": "2026-08-13T00:42:05.563Z"
+}

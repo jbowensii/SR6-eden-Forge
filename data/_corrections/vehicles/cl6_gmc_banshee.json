@@ -1,0 +1,15 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_gmc_banshee",
+  "deleted": true,
+  "ref": {
+    "name": "GMC Banshee",
+    "book": "corebook",
+    "page": 299
+  },
+  "correctedAt": "2026-08-09T18:51:41.267Z",
+  "system": {
+    "description": ""
+  }
+}

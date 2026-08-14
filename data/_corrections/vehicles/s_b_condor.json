@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "s_b_condor",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "ROTORCRAFT"
+    }
+  },
+  "ref": {
+    "name": "S-B Condor",
+    "book": "no_future",
+    "page": 160
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

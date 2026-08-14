@@ -1,0 +1,49 @@
+{
+  "id": "camazotz",
+  "name": "Camazotz",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 5,
+      "agi": 5,
+      "rea": 5,
+      "str": 4,
+      "wil": 6,
+      "log": 4,
+      "int": 5,
+      "cha": 4,
+      "mag": 7,
+      "ess": 6
+    },
+    "skills": "Astral 5, Athletics 4, Close Combat 5, Conjuring 7, Perception 6, Sorcery",
+    "powers": "Armor, Concealment, Confusion, Dual Natured, Innate Spell (Chaotic",
+    "description": "A malevolent spirit from a twisted metaplane, Camazotz causes and feeds on chaos and terror. Bargaining with it is pointless, as it does not want a peaceful resolution to any situation. It wants to Skills: intimidate and dominate. Camazotz's form is ever-shifting, a malleable Gear: gyre of teeth, claws, wings, and darkness. Gazing on it for too long brings the fear it hopes to inspire. DR I/ID AC CM MOVE once 8 10/1 A1, I2 11/11 12/17/+1 7, Stealth 6 get World, Stunball), Mystic Armor, Psychokinesis, Regeneration, Sapience of",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_camazotz",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "30_nights",
+    "page": 128,
+    "sources": [
+      {
+        "book": "30_nights",
+        "page": 128
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "30_nights",
+    "originalName": "Camazotz"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

@@ -1,0 +1,16 @@
+{
+  "domain": "sprite_powers",
+  "category": "sprite_powers",
+  "id": "cl6_trap",
+  "changed": {
+    "system": {
+      "category": "RESONANCE"
+    }
+  },
+  "ref": {
+    "name": "Trap",
+    "book": "corebook",
+    "page": 194
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

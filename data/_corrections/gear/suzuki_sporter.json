@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "vehicles",
+  "id": "suzuki_sporter",
+  "deleted": true,
+  "ref": {
+    "name": "Suzuki Sporter",
+    "book": "double_clutch",
+    "page": 34
+  },
+  "correctedAt": "2026-08-13T00:42:05.563Z"
+}

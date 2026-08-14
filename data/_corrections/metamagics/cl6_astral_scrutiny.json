@@ -1,0 +1,16 @@
+{
+  "domain": "metamagics",
+  "category": "metamagics",
+  "id": "cl6_astral_scrutiny",
+  "changed": {
+    "system": {
+      "category": "METAMAGIC"
+    }
+  },
+  "ref": {
+    "name": "Astral Scrutiny",
+    "book": "smooth_operations",
+    "page": 112
+  },
+  "correctedAt": "2026-08-14T14:08:17.335Z"
+}

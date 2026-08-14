@@ -1,0 +1,16 @@
+{
+  "domain": "skills",
+  "category": "skills",
+  "id": "cl6_cracking",
+  "changed": {
+    "system": {
+      "category": "TECHNICAL"
+    }
+  },
+  "ref": {
+    "name": "Cracking",
+    "book": "corebook",
+    "page": 94
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

@@ -1,0 +1,70 @@
+{
+  "id": "cl6_krime_tradition",
+  "name": "Krime Tradition",
+  "system": {
+    "type": "WEAPON_FIREARMS",
+    "subtype": "RIFLE_ASSAULT",
+    "price": 500,
+    "priceDef": "500",
+    "avail": 7,
+    "availDef": "7I",
+    "description": "Troll sized assault rifle.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "krime_tradition",
+      "category": "gear_firearms",
+      "book": "krime",
+      "attrs": {
+        "id": "krime_tradition",
+        "avail": "7I",
+        "price": "500",
+        "type": "WEAPON_FIREARMS",
+        "subtype": "RIFLE_ASSAULT"
+      },
+      "stats": {
+        "weapon.dmg": "4P",
+        "weapon.mode": "SA/FA",
+        "weapon.attack": "9,9,6,,",
+        "weapon.ammo": "30(c)/75(d)",
+        "weapon.skill": "firearms",
+        "weapon.spec": "firearms/rifles"
+      },
+      "page": "7"
+    },
+    "skill": "firearms",
+    "spec": "firearms/rifles",
+    "dmg": 4,
+    "stun": false,
+    "dmgDef": "4P",
+    "dmgFlags": [],
+    "modes": {
+      "SS": false,
+      "SA": true,
+      "BF": false,
+      "FA": true
+    },
+    "attackRating": [
+      9,
+      9,
+      6,
+      0,
+      0
+    ],
+    "ammocap": 30,
+    "ammoType": "c",
+    "genesisID": "krime_tradition"
+  },
+  "meta": {
+    "book": "krime_katalog",
+    "page": 7,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "krime_tradition_p007_x86.webp",
+  "domain": "gear",
+  "category": "weapons_firearms",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

@@ -1,0 +1,49 @@
+{
+  "id": "errhine",
+  "name": "Errhine",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 8,
+      "agi": 9,
+      "rea": 10,
+      "str": 5,
+      "wil": 7,
+      "log": 7,
+      "int": 8,
+      "cha": 7,
+      "mag": 7,
+      "ess": 7
+    },
+    "skills": "Astral, Athletics, Close Combat, Exotic Ranged Weapon, Perception",
+    "powers": "Accident, Astral Form, Confusion, Elemental Attack (Fire), Energy",
+    "weaknesses": "Allergy (Cold, Severe), Vulnerability (fire extinguishers)",
+    "description": "nor (Fire, Force 7) gives Errhine are large buffalo with bodies of jagged ice coal and horns like pokers pulled from the fire. Every step they take sends sparks, and when a herd stampedes, a great veil of smoke rises in their wake. While one may be tough, a group can be formidable.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_errhine",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 50,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 50
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Errhine"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

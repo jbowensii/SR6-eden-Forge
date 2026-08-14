@@ -1,0 +1,49 @@
+{
+  "id": "meistersinger",
+  "name": "Meistersinger",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 24,
+      "agi": 5,
+      "rea": 5,
+      "str": 32,
+      "wil": 8,
+      "log": 3,
+      "int": 4,
+      "cha": 5,
+      "mag": 8,
+      "ess": 6
+    },
+    "skills": "Athletics 6, Close Combat 5 (Breach +2), Outdoors 2, Perception",
+    "powers": "Animal Control (Fish, Marine Mammals), Armor 12, Compulsion,",
+    "description": "The meistersinger ( Megaptera palestrina ) an Awakened humpback whale averaging twenty-six meters in length and fifty-five metric tons in weight. It has elongated tail flukes and seven to twelve small dorsal humps instead of the dorsal fin, as well as a distinctly larger cranium. It also has similar coloration as the mundane brethren. They are also sapient. There has been a lot written about meistersingers over the years, but I would like to doff my hat to G-Nome for his assistance in this area. I have learned a lot about the oceans and seas in general listening to meistersingers, and feel I have a better understanding of the way the world works. > Guardians of the World Ocean, keepers of the deep. these majestic giants attack shipping, and I've seen seamen from certain death on multiple occasions. talk to them like you can, Deep Six > Bubbles OCEANS, SEAS, AND LAKES // Entire tomes would not do these creatures justice, so I'll simply catch everyone up after G-Nome's HowlingShadows upload. The STC are still working through some issues, and as such have not officially labelled meistersingers as sapient. But the United Nations has begun to take a look into the situation, so perhaps things may change in the future. Several megacorporations, namely Evo and Maersk, have sent envoys to speak to the meistersingers, but last I heard they had not returned. The envoys are still alive, but beyond that, magical and technological means of discerning their status and location fail. Quite catastrophically, in the case of one ritual. With Seattle's newfound freedom and the Sea Dragon's eye turned toward that sprawl, I feel it is only a matter of time before meistersingers are seen in numbers in Puget Sound. > Oh, hell no! It's bad enough out here with all the crazies and UCAS Navy and Lone Star and everyone else. Please don't add giant Awakened whales too! > Sounder So to prevent trawling through all of JackPoint looking for the Howling Shadows download, I shall simply say that meistersingers have the ability to trigger our reptile brains and produce a heightened fear response, can control fish and marine 3, mammals, and use their immense bulk and sonic attacks to destroy ships. And they do destroy ships, Sonic those that harm the balance of the world's oceans, either through contaminating/polluting the seas or by taking too much from the waters. Meistersingers move in pods of up to fifteen members as they hunt or mate. Females have a gestation period of twelve months, and they can produce offspring every two years. Normal humpback whales have been found to live over two hundred years. Meistersingers are posited to live longer than that. is Meistersinger DR I/ID AC CM M 36 9/1 A1,I 2 30 20/25/+3 5, Stealth 2 Durable 10, Engulf (Water), Enhanced Senses (Sonar), Fear, Immunity (Normal Weapons), Influence, Magic Sense, Mindspeech, Natural Weapon (Breach), Sapience, Search, Sonic Projection Weakness: Uneducated Weapons: I've seen Sonic Projection [Ranged, DV 8P, 16/14/8/6/—] Breach [Close Combat, DV 1 6P, 37/—/—/—/—] them save Unarmed Strike* [Close Combat, DV 10S, 16/—/—/—/—] I wish I could *Note: Use Unarmed Strike for tail slaps.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_meistersinger",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "wild_life",
+    "page": 155,
+    "sources": [
+      {
+        "book": "wild_life",
+        "page": 155
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "wild_life",
+    "originalName": "Meistersinger"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

@@ -1,0 +1,48 @@
+{
+  "id": "hook",
+  "name": "Hook",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 13,
+      "agi": 4,
+      "rea": 5,
+      "str": 11,
+      "wil": 3,
+      "log": 1,
+      "int": 5,
+      "cha": 4,
+      "ess": 6
+    },
+    "skills": "Athletics 5, Close Combat 8, Perception 5",
+    "powers": "Armor 4, Enhanced Sense (Low-light), Hardened Armor 2, Natural",
+    "description": "The last time PCs heard from Stiletto was they made their way out of Green Water Bay. dealing with recent blackouts, the PCs receive urgent distress call from Stiletto, who's under tack and needs immediate assistance. 23: WATCHING YOU, WATCHING ME length of three meters, a height of 150 centimeters at the shoulder, and a weight of 600 kilograms, the piasma more than doubles the size of most Fire mundane black bears. The piasma is further distinguished by a steel-grey pelt color and a pair of powerful boar-like tusks mounted on its lower jaw. is The piasma is an aggressive nocturnal predator. It by depends upon its enormous power, lethal natural armaments, and surprising speed to hunt virtually any animal it finds. While it exhibits a strong preference for live prey, the piasma does not hesitate to scavenge through the trash of metahuman society. Piasmas often establish their lairs near metahuman settlements or waste dumps.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_hook",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "the_third_parallel",
+    "page": 113,
+    "sources": [
+      {
+        "book": "the_third_parallel",
+        "page": 113
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "the_third_parallel",
+    "originalName": "Hook"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

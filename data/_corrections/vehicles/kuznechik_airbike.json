@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "kuznechik_airbike",
+  "changed": {
+    "meta": {
+      "flagged": "vehicle type/subtype not merged yet"
+    }
+  },
+  "ref": {
+    "name": "Kuznechik Airbike",
+    "book": "corebook_berlin",
+    "page": 343
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

@@ -1,0 +1,70 @@
+{
+  "id": "face",
+  "name": "Face",
+  "system": {
+    "category": "NPC",
+    "metatype": "ork",
+    "attributes": {
+      "bod": 3,
+      "agi": 5,
+      "rea": 4,
+      "str": 3,
+      "wil": 4,
+      "log": 3,
+      "int": 5,
+      "cha": 5,
+      "edg": 4,
+      "ess": 3.3
+    },
+    "initiative": "9(10) + 2D6/1 Major, 3 Minor",
+    "conditionMonitors": "Condition Monitors (P/S): 11/10",
+    "defenseRating": "5",
+    "activeSkills": "Con 7 (Acting +2), Influence 5 (Negotiation +2), Perception",
+    "knowledgeSkills": "Horizon Culture, Dance Clubs, Seattle Johnsons",
+    "languages": "English (Native), Japanese",
+    "qualities": "Aptitude (Con), Blandness, Built Tough 1 (ork trait),",
+    "contacts": "Bartender (C1/L2), Beat Cop (C2/L2), Ares Corporate Wage",
+    "lifestyle": "Middle (1 month prepaid)",
+    "gear": "Actioneer business clothes, long coat, 2 x fake SIN (rating 1), fake SIN",
+    "augmentations": "Datajack, muscle toner 1, olfactory booster 3, platelet factories, smartlink, tailored pheromones 3, wired reflexes 1",
+    "nuyen": "3,805¥",
+    "weapons": "",
+    "powers": "",
+    "adeptPowers": "",
+    "spells": "",
+    "complexForms": "",
+    "cyberware": "",
+    "genesisID": "cat28000_npcs_face",
+    "defenserating": "",
+    "notes": "",
+    "type": "NPC",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "corebook_berlin",
+    "page": 86,
+    "sources": [
+      {
+        "book": "corebook_berlin",
+        "page": 86
+      },
+      {
+        "book": "corebook_hongkong",
+        "page": 86
+      },
+      {
+        "book": "corebook",
+        "page": 86
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "corebook_berlin",
+    "originalName": "Face"
+  },
+  "img": "face_p086_x434.webp",
+  "domain": "npcs",
+  "category": "npc",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

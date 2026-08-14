@@ -1,0 +1,48 @@
+{
+  "id": "cl6_nanohive",
+  "name": "Nanohive",
+  "system": {
+    "type": "NANOWARE",
+    "subtype": "NANO_CYBERWARE",
+    "price": 0,
+    "priceDef": "",
+    "avail": 4,
+    "availDef": "4",
+    "description": "Nanohives consist of the hardware and softto manage colony templates, which are the configuration data and software required to build control a specific type of nanite colony. Nanite precursor compounds are the raw materials used generate new nanites. The cost for this supply precursor compounds is (500 x nanohive ratnuyen per month. If the reservoir is not refilled monthly, the nanite volume available drops by one point per day starting two weeks after the date the missed nanite precursor compound refill. Nanites are typically undetectable without a naVS.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "nanohive",
+      "category": "gear_nanoware",
+      "book": "body_shop",
+      "attrs": {
+        "id": "nanohive",
+        "avail": "4",
+        "type": "NANOWARE",
+        "subtype": "NANO_CYBERWARE"
+      },
+      "stats": {
+        "usage.mode": "EMBEDDED",
+        "usage.value": "$RATING*2",
+        "usage.slot": "CYBERLIMB_IMPLANT",
+        "attrdef.id": "PRICE",
+        "attrdef.value": "$RATING*15000",
+        "variant.id": "distributed"
+      },
+      "page": "79"
+    },
+    "genesisID": "nanohive"
+  },
+  "meta": {
+    "book": "body_shop",
+    "page": 79,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "nanohive_p079_x846.webp",
+  "domain": "gear",
+  "category": "bioware",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

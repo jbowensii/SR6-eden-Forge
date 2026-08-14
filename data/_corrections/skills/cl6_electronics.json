@@ -1,0 +1,16 @@
+{
+  "domain": "skills",
+  "category": "skills",
+  "id": "cl6_electronics",
+  "changed": {
+    "system": {
+      "category": "TECHNICAL"
+    }
+  },
+  "ref": {
+    "name": "Electronics",
+    "book": "corebook",
+    "page": 94
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

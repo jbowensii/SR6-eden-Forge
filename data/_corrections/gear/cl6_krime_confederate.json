@@ -1,0 +1,70 @@
+{
+  "id": "cl6_krime_confederate",
+  "name": "Krime Confederate",
+  "system": {
+    "type": "WEAPON_FIREARMS",
+    "subtype": "ASSAULT_CANNON",
+    "price": 3500,
+    "priceDef": "3500",
+    "avail": 10,
+    "availDef": "10I",
+    "description": "Troll sized shotgun using assault cannon ammunition.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "krime_confederate",
+      "category": "gear_firearms",
+      "book": "krime",
+      "attrs": {
+        "id": "krime_confederate",
+        "avail": "10I",
+        "price": "3500",
+        "type": "WEAPON_FIREARMS",
+        "subtype": "ASSAULT_CANNON"
+      },
+      "stats": {
+        "weapon.dmg": "8P",
+        "weapon.mode": "SS",
+        "weapon.attack": "1,6,6,3,1",
+        "weapon.ammo": "2(b)",
+        "weapon.skill": "firearms",
+        "weapon.spec": "firearms/assault_cannons"
+      },
+      "page": "16"
+    },
+    "skill": "firearms",
+    "spec": "firearms/assault_cannons",
+    "dmg": 8,
+    "stun": false,
+    "dmgDef": "8P",
+    "dmgFlags": [],
+    "modes": {
+      "SS": true,
+      "SA": false,
+      "BF": false,
+      "FA": false
+    },
+    "attackRating": [
+      1,
+      6,
+      6,
+      3,
+      1
+    ],
+    "ammocap": 2,
+    "ammoType": "b",
+    "genesisID": "krime_confederate"
+  },
+  "meta": {
+    "book": "krime_katalog",
+    "page": 16,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "krime_confederate_p016_x149.webp",
+  "domain": "gear",
+  "category": "weapons_firearms",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

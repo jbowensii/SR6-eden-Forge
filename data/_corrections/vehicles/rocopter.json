@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "rocopter",
+  "changed": {
+    "meta": {
+      "flagged": "type/subtype ambiguous — needs a human decision"
+    }
+  },
+  "ref": {
+    "name": "Rocopter",
+    "book": "no_future",
+    "page": 160
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

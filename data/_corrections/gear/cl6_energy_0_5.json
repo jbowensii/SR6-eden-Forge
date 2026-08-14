@@ -1,0 +1,11 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_energy_0_5",
+  "deleted": true,
+  "ref": {
+    "name": "Uses 0.5 Energy per shot",
+    "book": "deadly_arts"
+  },
+  "correctedAt": "2026-08-09T11:37:35.260Z"
+}

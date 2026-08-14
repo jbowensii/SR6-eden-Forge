@@ -1,0 +1,28 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_yamaha_growler",
+  "correctedAt": "2026-07-30T12:03:30.586Z",
+  "name": "Yamaha Growler",
+  "system": {
+    "type": "VEHICLE",
+    "subtype": "BIKE",
+    "handling": "3/3",
+    "accel": "15",
+    "speedInterval": "20",
+    "topSpeed": "180",
+    "body": "6",
+    "armor": "4",
+    "pilot": "1",
+    "sensor": "1",
+    "seats": "2",
+    "availability": "2",
+    "price": "8,000"
+  },
+  "qaStatus": "extracted",
+  "gapsOnly": true,
+  "ref": {
+    "name": "Yamaha Growler",
+    "wasId": "yamaha_growler"
+  }
+}

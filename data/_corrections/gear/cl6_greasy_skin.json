@@ -1,0 +1,20 @@
+{
+  "domain": "gear",
+  "category": "bioware",
+  "id": "cl6_greasy_skin",
+  "movedTo": {
+    "domain": "gear",
+    "category": "bioware"
+  },
+  "movedFrom": {
+    "domain": "qualities",
+    "category": "qualities"
+  },
+  "why": "Commlink6 files this under gear_bioware",
+  "ref": {
+    "name": "Greasy Skin",
+    "book": "companion",
+    "page": 119
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

@@ -1,0 +1,31 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_gyro_mount_ii",
+  "correctedAt": "2026-08-03T11:31:09.728Z",
+  "name": "Gyro Mount II",
+  "system": {
+    "type": "ACCESSORY",
+    "subtype": "WEAPON_ACCESSORY",
+    "price": 1500,
+    "priceDef": "1500",
+    "avail": 3,
+    "availDef": "3",
+    "description": "Base models can always be upgraded, and the advancements made to improve the basic gyro mount are SOTA. Micro-articulate stabilization, nano-responsive energy absorption protocols, and wireless-commanded mounts make this the slickest recoil-absorbing articulated firing platform on the market. \\nWireless: Exiting the harness using wireless quick-release is a Minor Action. The weapon's augmented reality firing control system can be used to free up the firer's hands to perform other actions while the weapon is firing. This includes making an attack with another weapon if a Major Action is available. \\nNote: The gyro mount II negates the SA and BF modifiers to Attack Rating by 1 and reduces FA modifier to 2. This system also shifts the Strength requirements for medium and heavy machine guns to 2+ and 3+ respectively. While wearing the harness, characters lower both Agility and Reaction by 1. Attaching or removing a weapon from the mount takes a Minor Action. Putting on a gyro-mount harness takes about a minute, while the quick-release allows you to get out of it with a Major Action.",
+    "notes": "",
+    "wifi": "Exiting the harness using wireless quick-release is a Minor Action. The weapon's augmented reality firing control system can be used to free up the firer's hands to perform other actions while the weapon is firing. This includes making an attack with another weapon if a Major Action is available.",
+    "_cl6": {
+      "id": "gyro_mount_ii",
+      "category": "weapon_modifications",
+      "book": "firing_squad",
+      "attrs": {
+        "id": "gyro_mount_ii",
+        "avail": "3",
+        "price": "1500"
+      },
+      "stats": {},
+      "page": "60"
+    }
+  },
+  "qaStatus": "extracted"
+}

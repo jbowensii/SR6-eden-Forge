@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "sikorsky_bell_stevedore",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "SPACECRAFT"
+    }
+  },
+  "ref": {
+    "name": "sikorsky-bell stevedore",
+    "book": "explosive_decompression",
+    "page": 97
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

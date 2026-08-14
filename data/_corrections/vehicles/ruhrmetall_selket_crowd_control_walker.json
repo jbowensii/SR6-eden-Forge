@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "ruhrmetall_selket_crowd_control_walker",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "WALKER"
+    }
+  },
+  "ref": {
+    "name": "Ruhrmetall Selket Crowd Control Walker",
+    "book": "corebook_berlin",
+    "page": 345
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

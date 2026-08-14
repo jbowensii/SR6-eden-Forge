@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "hyundai_shin_hyung_saeder",
+  "changed": {
+    "meta": {
+      "flagged": "name recovered from the printed page — please confirm"
+    }
+  },
+  "ref": {
+    "name": "Hyundai Shin-hyung",
+    "book": "corebook_berlin",
+    "page": 302
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

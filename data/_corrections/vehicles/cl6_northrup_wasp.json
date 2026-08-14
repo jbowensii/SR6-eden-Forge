@@ -1,0 +1,28 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_northrup_wasp",
+  "correctedAt": "2026-07-30T12:06:35.549Z",
+  "name": "Northrup Wasp",
+  "system": {
+    "type": "VEHICLE",
+    "subtype": "ROTORCRAFT",
+    "handling": "3",
+    "accel": "25",
+    "speedInterval": "30",
+    "topSpeed": "330",
+    "body": "10",
+    "armor": "8",
+    "pilot": "3",
+    "sensor": "3",
+    "seats": "2",
+    "availability": "3",
+    "price": "93,000"
+  },
+  "qaStatus": "extracted",
+  "gapsOnly": true,
+  "ref": {
+    "name": "Northrup Wasp",
+    "wasId": "northrup_wasp"
+  }
+}

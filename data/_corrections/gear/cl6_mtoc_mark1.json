@@ -1,0 +1,53 @@
+{
+  "id": "cl6_mtoc_mark1",
+  "name": "M-TOC Mark I",
+  "system": {
+    "type": "ELECTRONICS",
+    "subtype": "TAC_NET",
+    "price": 25000,
+    "priceDef": "25000",
+    "avail": 8,
+    "availDef": "8L",
+    "description": "M-TOC (Mobile Tactical Operations Center) Tactical Network \\nLike previous generations of tac-nets, the M-TOC is a man-portable network communication terminal roughly fifty percent the size of a standard cyberdeck. It can act on its own or link to a cyberdeck or RCC. The M-TOC works by accessing and correlating data from commlinks, sensors, smart weapon systems, audio and visual cybernetic augmentations, and other external sources. \\nWhat makes the M-TOC stand out from other tac-nets is the use of special proprietary programs made specifically for it called Tac-Apps. These provide extra functionality and capabilities, similar to cyberdeck programs. Tac-Apps can be swapped as needed for specific mission profiles allowing for unprecedented customization and versatility. The M-TOC requires an operator to keep the system running properly. Typically this is a Matrix specialist, but a rigger with appropriate skills and gear can also do it. Whoever maintains the network also grants users access to all pertinent information gathered. \\nCurrently, the M-TOC comes in three models, the Mark I, II, and III, each with its own capabilities and utilities. Each M-TOC comes with the following capabilities standard: \\n- Enhanced audio and image link \\n- Team member biomonitor \\n- Team member weapon status/access (ammo count, operational status, biometric access) \\n- Access to linked team members' gear (includes commlinks and other comm gear) \\n- Real-time tactical and strategic evaluation software \\n- GPS and mapsoft navigation software \\nThe Mark I was designed for security and law enforcement officers during situations requiring enhanced coordination, such as hostage situations, when specialized response teams are unavailable. It was designed to be cost effective, so it can be distributed among rank-and-file patrol officers. The Mark I also features standard enhanced threat detection, identification friend/foe (IFF) software, and limited enhanced targeting for smartgun-equipped weapons. \\nNotes: Lowers the threshold by -1 for Perception tests to detect ambush. IFF software provides a +1 to Perception tests to determine if a target is carrying concealed weapons and to identify subjects via facial recognition software. Also grants a +1 to AR for all linked smartgun weapons. The Mark I can handle up to nine users.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "mtoc_mark1",
+      "category": "gear_electronics",
+      "book": "firing_squad",
+      "attrs": {
+        "id": "mtoc_mark1",
+        "avail": "8L",
+        "price": "25000",
+        "type": "ELECTRONICS",
+        "subtype": "TAC_NET"
+      },
+      "stats": {
+        "matrix.d": "4",
+        "matrix.f": "3",
+        "matrix.devrat": "3",
+        "attrdef.id": "SOFTWARE_TYPES",
+        "attrdef.value": "TAC_APP"
+      },
+      "page": "89"
+    },
+    "d": 4,
+    "f": 3,
+    "progSlots": 0,
+    "rating": 3,
+    "genesisID": "mtoc_mark1",
+    "dmgDef": ""
+  },
+  "meta": {
+    "book": "firing_squad",
+    "page": 89,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "m_toc_mark_i_p089_x1078.webp",
+  "domain": "gear",
+  "category": "electronics",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

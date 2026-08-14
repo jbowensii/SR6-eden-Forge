@@ -1,0 +1,18 @@
+{
+  "domain": "contacts",
+  "category": "contacts",
+  "id": "cl6_mrjohnson",
+  "changed": {
+    "system": {
+      "category": "CONTACT",
+      "subtype": "CORPORATE"
+    }
+  },
+  "ref": {
+    "name": "Mr. Johnson",
+    "book": "corebook",
+    "page": 1
+  },
+  "correctedAt": "2026-08-13T23:36:50.517Z",
+  "why": "category from Commlink6; subtype is my guess"
+}

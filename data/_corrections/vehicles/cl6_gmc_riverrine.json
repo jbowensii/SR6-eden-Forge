@@ -1,0 +1,28 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_gmc_riverrine",
+  "correctedAt": "2026-07-30T12:03:42.198Z",
+  "name": "GMC Riverine",
+  "system": {
+    "type": "VEHICLE",
+    "subtype": "BOAT",
+    "handling": "4",
+    "accel": "15",
+    "speedInterval": "15",
+    "topSpeed": "100",
+    "body": "14",
+    "armor": "12",
+    "pilot": "4",
+    "sensor": "4",
+    "seats": "8",
+    "availability": "4",
+    "price": "113,000"
+  },
+  "qaStatus": "extracted",
+  "gapsOnly": true,
+  "ref": {
+    "name": "GMC Riverine",
+    "wasId": "gmc_riverine"
+  }
+}

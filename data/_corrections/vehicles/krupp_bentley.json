@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "krupp_bentley",
+  "changed": {
+    "meta": {
+      "flagged": "name recovered from the printed page — please confirm"
+    }
+  },
+  "ref": {
+    "name": "Saeder-Krupp-Bentley Concordat",
+    "book": "corebook_berlin",
+    "page": 302
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

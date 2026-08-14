@@ -1,0 +1,49 @@
+{
+  "id": "raptor",
+  "name": "Raptor",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 7,
+      "agi": 6,
+      "rea": 5,
+      "str": 7,
+      "wil": 5,
+      "log": 5,
+      "int": 5,
+      "cha": 5,
+      "mag": 5,
+      "ess": 5
+    },
+    "skills": "Astral, Close Combat, Perception, Stealth",
+    "powers": "Armor 5, Concealment, Confusion, Enhanced Senses (hearing, low-light vision, smell), Materialization, Mystic Armor 5, Natural Weapon",
+    "description": "(Force 5 Spirit of Beasts) 142 raptor DR",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_raptor",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 143,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 143
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Raptor"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

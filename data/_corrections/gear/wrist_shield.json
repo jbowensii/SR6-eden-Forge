@@ -1,0 +1,20 @@
+{
+  "domain": "gear",
+  "category": "cyberware",
+  "id": "wrist_shield",
+  "correctedAt": "2026-07-30T18:22:33.532Z",
+  "name": "Wrist Shield",
+  "system": {
+    "type": "CYBERWARE",
+    "essence": 0.5,
+    "capacity": 10,
+    "avail": 5,
+    "availDef": "5(L)",
+    "price": 2000,
+    "description": "A wrist shield is mounted in the user’s forearm hidden until needed. When activated, spring action propels a spiral of plates to form a rigid one meter wide, interlocking into a usable shield in a fraction of a second. While the wrist shield is deployed, the user gains +4 Defense RatThe outer rim of each panel is edged, allowthe shield to tear through ordinary clothing it deploys, but armor prevents the shield from opening unless the forearm is uncovered. The edgof a deployed wrist shield can be employed as a slashing weapon, and of course the shield can be to bludgeon with as well. A deployed wrist shield still leaves the hand free to perform tasks. shield can be deployed anytime as a Minor Action, but it requires a Major Action to crank it into the forearm. Only one wrist shield can installed per arm, and a user’s Defense Rating never benefit from more than two shields at same time.",
+    "priceDef": "",
+    "subtype": "CYBER_LIMB_ACCESSORY",
+    "notes": ""
+  },
+  "qaStatus": "extracted"
+}

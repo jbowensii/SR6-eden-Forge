@@ -1,0 +1,16 @@
+{
+  "domain": "metamagics",
+  "category": "metamagics",
+  "id": "cl6_king_of_the_jungle",
+  "changed": {
+    "system": {
+      "category": "ANIMALISM"
+    }
+  },
+  "ref": {
+    "name": "King of the Jungle",
+    "book": "bestial_nature",
+    "page": 22
+  },
+  "correctedAt": "2026-08-14T14:08:17.335Z"
+}

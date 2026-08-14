@@ -1,0 +1,31 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_dikote",
+  "correctedAt": "2026-08-03T11:30:47.164Z",
+  "name": "Dikote",
+  "system": {
+    "type": "ACCESSORY",
+    "subtype": "WEAPON_ACCESSORY",
+    "price": 225,
+    "priceDef": "225",
+    "avail": 5,
+    "availDef": "5",
+    "description": "Through a process that deposits a thin diamond coat on a sharp surface such as a blade or arrowhead, the cutting and edge-retention abilities of an item can be enhanced. The process to apply dikote involves brief exposure of the base material to a plasma furnace, which limits the process to sufficiently durable materials like steel and ceramic. \\nNote: Dikote increases the Attack Rating of a weapon or ammunition by 1, but it is limited to items that rely on a sharp edge.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "dikote",
+      "category": "weapon_modifications",
+      "book": "firing_squad",
+      "attrs": {
+        "id": "dikote",
+        "avail": "5",
+        "price": "225"
+      },
+      "stats": {},
+      "page": "59"
+    }
+  },
+  "qaStatus": "extracted"
+}

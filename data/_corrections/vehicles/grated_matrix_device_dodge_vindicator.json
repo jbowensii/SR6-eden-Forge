@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "grated_matrix_device_dodge_vindicator",
+  "changed": {
+    "meta": {
+      "flagged": "name recovered from the printed page — please confirm"
+    }
+  },
+  "ref": {
+    "name": "Isuzu Hop",
+    "book": "tarnished_star",
+    "page": 154
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

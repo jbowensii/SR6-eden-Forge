@@ -1,0 +1,44 @@
+{
+  "id": "cl6_stolen_gear",
+  "name": "Stolen gear",
+  "system": {
+    "type": "NORMAL",
+    "subtype": "NORMAL",
+    "price": 0,
+    "priceDef": "",
+    "avail": 0,
+    "availDef": "",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "stolen_gear",
+      "category": "qualities",
+      "book": "no_future",
+      "attrs": {
+        "id": "stolen_gear",
+        "karma": "0",
+        "pos": "false",
+        "type": "NORMAL"
+      },
+      "stats": {},
+      "page": "162"
+    },
+    "category": "negative",
+    "value": 0,
+    "genesisID": "stolen_gear",
+    "product": "",
+    "explain": ""
+  },
+  "meta": {
+    "book": "no_future",
+    "page": 162,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "stolen_gear_p162_x5955.webp",
+  "domain": "qualities",
+  "category": "qualities",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

@@ -1,0 +1,47 @@
+{
+  "id": "ares_packmule",
+  "name": "Ares Packmule",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 8,
+      "agi": 4,
+      "rea": 6,
+      "str": 8,
+      "wil": 3,
+      "log": 1,
+      "int": 5,
+      "cha": 1,
+      "ess": 6
+    },
+    "skills": "Astral 4, Athletics 6, Close Combat 8, Outdoors 8, Perception",
+    "powers": "Armor 6, Concealment, Dual Natured, Enhanced Senses",
+    "weaknesses": "Allergy (Sunlight, Extreme), Dietary Requirement",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_ares_packmule",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "free_seattle",
+    "page": 41,
+    "sources": [
+      {
+        "book": "free_seattle",
+        "page": 41
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "free_seattle",
+    "originalName": "Ares Packmule"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

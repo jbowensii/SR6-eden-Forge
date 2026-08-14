@@ -1,0 +1,16 @@
+{
+  "domain": "spells",
+  "category": "illusion",
+  "id": "invoking_great",
+  "changed": {
+    "meta": {
+      "flagged": "looks like page furniture, not an item — delete?"
+    }
+  },
+  "ref": {
+    "name": "Invoking Great",
+    "book": "street_wyrd",
+    "page": 160
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

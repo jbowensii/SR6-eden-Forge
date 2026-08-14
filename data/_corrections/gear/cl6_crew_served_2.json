@@ -1,0 +1,11 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_crew_served_2",
+  "deleted": true,
+  "ref": {
+    "name": "Crew Served (2)",
+    "book": "deadly_arts"
+  },
+  "correctedAt": "2026-08-09T11:37:35.086Z"
+}

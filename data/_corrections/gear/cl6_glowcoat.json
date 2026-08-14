@@ -1,0 +1,15 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_glowcoat",
+  "correctedAt": "2026-08-09T11:35:03.673Z",
+  "ref": {
+    "name": "Glowcoat",
+    "book": "firing_squad"
+  },
+  "changed": {
+    "system": {
+      "subtype": "FIREARMS_ACCESSORY"
+    }
+  }
+}

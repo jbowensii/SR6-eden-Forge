@@ -1,0 +1,28 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_ares_roadmaster",
+  "correctedAt": "2026-07-30T12:07:14.612Z",
+  "name": "Ares Roadmaster",
+  "system": {
+    "type": "VEHICLE",
+    "subtype": "TRUCK",
+    "handling": "5/7",
+    "accel": "8",
+    "speedInterval": "10",
+    "topSpeed": "120",
+    "body": "18",
+    "armor": "16",
+    "pilot": "2",
+    "sensor": "2",
+    "seats": "2/12",
+    "availability": "2",
+    "price": "68,000"
+  },
+  "qaStatus": "extracted",
+  "gapsOnly": true,
+  "ref": {
+    "name": "Ares Roadmaster",
+    "wasId": "ares_roadmaster"
+  }
+}

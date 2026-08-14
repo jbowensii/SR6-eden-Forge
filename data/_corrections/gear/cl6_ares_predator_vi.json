@@ -1,0 +1,69 @@
+{
+  "id": "cl6_ares_predator_vi",
+  "name": "Ares Predator VI",
+  "system": {
+    "type": "WEAPON_FIREARMS",
+    "subtype": "PISTOLS_HEAVY",
+    "price": 750,
+    "priceDef": "750",
+    "avail": 2,
+    "availDef": "2L",
+    "description": "<p data-sr6-render=\"1\"><img src=\"modules/sr6-forge-corebook/corebook/cl6_ares_predator_vi.webp\" alt=\"\"/></p>\nThe Predator V rode on the laurels of its name. The Predator VI is genuine innovation built into some classic styling. Built on the framing of the original Predator, the VI comes with the standard smartgun operations but adds Burst Fire capability and a new variable ammunition system that will make it king of the streets and warzones once again, even if it comes with a price tag to match that innovation. The variable ammunition system allows a single specially designed magazine (30� per spare) to be loaded with different ammo types.<br/>The smartgun is used to select ammo types and cycles them to the chamber in whatever quantity is necessary and available. If there aren’t enough rounds of a particular kind, the ammo counter reads empty and the weapon stops firing.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "ares_predator_vi",
+      "category": "gear_firearms",
+      "book": "core",
+      "attrs": {
+        "avail": "2L",
+        "price": "750",
+        "id": "ares_predator_vi",
+        "type": "WEAPON_FIREARMS",
+        "subtype": "PISTOLS_HEAVY"
+      },
+      "stats": {
+        "weapon.attack": "10,10,8,,",
+        "weapon.ammo": "15(c)",
+        "weapon.dmg": "3P",
+        "weapon.mode": "SA/BF",
+        "weapon.skill": "firearms",
+        "weapon.spec": "firearms/pistols_heavy"
+      },
+      "page": "253"
+    },
+    "skill": "firearms",
+    "spec": "firearms/pistols_heavy",
+    "dmg": 3,
+    "stun": false,
+    "dmgDef": "3P",
+    "dmgFlags": [],
+    "modes": {
+      "SS": false,
+      "SA": true,
+      "BF": true,
+      "FA": false
+    },
+    "attackRating": [
+      10,
+      10,
+      8,
+      0,
+      0
+    ],
+    "ammocap": 15,
+    "ammoType": "c",
+    "genesisID": "ares_predator_vi"
+  },
+  "meta": {
+    "book": "corebook",
+    "page": 253,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-08",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "domain": "gear",
+  "category": "weapons_firearms",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

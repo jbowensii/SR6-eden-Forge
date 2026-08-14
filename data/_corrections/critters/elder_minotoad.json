@@ -1,0 +1,48 @@
+{
+  "id": "elder_minotoad",
+  "name": "Elder Minotoad",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 11,
+      "agi": 12,
+      "rea": 10,
+      "str": 13,
+      "wil": 11,
+      "log": 5,
+      "int": 4,
+      "cha": 4,
+      "mag": 4,
+      "ess": 6
+    },
+    "skills": "Astral 5, Athletics 6, Close Combat 8, Exotic Weapon (any ranged weapon) 8, Influence 5, Perception 6, Sorcery 6, Stealth 4",
+    "powers": "Armor 6, Astral Perception, Fire Resistance (as quality), Great",
+    "notes": "The elder minotoad's tongue acts as a grapple attack at range.",
+    "movement": "",
+    "weaknesses": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_elder_minotoad",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 104,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 104
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Elder Minotoad"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

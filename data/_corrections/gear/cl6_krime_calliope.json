@@ -1,0 +1,20 @@
+{
+  "domain": "gear",
+  "category": "weapons_firearms",
+  "id": "cl6_krime_calliope",
+  "movedTo": {
+    "domain": "gear",
+    "category": "weapons_firearms"
+  },
+  "movedFrom": {
+    "domain": "vehicles",
+    "category": "vehicles"
+  },
+  "why": "Commlink6 files this under gear_firearms",
+  "ref": {
+    "name": "Krime Calliope",
+    "book": "krime_katalog",
+    "page": 19
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

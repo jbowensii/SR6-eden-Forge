@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "dsec",
+  "changed": {
+    "meta": {
+      "flagged": "vehicle type/subtype not merged yet"
+    }
+  },
+  "ref": {
+    "name": "DSEC",
+    "book": "double_clutch",
+    "page": 89
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

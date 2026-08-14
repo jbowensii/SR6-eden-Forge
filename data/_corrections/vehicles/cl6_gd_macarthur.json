@@ -1,0 +1,15 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_gd_macarthur",
+  "deleted": true,
+  "ref": {
+    "name": "GD/CAS MacArthur",
+    "book": "deadly_arts",
+    "page": 137
+  },
+  "correctedAt": "2026-08-09T18:51:41.260Z",
+  "system": {
+    "description": ""
+  }
+}

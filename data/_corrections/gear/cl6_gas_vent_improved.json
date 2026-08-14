@@ -1,0 +1,15 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_gas_vent_improved",
+  "correctedAt": "2026-08-09T10:46:09.129Z",
+  "ref": {
+    "name": "Gas Vent (improved)",
+    "book": "firing_squad"
+  },
+  "changed": {
+    "system": {
+      "subtype": "FIREARMS_ACCESSORY"
+    }
+  }
+}

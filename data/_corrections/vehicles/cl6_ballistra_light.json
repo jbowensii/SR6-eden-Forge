@@ -1,0 +1,20 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_ballistra_light",
+  "movedTo": {
+    "domain": "vehicles",
+    "category": "vehicles"
+  },
+  "movedFrom": {
+    "domain": "gear",
+    "category": "weapons_ranged"
+  },
+  "why": "Commlink6 files this under gear_vehicles",
+  "ref": {
+    "name": "Ballista, Light",
+    "book": "astral_ways",
+    "page": 128
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

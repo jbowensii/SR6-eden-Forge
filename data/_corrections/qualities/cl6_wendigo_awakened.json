@@ -1,0 +1,12 @@
+{
+  "domain": "qualities",
+  "category": "qualities",
+  "id": "cl6_wendigo_awakened",
+  "deleted": true,
+  "ref": {
+    "name": "Wendigo",
+    "book": "companion",
+    "page": 113
+  },
+  "correctedAt": "2026-08-09T18:51:41.149Z"
+}

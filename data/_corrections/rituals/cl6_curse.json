@@ -1,0 +1,16 @@
+{
+  "domain": "rituals",
+  "category": "rituals",
+  "id": "cl6_curse",
+  "changed": {
+    "system": {
+      "category": "RITUAL"
+    }
+  },
+  "ref": {
+    "name": "Curse",
+    "book": "corebook",
+    "page": 145
+  },
+  "correctedAt": "2026-08-13T20:30:49.894Z"
+}

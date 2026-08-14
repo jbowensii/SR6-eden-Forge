@@ -1,0 +1,16 @@
+{
+  "domain": "rituals",
+  "category": "rituals",
+  "id": "cl6_triage",
+  "changed": {
+    "system": {
+      "category": "RITUAL"
+    }
+  },
+  "ref": {
+    "name": "Triage",
+    "book": "deadly_arts",
+    "page": 173
+  },
+  "correctedAt": "2026-08-13T20:30:49.894Z"
+}

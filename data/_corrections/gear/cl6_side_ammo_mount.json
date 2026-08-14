@@ -1,0 +1,15 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_side_ammo_mount",
+  "correctedAt": "2026-08-09T11:35:03.580Z",
+  "ref": {
+    "name": "Side Ammo Mount",
+    "book": "firing_squad"
+  },
+  "changed": {
+    "system": {
+      "subtype": "FIREARMS_ACCESSORY"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_barrel_extension",
+  "correctedAt": "2026-08-03T11:30:24.883Z",
+  "name": "Barrel Extension",
+  "system": {
+    "type": "ACCESSORY",
+    "subtype": "WEAPON_ACCESSORY",
+    "price": 350,
+    "priceDef": "350",
+    "avail": 3,
+    "availDef": "3L",
+    "description": "Slapping a few extra inches on the end of a barrel makes a world of difference when you're putting hot lead way down range. It even helps when trying to do mid-range work with a short-range arm. Problem is, it makes it harder to tuck and run, and you start finding that when the barrel clears a corner first, lead often finds its way to you before you get a chance to fire some of your own. \\nNote: The barrel extension mod moves the concealability threshold of a weapon down one, adds an available AR range category that starts at 0, and modifies the AR as follows: -2/, /+1/+2/+2. If a weapon has no Attack Rating in a given range category before this modification is applied, that category is not affected.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "barrel_extension",
+      "category": "weapon_modifications",
+      "book": "firing_squad",
+      "attrs": {
+        "id": "barrel_extension",
+        "avail": "3L",
+        "price": "350"
+      },
+      "stats": {},
+      "page": "57"
+    }
+  },
+  "qaStatus": "extracted"
+}

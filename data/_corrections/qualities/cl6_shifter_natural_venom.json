@@ -1,0 +1,12 @@
+{
+  "domain": "qualities",
+  "category": "qualities",
+  "id": "cl6_shifter_natural_venom",
+  "deleted": true,
+  "ref": {
+    "name": "Natural Venom",
+    "book": "bestial_nature",
+    "page": 16
+  },
+  "correctedAt": "2026-08-09T18:51:41.126Z"
+}

@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "vehicles",
+  "id": "gmc_grizzly",
+  "deleted": true,
+  "ref": {
+    "name": "GMC Grizzly",
+    "book": "double_clutch",
+    "page": 30
+  },
+  "correctedAt": "2026-08-13T00:42:05.563Z"
+}

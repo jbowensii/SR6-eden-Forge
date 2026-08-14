@@ -1,0 +1,49 @@
+{
+  "id": "radiant_hell_hounds",
+  "name": "Radiant Hell Hounds",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 7,
+      "agi": 5,
+      "rea": 6,
+      "str": 5,
+      "wil": 3,
+      "log": 2,
+      "int": 4,
+      "cha": 3,
+      "mag": 7,
+      "ess": 6
+    },
+    "skills": "Astral 5, Athletics 7, Close Combat 4 (Bite +2), Influence 4 (Intimida- tion +2) Outdoors 5, Perception 2, Stealth 5",
+    "powers": "Armor 4, Dual Natured, Elemental Attack (Fire), Energy Aura",
+    "description": "These badass toxic mutant hell hounds 158 improved physical attributes, regeneration, and energy aura. They hunt in packs—though exiled lone hunters are not uncommon. Due to the savage competition of their chaotic pack hierarchy, survive long on their own.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_radiant_hell_hounds",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 159,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 159
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Radiant Hell Hounds"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

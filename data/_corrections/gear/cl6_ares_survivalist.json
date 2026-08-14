@@ -1,0 +1,65 @@
+{
+  "id": "cl6_ares_survivalist",
+  "name": "Ares Armored Survivalist",
+  "system": {
+    "type": "ARMOR",
+    "subtype": "ARMOR_BODY",
+    "price": 1500,
+    "priceDef": "1500",
+    "avail": 3,
+    "availDef": "3",
+    "description": "This suit is crafted to shield against the environment and bullets, making it ideal for hunters.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "ares_survivalist",
+      "category": "gear_armor",
+      "book": "deadly_arts",
+      "attrs": {
+        "id": "ares_survivalist",
+        "avail": "3",
+        "price": "1500",
+        "type": "ARMOR",
+        "subtype": "ARMOR_BODY"
+      },
+      "stats": {
+        "armor.rating": "3",
+        "armor.social": "-3"
+      },
+      "page": "174"
+    },
+    "defense": 3,
+    "social": -3,
+    "genesisID": "ares_survivalist",
+    "dmgDef": ""
+  },
+  "meta": {
+    "book": "deadly_arts",
+    "page": 174,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "effects": [
+    {
+      "name": "Ares Armored Survivalist",
+      "img": null,
+      "disabled": false,
+      "transfer": true,
+      "changes": [
+        {
+          "key": "system.skills.outdoors.mod",
+          "mode": 2,
+          "value": 1,
+          "priority": null
+        }
+      ],
+      "description": ""
+    }
+  ],
+  "img": "ares_armored_survivalist_p174_x844.webp",
+  "domain": "gear",
+  "category": "armor",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

@@ -1,0 +1,20 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_condor_solar_panel",
+  "movedTo": {
+    "domain": "vehicles",
+    "category": "vehicles"
+  },
+  "movedFrom": {
+    "domain": "gear",
+    "category": "tools"
+  },
+  "why": "Commlink6 files this under gear_vehicle_accessories",
+  "ref": {
+    "name": "LDSD-64 Condor Replacement Solar Panel",
+    "book": "double_clutch",
+    "page": 108
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

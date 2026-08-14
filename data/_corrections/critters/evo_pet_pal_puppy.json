@@ -1,0 +1,47 @@
+{
+  "id": "evo_pet_pal_puppy",
+  "name": "Evo Pet Pal Puppy",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 2,
+      "agi": 3,
+      "rea": 3,
+      "str": 1,
+      "wil": 2,
+      "log": 2,
+      "int": 3,
+      "cha": 5,
+      "ess": 1
+    },
+    "skills": "Athletics 6 (Climbing +2), Close Combat 3, Outdoors 4, Perception",
+    "powers": "Enhanced Senses (Low-Light Vision, Smell), Natural Weapon with Augmentations: Critterjack (rating 5), critter comm (rating 5), mental at- tribute enhancement (Charisma 2), natural bioware (mnemonic enhancer na-",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "defenserating": "",
+    "initiative": "",
+    "genesisID": "cat28000_critters_evo_pet_pal_puppy",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "body_shop",
+    "page": 161,
+    "sources": [
+      {
+        "book": "body_shop",
+        "page": 161
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "body_shop",
+    "originalName": "Evo Pet Pal Puppy"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "chemicals",
+  "id": "witch_s_moss",
+  "deleted": true,
+  "ref": {
+    "name": "Witch's Moss",
+    "book": "body_shop",
+    "page": 124
+  },
+  "correctedAt": "2026-08-09T18:51:40.973Z"
+}

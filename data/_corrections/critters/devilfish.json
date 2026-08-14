@@ -1,0 +1,49 @@
+{
+  "id": "devilfish",
+  "name": "Devilfish",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 11,
+      "agi": 3,
+      "rea": 5,
+      "str": 8,
+      "wil": 4,
+      "log": 2,
+      "int": 3,
+      "cha": 2,
+      "mag": 6,
+      "ess": 6
+    },
+    "skills": "Athletics 4 (Jumping +2), Close Combat 2, Outdoors 1, Perception 3",
+    "powers": "Fear, Venom (Vector: Injection, Speed: 4 Combat rounds, Power:",
+    "description": "The devilfish ( Mobula phobi ) is a manta ray with an average wingspan of eight meters with an average weight of roughly 2,000 kilograms. Its dorsal surface is black with white markings on the ventral. It has a raised spine and a slightly elongated tail that is tipped with a venomous spine. They have two sets of sharp, tiny teeth. The giant oceanic manta ray ( Mobula birostris is the mundane progenitor of the devilfish, and it was moved from the genus Manta to the genus Mobula after extensive genetic testing of the giant manta ray, the devilfish, and the reef manta ray in 2078. It is not uncommon to see some texts and Matrix reference material still refer to the devilfish by the old genus, but I hope JackPointers will update their knowledge bases and use the correct one. Like its progenitor, the devilfish is circumglobal and typically found in tropical and subtropical waters, both as solitary animals but also in groups of up to thirty individuals, often frequenting cleaning stations and mixing with other fish species. The giant oceanic manta ray subsists off of filter feeding (composing twenty-seven percent of its diet) as well as small crustaceans, larvae of many different species, and small shrimp. The devilfish, being significantly bigger, is able to take much larger fish and crustaceans, though it does not have the ability to bite through the shells of many crustacean species that one might expect them to prey on. Due to the wider array of possible prey species, devilfish in the wild rely upon filter feeding for approximately twelve percent of their diet, though they might subsist by this method in an emergency should other sources of food become sparse in a given area. OCEANS, SEAS, AND LAKES // In addition to normal feeding, which they do well due to their speed, devilfish have another tactic for hunting prey. When they come upon a school of fish, they will sometimes leap from the water and land on the school, stunning many of them long enough for the devilfish to gobble them up. It was once thought the devilfish used vacuum feeding, but this has proven to not be the case. Their ability to leap from the water is one of the most remarkable traits of the devilfish—they can reach altitudes of twelve meters and glide for up to 100 meters. They also are well-known for allowing divers to hold on to the front margin of their bodies, but I would strongly urge no one to attempt this when the devilfish is feeding as they, unlike other manta ray species, have a stinger in their tail. When agitated or provoked, devilfish will flail their 4, stinger around. Combined with their ability to inAr- cite a fear response, an agitated devilfish can be quite dangerous, including to small boats if they were to land upon them. Devilfish give birth to one or two young after a gestation period of fourteen months, though this is not a live birth as with a placenta, just the egg hatching within the female's body and undergoing an additional growth period there before being born. Devilfish offspring weigh ten kilograms at birth. These young mature over five years, and they can live up to fifteen years in the wild. devilfish ) DR I/ID AC CM M 11 8/1 A1,I 2 14 20/30/+3 6, E(cid:0)ect: Nauseated, Poisoned 6P) Weapons: Slam* [Close Combat, DV 9P, 12/—/—/—/—] Unarmed Strike [Close Combat, DV 3S, 13/—/—/—/—] *Note: Use Slam for when a devilfish lands on someone in the water. The slam also applies the Dazed status for 2 combat rounds.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_devilfish",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "wild_life",
+    "page": 151,
+    "sources": [
+      {
+        "book": "wild_life",
+        "page": 151
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "wild_life",
+    "originalName": "Devilfish"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

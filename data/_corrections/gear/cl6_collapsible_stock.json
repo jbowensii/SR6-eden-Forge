@@ -1,0 +1,31 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_collapsible_stock",
+  "correctedAt": "2026-08-03T11:30:32.148Z",
+  "name": "Collapsible Stock",
+  "system": {
+    "type": "ACCESSORY",
+    "subtype": "WEAPON_ACCESSORY",
+    "price": 250,
+    "priceDef": "250",
+    "avail": 2,
+    "availDef": "2",
+    "description": "Classic and simple versatility. Going long, slide it out. In close, tuck it tight. Bulked up in armor, set it for comfort. It may be simple, but it provides options. \\nWireless: Changing the setting does not require an action. \\nNote: The collapsible stock operates on two basic settings (full and tucked), which can be swapped with a Minor Action. On full, the collapsible stock alters AR as follows: -2/, /+1/+2/+1. On tucked, it alters AR as follows: +1/+1/, / -2/ -2 and increases the concealability threshold by 1. If a weapon has no Attack Rating in a given range category before this modification is applied, that category is not affected.",
+    "notes": "",
+    "wifi": "Collapsing or expanding the stock refunds a Minor Action.",
+    "_cl6": {
+      "id": "collapsible_stock",
+      "category": "weapon_modifications",
+      "book": "firing_squad",
+      "attrs": {
+        "id": "collapsible_stock",
+        "avail": "2",
+        "price": "250"
+      },
+      "stats": {},
+      "page": "58"
+    }
+  },
+  "qaStatus": "extracted"
+}

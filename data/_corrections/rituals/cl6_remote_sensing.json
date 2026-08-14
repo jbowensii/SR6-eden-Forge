@@ -1,0 +1,16 @@
+{
+  "domain": "rituals",
+  "category": "rituals",
+  "id": "cl6_remote_sensing",
+  "changed": {
+    "system": {
+      "category": "RITUAL"
+    }
+  },
+  "ref": {
+    "name": "Remote Sensing",
+    "book": "corebook",
+    "page": 145
+  },
+  "correctedAt": "2026-08-13T20:30:49.894Z"
+}

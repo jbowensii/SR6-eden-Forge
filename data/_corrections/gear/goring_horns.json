@@ -1,0 +1,19 @@
+{
+  "domain": "gear",
+  "category": "cyberware",
+  "id": "goring_horns",
+  "correctedAt": "2026-07-30T18:22:45.976Z",
+  "name": "Goring Horns",
+  "system": {
+    "type": "CYBERWARE",
+    "essence": 0.2,
+    "capacity": 3,
+    "avail": 2,
+    "availDef": "2(L)",
+    "price": 500,
+    "priceDef": "",
+    "subtype": "CYBER_IMPLANT_WEAPON",
+    "notes": ""
+  },
+  "qaStatus": "extracted"
+}

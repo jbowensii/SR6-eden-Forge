@@ -1,0 +1,49 @@
+{
+  "id": "fimbulwinter_fox",
+  "name": "Fimbulwinter Fox",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 1,
+      "agi": 3,
+      "rea": 4,
+      "str": 1,
+      "wil": 2,
+      "log": 1,
+      "int": 4,
+      "cha": 1,
+      "mag": 5,
+      "ess": 6
+    },
+    "skills": "Athletics 4, Close Combat 7 (Bite +2), Outdoors 4, Perception 5,",
+    "powers": "Armor 5, Corrosive Spit, Engulf (air, water), Energy Aura (air),",
+    "description": "Pollution and climate change continue to influence the planet. Many of the colder-weather animals have been severely impacted by changes like this. One such creature is the arctic fox, which found that some of its prey had been driven south. They moved south to follow but encountered mankind and its ability to pollute everything. Some of the first fimbulwinter foxes ( Vulpes glacies ) were found in regions controlled by the Athabaskan Council. The appearance of the fimbulwinter fox is never pure white. Its fur is often green and copper, which is caused by the leaching of ground chemicals in its drinking water. The ears are usually black or red, with more prominent veins visible. Their fur can also be other colors depending on the chemicals they have been exposed to. In addition, the teeth of the fimbulwinter fox are more triangular than that of the arctic fox. The animal is around sixGRASSLANDS // ty-five centimeters long and can weigh up to three kilograms. Due to the loss of its pure white coat, the fimbulwinter fox has shifted its hunting to be fully nocturnal. Its diet typically consists of small rodents. While the arctic fox is a shy creature, the fimbulwinter fox will boldly confront much larger creatures and will do so in packs of six to ten. They use their uncanny control of wind and water to lock their opponents in layers of frost. The toxicity has impacted their ability to reproduce, and they have adjusted to this as well. Their litter size has increased from twenty kits to around forty kits, but unfortunately many of the kits die within the first two to three days.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_fimbulwinter_fox",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "wild_life",
+    "page": 27,
+    "sources": [
+      {
+        "book": "wild_life",
+        "page": 27
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "wild_life",
+    "originalName": "Fimbulwinter Fox"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

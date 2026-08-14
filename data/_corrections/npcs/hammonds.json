@@ -1,0 +1,63 @@
+{
+  "id": "hammonds",
+  "name": "Hammonds",
+  "system": {
+    "category": "NPC",
+    "attributes": {
+      "bod": 3,
+      "agi": 3,
+      "rea": 3,
+      "str": 3,
+      "wil": 3,
+      "log": 4,
+      "int": 4,
+      "cha": 5,
+      "edg": 4,
+      "ess": 6.0
+    },
+    "languages": "Cantonese (S), English (N), French (S), Japanese (S), Russian (E)",
+    "qualities": "First Impression, Will to Live (3) well Gear: Actioneer business clothes (DR +2, Social +2), AR Gloves, Transys get Avalon Commlink (Rating 6, D/F 3/1)",
+    "weapons": "",
+    "metatype": "dwarf",
+    "description": "Everson Hammonds is a piranha. He will do anything in order to achieve his goals. That ruthto lessness leads him to take difficult, high-paying tasks with rewards that trickle down to the people he hires. He isn’t afraid to challenge syndicates or corporations. Instead he sees the entire system as a are game to be played, without considering the consequences for the pieces he puts on the board.",
+    "powers": "",
+    "nuyen": "",
+    "activeSkills": "",
+    "gear": "",
+    "adeptPowers": "",
+    "defenseRating": "",
+    "lifestyle": "",
+    "spells": "",
+    "conditionMonitors": "",
+    "contacts": "",
+    "knowledgeSkills": "",
+    "initiative": "",
+    "augmentations": "",
+    "complexForms": "",
+    "cyberware": "",
+    "genesisID": "cat28000_npcs_hammonds",
+    "defenserating": "",
+    "notes": "",
+    "type": "NPC",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "corebook_hongkong",
+    "page": 331,
+    "sources": [
+      {
+        "book": "corebook_hongkong",
+        "page": 331
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "corebook_hongkong",
+    "originalName": "Hammonds"
+  },
+  "img": "hammonds_p331_x2272.webp",
+  "domain": "npcs",
+  "category": "npc",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "vehicles",
+  "id": "bmw_tsarina_ii",
+  "deleted": true,
+  "ref": {
+    "name": "BMW Tsarina II",
+    "book": "double_clutch",
+    "page": 25
+  },
+  "correctedAt": "2026-08-13T00:42:05.563Z"
+}

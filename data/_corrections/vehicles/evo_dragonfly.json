@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "evo_dragonfly",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "SPACECRAFT"
+    }
+  },
+  "ref": {
+    "name": "evo dragonfly",
+    "book": "explosive_decompression",
+    "page": 98
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "drek_van",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "VANS"
+    }
+  },
+  "ref": {
+    "name": "Drek Van",
+    "book": "corebook_berlin",
+    "page": 342
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

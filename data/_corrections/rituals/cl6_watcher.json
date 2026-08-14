@@ -1,0 +1,16 @@
+{
+  "domain": "rituals",
+  "category": "rituals",
+  "id": "cl6_watcher",
+  "changed": {
+    "system": {
+      "category": "RITUAL"
+    }
+  },
+  "ref": {
+    "name": "Watcher",
+    "book": "corebook",
+    "page": 146
+  },
+  "correctedAt": "2026-08-13T20:30:49.894Z"
+}

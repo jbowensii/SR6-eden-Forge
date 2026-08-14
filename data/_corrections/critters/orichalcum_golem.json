@@ -1,0 +1,49 @@
+{
+  "id": "orichalcum_golem",
+  "name": "Orichalcum Golem",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 4,
+      "agi": 6,
+      "rea": 6,
+      "str": 4,
+      "wil": 6,
+      "log": 6,
+      "int": 6,
+      "cha": 6,
+      "mag": 8,
+      "ess": 8
+    },
+    "skills": "Astral 6, Athletics 4, Close Combat 4, Perception 6, Sorcery 8",
+    "powers": "Hardened Armor 4, Immunity (Fear), Immunity (Mental Manipu- lation Spells), Sapience, Spell Resistance (Combat spells only)",
+    "description": "This is the only type of the four that we know is an accurate name—I'd suspected the brass golems were actually orichalcum the first time I saw them casting spells, but Exile (as our resident expert on all things enchanting) confirmed it for us. Standing roughly 1.6 meters tall and with a slight build, the orichalcum golems look like your average Joe Wageslave. If he were made of orichalcum. They aren't physically imposing, but they show a lot more in the way of a spark of intelligence behind their eyes. And they're also capable of speech, though to date we've not encountered one that can understand or speak English or Sperethiel. As one would expect from the mage, the orichalcum golem is a force multiplier. They have been observed healing their allies (which is tremendously annoying when they do it on a steel golem, let me tell you) as well as casting offensive spells and using illumet- sions and manipulation spells to good effect in bata tle. So basically, they do everything a shadowrunner mage is likely to do. The orichalcum golems are also is. capable of potent offensive and defensive metamagour ics. Spell shaping is one they like to use a lot, which I completely understand as I use it a lot to make the my area spells more useful. They also use Shielding and Reflection quite a lot, which is annoying (did I fast, ever mention I hate it when people use my tricks on me?). I have, to date, not seen an orichalcum golem they using Absorption—that could be down to luck, or it could indicate that they are not capable of doing so they in some way. I have also not seen orichalcum golems use Conjuring or any of the associated metamagics. ter- Again, I don't know the reason why. un- Orichalcum golems are not stupid, though to be with honest I'm not sure I could call any of the golem the types stupid—their grasp of tactics, both individspot. ual combat and in small groups, is excellent. Reso gardless, the orichalcum golems carry one of those the golem short swords, and they know how to use it. used They are the worst swordsmen of their kind, but they they at least know to carry a sword and know how to use it, despite them seeming to shrug off drain like it was water off a duck's back.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_orichalcum_golem",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 115,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 115
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Orichalcum Golem"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

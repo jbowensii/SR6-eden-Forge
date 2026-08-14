@@ -1,0 +1,12 @@
+{
+  "domain": "qualities",
+  "category": "qualities",
+  "id": "cl6_shifter_long_reach",
+  "deleted": true,
+  "ref": {
+    "name": "Long Reach",
+    "book": "bestial_nature",
+    "page": 16
+  },
+  "correctedAt": "2026-08-09T18:51:41.082Z"
+}

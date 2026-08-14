@@ -1,0 +1,48 @@
+{
+  "id": "t_rex_bio_drone_prototype",
+  "name": "T-Rex Bio-Drone Prototype",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 18,
+      "agi": 2,
+      "rea": 4,
+      "str": 4,
+      "wil": 28,
+      "log": 2,
+      "int": 1,
+      "cha": 2,
+      "ess": 2
+    },
+    "powers": "Hardened Armor 6, Enhanced Senses (Smell), Natural Weapon",
+    "description": "Due in part to its resistance to training, in order to harness the power of the T-rex, Ares has resorted to using the bio-drone harness. Imagine being the rigger who gets to jump into this giant! If T-rex is operating independently as a bio-drone, the turret mounts can each fire independently a dice pool of 12. Each turret mount can fire twice per combat round. If riggers are jumped into bio-drone, three riggers work together: one to the T-rex, and one gunner for each turret mount.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "skills": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_t_rex_bio_drone_prototype",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "body_shop",
+    "page": 165,
+    "sources": [
+      {
+        "book": "body_shop",
+        "page": 165
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "body_shop",
+    "originalName": "T-Rex Bio-Drone Prototype"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

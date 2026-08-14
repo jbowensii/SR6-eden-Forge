@@ -1,0 +1,16 @@
+{
+  "domain": "adept_powers",
+  "category": "adept_powers",
+  "id": "cl6_wall_running",
+  "changed": {
+    "system": {
+      "category": "ADEPT_POWER"
+    }
+  },
+  "ref": {
+    "name": "Wall Running",
+    "book": "corebook",
+    "page": 158
+  },
+  "correctedAt": "2026-08-13T20:30:49.894Z"
+}

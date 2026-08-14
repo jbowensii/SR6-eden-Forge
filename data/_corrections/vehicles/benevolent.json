@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "benevolent",
+  "changed": {
+    "meta": {
+      "flagged": "vehicle type/subtype not merged yet"
+    }
+  },
+  "ref": {
+    "name": "Benevolent",
+    "book": "double_clutch",
+    "page": 77
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

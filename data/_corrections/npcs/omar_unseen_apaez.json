@@ -1,0 +1,64 @@
+{
+  "id": "omar_unseen_apaez",
+  "name": "Omar “Unseen” Apaez",
+  "system": {
+    "category": "NPC",
+    "metatype": "troll",
+    "attributes": {
+      "bod": 7,
+      "agi": 5,
+      "rea": 5,
+      "str": 5,
+      "wil": 4,
+      "log": 2,
+      "int": 3,
+      "cha": 4,
+      "edg": 5,
+      "magres": 6,
+      "ess": 6.0
+    },
+    "qualities": "Built Tough (2), Cyclopean Eye, Thermographic Vision",
+    "adeptPowers": "Astral Perception, Combat Sense 2, Improved Re- flexes 3, Kinesics, Pain Resistance 1, Vocal Control",
+    "gear": "Armor vest (w/electricity resistance 4), commlink (DR2)",
+    "weapons": "",
+    "description": "I will never get over how fast AzzieBall has taken off around the globe. If you don’t know what I’m referring to, you may want to scan the Matrix for ullamalitzli or court ball after you climb out from under that rock you’ve been living under. Though the specific part I’m talking about is the violent spin-off game that all the leagues call AzzieBall, and none of them let Aztechnology or Aztlan affiliated teams play. There’s a bit of humor that will come attached to all this later about that point. Just you wait. For now, let’s talk Omar Apaez. He’s a cyclops with a singular vision. Hee hee, I couldn’t resist. Anyway, as we all know the single cyclopean eye comes with all sorts of distance struggles. That said, it also seems to make it a lot easier to play a nice close game of ullamalitzli, especially when you have arms as wide as the lanes. He has proven to be historically inept from the free throw line, but his defense in the lanes and brutal strength have made him a force to be reckoned with. I would like to make it clear that I understand he’s not going toe-to-toe in the lane with Steger or Tullins—those brutes are doped or something—but for a decently agile troll, Omar is a very special tool to use in a playbook. Now, for the humor. Omar is an AZT operative. Yup. He works off the books doing shadow jobs for the Azzies in various cities where the Golden Boys play. He did the same thing when he played for the RipTide and the Crimson Crushers. Everywhere he goes, he is either slipping his way onto a team to monitor things, gathering a team for some work, running some counter intel op, or touching base with the local loyal talent. In the shadows he goes by the name “Unseen.” He’s a sweet source for intel on everyone but AZT and can often broker decent deals for selling intel on teams going after AZT or tertiary data on rivals that might help out the AZT bottom line.",
+    "powers": "",
+    "nuyen": "",
+    "activeSkills": "",
+    "languages": "",
+    "defenseRating": "",
+    "lifestyle": "",
+    "spells": "",
+    "conditionMonitors": "",
+    "contacts": "",
+    "knowledgeSkills": "",
+    "initiative": "",
+    "augmentations": "",
+    "complexForms": "",
+    "cyberware": "",
+    "genesisID": "cat28000_npcs_omar_unseen_apaez",
+    "defenserating": "",
+    "notes": "",
+    "type": "NPC",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "ingentis_athletes",
+    "page": 3,
+    "sources": [
+      {
+        "book": "ingentis_athletes",
+        "page": 3
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "ingentis_athletes",
+    "originalName": "Omar “Unseen” Apaez"
+  },
+  "img": "omar_unseen_apaez_p003_x7.webp",
+  "domain": "npcs",
+  "category": "npc",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

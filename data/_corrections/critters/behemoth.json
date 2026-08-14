@@ -1,0 +1,48 @@
+{
+  "id": "behemoth",
+  "name": "Behemoth",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 5,
+      "agi": 15,
+      "rea": 3,
+      "str": 2,
+      "wil": 16,
+      "log": 6,
+      "int": 2,
+      "cha": 3,
+      "ess": 1
+    },
+    "skills": "Athletics 5, Close Combat 8, Outdoors 4, Perception 4, Stealth 4",
+    "powers": "Armor 6, Natural Weapon (Bite)",
+    "description": "The behemoth ( Alligator gigas ) appears more like the dinosaurs of old than even that of the alligator or crocodile. These monstrous creatures are related to the American alligator and can be found in much the same environments, ranging around the Caribbean Sea through the CAS, Aztlan, and Carib League. Behemoths are double the height of an African hippopotamus, standing at three meters to its shoulder, and are about as long as a hippo or about five meters. Its weight tips the scales at two tons for the largest specimens. Whereas most alligators have splayed hips and move close to the ground, the behemoth has its legs and joints more directly underneath it. The skin of the behemoth has the same hard scales of an alligator, with greens, grays, and browns, but the thickness of the skin is more akin to the hippo, at around six centimeters. Along the spine of the creature are interlocking, hardened ossified plates. Its head has massive upwardpointing, fifty-centimeter-long tusks and two horns sweeping back. Like the American alligator, it will float in the water waiting for prey to approach before lunging out of the water. Its typical meal consists of birds, amphibians, and reptiles. And while it may not seem like much of a runner at two tons in weight, it can move on land at forty-five kilometers per hour at a full sprint, but only for a brief period of time. The behemoth is extremely territorial and will attack anything that it deems a threat to its ability to hunt prey. Behemoths are naturally solitary except during the spring and mating season. Once mating is complete, the male heads off while the female guards the clutch of six to eight eggs for the next three months until they hatch. After that, the juvenile behemoths will stay with their mother for the next nine months until she is ready to breed again.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_behemoth",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "wild_life",
+    "page": 75,
+    "sources": [
+      {
+        "book": "wild_life",
+        "page": 75
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "wild_life",
+    "originalName": "Behemoth"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

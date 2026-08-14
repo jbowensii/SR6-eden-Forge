@@ -1,0 +1,12 @@
+{
+  "domain": "qualities",
+  "category": "qualities",
+  "id": "cl6_dermal_deposits_metagenetic",
+  "deleted": true,
+  "ref": {
+    "name": "Dermal Deposits",
+    "book": "companion",
+    "page": 124
+  },
+  "correctedAt": "2026-08-09T18:51:41.035Z"
+}

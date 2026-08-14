@@ -1,0 +1,16 @@
+{
+  "domain": "spirits",
+  "category": "spirit",
+  "id": "cl6_spirit_guardian",
+  "changed": {
+    "system": {
+      "category": "SPIRIT"
+    }
+  },
+  "ref": {
+    "name": "Guardian Spirits",
+    "book": "street_wyrd",
+    "page": 55
+  },
+  "correctedAt": "2026-08-13T23:36:50.517Z"
+}

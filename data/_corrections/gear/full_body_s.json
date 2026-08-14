@@ -1,0 +1,16 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "full_body_s",
+  "changed": {
+    "meta": {
+      "flagged": "looks like page furniture, not an item — delete?"
+    }
+  },
+  "ref": {
+    "name": "Full - Body S",
+    "book": "tarnished_star",
+    "page": 151
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

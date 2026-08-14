@@ -1,0 +1,70 @@
+{
+  "id": "cl6_krime_soldier",
+  "name": "Krime Soldier",
+  "system": {
+    "type": "WEAPON_FIREARMS",
+    "subtype": "RIFLE_ASSAULT",
+    "price": 3500,
+    "priceDef": "3500",
+    "avail": 7,
+    "availDef": "7I",
+    "description": "Troll sized assault rifle with underbarrel grenade launcher.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "krime_soldier",
+      "category": "gear_firearms",
+      "book": "krime",
+      "attrs": {
+        "id": "krime_soldier",
+        "avail": "7I",
+        "price": "3500",
+        "type": "WEAPON_FIREARMS",
+        "subtype": "RIFLE_ASSAULT"
+      },
+      "stats": {
+        "weapon.dmg": "5P",
+        "weapon.mode": "SA/BF",
+        "weapon.attack": "1,7,6,3,1",
+        "weapon.ammo": "21(c)",
+        "weapon.skill": "firearms",
+        "weapon.spec": "firearms/rifles"
+      },
+      "page": "13"
+    },
+    "skill": "firearms",
+    "spec": "firearms/rifles",
+    "dmg": 5,
+    "stun": false,
+    "dmgDef": "5P",
+    "dmgFlags": [],
+    "modes": {
+      "SS": false,
+      "SA": true,
+      "BF": true,
+      "FA": false
+    },
+    "attackRating": [
+      1,
+      7,
+      6,
+      3,
+      1
+    ],
+    "ammocap": 21,
+    "ammoType": "c",
+    "genesisID": "krime_soldier"
+  },
+  "meta": {
+    "book": "krime_katalog",
+    "page": 13,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "krime_soldier_p013_x116.webp",
+  "domain": "gear",
+  "category": "weapons_firearms",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

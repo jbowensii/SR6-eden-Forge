@@ -1,0 +1,48 @@
+{
+  "id": "hell_hog",
+  "name": "Hell Hog",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 7,
+      "agi": 5,
+      "rea": 4,
+      "str": 5,
+      "wil": 3,
+      "log": 2,
+      "int": 4,
+      "cha": 1,
+      "ess": 6
+    },
+    "skills": "Athletics 4, Close Combat 5, Perception 4, Stealth 3",
+    "powers": "Dual Natured, Engulf (Fire), Immunity (Pathogens, Toxins),",
+    "description": "The hell hog is an Awakened wild pig that has been found near the growing trash heaps in and around Cancer Alley. The pig is thought to be distantly related to some of the European wild boar mixed with domesticated pigs and mutated by the toxic environment of the alley. The hell hog is aggressive, runs in packs of fifteen to twenty, and has been known to engulf their prey in a wreath of flame. They are typically no more than one meter long and half a meter tall and are known to consume just about anything.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_hell_hog",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "shadows_new_orleans",
+    "page": 27,
+    "sources": [
+      {
+        "book": "shadows_new_orleans",
+        "page": 27
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "shadows_new_orleans",
+    "originalName": "Hell Hog"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

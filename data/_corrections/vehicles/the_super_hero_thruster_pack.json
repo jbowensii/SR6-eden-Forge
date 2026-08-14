@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "the_super_hero_thruster_pack",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "SPECIAL_VEHICLES"
+    }
+  },
+  "ref": {
+    "name": "the super hero thruster pack",
+    "book": "explosive_decompression",
+    "page": 83
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

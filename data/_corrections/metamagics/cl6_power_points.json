@@ -1,0 +1,16 @@
+{
+  "domain": "metamagics",
+  "category": "metamagics",
+  "id": "cl6_power_points",
+  "changed": {
+    "system": {
+      "category": "METAMAGIC_ADEPT"
+    }
+  },
+  "ref": {
+    "name": "Power Points",
+    "book": "corebook",
+    "page": 168
+  },
+  "correctedAt": "2026-08-14T14:08:17.335Z"
+}

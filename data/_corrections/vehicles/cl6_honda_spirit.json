@@ -1,0 +1,28 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_honda_spirit",
+  "correctedAt": "2026-07-30T12:03:59.962Z",
+  "name": "Honda Spirit",
+  "system": {
+    "type": "VEHICLE",
+    "subtype": "CAR",
+    "handling": "4/5",
+    "accel": "15",
+    "speedInterval": "20",
+    "topSpeed": "150",
+    "body": "10",
+    "armor": "3",
+    "pilot": "1",
+    "sensor": "1",
+    "seats": "4",
+    "availability": "2",
+    "price": "13,000"
+  },
+  "qaStatus": "extracted",
+  "gapsOnly": true,
+  "ref": {
+    "name": "Honda Spirit",
+    "wasId": "honda_spirit"
+  }
+}

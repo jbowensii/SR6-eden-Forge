@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "evomars_corer",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "SPACECRAFT"
+    }
+  },
+  "ref": {
+    "name": "EVOMARS corer",
+    "book": "explosive_decompression",
+    "page": 96
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

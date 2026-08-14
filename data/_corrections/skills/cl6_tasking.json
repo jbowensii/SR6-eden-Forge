@@ -1,0 +1,16 @@
+{
+  "domain": "skills",
+  "category": "skills",
+  "id": "cl6_tasking",
+  "changed": {
+    "system": {
+      "category": "RESONANCE"
+    }
+  },
+  "ref": {
+    "name": "Tasking",
+    "book": "corebook",
+    "page": 97
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

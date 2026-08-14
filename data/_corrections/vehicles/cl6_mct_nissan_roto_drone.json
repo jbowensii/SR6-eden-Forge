@@ -1,0 +1,12 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_mct_nissan_roto_drone",
+  "deleted": true,
+  "ref": {
+    "name": "MCT-Nissan Roto-Drone",
+    "book": "double_clutch",
+    "page": 1
+  },
+  "correctedAt": "2026-08-09T18:51:41.321Z"
+}

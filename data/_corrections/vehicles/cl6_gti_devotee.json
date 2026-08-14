@@ -1,0 +1,63 @@
+{
+  "id": "cl6_gti_devotee",
+  "name": "GTI Devotee MK.1",
+  "system": {
+    "type": "VEHICLES",
+    "subtype": "GRAV",
+    "price": 999999999,
+    "priceDef": "999999999",
+    "avail": 9,
+    "availDef": "9I",
+    "description": "Cost is 2.3 Billion, out of scope of Genesis.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "gti_devotee",
+      "category": "gear_vehicles",
+      "book": "double_clutch",
+      "attrs": {
+        "id": "gti_devotee",
+        "lang": "de",
+        "avail": "9I",
+        "price": "999999999",
+        "type": "VEHICLES",
+        "subtype": "GRAV"
+      },
+      "stats": {
+        "vehicle.han": "3",
+        "vehicle.acc": "20",
+        "vehicle.spdi": "100",
+        "vehicle.tspd": "1000",
+        "vehicle.bod": "50",
+        "vehicle.arm": "10",
+        "vehicle.pil": "5",
+        "vehicle.sen": "5",
+        "vehicle.sea": "50"
+      },
+      "page": "77"
+    },
+    "genesisID": "gti_devotee",
+    "handling": "3",
+    "accel": "20",
+    "speedInterval": "100",
+    "topSpeed": "1,000",
+    "body": "50",
+    "armor": "10",
+    "pilot": "5",
+    "sensor": "5",
+    "seats": "50",
+    "availability": "9"
+  },
+  "meta": {
+    "book": "double_clutch",
+    "page": 77,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "gti_devotee_mk_1_p078_x1184.webp",
+  "domain": "vehicles",
+  "category": "vehicles",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

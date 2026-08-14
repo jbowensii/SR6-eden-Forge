@@ -1,0 +1,47 @@
+{
+  "id": "renraku_best_boy",
+  "name": "Renraku Best Boy",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 4,
+      "agi": 2,
+      "rea": 2,
+      "str": 3,
+      "wil": 4,
+      "log": 4,
+      "int": 2,
+      "cha": 2,
+      "ess": 3
+    },
+    "skills": "Athletics 5, Close Combat 4, Influence 2 (Intimidation +2), Outdoors",
+    "powers": "Armor 2, Enhanced Senses (Hearing, Smell), Natural Weapon",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_renraku_best_boy",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "body_shop",
+    "page": 162,
+    "sources": [
+      {
+        "book": "body_shop",
+        "page": 162
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "body_shop",
+    "originalName": "Renraku Best Boy"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

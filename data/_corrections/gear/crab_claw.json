@@ -1,0 +1,20 @@
+{
+  "domain": "gear",
+  "category": "cyberware",
+  "id": "crab_claw",
+  "correctedAt": "2026-07-30T18:22:59.098Z",
+  "name": "Crab Claw",
+  "system": {
+    "type": "CYBERWARE",
+    "essence": 0.5,
+    "capacity": 8,
+    "avail": 3,
+    "availDef": "3(I)",
+    "price": 2000,
+    "description": "A crab claw cyber implant replaces the user’s forearm and hand with an oversized, pneumatically driven cutting clamp. These serrated blades have a bite strength similar to the jaws of life by emergency responders. If the user wishes damage their opponent during a grapple (p. SR6 ), they deal this weapon’s DV + net hits rather than Strength/2. A crab claw doubles its DV when employed against a barrier that can be placed tween its blades.",
+    "priceDef": "",
+    "subtype": "CYBER_IMPLANT_WEAPON",
+    "notes": ""
+  },
+  "qaStatus": "extracted"
+}

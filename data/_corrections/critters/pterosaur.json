@@ -1,0 +1,48 @@
+{
+  "id": "pterosaur",
+  "name": "Pterosaur",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 13,
+      "agi": 8,
+      "rea": 7,
+      "str": 13,
+      "wil": 5,
+      "log": 5,
+      "int": 5,
+      "cha": 5,
+      "mag": 7,
+      "ess": 7
+    },
+    "skills": "Astral, Close Combat, Perception",
+    "powers": "Armor 7, Enhanced Senses (hearing, low-light vision, smell), Ele- mental Attack (Electric or Fire), Guard, Movement, Mystic Armor 7, Natural",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_pterosaur",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 143,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 143
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Pterosaur"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

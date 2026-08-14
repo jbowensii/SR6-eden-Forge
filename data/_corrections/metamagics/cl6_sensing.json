@@ -1,0 +1,16 @@
+{
+  "domain": "metamagics",
+  "category": "metamagics",
+  "id": "cl6_sensing",
+  "changed": {
+    "system": {
+      "category": "METAMAGIC"
+    }
+  },
+  "ref": {
+    "name": "Sensing",
+    "book": "street_wyrd",
+    "page": 120
+  },
+  "correctedAt": "2026-08-14T14:08:17.335Z"
+}

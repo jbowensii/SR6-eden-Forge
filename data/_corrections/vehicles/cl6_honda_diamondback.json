@@ -1,0 +1,63 @@
+{
+  "id": "cl6_honda_diamondback",
+  "name": "Honda-GM Diamondback",
+  "system": {
+    "type": "VEHICLES",
+    "subtype": "BIKES",
+    "price": 75000,
+    "priceDef": "75000",
+    "avail": 8,
+    "availDef": "8L",
+    "description": "Comes with targeting autosoft level 4 for the weapon in the turret",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "honda_diamondback",
+      "category": "gear_vehicles",
+      "book": "double_clutch",
+      "attrs": {
+        "id": "honda_diamondback",
+        "lang": "de",
+        "avail": "8L",
+        "price": "75000",
+        "type": "VEHICLES",
+        "subtype": "BIKES"
+      },
+      "stats": {
+        "vehicle.han": "3/4",
+        "vehicle.acc": "30",
+        "vehicle.spdi": "30",
+        "vehicle.tspd": "250",
+        "vehicle.bod": "16",
+        "vehicle.arm": "12",
+        "vehicle.pil": "3",
+        "vehicle.sen": "3",
+        "vehicle.sea": "1"
+      },
+      "page": "40"
+    },
+    "genesisID": "honda_diamondback",
+    "handling": "3/4",
+    "accel": "30",
+    "speedInterval": "30",
+    "topSpeed": "250",
+    "body": "16",
+    "armor": "12",
+    "pilot": "3",
+    "sensor": "3",
+    "seats": "1",
+    "availability": "8"
+  },
+  "meta": {
+    "book": "double_clutch",
+    "page": 40,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "honda_gm_diamondback_p042_x961.webp",
+  "domain": "vehicles",
+  "category": "vehicles",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

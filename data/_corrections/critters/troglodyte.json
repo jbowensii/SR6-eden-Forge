@@ -1,0 +1,48 @@
+{
+  "id": "troglodyte",
+  "name": "Troglodyte",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 3,
+      "agi": 3,
+      "rea": 4,
+      "str": 2,
+      "wil": 3,
+      "log": 2,
+      "int": 3,
+      "cha": 2,
+      "mag": 1,
+      "ess": 6
+    },
+    "skills": "Athletics 5, Close Combat 2 (Clubs +2), Stealth 6",
+    "powers": "Armor (2), Concealment, Enhanced Senses (Thermographic Vision),",
+    "weaknesses": "Allergy (sunlight, moderate), Uneducated",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_troglodyte",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "30_nights",
+    "page": 139,
+    "sources": [
+      {
+        "book": "30_nights",
+        "page": 139
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "30_nights",
+    "originalName": "Troglodyte"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

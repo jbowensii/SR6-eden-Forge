@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "chemicals",
+  "id": "shade",
+  "deleted": true,
+  "ref": {
+    "name": "Shade",
+    "book": "body_shop",
+    "page": 124
+  },
+  "correctedAt": "2026-08-09T18:51:40.930Z"
+}

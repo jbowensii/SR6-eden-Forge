@@ -1,0 +1,49 @@
+{
+  "id": "midden",
+  "name": "Midden",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 7,
+      "agi": 1,
+      "rea": 2,
+      "str": 7,
+      "wil": 3,
+      "log": 2,
+      "int": 3,
+      "cha": 3,
+      "mag": 3,
+      "ess": 3
+    },
+    "skills": "Astral, Close Combat, Exotic Ranged Weapon, Perception, Stealth",
+    "powers": "Astral Form, Binding, Guard, Materialization, Movement, Search",
+    "description": "(Earth, Force 3) As if a child made a sheep out of mud in the backyard, middens are a chaotic mixture of dirt, stone, and clay, with droopy eyes that make you sorry for them. These quadrupeds wander around the landscape, grazing on what constitutes vegetation or crunching down on gemstone fruit. Middens grow asbestos-like wool, and they actually resistant to electricity. Middens are aggressive beasts, but once they find something like to eat, it's hard to get them to move on they finish their meal.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_midden",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 52,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 52
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Midden"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

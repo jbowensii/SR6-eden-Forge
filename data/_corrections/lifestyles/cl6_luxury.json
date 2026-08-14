@@ -1,0 +1,16 @@
+{
+  "domain": "lifestyles",
+  "category": "lifestyles",
+  "id": "cl6_luxury",
+  "changed": {
+    "system": {
+      "category": "LIFESTYLE"
+    }
+  },
+  "ref": {
+    "name": "Luxury",
+    "book": "corebook",
+    "page": 57
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

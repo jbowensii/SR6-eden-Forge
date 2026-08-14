@@ -1,0 +1,49 @@
+{
+  "id": "new_leatherback",
+  "name": "New Leatherback",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 8,
+      "agi": 3,
+      "rea": 3,
+      "str": 6,
+      "wil": 4,
+      "log": 2,
+      "int": 3,
+      "cha": 4,
+      "mag": 5,
+      "ess": 6
+    },
+    "skills": "Athletics 5, Close Combat 5, Outdoors 2, Perception 4, Stealth 2,",
+    "powers": "Armor 5, Compulsion, Magical Guard (Self), Movement, Natural",
+    "description": "New leatherbacks ( Dermochelys novalis ) are > enormous sea turtles that can grow in excess of three meters in length and up to 1,000 kilograms > in weight. Like its mundane relatives, the leath> erback turtle ( Dermochelys coriacea ), the new leatherback's body is covered with a flexible car> apace rather than a bony shell. The back of the “shell” is a dense, oily skin that assists the turtle in regulating body temperature. The carapace is interspersed with small bones that offer structure > and rigidity. All four limbs are powerful flippers, which make the new leatherback a deceptively > fast swimmer. > New leatherbacks prefer tropical waters but can be found almost anywhere. There is also > freshwater variant ( Dermochelys potami ) that in- > habits the Mississippi River and the Great Lakes, as well as larger lakes and rivers of the north> ern hemisphere. Though it is confirmed that new > leatherbacks are predators, as well as scavengers at times, they hunt small prey, as they have to be able to swallow them whole due to not having teeth to chew larger prey with. When scavenging, new leatherbacks will take bites, but it is not a behavior seen with live prey outside of very rare occasions. It is worth noting that the new leatherback's bite is more than strong enough to break metahuman bones and is quite dangerous. It is not, however, its primary defense mechanism—for that, they rely upon their magical ability to compel animals to swim as deep as they can. Against aquatic predators, this gives the turtle plenty of time to escape, but against non-aquatic predators or interlopers, this can be quite dangerous indeed. The mating cycle of the new leatherback is slightly different from their mundane progenitors. Though mating occurs at sea, a mated pair returns that to the female's nesting beach together. There, the the mother lays a clutch of more than one hundred and eggs, which she promptly buries in the dry sand the beyond the highest point of the tide. Then, for the year next seventy days, the mated pair defends their nest against all intruders, primarily by compelling five them to dive to the bottom of the ocean and stay year. there. This has caused problems, as turtle con- teeth servationists have been trying to preserve nesting It beaches for decades, but where a new leatherback belly. chooses to use that same beach for nesting, these on conservationists often stray too close and end up sure being compelled into the water. with > I'll say, mate! I've had a fair bit of business over the years long keeping overwatch on nesting beaches. Gotta stay far away, though, so I often post myself up in the tree line and use mon Ol' Bessie to discourage poachers. The problem comes when but poachers but normal folks on a beach hike. Thankfully, most fish, the time nest watchers get to them first, but a few times that ain't happened before the turtles have forced some poor dumb fellas down to the bottom. Outback 155 Wait, you let them get compelled? S /dev/grrl H A D O Sure do! I ain't being paid to look after oiks. I'm paid to watch W the turtles and make sure they don't have any problems. Let R U them gap-year wazzers get up close and personal. N : Outback W IL D Hmmm, this gives me a great idea for a field trip. L Canis IF E Ghost, he's going to make us get compelled isn't he. Torch Yes, yes he is. Unless you resist it. Exile new leatherback DR I/ID AC CM M 13 6/1 A1,I 2 12 10/15/+1 Sorcery 4 Weapon (Bite) Weakness :Vulnerability (Mercury) Weapons: Bite [Close Combat, DV 3P, 9/—/—/—/—]",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_new_leatherback",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "wild_life",
+    "page": 156,
+    "sources": [
+      {
+        "book": "wild_life",
+        "page": 156
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "wild_life",
+    "originalName": "New Leatherback"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

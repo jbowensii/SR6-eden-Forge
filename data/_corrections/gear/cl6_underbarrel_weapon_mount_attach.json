@@ -1,0 +1,15 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_underbarrel_weapon_mount_attach",
+  "correctedAt": "2026-08-09T11:35:03.610Z",
+  "ref": {
+    "name": "Underbarrel Weapon Mount",
+    "book": "firing_squad"
+  },
+  "changed": {
+    "system": {
+      "subtype": "FIREARMS_ACCESSORY"
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "id": "atomic_devil_rats",
+  "name": "Atomic Devil Rats",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 1,
+      "agi": 5,
+      "rea": 6,
+      "str": 1,
+      "wil": 2,
+      "log": 1,
+      "int": 5,
+      "cha": 4,
+      "mag": 5,
+      "ess": 6
+    },
+    "skills": "Athletics 4 (Climbing +2), Close Combat 6, Perception 5, Stealth 7",
+    "powers": "Concealment (self only), Elemental Attack (Fire), Immunity (tox- ins), Natural Weapon (Bite)",
+    "description": "When these mutant devil rats begin to glow, are preparing their elemental attack. They are quicker and more agile than normal devil rats. These creatures roam the city of Hubris in swarms are rarely encountered alone.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_atomic_devil_rats",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 158,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 158
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Atomic Devil Rats"
+  },
+  "img": "p158_x739.webp",
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-11T17:37:39.000Z"
+}

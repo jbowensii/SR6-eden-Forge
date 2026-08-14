@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "vice",
+  "changed": {
+    "meta": {
+      "flagged": "name recovered from the printed page — please confirm"
+    }
+  },
+  "ref": {
+    "name": "Ford Stinger",
+    "book": "tarnished_star",
+    "page": 155
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

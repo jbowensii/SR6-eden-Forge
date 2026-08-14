@@ -1,0 +1,49 @@
+{
+  "id": "century_ferret",
+  "name": "Century Ferret",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 1,
+      "agi": 2,
+      "rea": 3,
+      "str": 1,
+      "wil": 1,
+      "log": 2,
+      "int": 2,
+      "cha": 1,
+      "mag": 2,
+      "ess": 6
+    },
+    "skills": "Athletics 3, Close Combat 3 (Bite +2), Outdoors 3, Perception 3,",
+    "powers": "Manasense",
+    "description": "The century ferret ( Mustela millenniae ) is one of the first known Awakened creatures. Originally discovered on January 1, 2000 (hence the name), this animal set the zoological world on fire. The discovery of new species happens regularly enough, prized pets but the sudden appearance of this large rodent was the news too a surprise to experts. If only those scientists were to make them aware of the Awakening, they wouldn't have been receives some so surprised, as we have seen an explosion in speThey don't cies with the rising mana level. The century ferret shares much of its appearance with the black-footed ferret. Its back fur is typically brown and grey, while the underbelly is light yellow. The paws and area surrounding the eyes are black. While the black-footed ferret typically can reach sixty-five centimeters in length, the century ferret can reach lengths of two meters. Its larger proportions apply to its weight as well with the largest specimens weighing five kilograms. The ferret has similar behavior, as other mem+2), bers of the Mustela family. They are typically solitary hunters, targeting birds and rodents. The larger size allows them to take down larger rodents and Natubirds, but they pose no concern to metahumanity. They are often a source of food for the many larger predators of North America. There were nests of these creatures in European grasslands as well, but it appears that they have been wiped out in the wild since around 2038. Many of these creatures can be found in captivity. During the early days of the Awakening, their unique sneezing fits when around magic led to many corporations creating breeding programs to use for magical security. While this is less common today because of better detection methods, +2), Per- less hatred, and less musky methods, it's still used by some cost-conscious companies as an effective means to identify the use of magic on site.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_century_ferret",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "wild_life",
+    "page": 25,
+    "sources": [
+      {
+        "book": "wild_life",
+        "page": 25
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "wild_life",
+    "originalName": "Century Ferret"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

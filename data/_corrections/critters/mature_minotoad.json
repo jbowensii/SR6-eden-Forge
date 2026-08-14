@@ -1,0 +1,48 @@
+{
+  "id": "mature_minotoad",
+  "name": "Mature Minotoad",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 8,
+      "agi": 9,
+      "rea": 7,
+      "str": 9,
+      "wil": 8,
+      "log": 4,
+      "int": 4,
+      "cha": 4,
+      "mag": 2,
+      "ess": 6
+    },
+    "skills": "Astral 3, Athletics 6, Close Combat 6, Exotic Weapon (any ranged weapon) 5, Influence 3, Perception 6, Stealth 4",
+    "powers": "Armor 4, Astral Perception, Berserk 2, Fire Resistance (as quali- ty), Great Leap 4, Improved Reflexes 2, Natural Weapon (claws/bite), Nat- ural Weapon (horns), Natural Weapon (tongue), Sapience",
+    "notes": "The mature minotoad's tongue acts as a grapple attack at range.",
+    "movement": "",
+    "weaknesses": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_mature_minotoad",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 104,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 104
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Mature Minotoad"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

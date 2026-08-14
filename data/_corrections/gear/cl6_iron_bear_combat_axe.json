@@ -1,0 +1,69 @@
+{
+  "id": "cl6_iron_bear_combat_axe",
+  "name": "Iron Bear Combat Axe",
+  "system": {
+    "type": "WEAPON_CLOSE_COMBAT",
+    "subtype": "BLADES",
+    "price": 1000,
+    "priceDef": "1000",
+    "avail": 3,
+    "availDef": "3",
+    "description": "Wallacher better watch their hoops. The Iron Bear is a lightweight titanium double-bladed axe with a meter of razor-sharp edge divided between the twin heads. It lacks the spike but makes up for it with a thick-handled base that can be used for less-than-lethal takedowns, unless you're a troll with swing control issues.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "iron_bear_combat_axe",
+      "category": "gear_revolution_arms",
+      "book": "firing_squad",
+      "attrs": {
+        "id": "iron_bear_combat_axe",
+        "avail": "3",
+        "price": "1000",
+        "type": "WEAPON_CLOSE_COMBAT",
+        "subtype": "BLADES"
+      },
+      "stats": {
+        "weapon.dmg": "5P",
+        "weapon.attack": "8,,,,",
+        "weapon.skill": "close_combat",
+        "weapon.spec": "close_combat/blades",
+        "weapon.wild": "true"
+      },
+      "page": "39"
+    },
+    "skill": "close_combat",
+    "spec": "close_combat/blades",
+    "dmg": 5,
+    "stun": false,
+    "dmgDef": "5P",
+    "dmgFlags": [],
+    "modes": {
+      "SS": false,
+      "SA": false,
+      "BF": false,
+      "FA": false
+    },
+    "attackRating": [
+      8,
+      0,
+      0,
+      0,
+      0
+    ],
+    "ammocap": 0,
+    "ammoType": "",
+    "genesisID": "iron_bear_combat_axe"
+  },
+  "meta": {
+    "book": "firing_squad",
+    "page": 39,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "iron_bear_combat_axe_p040_x850.webp",
+  "domain": "gear",
+  "category": "weapons_firearms",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

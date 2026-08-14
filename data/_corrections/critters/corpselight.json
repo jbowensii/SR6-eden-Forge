@@ -1,0 +1,52 @@
+{
+  "id": "corpselight",
+  "name": "Corpselight",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 3,
+      "agi": 8,
+      "rea": 8,
+      "str": 1,
+      "wil": 5,
+      "log": 2,
+      "int": 5,
+      "cha": 3,
+      "ess": 2
+    },
+    "skills": "Astral 6, Close Combat 6, Influence 2 (Intimidation +2), Per- ception 6, Spellcasting 4 (Counterspelling +2), Stealth 6",
+    "powers": "Essence Drain, Materialization*, Movement (self), Psycho- kinesis, Regeneration",
+    "description": "The legends of ghostly lights deep in the swamps and forested areas were always chalked up to swamp gas or hallucinogens, but the research of many prominent scientists has found a type of malevolent spirit that lures unsuspecting victims deep into the wilderness and then consumes their very life essence. These spirits look like glowing balls of light, but on the astral plane appear as twenty-tentain focus easy go: PAGE 26 orleans cled cephalopods that latch onto their victims. These often are solitary hunters but will sometimes hunt as a pack if there is a good hunting ground. Just be careful where your casino boat lets you off.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_corpselight",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "shadows_new_orleans",
+    "page": 26,
+    "sources": [
+      {
+        "book": "shadows_new_orleans",
+        "page": 26
+      },
+      {
+        "book": "wild_life",
+        "page": 77
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "shadows_new_orleans",
+    "originalName": "Corpselight"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

@@ -1,0 +1,52 @@
+{
+  "id": "cl6_krime_detruck",
+  "name": "Krime DeTruck Sports Truck",
+  "system": {
+    "type": "VEHICLES",
+    "subtype": "TRUCKS",
+    "price": 100000,
+    "priceDef": "100000",
+    "avail": 8,
+    "availDef": "8L",
+    "description": "Troll sized open bed sports truck.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "krime_detruck",
+      "category": "gear_vehicles",
+      "book": "krime",
+      "attrs": {
+        "id": "krime_detruck",
+        "avail": "8L",
+        "price": "100000",
+        "subtype": "TRUCKS",
+        "type": "VEHICLES"
+      },
+      "stats": {
+        "vehicle.han": "4/4",
+        "vehicle.acc": "15",
+        "vehicle.spdi": "20",
+        "vehicle.tspd": "160",
+        "vehicle.bod": "9",
+        "vehicle.arm": "4",
+        "vehicle.pil": "2",
+        "vehicle.sen": "2",
+        "vehicle.sea": "3"
+      },
+      "page": "35"
+    },
+    "genesisID": "krime_detruck"
+  },
+  "meta": {
+    "book": "krime_katalog",
+    "page": 35,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "krime_detruck_sports_truck_p035_x264.webp",
+  "domain": "vehicles",
+  "category": "vehicles",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

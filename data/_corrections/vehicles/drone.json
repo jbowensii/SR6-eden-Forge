@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "drone",
+  "changed": {
+    "meta": {
+      "flagged": "subtype is my guess — please confirm"
+    }
+  },
+  "ref": {
+    "name": "Drone",
+    "book": "corebook_berlin",
+    "page": 303
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

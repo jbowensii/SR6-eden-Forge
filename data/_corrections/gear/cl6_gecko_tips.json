@@ -1,0 +1,20 @@
+{
+  "domain": "gear",
+  "category": "cyberware",
+  "id": "cl6_gecko_tips",
+  "movedTo": {
+    "domain": "gear",
+    "category": "cyberware"
+  },
+  "movedFrom": {
+    "domain": "vehicles",
+    "category": "vehicles"
+  },
+  "why": "Commlink6 files this under gear_cyberlimbs",
+  "ref": {
+    "name": "Gecko Tips",
+    "book": "double_clutch",
+    "page": 135
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

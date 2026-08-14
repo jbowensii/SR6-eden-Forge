@@ -1,0 +1,16 @@
+{
+  "domain": "complexforms",
+  "category": "complexforms",
+  "id": "cl6_enlighten_automaton",
+  "changed": {
+    "system": {
+      "category": "COMPLEX_FORM"
+    }
+  },
+  "ref": {
+    "name": "Enlighten Automaton",
+    "book": "hack_slash",
+    "page": 64
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

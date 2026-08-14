@@ -1,0 +1,16 @@
+{
+  "domain": "metamagics",
+  "category": "metamagics",
+  "id": "cl6_extended_masking",
+  "changed": {
+    "system": {
+      "category": "METAMAGIC"
+    }
+  },
+  "ref": {
+    "name": "Extended Masking",
+    "book": "street_wyrd",
+    "page": 119
+  },
+  "correctedAt": "2026-08-14T14:08:17.335Z"
+}

@@ -1,0 +1,11 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_slow_rof_ss1_3",
+  "deleted": true,
+  "ref": {
+    "name": "SS(1-3)",
+    "book": "deadly_arts"
+  },
+  "correctedAt": "2026-08-09T11:37:35.107Z"
+}

@@ -1,0 +1,71 @@
+{
+  "id": "technomancer",
+  "name": "Technomancer",
+  "system": {
+    "category": "NPC",
+    "metatype": "dwarf",
+    "attributes": {
+      "bod": 5,
+      "agi": 2,
+      "rea": 2,
+      "str": 5,
+      "wil": 7,
+      "log": 5,
+      "int": 6,
+      "cha": 5,
+      "edg": 3,
+      "magres": 6,
+      "ess": 6.0
+    },
+    "initiative": "8 + 1D6/1 Major, 2 Minor",
+    "conditionMonitors": "Condition Monitors (P/S): 11/12",
+    "defenseRating": "9",
+    "activeSkills": "Con 2 (Acting +2), Cracking 4, Electronics 4 (Computer +2),",
+    "knowledgeSkills": "Commlink Design, Dragons, Host Design, Seattle",
+    "languages": "English (Native)",
+    "qualities": "Allergy (grass, Moderate), Analytical Mind, Focused",
+    "complexForms": "Diffusion of Firewall, Infusion of Attack, Infusion of",
+    "contacts": "Bartender (C1/L3), Bounty Hunter (C2/L5), Cab Driver (C2/L1),",
+    "lifestyle": "Low (1 month prepaid)",
+    "gear": "Area jammer (Rating 4), armor jacket (nonconductivity 4), Meta",
+    "nuyen": "2,050¥",
+    "weapons": "",
+    "powers": "",
+    "adeptPowers": "",
+    "spells": "",
+    "augmentations": "",
+    "cyberware": "",
+    "genesisID": "cat28000_npcs_technomancer",
+    "defenserating": "",
+    "notes": "",
+    "type": "NPC",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "corebook_berlin",
+    "page": 90,
+    "sources": [
+      {
+        "book": "corebook_berlin",
+        "page": 90
+      },
+      {
+        "book": "corebook_hongkong",
+        "page": 90
+      },
+      {
+        "book": "corebook",
+        "page": 90
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "corebook_berlin",
+    "originalName": "Technomancer"
+  },
+  "img": "technomancer_p090_x465.webp",
+  "domain": "npcs",
+  "category": "npc",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

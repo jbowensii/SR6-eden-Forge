@@ -1,0 +1,16 @@
+{
+  "domain": "spells",
+  "category": "illusion",
+  "id": "form_blood_spirits",
+  "changed": {
+    "meta": {
+      "flagged": "looks like page furniture, not an item — delete?"
+    }
+  },
+  "ref": {
+    "name": "Form Blood Spirits",
+    "book": "street_wyrd",
+    "page": 160
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

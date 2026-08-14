@@ -1,0 +1,16 @@
+{
+  "domain": "foci",
+  "category": "foci",
+  "id": "cl6_foundation_focus",
+  "changed": {
+    "system": {
+      "category": "FOCUS"
+    }
+  },
+  "ref": {
+    "name": "Foundation Focus",
+    "book": "deadly_arts",
+    "page": 165
+  },
+  "correctedAt": "2026-08-14T14:08:17.335Z"
+}

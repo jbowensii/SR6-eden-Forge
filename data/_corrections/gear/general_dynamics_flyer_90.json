@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "vehicles",
+  "id": "general_dynamics_flyer_90",
+  "deleted": true,
+  "ref": {
+    "name": "General Dynamics Flyer 90",
+    "book": "double_clutch",
+    "page": 40
+  },
+  "correctedAt": "2026-08-13T00:42:05.563Z"
+}

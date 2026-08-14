@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "jackrabbit_honda_spirit_eurocar",
+  "changed": {
+    "meta": {
+      "flagged": "vehicle type/subtype not merged yet"
+    }
+  },
+  "ref": {
+    "name": "Jackrabbit Honda Spirit Eurocar",
+    "book": "corebook",
+    "page": 302
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

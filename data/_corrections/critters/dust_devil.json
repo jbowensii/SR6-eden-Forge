@@ -1,0 +1,50 @@
+{
+  "id": "dust_devil",
+  "name": "Dust Devil",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 3,
+      "agi": 8,
+      "rea": 9,
+      "str": 2,
+      "wil": 5,
+      "log": 5,
+      "int": 5,
+      "cha": 5,
+      "mag": 5,
+      "ess": 5
+    },
+    "skills": "Astral, Athletics, Close Combat, Exotic Ranged Weapon, Perception,",
+    "powers": "Accident, Astral Form, Binding, Concealment, Confusion, Energy",
+    "weaknesses": "Allergy (Inhalation Vector Toxins, Severe)",
+    "description": "(Air, Force 5) Dust devils live primarily in Foehn. They are dust in simian shape, cloaked in a whirlwind of dust. Many are half a meter tall, but they band together to raid the unsuspecting tourists and harass the guards, distracting them from any contraband they are guarding. They can build up static electricity as they spin around as a defense mechanism.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_dust_devil",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 49,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 49
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Dust Devil"
+  },
+  "img": "p049_x592.webp",
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-11T17:37:39.000Z"
+}

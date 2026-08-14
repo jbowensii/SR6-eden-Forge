@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "cl6_laser_microphone_function",
+  "deleted": true,
+  "ref": {
+    "name": "Laser microphone",
+    "book": "corebook",
+    "page": 276
+  },
+  "correctedAt": "2026-08-09T18:51:40.855Z"
+}

@@ -1,0 +1,11 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_range_160",
+  "deleted": true,
+  "ref": {
+    "name": "160 km",
+    "book": "deadly_arts"
+  },
+  "correctedAt": "2026-08-09T11:37:35.255Z"
+}

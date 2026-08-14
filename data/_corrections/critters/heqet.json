@@ -1,0 +1,49 @@
+{
+  "id": "heqet",
+  "name": "Heqet",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 1,
+      "agi": 3,
+      "rea": 4,
+      "str": 1,
+      "wil": 2,
+      "log": 1,
+      "int": 2,
+      "cha": 1,
+      "mag": 3,
+      "ess": 6
+    },
+    "skills": "Astral 3, Athletics 4, Close Combat 1, Outdoors 3, Perception 4,",
+    "powers": "Concealment, Dual Natured, Energy Drain (Magic)",
+    "description": "Frogs are one of the most adaptable animals in the classification of amphibians. The heqet ( Hyperolius hqtyt ) is really a great example of this flexibility. This creature is found in the wetlands near the Nile River. It is believed that this frog is the source of the biblical tale concerning one of the plagues of Egypt due to its ability to rapidly reproduce. The heqet frog is interesting in that in the tadpole stage of their life cycle, they feed upon the manasphere before changing into their adult form. Like other types of reed frogs, the heqet has patterned skin and vivid colors. The pattern of Hyperoliu hqtyt is striped with alternating colors of purple, bright green, and a light beige. They reach a maximum size of eight centimeters in length and a weight of fifty grams. During breeding, the purple stripes of the males fluoresce. The heqet is a wonderful creature for monitoring the local manasphere. Observant magicians and herpetologists have noted that these frogs gather for mating in the month preceding an increase in deploy the mana flow for a region. The reason behind this control. This behavior is that while the heqet is a tadpole, they feed animals and primarily upon magic in the natural environment, causing a mana ebb. The strength of this ebb is related to the prevalence of natural predators in the environment. During the early stages of the Awakening, when there were few predators, high mana ebbs were detected during these breeding frenzies. There are similar breeds of frogs located in other marshlands around the world. The adult heqet is generally shy and feeds exclusively on insects. The tadpoles will feed on plants, insects, and on other tadpoles, but they 4 primarily feed on magic. Once the tadpole's magic (Pathogens), is full, it will no longer continue draining from the environment or any unfortunate victim. > I know of one corporation that's used this as a means to torture Awakened people. They put them in a holding tank full of the tadpoles and drain them of their magic. > Plan 9 adult heqet 2, DR I/ID AC CM MOVE (Smell, So- 1 6/2 A1,I 3 9 10/15/+1 Stealth 3 Weapons: Sticky Tongue [Close Combat, DV 2P (sets Corrosive I status), 5/—/—/—/—] Note: The natural maximum for Magic is 3.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_heqet",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "wild_life",
+    "page": 79,
+    "sources": [
+      {
+        "book": "wild_life",
+        "page": 79
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "wild_life",
+    "originalName": "Heqet"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

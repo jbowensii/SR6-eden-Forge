@@ -1,0 +1,17 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "stun_cage_standard_size",
+  "changed": {
+    "system": {
+      "type": "ELECTRONICS",
+      "subtype": "SECURITY"
+    }
+  },
+  "ref": {
+    "name": "Stun Cage (Standard Size)",
+    "book": "bestial_nature",
+    "page": 35
+  },
+  "correctedAt": "2026-08-13T16:04:22.960Z"
+}

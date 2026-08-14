@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "aresspace_mr_hydrone",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "SPACECRAFT"
+    }
+  },
+  "ref": {
+    "name": "aresspace mr. hydrone",
+    "book": "explosive_decompression",
+    "page": 96
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

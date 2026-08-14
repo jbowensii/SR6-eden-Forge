@@ -1,0 +1,52 @@
+{
+  "id": "cl6_krime_barco",
+  "name": "Krime Barco de Pesca",
+  "system": {
+    "type": "VEHICLES",
+    "subtype": "BOATS",
+    "price": 50000,
+    "priceDef": "50000",
+    "avail": 6,
+    "availDef": "6",
+    "description": "Troll sized fishing boat, powered by diesel motor or sails (Handling 5, Accel 4, Speed Int 10, Top Speed 50).",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "krime_barco",
+      "category": "gear_vehicles",
+      "book": "krime",
+      "attrs": {
+        "id": "krime_barco",
+        "avail": "6",
+        "price": "50000",
+        "subtype": "BOATS",
+        "type": "VEHICLES"
+      },
+      "stats": {
+        "vehicle.han": "4",
+        "vehicle.acc": "10",
+        "vehicle.spdi": "10",
+        "vehicle.tspd": "120",
+        "vehicle.bod": "10",
+        "vehicle.arm": "3",
+        "vehicle.pil": "1",
+        "vehicle.sen": "1",
+        "vehicle.sea": "6"
+      },
+      "page": "38"
+    },
+    "genesisID": "krime_barco"
+  },
+  "meta": {
+    "book": "krime_katalog",
+    "page": 38,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "krime_barco_de_pesca_p038_x295.webp",
+  "domain": "vehicles",
+  "category": "vehicles",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

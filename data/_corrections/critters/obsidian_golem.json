@@ -1,0 +1,49 @@
+{
+  "id": "obsidian_golem",
+  "name": "Obsidian Golem",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 4,
+      "agi": 8,
+      "rea": 10,
+      "str": 4,
+      "wil": 4,
+      "log": 4,
+      "int": 4,
+      "cha": 4,
+      "mag": 4,
+      "ess": 8
+    },
+    "skills": "Athletics 6, Close Combat 6, Perception 6, Stealth 6",
+    "powers": "Ambidextrous, Concealment (self only), Hardened Armor 2, Im- munity (Fear), Immunity (Mental Manipulation spells), Spell Resistance",
+    "weaknesses": "None",
+    "description": "Yes, I am well aware that obsidian is not a al, but you try naming something that looks like very slightly built human made of dull matte black metal when you don't know what the metal Should we manage to bring samples back to plane any time, we will analyze them to determine what they are. But having seen these things in flesh (so to speak), I think it's an appropriate name. Obsidian golems are not particularly they're not really what I would call tough—though they do have the same golem resilience—and aren't strong. When facing one you know is there, I wouldn't call them very skillful, either. What are, though, is fragging sneaky, able to cloak themselves and move without a trace. They are true rors when it comes to ambushes. They also are likely to be on their own, and they often work another golem to act as a primary focus while obsidian golem gets into an opponent's blind All the obsidian golems that have been seen far are armed with the same short sword as silver golems, a dagger that can be thrown or in their off hand, and a light crossbow when need to work at range.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_obsidian_golem",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 115,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 115
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Obsidian Golem"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

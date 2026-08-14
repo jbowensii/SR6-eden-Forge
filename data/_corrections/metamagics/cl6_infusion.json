@@ -1,0 +1,16 @@
+{
+  "domain": "metamagics",
+  "category": "metamagics",
+  "id": "cl6_infusion",
+  "changed": {
+    "system": {
+      "category": "METAMAGIC_ADEPT"
+    }
+  },
+  "ref": {
+    "name": "Infusion",
+    "book": "street_wyrd",
+    "page": 84
+  },
+  "correctedAt": "2026-08-14T14:08:17.335Z"
+}

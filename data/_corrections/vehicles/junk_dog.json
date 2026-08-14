@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "junk_dog",
+  "changed": {
+    "meta": {
+      "flagged": "subtype is my guess — please confirm"
+    }
+  },
+  "ref": {
+    "name": "junk dog",
+    "book": "corebook_berlin",
+    "page": 345
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

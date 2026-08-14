@@ -1,0 +1,31 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_accessory_rail_right",
+  "correctedAt": "2026-08-03T11:30:21.069Z",
+  "name": "Accessory Rail (right)",
+  "system": {
+    "type": "ACCESSORY",
+    "subtype": "WEAPON_ACCESSORY",
+    "price": 75,
+    "priceDef": "75",
+    "avail": 3,
+    "availDef": "3L",
+    "description": "Current firearm industry standards call for most weapons to feature at least two integral accessory rails or mounts as standard. These usually are located over or under the barrel. For many shooters and professionals, however, this simply isn't enough. Typically attached to the firearm's sides, accessory rails enable shooters to add two more accessories than what the weapon could normally mount. These mounts may vary in exact size depending on the weapon, but one rail accepts one accessory. Pistols are unable to accept accessory rails on the sides because they interfere with the weapon's operation. accessory rails",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "accessory_rail_right",
+      "category": "weapon_modifications",
+      "book": "firing_squad",
+      "attrs": {
+        "id": "accessory_rail_right",
+        "avail": "3L",
+        "price": "75"
+      },
+      "stats": {},
+      "page": "56"
+    }
+  },
+  "qaStatus": "extracted"
+}

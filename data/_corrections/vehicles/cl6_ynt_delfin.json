@@ -1,0 +1,28 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_ynt_delfin",
+  "correctedAt": "2026-07-30T12:07:03.297Z",
+  "name": "YNT Delfin",
+  "system": {
+    "type": "VEHICLE",
+    "subtype": "SUBMARINE",
+    "handling": "5",
+    "accel": "18",
+    "speedInterval": "10",
+    "topSpeed": "70",
+    "body": "6",
+    "armor": "12",
+    "pilot": "3",
+    "sensor": "3",
+    "seats": "3",
+    "availability": "3",
+    "price": "110,000"
+  },
+  "qaStatus": "extracted",
+  "gapsOnly": true,
+  "ref": {
+    "name": "YNT Delfin",
+    "wasId": "ynt_delfin"
+  }
+}

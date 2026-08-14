@@ -1,0 +1,20 @@
+{
+  "domain": "rituals",
+  "category": "rituals",
+  "id": "cl6_astral_gateway",
+  "movedTo": {
+    "domain": "rituals",
+    "category": "rituals"
+  },
+  "movedFrom": {
+    "domain": "critter_powers",
+    "category": "critter_powers"
+  },
+  "why": "Commlink6 files this under rituals",
+  "ref": {
+    "name": "Astral Gateway",
+    "book": "street_wyrd",
+    "page": 66
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

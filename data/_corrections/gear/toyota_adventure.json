@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "vehicles",
+  "id": "toyota_adventure",
+  "deleted": true,
+  "ref": {
+    "name": "Toyota Adventure",
+    "book": "double_clutch",
+    "page": 34
+  },
+  "correctedAt": "2026-08-13T00:42:05.563Z"
+}

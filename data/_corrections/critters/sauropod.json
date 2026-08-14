@@ -1,0 +1,48 @@
+{
+  "id": "sauropod",
+  "name": "Sauropod",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 24,
+      "agi": 10,
+      "rea": 10,
+      "str": 20,
+      "wil": 8,
+      "log": 8,
+      "int": 8,
+      "cha": 8,
+      "mag": 8,
+      "ess": 8
+    },
+    "skills": "Astral, Close Combat, Perception",
+    "powers": "Armor 12, Enhanced Senses (hearing, low-light vision, smell),",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_sauropod",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 144,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 144
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Sauropod"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

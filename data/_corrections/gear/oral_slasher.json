@@ -1,0 +1,20 @@
+{
+  "domain": "gear",
+  "category": "cyberware",
+  "id": "oral_slasher",
+  "correctedAt": "2026-07-30T18:22:42.104Z",
+  "name": "Oral Slasher",
+  "system": {
+    "type": "CYBERWARE",
+    "essence": 0.25,
+    "capacity": 3,
+    "avail": 6,
+    "availDef": "6(I)",
+    "price": 1000,
+    "description": "A weapon that is as concealable as it is impracti- disc cal, the oral slasher hides a telescoping spike under the user’s tongue. A compact air compressor launches the weapon through the user’s open mouth in a ing. vicious, lashing stab before spring-like polymers re- ing tract it back in place with almost as much quickness. as If the oral slasher is employed against an unaware opponent who is mouth to mouth with the user (for es example, someone engaged in a kiss) and the attack is successful, then the weapon automatically fills the used victim’s Physical Condition Monitor with no Body roll to reduce the damage. The back Shotgun Knee be Although this implant incorporates a shotgun, can it is in practice only usable in close combat. Virtu- the everything other than the barrel and the chamhousing a single shell are stripped away and implanted in the user’s lower leg, aligned upward.",
+    "priceDef": "",
+    "subtype": "CYBER_IMPLANT_WEAPON",
+    "notes": ""
+  },
+  "qaStatus": "extracted"
+}

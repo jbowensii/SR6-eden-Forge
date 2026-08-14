@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "vehicles",
+  "id": "nissan_constellation",
+  "deleted": true,
+  "ref": {
+    "name": "Nissan Constellation",
+    "book": "double_clutch",
+    "page": 24
+  },
+  "correctedAt": "2026-08-13T00:42:05.563Z"
+}

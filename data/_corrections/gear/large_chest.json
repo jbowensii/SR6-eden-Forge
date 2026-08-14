@@ -1,0 +1,16 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "large_chest",
+  "changed": {
+    "meta": {
+      "flagged": "type/subtype ambiguous — needs a human decision"
+    }
+  },
+  "ref": {
+    "name": "Large Chest",
+    "book": "deadly_arts",
+    "page": 166
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "carrack_class_modular_transport",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "SPACECRAFT"
+    }
+  },
+  "ref": {
+    "name": "Carrack-class Modular Transport",
+    "book": "explosive_decompression",
+    "page": 90
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

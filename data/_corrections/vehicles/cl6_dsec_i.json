@@ -1,0 +1,28 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_dsec_i",
+  "correctedAt": "2026-07-30T12:04:44.716Z",
+  "name": "DSEC I",
+  "system": {
+    "type": "VEHICLE",
+    "subtype": "FIXED_WING",
+    "handling": "4",
+    "accel": "120",
+    "speedInterval": "300",
+    "topSpeed": "2,500",
+    "body": "14",
+    "armor": "12",
+    "pilot": "5",
+    "sensor": "4",
+    "seats": "2",
+    "availability": "5",
+    "price": "1,945,000"
+  },
+  "qaStatus": "extracted",
+  "gapsOnly": true,
+  "ref": {
+    "name": "DSEC I",
+    "wasId": "dsec_i"
+  }
+}

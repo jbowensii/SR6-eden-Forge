@@ -1,0 +1,16 @@
+{
+  "domain": "echoes",
+  "category": "echoes",
+  "id": "cl6_dissonant_scream",
+  "changed": {
+    "system": {
+      "category": "ECHO"
+    }
+  },
+  "ref": {
+    "name": "Dissonant Scream",
+    "book": "hack_slash",
+    "page": 67
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

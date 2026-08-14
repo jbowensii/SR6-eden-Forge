@@ -1,0 +1,16 @@
+{
+  "domain": "metamagics",
+  "category": "metamagics",
+  "id": "cl6_great_form_channeling",
+  "changed": {
+    "system": {
+      "category": "METAMAGIC"
+    }
+  },
+  "ref": {
+    "name": "Great Form Channeling",
+    "book": "street_wyrd",
+    "page": 122
+  },
+  "correctedAt": "2026-08-14T14:08:17.335Z"
+}

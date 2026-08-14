@@ -1,0 +1,48 @@
+{
+  "id": "wampus",
+  "name": "Wampus",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 3,
+      "agi": 5,
+      "rea": 5,
+      "str": 7,
+      "wil": 3,
+      "log": 4,
+      "int": 3,
+      "cha": 4,
+      "ess": 3
+    },
+    "skills": "Athletics 5 (Climbing +2), Close Combat 5 (Claws +2), Con 5 (Imper- sonation +2), Outdoors 4, Perception 4, Stealth 5",
+    "powers": "Enhanced Senses (Hearing, Low-Light Vision, Smell), Influence,",
+    "description": "(Felis effingo) 174 The legend of the wampus originates from NaE tive American mythology, with various tribes havIF ing their versions of the creature's story. There are L D similar stories around the globe; a common eleIL ment to the lore is a person using a wild cat's pelt W as camouflage so they can watch a sacred ceremo: N ny. When discovered, they are condemned by the U R elders. In some traditions, the wampus is considW ered a symbol of protection or a guardian spirit, O D attempting to stop others from making a similar A H mistake, while in others it is a fearsome monster S to be avoided. Starting in 1920, various locations within the United States reported sightings of a strange catlike creature murdering local animals. Major media outlets of the time claimed to have spotted a “wampus cat” from Georgia to North Carolina. These sightings continued through the 1960s and grew in savagery, forcing locals to impose curfews and arm people to protect cattle and other livestock. It is now believed that these sightings were actually Awakened wampus, but due to the low magic of the Fifth World, they could not fully utilize their powers and only achieved a hybrid form. A wampus can be a North American bobcat, European lynx, Eurasian lynx, or African caracal with the ability to transform itself into a fully clothed adolescent metahuman. In this form, they can stand 0.8 to 1.3 meters tall and weigh 25 to 30 kilograms. They can move bipedally and have fully functioning arms and hands. Research has proven that a wampus can only maintain its bipedal form for four to six hours a day. While they frequently appear alone, they are usually associated with a group or clowder. The size of a clowder will potentially range from // five to twenty people. When alone, they like to mix in with groups of people to avoid detection, using their tiny size and innocent demeanor to their advantage. A wampus can mimic any language it hears, but it normally keeps its mimics to a few syllables. Also, a wampus possesses the ability to influence people to forget about them or to not stop them from entering a location. If a single member is attacked, the rest of the clowder will converge, often leaping from roofs or walls until they have chased off the would-be attacker. > Do these things sound like the kid things from Metaplane #844? > Lav > It is one of the reasons why I stated that we didn't believe a kinder chimera was ever a metahuman. > Dr. Grey > I think Netcat may owe someone an apology. > Slamm-0!",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_wampus",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "wild_life",
+    "page": 175,
+    "sources": [
+      {
+        "book": "wild_life",
+        "page": 175
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "wild_life",
+    "originalName": "Wampus"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

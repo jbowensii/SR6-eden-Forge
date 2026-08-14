@@ -1,0 +1,16 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "myomeric_smart_harness",
+  "changed": {
+    "meta": {
+      "flagged": "type/subtype ambiguous — needs a human decision"
+    }
+  },
+  "ref": {
+    "name": "Myomeric Smart Harness",
+    "book": "bestial_nature",
+    "page": 35
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

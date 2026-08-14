@@ -1,0 +1,15 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_ares_venture",
+  "deleted": true,
+  "ref": {
+    "name": "Ares Venture",
+    "book": "double_clutch",
+    "page": 1
+  },
+  "correctedAt": "2026-08-09T18:51:41.176Z",
+  "system": {
+    "description": ""
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "id": "plesiosaur",
+  "name": "Plesiosaur",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 12,
+      "agi": 8,
+      "rea": 7,
+      "str": 12,
+      "wil": 5,
+      "log": 5,
+      "int": 5,
+      "cha": 5,
+      "mag": 7,
+      "ess": 7
+    },
+    "skills": "Astral, Close Combat, Perception",
+    "powers": "Animal Control, Armor 7, Enhanced Senses (hearing, low-light vision, smell), Elemental Attack (Cold), Fear, Movement, Mystic Armor",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_plesiosaur",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 143,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 143
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Plesiosaur"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

@@ -1,0 +1,20 @@
+{
+  "domain": "critter_powers",
+  "category": "critter_powers",
+  "id": "cl6_compulsion",
+  "movedTo": {
+    "domain": "critter_powers",
+    "category": "critter_powers"
+  },
+  "movedFrom": {
+    "domain": "qualities",
+    "category": "qualities"
+  },
+  "why": "Commlink6 files this under critterpower",
+  "ref": {
+    "name": "Compulsion",
+    "book": "firing_squad",
+    "page": 129
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

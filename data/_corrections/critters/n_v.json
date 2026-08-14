@@ -1,0 +1,49 @@
+{
+  "id": "n_v",
+  "name": "Névé",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 4,
+      "agi": 5,
+      "rea": 6,
+      "str": 4,
+      "wil": 4,
+      "log": 4,
+      "int": 4,
+      "cha": 4,
+      "mag": 4,
+      "ess": 4
+    },
+    "skills": "Astral, Athletics (Swimming), Close Combat, Exotic Ranged Weap- on, Perception",
+    "powers": "Astral Form, Binding, Concealment, Confusion, Elemental Attack",
+    "weaknesses": "Allergy (Fire, Severe)",
+    "description": "(Water, Force 4) Névés are cousins to the firns. Their forms much softer, like a collection of freshly fallen snow. They've accepted the metahuman nickname snowmen, though there are few that will take vantage of the childhood relationship. The névé's lighter form allows them to work in the highest structures and craft extravagant details in cloud palaces for brumes.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_n_v",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 53,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 53
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Névé"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

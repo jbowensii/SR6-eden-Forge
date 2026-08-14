@@ -1,0 +1,47 @@
+{
+  "id": "bio_drone_prototype",
+  "name": "Bio-Drone Prototype",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 8,
+      "agi": 5,
+      "rea": 7,
+      "str": 5,
+      "wil": 8,
+      "log": 10,
+      "int": 2,
+      "cha": 1,
+      "ess": 3
+    },
+    "powers": "Hardened Armor 4, Enhanced Senses (Smell), Natural Weapon",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "skills": "",
+    "metatype": "",
+    "defenserating": "",
+    "initiative": "",
+    "genesisID": "cat28000_critters_bio_drone_prototype",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "body_shop",
+    "page": 166,
+    "sources": [
+      {
+        "book": "body_shop",
+        "page": 166
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "body_shop",
+    "originalName": "Bio-Drone Prototype"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

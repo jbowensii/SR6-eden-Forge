@@ -1,0 +1,19 @@
+{
+  "domain": "gear",
+  "category": "biotech",
+  "id": "demolisher_spray_kit",
+  "correctedAt": "2026-07-31T10:35:30.607Z",
+  "name": "Demolisher Spray Kit",
+  "img": "generic/biology_biotech.webp",
+  "system": {
+    "type": "BIOLOGY",
+    "avail": 6,
+    "availDef": "6(I)",
+    "price": 8500,
+    "subtype": "BIOTECH",
+    "priceDef": "",
+    "dmgDef": "",
+    "notes": ""
+  },
+  "qaStatus": "extracted"
+}

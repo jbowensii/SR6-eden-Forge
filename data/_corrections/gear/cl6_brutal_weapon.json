@@ -1,0 +1,15 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_brutal_weapon",
+  "correctedAt": "2026-08-09T11:30:51.693Z",
+  "ref": {
+    "name": "Brutal Weapon",
+    "book": "smooth_operations"
+  },
+  "changed": {
+    "system": {
+      "subtype": "FIREARMS_ACCESSORY"
+    }
+  }
+}

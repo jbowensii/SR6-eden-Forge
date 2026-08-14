@@ -1,0 +1,49 @@
+{
+  "id": "archaeopteryx",
+  "name": "Archaeopteryx",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 4,
+      "agi": 6,
+      "rea": 6,
+      "str": 8,
+      "wil": 2,
+      "log": 2,
+      "int": 2,
+      "cha": 2,
+      "mag": 4,
+      "ess": 4
+    },
+    "skills": "Astral, Close Combat, Perception",
+    "powers": "Armor 4, Confusion, Enhanced Senses (hearing, low-light vision, smell), Movement, Mystic Armor 4, Natural Weapon (Bite), Sapience,",
+    "description": "(Lizard-Birds, Force 4 Spirit of Beasts) Archaeopteryx DR",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_archaeopteryx",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 142,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 142
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Archaeopteryx"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

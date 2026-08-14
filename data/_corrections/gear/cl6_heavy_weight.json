@@ -1,0 +1,31 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_heavy_weight",
+  "correctedAt": "2026-08-03T11:31:19.841Z",
+  "name": "Heavyweight",
+  "system": {
+    "type": "ACCESSORY",
+    "subtype": "WEAPON_ACCESSORY",
+    "price": 175,
+    "priceDef": "175",
+    "avail": 3,
+    "availDef": "3",
+    "description": "Nice thing about a gun with some girth is that it never comes far off the target when you pull the trigger. It also gives you some real buff arms shooting that thing all day, but then again, if you know what you're doing, you never have to shoot for that long. \\nNote: This mod alters a weapon's AR as follows: -2/+2/+1/, /, and changes the AR modification from Burst Fire from 4 to 3 (p. 109, SR6). If a weapon has no Attack Rating in a given range category before this modification is applied, that category is not affected.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "heavy_weight",
+      "category": "weapon_modifications",
+      "book": "firing_squad",
+      "attrs": {
+        "id": "heavy_weight",
+        "avail": "3",
+        "price": "175"
+      },
+      "stats": {},
+      "page": "60"
+    }
+  },
+  "qaStatus": "extracted"
+}

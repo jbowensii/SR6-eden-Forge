@@ -1,0 +1,17 @@
+{
+  "domain": "npcs",
+  "category": "npc",
+  "id": "cl6_goon",
+  "changed": {
+    "system": {
+      "category": "GRUNT"
+    }
+  },
+  "ref": {
+    "name": "Goon",
+    "book": "corebook",
+    "page": 204
+  },
+  "correctedAt": "2026-08-13T23:36:50.517Z",
+  "why": "Commlink6 types these GRUNT, a distinct thing from NPC"
+}

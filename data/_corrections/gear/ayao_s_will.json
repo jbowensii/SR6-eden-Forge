@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "chemicals",
+  "id": "ayao_s_will",
+  "deleted": true,
+  "ref": {
+    "name": "Ayao's Will",
+    "book": "body_shop",
+    "page": 124
+  },
+  "correctedAt": "2026-08-09T18:51:40.705Z"
+}

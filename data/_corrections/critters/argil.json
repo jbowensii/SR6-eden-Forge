@@ -1,0 +1,49 @@
+{
+  "id": "argil",
+  "name": "Argil",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 6,
+      "agi": 1,
+      "rea": 1,
+      "str": 5,
+      "wil": 2,
+      "log": 1,
+      "int": 2,
+      "cha": 2,
+      "mag": 4,
+      "ess": 2
+    },
+    "skills": "Astral, Close Combat, Exotic Ranged Weapon, Perception, Sorcery",
+    "powers": "Astral Form, Binding, Guard, Innate Spell (Agony), Materializa- tion, Search",
+    "weaknesses": "Allergy (Electricity, Severe)",
+    "description": "crysthat (Earth, Force 2) Argils are small, slow-moving, snail-like creatures with an unusual geometric shell. The shell colors vary greatly from banana yellow to cherry red, depending on the terrain. Iron and mercury in the ground, for example, lead to the brightest red shells. They methodically zigzag around the ground, feeding on the lightest dust that settles around them without a care in the world. They don't have any attacks, but they do have some defense. If someone is threatening to step on it, an argil can project mental anguish as if the attacker stepped on a nail.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_argil",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 47,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 47
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Argil"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

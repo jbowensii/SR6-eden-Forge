@@ -1,0 +1,49 @@
+{
+  "id": "fear_the_dark_terrorist",
+  "name": "Fear the Dark Terrorist",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 3,
+      "agi": 5,
+      "rea": 4,
+      "str": 3,
+      "wil": 5,
+      "log": 3,
+      "int": 4,
+      "cha": 4,
+      "mag": 6,
+      "ess": 2
+    },
+    "skills": "Athletics 8, Con 4, Close Combat 7 (Unarmed Combat +2), Firearms",
+    "powers": "Dual Natured, Enhanced Senses (hearing, smell, thermographic vision), Essence Drain, Immunity (age, pathogens, toxins), Infection, Mist",
+    "weaknesses": "Allergy (sunlight, Severe), Allergy (wood, Severe), Dietary",
+    "description": "(Vampire, Professional Rating 5) 8 FtD has largely been absorbed into the Ordo, and its operatives carry out acts of violence as they always have, only now with the added caveat of additional funding and selection of targets courtesy of their Inner Circle masters. Infected supremacists, they find their beliefs fall well in line with the Ordo, but they prefer action, leaving innovation to the blue-blood eggheads of the Inner Circle. Hands-on and viciously effective, they always prefer tactics that emphasize their strengths and immunities, and they are fans of biological and chemical warfare to inflict psychological as well as physical harm. To them, collateral damage is sima sign of a job well done.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_fear_the_dark_terrorist",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "collapsing_now",
+    "page": 96,
+    "sources": [
+      {
+        "book": "collapsing_now",
+        "page": 96
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "collapsing_now",
+    "originalName": "Fear the Dark Terrorist"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

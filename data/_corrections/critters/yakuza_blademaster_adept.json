@@ -1,0 +1,31 @@
+{
+  "domain": "critters",
+  "category": "critter",
+  "id": "yakuza_blademaster_adept",
+  "correctedAt": "2026-07-30T11:59:20.270Z",
+  "name": "Yakuza Blademaster (Adept)",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 3,
+      "agi": 5,
+      "rea": 6,
+      "str": 4,
+      "wil": 5,
+      "log": 3,
+      "int": 3,
+      "cha": 2,
+      "mag": 3,
+      "ess": 2
+    },
+    "skills": "Astral 2, Athletics 4, Close Combat 5(6) (Blades +2), Outdoors 2",
+    "powers": "Astral Perception, Improved Close Combat 1, Improved Agility 1,",
+    "metatype": "",
+    "initiative": "",
+    "weaknesses": "",
+    "notes": "",
+    "defenserating": "",
+    "movement": ""
+  },
+  "qaStatus": "extracted"
+}

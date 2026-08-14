@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "clothing",
+  "id": "krime_rave_vest",
+  "deleted": true,
+  "ref": {
+    "name": "Krime Rave Vest",
+    "book": "smooth_operations",
+    "page": 118
+  },
+  "correctedAt": "2026-08-09T18:51:40.843Z"
+}

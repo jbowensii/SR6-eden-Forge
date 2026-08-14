@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "bazoo_chrome",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "CARS"
+    }
+  },
+  "ref": {
+    "name": "Bazoo Chrome",
+    "book": "krime_katalog",
+    "page": 31
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

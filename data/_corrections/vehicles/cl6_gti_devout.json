@@ -1,0 +1,62 @@
+{
+  "id": "cl6_gti_devout",
+  "name": "GTI Devout",
+  "system": {
+    "type": "VEHICLES",
+    "subtype": "GRAV",
+    "price": 23000000,
+    "priceDef": "23000000",
+    "avail": 9,
+    "availDef": "9I",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "gti_devout",
+      "category": "gear_vehicles",
+      "book": "double_clutch",
+      "attrs": {
+        "id": "gti_devout",
+        "lang": "de",
+        "avail": "9I",
+        "price": "23000000",
+        "type": "VEHICLES",
+        "subtype": "GRAV"
+      },
+      "stats": {
+        "vehicle.han": "2",
+        "vehicle.acc": "180",
+        "vehicle.spdi": "800",
+        "vehicle.tspd": "6000",
+        "vehicle.bod": "14",
+        "vehicle.arm": "14",
+        "vehicle.pil": "5",
+        "vehicle.sen": "4",
+        "vehicle.sea": "2"
+      },
+      "page": "78"
+    },
+    "genesisID": "gti_devout",
+    "handling": "2",
+    "accel": "180",
+    "speedInterval": "800",
+    "topSpeed": "6,000",
+    "body": "14",
+    "armor": "14",
+    "pilot": "5",
+    "sensor": "4",
+    "seats": "2",
+    "availability": "9"
+  },
+  "meta": {
+    "book": "double_clutch",
+    "page": 78,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-11",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "gti_devotee_mk_1_p078_x1184.webp",
+  "domain": "vehicles",
+  "category": "vehicles",
+  "correctedAt": "2026-08-11T14:26:56.000Z"
+}

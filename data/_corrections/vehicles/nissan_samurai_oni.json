@@ -1,0 +1,36 @@
+{
+  "id": "nissan_samurai_oni",
+  "name": "Nissan Samurai/Oni",
+  "system": {
+    "type": "DRONE",
+    "subtype": "MEDIUM_DRONE",
+    "handling": "3/4",
+    "accel": "10",
+    "speedInterval": "10/8",
+    "topSpeed": "30",
+    "body": "6/9",
+    "armor": "6/10",
+    "pilot": "3",
+    "sensor": "2",
+    "seats": "—",
+    "availability": "2",
+    "price": "4,500/ 6,700"
+  },
+  "meta": {
+    "book": "corebook",
+    "page": 303,
+    "sources": [
+      {
+        "book": "corebook",
+        "page": 303
+      }
+    ],
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "corebook"
+  },
+  "domain": "vehicles",
+  "category": "vehicles",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

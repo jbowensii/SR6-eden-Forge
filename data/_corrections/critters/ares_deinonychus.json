@@ -1,0 +1,47 @@
+{
+  "id": "ares_deinonychus",
+  "name": "Ares Deinonychus",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 8,
+      "agi": 5,
+      "rea": 5,
+      "str": 8,
+      "wil": 2,
+      "log": 1,
+      "int": 3,
+      "cha": 2,
+      "ess": 6
+    },
+    "skills": "Athletics 7, Close Combat 7, Influence 2 (Intimidation +2), Outdoors",
+    "powers": "Hardened Armor 4, Enhanced Senses (Smell), Natural Weapon",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_ares_deinonychus",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "body_shop",
+    "page": 166,
+    "sources": [
+      {
+        "book": "body_shop",
+        "page": 166
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "body_shop",
+    "originalName": "Ares Deinonychus"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

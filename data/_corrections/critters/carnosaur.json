@@ -1,0 +1,48 @@
+{
+  "id": "carnosaur",
+  "name": "Carnosaur",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 16,
+      "agi": 10,
+      "rea": 10,
+      "str": 16,
+      "wil": 8,
+      "log": 8,
+      "int": 8,
+      "cha": 8,
+      "mag": 10,
+      "ess": 10
+    },
+    "skills": "Astral, Close Combat, Perception",
+    "powers": "Animal Control, Armor 10, Enhanced Senses (hearing, low-light,vi- sion, smell), Engulf (Earth), Fear, Materialization, Mystic Armor 10, Natural",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_carnosaur",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 144,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 144
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Carnosaur"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

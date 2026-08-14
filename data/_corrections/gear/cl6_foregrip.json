@@ -1,0 +1,31 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_foregrip",
+  "correctedAt": "2026-08-03T11:30:57.996Z",
+  "name": "Foregrip",
+  "system": {
+    "type": "ACCESSORY",
+    "subtype": "WEAPON_ACCESSORY",
+    "price": 250,
+    "priceDef": "250",
+    "avail": 2,
+    "availDef": "2",
+    "description": "The simple installation of a grip along the barrel is such a game-changer across so many aspects of modern warfare. Sweeps and turns are quicker, grip and control are stronger, and recoil is easier to keep in check. A simple tool with so many versatile supports. \\nNote: The mod alters the Attack Rating as follows: +1/+2/+1/, /, and reduces the AR penalty for Burst Fire by 1. If a weapon has no Attack Rating in a given range category before this modification is applied, that category is not affected.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "foregrip",
+      "category": "weapon_modifications",
+      "book": "firing_squad",
+      "attrs": {
+        "id": "foregrip",
+        "avail": "2",
+        "price": "250"
+      },
+      "stats": {},
+      "page": "59"
+    }
+  },
+  "qaStatus": "extracted"
+}

@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "vehicles",
+  "id": "thundercloud_morgan_v1",
+  "deleted": true,
+  "ref": {
+    "name": "Thundercloud Morgan V1",
+    "book": "double_clutch",
+    "page": 43
+  },
+  "correctedAt": "2026-08-13T00:42:05.563Z"
+}

@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "bell_wolfhound_northrup_wasp_speed",
+  "changed": {
+    "meta": {
+      "flagged": "vehicle type/subtype not merged yet"
+    }
+  },
+  "ref": {
+    "name": "Bell Wolfhound Northrup Wasp SPEED",
+    "book": "corebook",
+    "page": 303
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

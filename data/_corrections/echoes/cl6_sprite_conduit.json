@@ -1,0 +1,16 @@
+{
+  "domain": "echoes",
+  "category": "echoes",
+  "id": "cl6_sprite_conduit",
+  "changed": {
+    "system": {
+      "category": "ECHO"
+    }
+  },
+  "ref": {
+    "name": "Sprite Conduit",
+    "book": "hack_slash",
+    "page": 69
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

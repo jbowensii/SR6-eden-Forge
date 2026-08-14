@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "bondsman",
+  "changed": {
+    "meta": {
+      "flagged": "subtype is my guess — please confirm"
+    }
+  },
+  "ref": {
+    "name": "Bondsman",
+    "book": "deadly_arts",
+    "page": 135
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

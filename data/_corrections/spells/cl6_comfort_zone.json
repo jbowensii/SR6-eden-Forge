@@ -1,0 +1,54 @@
+{
+  "id": "cl6_comfort_zone",
+  "name": "Comfort Zone",
+  "system": {
+    "type": "PHYSICAL",
+    "subtype": "",
+    "price": 0,
+    "priceDef": "",
+    "avail": 0,
+    "availDef": "",
+    "description": "Want to slow down pursuers, or cause chaos on the street? This spell specifically targets rubber, pulling apart tires and making cars more difficult to control. When casting, target a specific tire and make a Sorcery + Magic (3) test. A successful test ruptures the tire; either the driver has to pull over or drive on a ruined wheel, which reduces the Acceleration by 1, the Speed Interval by 5, and the Top Speed by 10. Additionally, each net hit increases the the Handling of the targeted vehicle by 1. If the original Handling is doubled or more, the vehicle must immediately make a Handling test to avoid crashing.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "comfort_zone",
+      "category": "spells",
+      "book": "street_wyrd",
+      "attrs": {
+        "id": "comfort_zone",
+        "cat": "HEALTH",
+        "range": "TOUCH",
+        "type": "PHYSICAL",
+        "dur": "SUSTAINED",
+        "drain": "6"
+      },
+      "stats": {},
+      "page": "52"
+    },
+    "category": "HEALTH",
+    "range": "TOUCH",
+    "duration": "SUSTAINED",
+    "drain": 6,
+    "damage": "",
+    "genesisID": "comfort_zone"
+  },
+  "meta": {
+    "book": "street_wyrd",
+    "page": 52,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0",
+    "sources": [
+      {
+        "book": "street_wyrd",
+        "page": 52
+      }
+    ]
+  },
+  "img": "comfort_zone_p052_x614.webp",
+  "domain": "spells",
+  "category": "spells",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

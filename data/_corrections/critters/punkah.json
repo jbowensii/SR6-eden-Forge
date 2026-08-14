@@ -1,0 +1,49 @@
+{
+  "id": "punkah",
+  "name": "Punkah",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 2,
+      "agi": 7,
+      "rea": 8,
+      "str": 1,
+      "wil": 4,
+      "log": 4,
+      "int": 4,
+      "cha": 4,
+      "mag": 4,
+      "ess": 4
+    },
+    "skills": "Astral, Athletics, Close Combat, Exotic Ranged Weapon, Perception,",
+    "powers": "Astral Form, Concealment, Confusion, Materialization, Move- ment, Psychokinesis, Sapience, Search, Silence",
+    "weaknesses": "Allergy (Inhalation vector toxins, Severe)",
+    "description": "(Air, Force 4) A punkah resembles a humanoid cloud formation, slowly shifting within their shape. Their are heads can be shaped like a rabbit, a lion, or even an elephant's head. Most punkahs are servants at of the palace and are familiar with cleaning and oradganizing a household. They mostly float around quietly, getting things done without being seen or becoming a nuisance to those around them.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_punkah",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 53,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 53
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Punkah"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

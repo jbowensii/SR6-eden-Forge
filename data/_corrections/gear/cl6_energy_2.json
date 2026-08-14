@@ -1,0 +1,11 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_energy_2",
+  "deleted": true,
+  "ref": {
+    "name": "Uses 2 Energy per shot",
+    "book": "deadly_arts"
+  },
+  "correctedAt": "2026-08-09T11:37:35.268Z"
+}

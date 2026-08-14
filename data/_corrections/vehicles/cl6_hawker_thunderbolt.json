@@ -1,0 +1,62 @@
+{
+  "id": "cl6_hawker_thunderbolt",
+  "name": "Hawker-Siddley Thunderbolt",
+  "system": {
+    "type": "DRONE_LARGE",
+    "subtype": "AIR",
+    "price": 85000,
+    "priceDef": "85000",
+    "avail": 6,
+    "availDef": "6I",
+    "description": "Hover flight: Handling 5. Secondary wings are designed to mount up to one heavy weapon or two missiles/rockets.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "hawker_thunderbolt",
+      "category": "gear_drones",
+      "book": "double_clutch",
+      "attrs": {
+        "id": "hawker_thunderbolt",
+        "lang": "de",
+        "avail": "6I",
+        "price": "85000",
+        "type": "DRONE_LARGE",
+        "subtype": "AIR"
+      },
+      "stats": {
+        "vehicle.han": "4",
+        "vehicle.acc": "20",
+        "vehicle.spdi": "30",
+        "vehicle.tspd": "210",
+        "vehicle.bod": "20",
+        "vehicle.arm": "15",
+        "vehicle.pil": "5",
+        "vehicle.sen": "6"
+      },
+      "page": "111"
+    },
+    "genesisID": "hawker_thunderbolt",
+    "handling": "4/5*",
+    "accel": "20",
+    "speedInterval": "30",
+    "topSpeed": "210",
+    "body": "20",
+    "armor": "15",
+    "pilot": "5",
+    "sensor": "6",
+    "seats": "—",
+    "availability": "6"
+  },
+  "meta": {
+    "book": "double_clutch",
+    "page": 111,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "hawker_siddley_thunderbolt_p112_x1319.webp",
+  "domain": "vehicles",
+  "category": "vehicles",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

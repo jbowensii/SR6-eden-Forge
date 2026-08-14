@@ -1,0 +1,47 @@
+{
+  "id": "the_corrupted",
+  "name": "The Corrupted",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 3,
+      "agi": 2,
+      "rea": 2,
+      "str": 2,
+      "wil": 1,
+      "log": 1,
+      "int": 3,
+      "cha": 1,
+      "ess": 6
+    },
+    "powers": "Mindless Drive (metahuman flesh)",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "skills": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_the_corrupted",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "30_nights",
+    "page": 128,
+    "sources": [
+      {
+        "book": "30_nights",
+        "page": 128
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "30_nights",
+    "originalName": "The Corrupted"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

@@ -1,0 +1,17 @@
+{
+  "domain": "spells",
+  "category": "combat",
+  "id": "stunball_sleep",
+  "changed": {
+    "system": {
+      "category": "COMBAT",
+      "type": "MANA"
+    }
+  },
+  "ref": {
+    "name": "Stunball/Sleep",
+    "book": "street_wyrd",
+    "page": 26
+  },
+  "correctedAt": "2026-08-13T19:00:34.879Z"
+}

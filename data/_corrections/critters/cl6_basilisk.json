@@ -1,0 +1,49 @@
+{
+  "domain": "critters",
+  "category": "critter",
+  "id": "cl6_basilisk",
+  "correctedAt": "2026-07-30T11:50:50.743Z",
+  "name": "Basilisk",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 6,
+      "agi": 2,
+      "rea": 3,
+      "str": 6,
+      "wil": 4,
+      "log": 1,
+      "int": 3,
+      "cha": 1,
+      "mag": 4,
+      "ess": 6
+    },
+    "metatype": "",
+    "rating": 0,
+    "initiative": "",
+    "defenserating": "",
+    "description": "A metaspecies of the komodo dragon, the ilisk averages approximately 2.6 meters from snout to the tip of its tail, and it weighs around 100 kilograms. They stand about 50 centimeters at the shoulder, are somewhat broader than progenitor, and have a spiny dorsal fan, about thirty centimeters in height at its tallest point, running most of their length. Their scales heavy. Usual coloration is black and bright low, with a solid black snout and tail tip. Their maws are filled with sharp, saw-edged teeth that are constantly replaced as they're lost. Not surprisingly, they're aggressively carnivorous, typically feeding on fish and small mammals. They cheerfully glut themselves on anything they can catch, up to and including metahumans. Extremely territorial, they are relatively easy to train and are used extensively as guard animals by a number of megacorps throughout the Sixth World but usually cannot be prevented from eating things they kill. Natural Habitat/Range: Native to Indonesia, basilisks can now be found in temperate and tropical woodlands worldwide thanks to corporate escapes and ridiculous attempts to make them pets. They are powerful swimmers, so their natural lairs are always near running water.",
+    "notes": "",
+    "monitor": {
+      "physical": 0,
+      "stun": 0,
+      "overflow": 6,
+      "edge": 0
+    },
+    "movement": {
+      "walk": "",
+      "sprint": "",
+      "perHit": "",
+      "notes": ""
+    },
+    "powers": "Armor 7, Natural Weapon, Petrification",
+    "skills": "Athletics 5 (Swimming +2), Close Combat 6, Perception 4, Stealth 3,",
+    "weaknesses": "Vulnerability (Own Gaze)"
+  },
+  "qaStatus": "extracted",
+  "gapsOnly": true,
+  "ref": {
+    "name": "Basilisk",
+    "wasId": "basilisk"
+  }
+}

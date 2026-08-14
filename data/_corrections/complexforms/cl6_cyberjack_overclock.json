@@ -1,0 +1,16 @@
+{
+  "domain": "complexforms",
+  "category": "complexforms",
+  "id": "cl6_cyberjack_overclock",
+  "changed": {
+    "system": {
+      "category": "COMPLEX_FORM"
+    }
+  },
+  "ref": {
+    "name": "Cyberjack Overclock",
+    "book": "hack_slash",
+    "page": 63
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

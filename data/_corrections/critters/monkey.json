@@ -1,0 +1,47 @@
+{
+  "id": "monkey",
+  "name": "Monkey",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 2,
+      "agi": 4,
+      "rea": 3,
+      "str": 1,
+      "wil": 2,
+      "log": 2,
+      "int": 4,
+      "cha": 3,
+      "ess": 6
+    },
+    "skills": "Athletics 6 (Flying +2), Close Combat 4 (Grappling +2), Outdoors 4,",
+    "powers": "Armor 1, Enhanced Senses (Vision enhancement, vision magnifi- cation), Natural Weapon",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_monkey",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "body_shop",
+    "page": 158,
+    "sources": [
+      {
+        "book": "body_shop",
+        "page": 158
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "body_shop",
+    "originalName": "Monkey"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

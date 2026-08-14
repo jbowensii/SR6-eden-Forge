@@ -1,0 +1,61 @@
+{
+  "id": "cl6_lurssen_mobius",
+  "name": "Lurssen Mobius",
+  "system": {
+    "type": "VEHICLES",
+    "subtype": "SHIPS",
+    "price": 400000000,
+    "priceDef": "400000000",
+    "avail": 9,
+    "availDef": "9",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "lurssen_mobius",
+      "category": "gear_vehicles",
+      "book": "double_clutch",
+      "attrs": {
+        "id": "lurssen_mobius",
+        "avail": "9",
+        "price": "400000000",
+        "type": "VEHICLES",
+        "subtype": "SHIPS"
+      },
+      "stats": {
+        "vehicle.han": "4",
+        "vehicle.acc": "10",
+        "vehicle.spdi": "10",
+        "vehicle.tspd": "50",
+        "vehicle.bod": "36",
+        "vehicle.arm": "14",
+        "vehicle.pil": "6",
+        "vehicle.sen": "5",
+        "vehicle.sea": "22"
+      },
+      "page": "56"
+    },
+    "genesisID": "lurssen_mobius",
+    "handling": "4",
+    "accel": "10",
+    "speedInterval": "10",
+    "topSpeed": "50",
+    "body": "36",
+    "armor": "14",
+    "pilot": "6",
+    "sensor": "5",
+    "seats": "22",
+    "availability": "9"
+  },
+  "meta": {
+    "book": "double_clutch",
+    "page": 56,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-11",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "p056_x1072.webp",
+  "domain": "vehicles",
+  "category": "vehicles",
+  "correctedAt": "2026-08-11T14:26:56.000Z"
+}

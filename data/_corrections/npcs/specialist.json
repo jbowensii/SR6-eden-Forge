@@ -1,0 +1,70 @@
+{
+  "id": "specialist",
+  "name": "Specialist",
+  "system": {
+    "category": "NPC",
+    "metatype": "elf",
+    "attributes": {
+      "bod": 3,
+      "agi": 5,
+      "rea": 4,
+      "str": 2,
+      "wil": 4,
+      "log": 3,
+      "int": 5,
+      "cha": 7,
+      "edg": 3,
+      "ess": 2.85
+    },
+    "initiative": "9(11) + 3D6/1 Major, 4 Minor",
+    "conditionMonitors": "Condition Monitors (P/S): 10/10",
+    "defenseRating": "5",
+    "activeSkills": "Athletics 2 (Sprinting +2), Close Combat 2 (Unarmed",
+    "knowledgeSkills": "Seattle Johnsons, Seattle Downtown Geography,",
+    "languages": "English (Native)",
+    "qualities": "Addiction (nic-stick, Level 3), Aptitude (Stealth), Blandness,",
+    "contacts": "Beat Cop (C2/L4), Corporate Secretary (C3/L3), Fixer (C6/L4),",
+    "lifestyle": "Middle (1 month prepaid)",
+    "augmentations": "Cyberhand (obvious left, w/ shock hand), datajack, image link, muscle toner 1, reaction enhancer 1, smartlink, wired reflexes 2",
+    "gear": "Actioneer Business clothes, area jammer (rating 6), autopicker",
+    "nuyen": "3,155¥",
+    "weapons": "",
+    "powers": "",
+    "adeptPowers": "",
+    "spells": "",
+    "complexForms": "",
+    "cyberware": "",
+    "genesisID": "cat28000_npcs_specialist",
+    "defenserating": "",
+    "notes": "",
+    "type": "NPC",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "corebook_berlin",
+    "page": 84,
+    "sources": [
+      {
+        "book": "corebook_berlin",
+        "page": 84
+      },
+      {
+        "book": "corebook_hongkong",
+        "page": 84
+      },
+      {
+        "book": "corebook",
+        "page": 84
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "corebook_berlin",
+    "originalName": "Specialist"
+  },
+  "img": "specialist_p084_x419.webp",
+  "domain": "npcs",
+  "category": "npc",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

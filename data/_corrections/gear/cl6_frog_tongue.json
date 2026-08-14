@@ -1,0 +1,20 @@
+{
+  "domain": "gear",
+  "category": "bioware",
+  "id": "cl6_frog_tongue",
+  "movedTo": {
+    "domain": "gear",
+    "category": "bioware"
+  },
+  "movedFrom": {
+    "domain": "qualities",
+    "category": "qualities"
+  },
+  "why": "Commlink6 files this under gear_bioware",
+  "ref": {
+    "name": "Frog Tongue",
+    "book": "companion",
+    "page": 124
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

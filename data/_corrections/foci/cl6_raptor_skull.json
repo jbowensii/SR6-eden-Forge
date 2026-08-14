@@ -1,0 +1,16 @@
+{
+  "domain": "foci",
+  "category": "foci",
+  "id": "cl6_raptor_skull",
+  "changed": {
+    "system": {
+      "category": "FOCUS"
+    }
+  },
+  "ref": {
+    "name": "Raptor Skull",
+    "book": "astral_ways",
+    "page": 139
+  },
+  "correctedAt": "2026-08-14T14:08:17.335Z"
+}

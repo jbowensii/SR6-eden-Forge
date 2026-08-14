@@ -1,0 +1,47 @@
+{
+  "id": "new",
+  "name": "New",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 15,
+      "agi": 3,
+      "rea": 2,
+      "str": 16,
+      "wil": 6,
+      "log": 2,
+      "int": 3,
+      "cha": 1,
+      "ess": 6
+    },
+    "skills": "Athletics 5, Close Combat 8, Perception 4, Stealth 4",
+    "powers": "Natural Weapon (Bite)",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_new",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "shadows_new_orleans",
+    "page": 26,
+    "sources": [
+      {
+        "book": "shadows_new_orleans",
+        "page": 26
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "shadows_new_orleans",
+    "originalName": "New"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

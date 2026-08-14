@@ -1,0 +1,62 @@
+{
+  "id": "cl6_proteus_devil_ray",
+  "name": "Proteus Devil Ray",
+  "system": {
+    "type": "DRONE_MEDIUM",
+    "subtype": "AQUATIC",
+    "price": 7500,
+    "priceDef": "7500",
+    "avail": 2,
+    "availDef": "2L",
+    "description": "These are not actual seats, but rather grab bars divers can hold and useto ride the drone underwater.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "proteus_devil_ray",
+      "category": "gear_drones",
+      "book": "double_clutch",
+      "attrs": {
+        "id": "proteus_devil_ray",
+        "lang": "de",
+        "avail": "2L",
+        "price": "7500",
+        "type": "DRONE_MEDIUM",
+        "subtype": "AQUATIC"
+      },
+      "stats": {
+        "vehicle.han": "4",
+        "vehicle.acc": "20",
+        "vehicle.spdi": "30",
+        "vehicle.tspd": "100",
+        "vehicle.bod": "8",
+        "vehicle.arm": "10",
+        "vehicle.pil": "2",
+        "vehicle.sen": "3"
+      },
+      "page": "113"
+    },
+    "genesisID": "proteus_devil_ray",
+    "handling": "4",
+    "accel": "20",
+    "speedInterval": "30",
+    "topSpeed": "100",
+    "body": "8",
+    "armor": "10",
+    "pilot": "2",
+    "sensor": "3",
+    "seats": "2*",
+    "availability": "2"
+  },
+  "meta": {
+    "book": "double_clutch",
+    "page": 113,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "proteus_devil_ray_p115_x1332.webp",
+  "domain": "vehicles",
+  "category": "vehicles",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

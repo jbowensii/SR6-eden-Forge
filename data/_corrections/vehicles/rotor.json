@@ -1,0 +1,23 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "rotor",
+  "correctedAt": "2026-07-30T12:07:33.097Z",
+  "name": "Rotor",
+  "system": {
+    "type": "VEHICLE",
+    "subtype": "VEHICLE",
+    "handling": "5/7",
+    "accel": "4",
+    "speedInterval": "10",
+    "topSpeed": "80",
+    "body": "2",
+    "armor": "0",
+    "pilot": "1",
+    "sensor": "0",
+    "seats": "2",
+    "availability": "2",
+    "price": "3,000"
+  },
+  "qaStatus": "extracted"
+}

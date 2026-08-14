@@ -1,0 +1,49 @@
+{
+  "id": "empyrean",
+  "name": "Empyrean",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 5,
+      "agi": 6,
+      "rea": 7,
+      "str": 2,
+      "wil": 4,
+      "log": 4,
+      "int": 5,
+      "cha": 4,
+      "mag": 4,
+      "ess": 4
+    },
+    "skills": "Astral, Athletics, Close Combat, Exotic Ranged Weapon, Influence,",
+    "powers": "Accident, Astral Form, Confusion, Elemental Attack (Fire), Energy",
+    "weaknesses": "Allergy (Cold, Severe), Allergy (Inhalation vector toxins,",
+    "description": "(Fire, Force 4) If ardors are considered rural hippies, then the empyrean are urban goths. Their appearance is less humanoid, with torsos and legs replaced by a conflagrant cyclone. Their faces are a rapid flickering were of light on smoke, creating a projected expression that metahumans can relate to. While the greater emperor wears the crown, many royal empyreans look for tall or extravagant headwear as they wait their turn.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_empyrean",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 50,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 50
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Empyrean"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

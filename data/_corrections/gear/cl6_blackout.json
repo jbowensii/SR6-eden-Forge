@@ -1,0 +1,20 @@
+{
+  "domain": "gear",
+  "category": "software",
+  "id": "cl6_blackout",
+  "movedTo": {
+    "domain": "gear",
+    "category": "software"
+  },
+  "movedFrom": {
+    "domain": "spells",
+    "category": "spells"
+  },
+  "why": "Commlink6 files this under gear_software",
+  "ref": {
+    "name": "Blackout",
+    "book": "smooth_operations",
+    "page": 108
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

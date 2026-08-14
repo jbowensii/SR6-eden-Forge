@@ -1,0 +1,49 @@
+{
+  "id": "torpedo_shark",
+  "name": "Torpedo Shark",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 8,
+      "agi": 5,
+      "rea": 4,
+      "str": 9,
+      "wil": 3,
+      "log": 1,
+      "int": 3,
+      "cha": 1,
+      "mag": 4,
+      "ess": 6
+    },
+    "skills": "Athletics 4, Close Combat 4 (Brow Ridge +2), Outdoors 2, Percep- tion 5, Stealth 1",
+    "powers": "Armor 5, Enhanced Senses (Smell), Natural Weapon (Brow Ridge)",
+    "description": "The torpedo shark ( Portheus velocis ) is the Awakened variant of the blue shark that can be found in the tropical and subtropical waters of the Pacific Ocean at depths no greater than 150 meters. It grows to five meters long and up to 1,000 kilograms. Its domed head is heavily armored by bony calcifications that give the shark a torpedo-like appearance. The shark's eyes and jaw are set behind and protected by the large brow ridge. A torpedo shark is also unusual in its lack 157 a dorsal fin. Coloration can vary from black to pale blue-grey. S Torpedo sharks are solitary predators that hunt H A wide variety of prey, mainly small squid and fish. D brow ridge, however, is suited for tackling O W much larger prey. They also are able to move their R to stimulate the flow of water over their gills U N thus do not have to remain in motion in order : W breathe. I IL Like all sharks, the torpedo shark is drawn to D noscent of blood in the water, able to detect a L IF drops from kilometers away. Upon arrival at E source of the blood, the presence or absence other predators in the area, especially other breeds of shark, determines the torpedo shark's actions. If there are large predators present, torpedo shark will often rapidly swim to its maximum speed and use its bony brow ridge to an opponent. In this manner, another predsuddenly becomes its prey. If no other predare present, the torpedo shark will devour smaller prey or use its ramming attack to finish larger prey animals. Another torpedo shark is about the only predator that they will not attack. There are many reported instances of torpedo sharks mistaking small boats as predators and badly damaging them by ramming. torpedo shark DR I/ID AC CM M 13 7/2 A1,I 3 12 20/25/+3 Weapons: Brow Ridge [Close Combat, DV 5P, 13/—/—/—/—] // OCEANS, SEAS, AND LAKES",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_torpedo_shark",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "wild_life",
+    "page": 158,
+    "sources": [
+      {
+        "book": "wild_life",
+        "page": 158
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "wild_life",
+    "originalName": "Torpedo Shark"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

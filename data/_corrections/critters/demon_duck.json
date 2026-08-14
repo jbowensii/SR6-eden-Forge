@@ -1,0 +1,48 @@
+{
+  "id": "demon_duck",
+  "name": "Demon Duck",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 6,
+      "agi": 4,
+      "rea": 3,
+      "str": 7,
+      "wil": 2,
+      "log": 1,
+      "int": 3,
+      "cha": 2,
+      "ess": 6
+    },
+    "skills": "Athletics 2, Close Combat 3, Outdoors 3, Perception 5, Stealth 4",
+    "powers": "Natural Weapon (beak, claws)",
+    "description": "the Unlike the terror bird, the mihirun (or demon duck, Genyornis australis ) is a naturally occurring bird in Australia. Just like the terror bird, it is large, ered powerful, and terrifying. While it's a herbivore, the by territorial nature of the bird puts it on par with ed geese and swans. These creatures can be found in grasslands. The basic structure of the bird differs heav25 from ostriches or emus. They have extremely stocky and strong legs, making them fast but not S agile. It has wings, but these are too small to be H A in flight and are used instead to help with D balance. The demon duck stands nearly three me- O W tall and weighs eighty kilograms. Its massive R weighs nearly five kilograms by itself and U N hardened edges it uses to crack open nuts and : W shells. The plumage of the demon duck is striped IL patterns of brown and black, while its head is cov- D in iridescent green. Its beak is typically yellow L IF orange in coloration. E The demon duck is an herbivore, and the majority of its diet consists of tough, woody vegetaand hard seeds. Due to the size of the bird and quality of its diet, it is grazing on food nearly day. While the animal is normally aggressive against any large creature entering into its territory, behavior is much stronger while nesting in the springtime near September, when it has eggs. After chicks hatch, the mother remains to guard the chicks for the next six months before wandering to let the chicks fend for itself. The birds are typically solitary in nature, but many will exist over a set range. Probably the best to describe the behavior is that they are social do not really operate as a flock.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_demon_duck",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "wild_life",
+    "page": 26,
+    "sources": [
+      {
+        "book": "wild_life",
+        "page": 26
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "wild_life",
+    "originalName": "Demon Duck"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

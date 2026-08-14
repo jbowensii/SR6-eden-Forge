@@ -1,0 +1,16 @@
+{
+  "domain": "complexforms",
+  "category": "complexforms",
+  "id": "cl6_control_virtual_life",
+  "changed": {
+    "system": {
+      "category": "COMPLEX_FORM"
+    }
+  },
+  "ref": {
+    "name": "Control Virtual Life",
+    "book": "hack_slash",
+    "page": 131
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

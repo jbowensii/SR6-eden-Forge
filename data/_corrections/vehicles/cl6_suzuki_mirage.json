@@ -1,0 +1,15 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_suzuki_mirage",
+  "deleted": true,
+  "ref": {
+    "name": "Suzuki Mirage",
+    "book": "corebook",
+    "page": 295
+  },
+  "correctedAt": "2026-08-09T18:51:41.412Z",
+  "system": {
+    "description": ""
+  }
+}

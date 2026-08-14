@@ -1,0 +1,48 @@
+{
+  "id": "lusitano_pegasus",
+  "name": "Lusitano Pegasus",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 8,
+      "agi": 2,
+      "rea": 6,
+      "str": 8,
+      "wil": 4,
+      "log": 7,
+      "int": 3,
+      "cha": 2,
+      "ess": 5
+    },
+    "skills": "Athletics 7(10), Close Combat 1, Perception 3",
+    "powers": "Armor 1, Enhanced Senses (Hearing), Natural Weapon",
+    "description": "A cybernetic version of the Lusitano Melhor is equipped with an exoframe and glider wings and is this capable of carrying a rider into the skies.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_lusitano_pegasus",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "body_shop",
+    "page": 164,
+    "sources": [
+      {
+        "book": "body_shop",
+        "page": 164
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "body_shop",
+    "originalName": "Lusitano Pegasus"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

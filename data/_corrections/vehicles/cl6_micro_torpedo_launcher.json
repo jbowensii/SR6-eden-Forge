@@ -1,0 +1,20 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_micro_torpedo_launcher",
+  "movedTo": {
+    "domain": "vehicles",
+    "category": "vehicles"
+  },
+  "movedFrom": {
+    "domain": "gear",
+    "category": "weapons_special"
+  },
+  "why": "Commlink6 files this under gear_vehicle_accessories",
+  "ref": {
+    "name": "Micro Launcher",
+    "book": "double_clutch",
+    "page": 113
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

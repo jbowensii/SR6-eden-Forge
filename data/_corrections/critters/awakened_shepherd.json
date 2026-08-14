@@ -1,0 +1,48 @@
+{
+  "id": "awakened_shepherd",
+  "name": "Awakened Shepherd",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 3,
+      "agi": 2,
+      "rea": 3,
+      "str": 2,
+      "wil": 2,
+      "log": 3,
+      "int": 3,
+      "cha": 3,
+      "ess": 6
+    },
+    "skills": "Astral 4 (Astral Signatures +2), Athletics 5, Close Combat 4, Influ- er ence 2 (Intimidation +2), Outdoors 6, Perception 6 (Smell +2)",
+    "powers": "Armor 1, Dual Natured, Enhanced Senses (Hearing, Smell), Mystic",
+    "description": "(Canis lupis familiaris protego) Awakened shepherds are a dog breed descended from German shepherds, which originated in Germany in the late 1800s. German shepherds were to initially developed as herding dogs, but they have ter. gained popularity over time due to their intelli- they gence, devotion, and flexibility. Awakened shepherds are medium- to large- out sized dogs that measure 0.5 meters in height at the for shoulder and weigh twenty-two to forty-one kilograms. They are distinguished by their characteristic black-and-tan coloration, but other hues, such as sable and pure black, are also popular. Awakened shepherds are extremely clever and trainable animals that are frequently employed as gram police dogs, search and rescue dogs, and service dogs for persons with disabilities. They are especial- into ly popular as household pets, since they are devoted. Awakened shepherds require a lot of exercise and mental stimulation and can become destruc- a tive if they are not given enough attention. These animals retain the character that has made German shepherds a popular breed, and it is rare to see Awakened shepherds in the wild. The easiest way to tell the difference between an Awakened as shepherd and a mundane one is when they go on alert, because there will be a drop in the ambient temperature, and its tracks will have rime ice. man This varies depending on the creature, but there is a disadvantage in that even if the threat is non-magical, there will still be a drop in ambi- with ent temperature and rime ice tracks. Many orga- for nizations that do not have highly trained security and use Awakened shepherds, because a glowing dog is harder for a person to ignore, so they are still highly sought after. es, awakened shepherd es. DR I/ID AC CM MOVE are 4 6/1 A1,I 2 10 10/15/+1 as Armor 1, Natural Weapon (Bite) will Weapons: see Bite [Close Combat, DV 1P, 5/—/—/—/—] that Note: Anyone attempting to notice the Awakened shepherd while it is on alert will receive a point of situational Edge. get, of",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_awakened_shepherd",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "wild_life",
+    "page": 166,
+    "sources": [
+      {
+        "book": "wild_life",
+        "page": 166
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "wild_life",
+    "originalName": "Awakened Shepherd"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

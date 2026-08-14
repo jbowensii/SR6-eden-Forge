@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "chemicals",
+  "id": "pixie_dust",
+  "deleted": true,
+  "ref": {
+    "name": "Pixie Dust",
+    "book": "body_shop",
+    "page": 124
+  },
+  "correctedAt": "2026-08-09T18:51:40.914Z"
+}

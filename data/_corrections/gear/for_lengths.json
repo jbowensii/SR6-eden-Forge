@@ -1,0 +1,16 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "for_lengths",
+  "changed": {
+    "meta": {
+      "flagged": "looks like page furniture, not an item — delete?"
+    }
+  },
+  "ref": {
+    "name": "For Lengths",
+    "book": "deadly_arts",
+    "page": 48
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

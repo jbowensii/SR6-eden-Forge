@@ -1,0 +1,15 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_ares_packmule",
+  "deleted": true,
+  "ref": {
+    "name": "Ares Packmule",
+    "book": "corebook",
+    "page": 301
+  },
+  "correctedAt": "2026-08-09T18:51:41.168Z",
+  "system": {
+    "description": ""
+  }
+}

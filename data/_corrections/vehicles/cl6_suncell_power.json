@@ -1,0 +1,12 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_suncell_power",
+  "deleted": true,
+  "ref": {
+    "name": "Suncell",
+    "book": "double_clutch",
+    "page": 135
+  },
+  "correctedAt": "2026-08-09T18:51:41.404Z"
+}

@@ -1,0 +1,70 @@
+{
+  "id": "cl6_ynt_colossus",
+  "name": "YNT Colossus",
+  "system": {
+    "type": "WEAPON_FIREARMS",
+    "subtype": "ASSAULT_CANNON",
+    "price": 31000,
+    "priceDef": "31000",
+    "avail": 9,
+    "availDef": "9I",
+    "description": "When the Nashorn was announced, those of who keep a close eye on the firearms industry shocked at the idea of a man-portable coilgun. they won’t miniaturize the chemrail any time soon, we all said to each other. Three months later, jaws dropped. The Colossus is a huge shoulder-fired chemrail, designed as a crew-served weapon. Because it is a big tube a little over 2 meters long, the first time saw one I assumed it was a new man-portable rocket launcher. But on closer inspection, I noticed the rear 1.2 meters of the tube is 50 percent larger diameter than the front portion, and half a meter from the rear is the huge half-meter-diameter drum magazine for this thing! Thankfully there is a grip to help hold on to the damn thing. As a chemrail, the Colossus fires a penetrator that has an initial powder charge and accelerates it using a normal railgun. However, YNT has gone one step further and included forward-projecting ionized gas cloud that has effect of extending the length of the rails without physically extending the barrel.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "ynt_colossus",
+      "category": "gear_firearms",
+      "book": "deadly_arts",
+      "attrs": {
+        "id": "ynt_colossus",
+        "avail": "9I",
+        "price": "31000",
+        "type": "WEAPON_FIREARMS",
+        "subtype": "ASSAULT_CANNON"
+      },
+      "stats": {
+        "weapon.dmg": "9P",
+        "weapon.mode": "SS",
+        "weapon.attack": "5,16,17,17,17",
+        "weapon.ammo": "10(d)",
+        "weapon.skill": "exotic_weapons",
+        "weapon.spec": "exotic_weapons/linear"
+      },
+      "page": "62"
+    },
+    "skill": "exotic_weapons",
+    "spec": "exotic_weapons/linear",
+    "dmg": 9,
+    "stun": false,
+    "dmgDef": "9P",
+    "dmgFlags": [],
+    "modes": {
+      "SS": true,
+      "SA": false,
+      "BF": false,
+      "FA": false
+    },
+    "attackRating": [
+      5,
+      16,
+      17,
+      17,
+      17
+    ],
+    "ammocap": 10,
+    "ammoType": "d",
+    "genesisID": "ynt_colossus"
+  },
+  "meta": {
+    "book": "deadly_arts",
+    "page": 62,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "ynt_colossus_p063_x289.webp",
+  "domain": "gear",
+  "category": "weapons_firearms",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

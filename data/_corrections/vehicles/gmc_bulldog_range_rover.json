@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "gmc_bulldog_range_rover",
+  "changed": {
+    "meta": {
+      "flagged": "vehicle type/subtype not merged yet"
+    }
+  },
+  "ref": {
+    "name": "GMC Bulldog Range Rover",
+    "book": "corebook",
+    "page": 302
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

@@ -1,0 +1,20 @@
+{
+  "domain": "spells",
+  "category": "spells",
+  "id": "cl6_silence",
+  "movedTo": {
+    "domain": "spells",
+    "category": "spells"
+  },
+  "movedFrom": {
+    "domain": "critter_powers",
+    "category": "critter_powers"
+  },
+  "why": "Commlink6 files this under spells",
+  "ref": {
+    "name": "Silence",
+    "book": "street_wyrd",
+    "page": 70
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

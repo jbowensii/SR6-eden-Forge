@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "mitsuhama_automatronics_bust_a_move_and_friends",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "ANTHRO"
+    }
+  },
+  "ref": {
+    "name": "Mitsuhama Automatronics Bust-A-Move and Friends",
+    "book": "double_clutch",
+    "page": 118
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

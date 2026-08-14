@@ -1,0 +1,47 @@
+{
+  "id": "bear",
+  "name": "Bear",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 8,
+      "agi": 3,
+      "rea": 3,
+      "str": 7,
+      "wil": 2,
+      "log": 1,
+      "int": 3,
+      "cha": 2,
+      "ess": 6
+    },
+    "skills": "Athletics 5, Close Combat 5, Influence 2 (Intimidation +2), Outdoors",
+    "powers": "Armor 4, Enhanced Senses (Smell), Natural Weapon",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "defenserating": "",
+    "initiative": "",
+    "genesisID": "cat28000_critters_bear",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "body_shop",
+    "page": 157,
+    "sources": [
+      {
+        "book": "body_shop",
+        "page": 157
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "body_shop",
+    "originalName": "Bear"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

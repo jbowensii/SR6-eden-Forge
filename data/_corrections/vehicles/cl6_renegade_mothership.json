@@ -1,0 +1,61 @@
+{
+  "id": "cl6_renegade_mothership",
+  "name": "Renegade Works Mothership",
+  "system": {
+    "type": "VEHICLES",
+    "subtype": "LTAV",
+    "price": 50000,
+    "priceDef": "50000",
+    "avail": 3,
+    "availDef": "3",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "renegade_mothership",
+      "category": "gear_vehicles",
+      "book": "double_clutch",
+      "attrs": {
+        "id": "renegade_mothership",
+        "avail": "3",
+        "price": "50000",
+        "type": "VEHICLES",
+        "subtype": "LTAV"
+      },
+      "stats": {
+        "vehicle.han": "3",
+        "vehicle.acc": "5",
+        "vehicle.spdi": "30",
+        "vehicle.tspd": "120",
+        "vehicle.bod": "26",
+        "vehicle.arm": "0",
+        "vehicle.pil": "1",
+        "vehicle.sen": "2",
+        "vehicle.sea": "1"
+      },
+      "page": "86"
+    },
+    "genesisID": "renegade_mothership",
+    "handling": "3",
+    "accel": "5",
+    "speedInterval": "30",
+    "topSpeed": "120",
+    "body": "26",
+    "armor": "0",
+    "pilot": "1",
+    "sensor": "2",
+    "seats": "1",
+    "availability": "3"
+  },
+  "meta": {
+    "book": "double_clutch",
+    "page": 86,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-11",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "northrup_hornet_p086_x1216.webp",
+  "domain": "vehicles",
+  "category": "vehicles",
+  "correctedAt": "2026-08-11T14:26:56.000Z"
+}

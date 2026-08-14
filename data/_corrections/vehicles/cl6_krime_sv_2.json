@@ -1,0 +1,53 @@
+{
+  "id": "cl6_krime_sv_2",
+  "name": "Krime SV-2 Crashtest",
+  "system": {
+    "type": "VEHICLES",
+    "subtype": "CARS",
+    "price": 120000,
+    "priceDef": "120000",
+    "avail": 6,
+    "availDef": "6",
+    "description": "Troll sized safety-focused sports car.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "krime_sv-2",
+      "category": "gear_vehicles",
+      "book": "krime",
+      "attrs": {
+        "id": "krime_sv-2",
+        "lang": "de",
+        "avail": "6",
+        "price": "120000",
+        "subtype": "CARS",
+        "type": "VEHICLES"
+      },
+      "stats": {
+        "vehicle.han": "1/4",
+        "vehicle.acc": "15",
+        "vehicle.spdi": "20",
+        "vehicle.tspd": "160",
+        "vehicle.bod": "7",
+        "vehicle.arm": "5",
+        "vehicle.pil": "2",
+        "vehicle.sen": "2",
+        "vehicle.sea": "4"
+      },
+      "page": "32"
+    },
+    "genesisID": "krime_sv-2"
+  },
+  "meta": {
+    "book": "krime_katalog",
+    "page": 32,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "krime_sv_2_crashtest_p032_x243.webp",
+  "domain": "vehicles",
+  "category": "vehicles",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

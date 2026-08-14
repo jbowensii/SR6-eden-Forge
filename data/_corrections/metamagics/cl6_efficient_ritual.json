@@ -1,0 +1,16 @@
+{
+  "domain": "metamagics",
+  "category": "metamagics",
+  "id": "cl6_efficient_ritual",
+  "changed": {
+    "system": {
+      "category": "METAMAGIC"
+    }
+  },
+  "ref": {
+    "name": "Efficient Ritual",
+    "book": "street_wyrd",
+    "page": 124
+  },
+  "correctedAt": "2026-08-14T14:08:17.335Z"
+}

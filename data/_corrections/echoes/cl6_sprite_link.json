@@ -1,0 +1,16 @@
+{
+  "domain": "echoes",
+  "category": "echoes",
+  "id": "cl6_sprite_link",
+  "changed": {
+    "system": {
+      "category": "ECHO"
+    }
+  },
+  "ref": {
+    "name": "Sprite Link",
+    "book": "hack_slash",
+    "page": 69
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

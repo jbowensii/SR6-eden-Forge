@@ -1,0 +1,44 @@
+{
+  "domain": "critters",
+  "category": "critter",
+  "id": "hell_hound",
+  "correctedAt": "2026-07-30T11:51:48.330Z",
+  "name": "Hell Hound",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 6,
+      "agi": 4,
+      "rea": 5,
+      "str": 4,
+      "wil": 3,
+      "log": 2,
+      "int": 4,
+      "cha": 3,
+      "mag": 5,
+      "ess": 6
+    },
+    "metatype": "",
+    "rating": 0,
+    "initiative": "",
+    "defenserating": "",
+    "description": "The hell hound is a metaspecies of the German shepherd, standing about 90 centimeters at shoulder and weighing about 70 kilograms. Their fur is as black as a moonless night, and the sclera of their eyes is red rather than white. They are the pack-hunting predators, typically hunting small congame up to the size of a deer in groups of four to seven hounds, though they will scavenge if prey is scarce. If their pack is large enough, they will go afnot ter larger animals, including metahumans. They're popular as security animals, especially in isolated facilities in rural areas, where bursts of flame carry unless risk of property damage. may Natural Habitat/Range: Primarily woodland ofareas of North America, but anywhere domesticattheir ed dogs are present.",
+    "notes": "",
+    "monitor": {
+      "physical": 0,
+      "stun": 0,
+      "overflow": 6,
+      "edge": 0
+    },
+    "movement": {
+      "walk": "",
+      "sprint": "",
+      "perHit": "",
+      "notes": ""
+    },
+    "powers": "Armor 4, Dual Natured, Elemental Attack (Fire), Enhanced Sense",
+    "skills": "Astral 5, Athletics 7, Close Combat 4, Influence 4 (Intimidation +2),",
+    "weaknesses": ""
+  },
+  "qaStatus": "extracted"
+}

@@ -1,0 +1,16 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "chakri",
+  "changed": {
+    "meta": {
+      "flagged": "looks like page furniture, not an item — delete?"
+    }
+  },
+  "ref": {
+    "name": "Chakri",
+    "book": "deadly_arts",
+    "page": 48
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

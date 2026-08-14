@@ -1,0 +1,16 @@
+{
+  "domain": "echoes",
+  "category": "echoes",
+  "id": "cl6_resonance_power",
+  "changed": {
+    "system": {
+      "category": "ECHO"
+    }
+  },
+  "ref": {
+    "name": "Resonance Power",
+    "book": "hack_slash",
+    "page": 68
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

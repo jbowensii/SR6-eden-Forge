@@ -1,0 +1,16 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "wooden",
+  "changed": {
+    "meta": {
+      "flagged": "looks like page furniture, not an item — delete?"
+    }
+  },
+  "ref": {
+    "name": "Wooden",
+    "book": "shadows_new_orleans",
+    "page": 27
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

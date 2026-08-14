@@ -1,0 +1,47 @@
+{
+  "id": "elephant",
+  "name": "Elephant",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 12,
+      "agi": 4,
+      "rea": 3,
+      "str": 18,
+      "wil": 3,
+      "log": 2,
+      "int": 4,
+      "cha": 3,
+      "ess": 6
+    },
+    "skills": "Athletics 4, Close Combat 4, Influence 3 (Intimidation +2), Outdoors",
+    "powers": "Armor 8, Enhanced Senses (Hearing), Natural Weapon",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_elephant",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "body_shop",
+    "page": 157,
+    "sources": [
+      {
+        "book": "body_shop",
+        "page": 157
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "body_shop",
+    "originalName": "Elephant"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

@@ -1,0 +1,15 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_metahuman_adaption",
+  "correctedAt": "2026-08-09T11:35:03.508Z",
+  "ref": {
+    "name": "Metahuman Adaptation",
+    "book": "firing_squad"
+  },
+  "changed": {
+    "system": {
+      "subtype": "FIREARMS_ACCESSORY"
+    }
+  }
+}

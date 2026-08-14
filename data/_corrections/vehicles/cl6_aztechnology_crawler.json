@@ -1,0 +1,28 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_aztechnology_crawler",
+  "correctedAt": "2026-07-30T12:06:41.108Z",
+  "name": "Aztechnology Crawler",
+  "system": {
+    "type": "DRONE",
+    "subtype": "SMALL_DRONE",
+    "handling": "3/4",
+    "accel": "8",
+    "speedInterval": "10",
+    "topSpeed": "30",
+    "body": "6",
+    "armor": "2",
+    "pilot": "2",
+    "sensor": "2",
+    "seats": "—",
+    "availability": "2",
+    "price": "4,500"
+  },
+  "qaStatus": "extracted",
+  "gapsOnly": true,
+  "ref": {
+    "name": "Aztechnology Crawler",
+    "wasId": "aztechnology_crawler"
+  }
+}

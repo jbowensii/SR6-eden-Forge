@@ -1,0 +1,17 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "mct_gm_kiba",
+  "changed": {
+    "system": {
+      "type": "WEAPON_SPECIAL",
+      "subtype": "MISSILES"
+    }
+  },
+  "ref": {
+    "name": "MCT-GM Kiba",
+    "book": "deadly_arts",
+    "page": 144
+  },
+  "correctedAt": "2026-08-13T16:02:23.223Z"
+}

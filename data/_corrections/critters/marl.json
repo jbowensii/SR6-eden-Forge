@@ -1,0 +1,49 @@
+{
+  "id": "marl",
+  "name": "Marl",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 12,
+      "agi": 6,
+      "rea": 7,
+      "str": 12,
+      "wil": 8,
+      "log": 7,
+      "int": 8,
+      "cha": 8,
+      "mag": 8,
+      "ess": 8
+    },
+    "skills": "Astral, Close Combat, Exotic Ranged Weapon, Perception, Stealth",
+    "powers": "Astral Form, Concealment, Binding, Engulf (Earth), Guard, Mate- rialization, Movement, Search",
+    "weaknesses": "Allergy (Electricity, Severe)",
+    "description": "(Earth, Force 8) Marls are huge beasts that could easily be mis- ly taken for hills. They have large mouths and heads, and small eyes. The body can be large as a whale, with the fluke ending in stubby raking claws. They find move slowly as they climb up hillsides and mountains. They're not aggressive, but if cornered, they defend themselves by sliding down mountains, pulling down the ground around them like an avalanche. Marls on the material plane are sometimes known as slide-rock bolters, fearsome creatures found in the Rocky Mountains of North America.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_marl",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 52,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 52
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Marl"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

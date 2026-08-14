@@ -1,0 +1,49 @@
+{
+  "id": "brume",
+  "name": "Brume",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 4,
+      "agi": 5,
+      "rea": 6,
+      "str": 4,
+      "wil": 4,
+      "log": 4,
+      "int": 4,
+      "cha": 4,
+      "mag": 4,
+      "ess": 4
+    },
+    "skills": "Astral, Athletics (Swimming), Close Combat, Con, Exotic Ranged",
+    "powers": "Astral Form, Energy Aura (Cold), Innate Spell (Fashion), Innate",
+    "weaknesses": "Allergy (Fire, Severe)",
+    "description": "(Water, Force 4) Brumes have a similar appearance as punkahs 52), but they would find the comparison offensive. In their eyes, punkahs are there to serve, brumes are to be served. They are very arroand do not like menial labor, as that's for the lower castes. Most of the time, they float around metaplane contemplating philosophy or what serve at the next gala. One thing brumes are known for is fashion sense, relative to all the elemental planes. Brumes believe that fashion is an important gossip topic.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_brume",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 48,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 48
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Brume"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "chemicals",
+  "id": "pantophobia",
+  "deleted": true,
+  "ref": {
+    "name": "Pantophobia",
+    "book": "body_shop",
+    "page": 130
+  },
+  "correctedAt": "2026-08-09T18:51:40.902Z"
+}

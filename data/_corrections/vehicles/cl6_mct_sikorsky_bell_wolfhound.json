@@ -1,0 +1,28 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_mct_sikorsky_bell_wolfhound",
+  "correctedAt": "2026-07-30T12:06:30.045Z",
+  "name": "MCT-Sikorsky- Bell Wolfhound",
+  "system": {
+    "type": "VEHICLE",
+    "subtype": "ROTORCRAFT",
+    "handling": "3",
+    "accel": "20",
+    "speedInterval": "40",
+    "topSpeed": "320",
+    "body": "12",
+    "armor": "14",
+    "pilot": "4",
+    "sensor": "4",
+    "seats": "8",
+    "availability": "4",
+    "price": "423,000"
+  },
+  "qaStatus": "extracted",
+  "gapsOnly": true,
+  "ref": {
+    "name": "MCT-Sikorsky- Bell Wolfhound",
+    "wasId": "mct_sikorsky_bell_wolfhound"
+  }
+}

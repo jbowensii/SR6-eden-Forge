@@ -1,0 +1,63 @@
+{
+  "id": "cl6_northrup_hornet",
+  "name": "Northrup Hornet",
+  "system": {
+    "type": "VEHICLES",
+    "subtype": "ROTORCRAFT",
+    "price": 200000,
+    "priceDef": "200000",
+    "avail": 4,
+    "availDef": "4I",
+    "description": "Alternative configuration with 2 seats available.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "northrup_hornet",
+      "category": "gear_vehicles",
+      "book": "double_clutch",
+      "attrs": {
+        "id": "northrup_hornet",
+        "lang": "de",
+        "avail": "4I",
+        "price": "200000",
+        "type": "VEHICLES",
+        "subtype": "ROTORCRAFT"
+      },
+      "stats": {
+        "vehicle.han": "5",
+        "vehicle.acc": "15",
+        "vehicle.spdi": "30",
+        "vehicle.tspd": "280",
+        "vehicle.bod": "16",
+        "vehicle.arm": "16",
+        "vehicle.pil": "3",
+        "vehicle.sen": "4",
+        "vehicle.sea": "8"
+      },
+      "page": "84"
+    },
+    "genesisID": "northrup_hornet",
+    "handling": "5",
+    "accel": "15",
+    "speedInterval": "30",
+    "topSpeed": "280",
+    "body": "16",
+    "armor": "16",
+    "pilot": "3",
+    "sensor": "4",
+    "seats": "2/8",
+    "availability": "4"
+  },
+  "meta": {
+    "book": "double_clutch",
+    "page": 84,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "northrup_hornet_p086_x1216.webp",
+  "domain": "vehicles",
+  "category": "vehicles",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

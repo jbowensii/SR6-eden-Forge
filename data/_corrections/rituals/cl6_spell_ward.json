@@ -1,0 +1,16 @@
+{
+  "domain": "rituals",
+  "category": "rituals",
+  "id": "cl6_spell_ward",
+  "changed": {
+    "system": {
+      "category": "RITUAL"
+    }
+  },
+  "ref": {
+    "name": "Spell Ward",
+    "book": "smooth_operations",
+    "page": 110
+  },
+  "correctedAt": "2026-08-13T20:30:49.894Z"
+}

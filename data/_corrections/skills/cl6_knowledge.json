@@ -1,0 +1,16 @@
+{
+  "domain": "skills",
+  "category": "skills",
+  "id": "cl6_knowledge",
+  "changed": {
+    "system": {
+      "category": "KNOWLEDGE"
+    }
+  },
+  "ref": {
+    "name": "Knowledge",
+    "book": "corebook",
+    "page": 98
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

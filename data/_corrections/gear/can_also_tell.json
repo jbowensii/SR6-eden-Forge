@@ -1,0 +1,16 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "can_also_tell",
+  "changed": {
+    "meta": {
+      "flagged": "looks like page furniture, not an item — delete?"
+    }
+  },
+  "ref": {
+    "name": "Can Also Tell",
+    "book": "smooth_operations",
+    "page": 120
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

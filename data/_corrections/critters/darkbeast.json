@@ -1,0 +1,49 @@
+{
+  "id": "darkbeast",
+  "name": "Darkbeast",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 5,
+      "agi": 7,
+      "rea": 5,
+      "str": 4,
+      "wil": 2,
+      "log": 1,
+      "int": 4,
+      "cha": 4,
+      "mag": 4,
+      "ess": 6
+    },
+    "skills": "Athletics 5, Close Combat 5, Perception 4 (Visual +2), Sorcery 4",
+    "powers": "Armor 2, Concealment, Enhanced Sense (Low-Light Vision), Fear,",
+    "weaknesses": "Light of the moon [the darkbeasts cannot use their Conceal- ment or Innate Spell while being touched by the light of the moon]",
+    "description": "These six-legged canine-like creatures usually appear as little more than a darker patch of shadow, but when the light of the moon hits them, turn stark white and display their full extraplanar nature. Their six legs have six joints each, making them exceptionally flexible and quite powerful. They have a long, thin tail that can be used balance or for wrapping around a branch or 28: p. for stability when climbing. Their bodies are lean and muscular, and their heads are canine-like but with longer slits for eyes and shark-like teeth in their jaws.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_darkbeast",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "the_third_parallel",
+    "page": 127,
+    "sources": [
+      {
+        "book": "the_third_parallel",
+        "page": 127
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "the_third_parallel",
+    "originalName": "Darkbeast"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

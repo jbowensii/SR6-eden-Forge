@@ -1,0 +1,61 @@
+{
+  "id": "cl6_japan_navy_shio",
+  "name": "Japanese Imperial Navy Shio-Class SSI",
+  "system": {
+    "type": "VEHICLES",
+    "subtype": "SUBMARINES",
+    "price": 999999999,
+    "priceDef": "999999999",
+    "avail": 9,
+    "availDef": "9I",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "japan_navy_shio",
+      "category": "gear_vehicles",
+      "book": "double_clutch",
+      "attrs": {
+        "id": "japan_navy_shio",
+        "avail": "9I",
+        "price": "999999999",
+        "type": "VEHICLES",
+        "subtype": "SUBMARINES"
+      },
+      "stats": {
+        "vehicle.han": "4",
+        "vehicle.acc": "15",
+        "vehicle.spdi": "15",
+        "vehicle.tspd": "60",
+        "vehicle.bod": "51",
+        "vehicle.arm": "26",
+        "vehicle.pil": "4",
+        "vehicle.sen": "6",
+        "vehicle.sea": "65"
+      },
+      "page": "64"
+    },
+    "genesisID": "japan_navy_shio",
+    "handling": "4/6",
+    "accel": "15",
+    "speedInterval": "15/10",
+    "topSpeed": "60/40",
+    "body": "51",
+    "armor": "26",
+    "pilot": "4",
+    "sensor": "6",
+    "seats": "65",
+    "availability": "9(I)"
+  },
+  "meta": {
+    "book": "double_clutch",
+    "page": 64,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-11",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "proteus_sea_class_cargo_submarine_p064_x1119.webp",
+  "domain": "vehicles",
+  "category": "vehicles",
+  "correctedAt": "2026-08-11T14:26:56.000Z"
+}

@@ -1,0 +1,49 @@
+{
+  "id": "ground_wolf",
+  "name": "Ground Wolf",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 3,
+      "agi": 4,
+      "rea": 4,
+      "str": 5,
+      "wil": 2,
+      "log": 2,
+      "int": 3,
+      "cha": 1,
+      "mag": 4,
+      "ess": 6
+    },
+    "skills": "Athletics 4, Close Combat 7 (Bite +2), Outdoors 4, Perception",
+    "powers": "Dual Nature, Engulf (earth), Enhanced Senses (tremor",
+    "description": "The vast grasslands often do not afford the 28 creatures there much in the way of shelter from the elements. The blazing hot sun, the cold sweep E IF of wind, and the sudden torrential downpours all L come down on the creatures that live there. Each D of the creatures end up with their own strategy for IL dealing with the wide range of climate throughout W : the year. One such Awakened critter is the ground N U wolf ( Cyonomys canis ), a distant relative of the R prairie dog, which lives in burrows in the ground W O and comes out to hunt its prey. D A While related to the prairie dog, the ground H wolf is much larger. They are normally 1.5 meters S long, and on the rare occasion that you see them above ground, they stand about three-quarters of a meter tall at the shoulder. These predators come in at a solid twenty-five kilograms of muscle. Their paws have powerful digging claws, and they use their long, vicious canines to perform the killing blow on their prey. Their fur is typically some form of dusty brown, but it is difficult to tell whether it's just the dirt from the ground or if that is the actual coloration. The ground wolf is built to hunt from below ground. It uses its ability to phase through earth to quickly reach the prey that it has located through its tremor sense. Ground wolves hunt in packs of six to seven animals, while their clan is often much larger and lives throughout the underground town of tunnels. The critters will typically hunt nearly any animals that happen through, although some prey is definitely too large for them to take down. The biggest killer of these creatures are ranchers who eliminate the ground wolves before they can take down their valuable animals. The family units typically consist of multiple adult males and females as a single family along with multiple litters of pups. When the pups become old enough, they often seek out other dens.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_ground_wolf",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "wild_life",
+    "page": 29,
+    "sources": [
+      {
+        "book": "wild_life",
+        "page": 29
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "wild_life",
+    "originalName": "Ground Wolf"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "better_drek_car",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "CARS"
+    }
+  },
+  "ref": {
+    "name": "Better Drek Car",
+    "book": "corebook_berlin",
+    "page": 342
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

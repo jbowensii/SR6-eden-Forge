@@ -1,0 +1,49 @@
+{
+  "id": "cas_pcc_border",
+  "name": "CAS/PCC Border",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 4,
+      "agi": 5,
+      "rea": 5,
+      "str": 3,
+      "wil": 3,
+      "log": 2,
+      "int": 6,
+      "cha": 4,
+      "mag": 4,
+      "ess": 6
+    },
+    "skills": "Athletics 4, Close Combat 6, Perception 5",
+    "powers": "Armor 4, Concealment (self only), Enhanced Sense (Low-Light",
+    "weaknesses": "Allergy (Sunlight, Extreme)",
+    "description": "but rags Beneath the overpass, in the shadows created by 470 going over 177, is a rift to a realm of shadow free and despair. The rift was fueled by an urban legners end that was strengthened by the mercurial nature for of the teenage mind. The urban legend spoke of a teenage girl at her lowest point, saddened by the lack of understanding in her family, the ridicule of her friends at school, and the self-loathing she had created in herself from the gossip and rumors of those around her. She went to the bridge and threw herself off only to survive the impact and find a clarity in her own situation that assuaged her depression and led her to a more fulfilling life. Despite the best efforts of the local law enforcers, they were not able to stop other sad teens from leaping. Urban legends kept relating tales about the successes as a friend of a friend, but the screamsheets kept graphically showing the truth. During the separation of the city, this spot often became a meeting place for star-crossed lovers from different nations who would sneak into the shadows under the overpass to meet, only to find the restless spirits of those who leapt there to terrorize them, occasionally chasing them down into the traffic below. This place has seen its share of death, despair, fear, and terror, so as the rifts formed, this one connected to a dark place. From this dark place, creatures called shade stalkers are emerging. These a creatures have been slipping out from the overpass night and finding other shaded and shadowy spots to haunt. They cannot stand the sun and 127 live in shadow at all times. They have discovered a taste for metahuman flesh, leading some people to mistake their presfor ghouls lurking in the area. The rift is located in the deepest shadows of the overpass and is less than 1.5 meters in diameter. of the most powerful shade stalkers (increase attributes and skills by 1) have claimed this hunting ground and enjoy that ability to pass back forth between here and their home metaplane. is especially useful when they can bring back tasty morsel to their masters on the other side. The metaplane on the other side is a dark dunwhere the runners will immediately encouna being that makes a troll look small. The shade stalkers are basically the giant rats of this metaplane, and this imprisoned individual has trained them. The fact that they keep bringing him these snacks has intrigued him, and he watches the small they travel through frequently. When he sees living snacks come through, he bellows excitedly a tongue the runners do not understand. He'll to grab the runners, and they need to make an Agility + Reaction (2) test to avoid him. If they find way to communicate with him, he talks about an king imprisoning him for being in love with his daughter. The being looks remarkably metahuman has blue skin and fine white hair. He wears but looks well-fed. If the runners decide to try and help him, feel to make up an adventure of tiny shadowrunin the realm of giants and award them Karma their altruism. shadestalker These creatures are a mix of quadruped and biped. They can drop to all fours and run quickly in an awkward lope, but most of the time they stand on their rear two legs. They have large claws and a vaguely bovine appearance to their head and torso.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_cas_pcc_border",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "the_third_parallel",
+    "page": 128,
+    "sources": [
+      {
+        "book": "the_third_parallel",
+        "page": 128
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "the_third_parallel",
+    "originalName": "CAS/PCC Border"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

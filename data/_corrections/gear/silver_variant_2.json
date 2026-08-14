@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "silver_variant_2",
+  "deleted": true,
+  "ref": {
+    "name": "Silver (Variant)",
+    "book": "shadows_new_orleans",
+    "page": 27
+  },
+  "correctedAt": "2026-08-09T18:51:40.937Z"
+}

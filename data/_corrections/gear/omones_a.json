@@ -1,0 +1,16 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "omones_a",
+  "changed": {
+    "meta": {
+      "flagged": "looks like page furniture, not an item — delete?"
+    }
+  },
+  "ref": {
+    "name": "Omones a",
+    "book": "smooth_operations",
+    "page": 120
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

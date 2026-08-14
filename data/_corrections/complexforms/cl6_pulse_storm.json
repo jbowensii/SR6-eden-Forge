@@ -1,0 +1,16 @@
+{
+  "domain": "complexforms",
+  "category": "complexforms",
+  "id": "cl6_pulse_storm",
+  "changed": {
+    "system": {
+      "category": "COMPLEX_FORM"
+    }
+  },
+  "ref": {
+    "name": "Pulse Storm",
+    "book": "corebook",
+    "page": 190
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

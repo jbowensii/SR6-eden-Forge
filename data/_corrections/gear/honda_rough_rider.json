@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "vehicles",
+  "id": "honda_rough_rider",
+  "deleted": true,
+  "ref": {
+    "name": "Honda Rough Rider",
+    "book": "double_clutch",
+    "page": 23
+  },
+  "correctedAt": "2026-08-13T00:42:05.563Z"
+}

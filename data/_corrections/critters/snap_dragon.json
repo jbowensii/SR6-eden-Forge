@@ -1,0 +1,48 @@
+{
+  "id": "snap_dragon",
+  "name": "Snap Dragon",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 11,
+      "agi": 4,
+      "rea": 4,
+      "str": 14,
+      "wil": 4,
+      "log": 1,
+      "int": 3,
+      "cha": 1,
+      "ess": 6
+    },
+    "skills": "Athletics 2, Close Combat 5, Perception 3, Stealth 7",
+    "powers": "Binding (LOS, Water), Hardened Armor (5), Long Reach,",
+    "description": "Snapping turtles are known for the strength of their bite, but this Awakened version takes this to a whole new level. These creatures have a hardened shell that is up to twelve meters in diameter. It can shoot its neck out five meters to snap its crushing jaws around their prey. They are slow to move, but they are expert ambushers.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_snap_dragon",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "shadows_new_orleans",
+    "page": 27,
+    "sources": [
+      {
+        "book": "shadows_new_orleans",
+        "page": 27
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "shadows_new_orleans",
+    "originalName": "Snap Dragon"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

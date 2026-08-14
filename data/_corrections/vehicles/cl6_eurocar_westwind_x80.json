@@ -1,0 +1,15 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_eurocar_westwind_x80",
+  "deleted": true,
+  "ref": {
+    "name": "Eurocar Westwind X80",
+    "book": "double_clutch",
+    "page": 1
+  },
+  "correctedAt": "2026-08-09T18:51:41.229Z",
+  "system": {
+    "description": ""
+  }
+}

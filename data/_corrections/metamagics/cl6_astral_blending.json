@@ -1,0 +1,16 @@
+{
+  "domain": "metamagics",
+  "category": "metamagics",
+  "id": "cl6_astral_blending",
+  "changed": {
+    "system": {
+      "category": "ANIMALISM"
+    }
+  },
+  "ref": {
+    "name": "Astral blending",
+    "book": "bestial_nature",
+    "page": 21
+  },
+  "correctedAt": "2026-08-14T14:08:17.335Z"
+}

@@ -1,0 +1,12 @@
+{
+  "domain": "qualities",
+  "category": "qualities",
+  "id": "cl6_astral_beacon_metagenetic",
+  "deleted": true,
+  "ref": {
+    "name": "Astral Beacon",
+    "book": "companion",
+    "page": 127
+  },
+  "correctedAt": "2026-08-09T18:51:40.988Z"
+}

@@ -1,0 +1,16 @@
+{
+  "domain": "echoes",
+  "category": "echoes",
+  "id": "cl6_firewall_upgrade",
+  "changed": {
+    "system": {
+      "category": "ECHO"
+    }
+  },
+  "ref": {
+    "name": "Firewall Upgrade",
+    "book": "corebook",
+    "page": 195
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

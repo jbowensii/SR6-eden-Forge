@@ -1,0 +1,48 @@
+{
+  "id": "tylosaur",
+  "name": "Tylosaur",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 13,
+      "agi": 7,
+      "rea": 6,
+      "str": 11,
+      "wil": 5,
+      "log": 2,
+      "int": 5,
+      "cha": 2,
+      "ess": 6
+    },
+    "skills": "Athletics 4, Close Combat 5, Perception 4, Stealth 3",
+    "powers": "Armor (6), Enhanced Senses (low-light vision), Natural",
+    "description": "Originally known as sea drakes until the recent reclassification of dracoforms, the tylosaur is the name given to a modern sea terror which resembles the ancient dinosaur it shares a name with. The thirteen-meter-long creature is believed to be distantly related to dragons, but just don't let them hear you say that. They have been spotted in the Gulf of Mexico and within sight of New Orleans.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_tylosaur",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "shadows_new_orleans",
+    "page": 27,
+    "sources": [
+      {
+        "book": "shadows_new_orleans",
+        "page": 27
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "shadows_new_orleans",
+    "originalName": "Tylosaur"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

@@ -1,0 +1,20 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_gecko_grip",
+  "movedTo": {
+    "domain": "gear",
+    "category": "weapon_accessories"
+  },
+  "movedFrom": {
+    "domain": "qualities",
+    "category": "qualities"
+  },
+  "why": "Commlink6 files this under weapon_modifications",
+  "ref": {
+    "name": "Gecko Grip",
+    "book": "slip_streams",
+    "page": 142
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

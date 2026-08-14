@@ -1,0 +1,62 @@
+{
+  "id": "cl6_gti_anubis",
+  "name": "GTI Anubis",
+  "system": {
+    "type": "VEHICLES",
+    "subtype": "GRAV",
+    "price": 450000000,
+    "priceDef": "450000000",
+    "avail": 99,
+    "availDef": "99I",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "gti_anubis",
+      "category": "gear_vehicles",
+      "book": "deadly_arts",
+      "attrs": {
+        "id": "gti_anubis",
+        "avail": "99I",
+        "price": "450000000",
+        "type": "VEHICLES",
+        "subtype": "GRAV"
+      },
+      "stats": {
+        "vehicle.han": "2",
+        "vehicle.acc": "120",
+        "vehicle.spdi": "300",
+        "vehicle.tspd": "5000",
+        "vehicle.bod": "60",
+        "vehicle.arm": "32",
+        "vehicle.pil": "8",
+        "vehicle.sen": "7",
+        "vehicle.sea": "120",
+        "vehicle.type": "AIR"
+      },
+      "page": "138"
+    },
+    "genesisID": "gti_anubis",
+    "handling": "2",
+    "accel": "120",
+    "speedInterval": "300",
+    "topSpeed": "5,000",
+    "body": "48 (60)",
+    "armor": "32 (+6)",
+    "pilot": "8",
+    "sensor": "7",
+    "seats": "20 / 120",
+    "availability": "—"
+  },
+  "meta": {
+    "book": "deadly_arts",
+    "page": 138,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "gti_anubis_p140_x713.webp",
+  "domain": "vehicles",
+  "category": "vehicles",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

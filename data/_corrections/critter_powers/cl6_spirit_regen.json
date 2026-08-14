@@ -1,0 +1,15 @@
+{
+  "domain": "critter_powers",
+  "category": "critter_powers",
+  "id": "cl6_spirit_regen",
+  "deleted": true,
+  "ref": {
+    "name": "Regeneration",
+    "book": "street_wyrd",
+    "page": 70
+  },
+  "correctedAt": "2026-08-09T18:51:40.670Z",
+  "system": {
+    "description": "This power follows the rules for the critter power of Regeneration (p. 227, SR6 ). This power applies to the spirit’s materialized, possessed, inhabited form. If the spirit possesses or inhabits formerly living vessel, the vessel slowly regenerates back to its living form. For example, a wooden munculus begins to grow new leaves, or a corpse regains a semblance of life."
+  }
+}

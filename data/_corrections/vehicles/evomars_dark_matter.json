@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "evomars_dark_matter",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "SPACECRAFT"
+    }
+  },
+  "ref": {
+    "name": "Evomars DARK MATTER",
+    "book": "explosive_decompression",
+    "page": 92
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

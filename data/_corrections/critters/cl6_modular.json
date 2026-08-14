@@ -1,0 +1,17 @@
+{
+  "domain": "critters",
+  "category": "critter",
+  "id": "cl6_modular",
+  "changed": {
+    "system": {
+      "category": "SPRITE"
+    }
+  },
+  "ref": {
+    "name": "Modular Sprite",
+    "book": "hack_slash",
+    "page": 73
+  },
+  "correctedAt": "2026-08-13T23:36:50.517Z",
+  "why": "Commlink6 files this under sprites, type SPRITE — not a critter"
+}

@@ -1,0 +1,16 @@
+{
+  "domain": "lifestyles",
+  "category": "lifestyles",
+  "id": "cl6_aaa_zone",
+  "changed": {
+    "system": {
+      "category": "LIFESTYLE"
+    }
+  },
+  "ref": {
+    "name": "AAA zone",
+    "book": "corebook",
+    "page": 57
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

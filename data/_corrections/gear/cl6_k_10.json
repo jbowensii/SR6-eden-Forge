@@ -1,0 +1,20 @@
+{
+  "domain": "gear",
+  "category": "chemicals",
+  "id": "cl6_k_10",
+  "movedTo": {
+    "domain": "gear",
+    "category": "chemicals"
+  },
+  "movedFrom": {
+    "domain": "vehicles",
+    "category": "vehicles"
+  },
+  "why": "Commlink6 files this under gear_drugs",
+  "ref": {
+    "name": "K-10",
+    "book": "tarnished_star",
+    "page": 157
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

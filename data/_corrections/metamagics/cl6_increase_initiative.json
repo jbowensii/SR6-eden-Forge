@@ -1,0 +1,16 @@
+{
+  "domain": "metamagics",
+  "category": "metamagics",
+  "id": "cl6_increase_initiative",
+  "changed": {
+    "system": {
+      "category": "ANIMALISM"
+    }
+  },
+  "ref": {
+    "name": "Increase Initiative",
+    "book": "bestial_nature",
+    "page": 22
+  },
+  "correctedAt": "2026-08-14T14:08:17.335Z"
+}

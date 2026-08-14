@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "advanced_industries_personal_propulsion_systems_w_pfs",
+  "changed": {
+    "meta": {
+      "flagged": "vehicle type/subtype not merged yet"
+    }
+  },
+  "ref": {
+    "name": "Advanced Industries Personal Propulsion Systems w/pfs",
+    "book": "double_clutch",
+    "page": 68
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

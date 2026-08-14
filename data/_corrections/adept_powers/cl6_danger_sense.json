@@ -1,0 +1,16 @@
+{
+  "domain": "adept_powers",
+  "category": "adept_powers",
+  "id": "cl6_danger_sense",
+  "changed": {
+    "system": {
+      "category": "ADEPT_POWER"
+    }
+  },
+  "ref": {
+    "name": "Danger Sense",
+    "book": "corebook",
+    "page": 156
+  },
+  "correctedAt": "2026-08-13T20:30:49.894Z"
+}

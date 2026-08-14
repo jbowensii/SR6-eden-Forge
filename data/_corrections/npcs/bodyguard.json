@@ -1,0 +1,62 @@
+{
+  "id": "bodyguard",
+  "name": "Bodyguard",
+  "system": {
+    "category": "NPC",
+    "metatype": "troll",
+    "attributes": {
+      "bod": 7,
+      "agi": 4,
+      "rea": 5,
+      "str": 8,
+      "wil": 4,
+      "log": 3,
+      "int": 5,
+      "cha": 4,
+      "edg": 4,
+      "ess": 4.54
+    },
+    "activeSkills": "Athletics 3, Close Combat 5, Con 1, Electronics 2, Firearms 5,",
+    "knowledgeSkills": "Architecture, professional bodyguarding, public relations",
+    "languages": "English (Native)",
+    "qualities": "Built Tough 2, Compulsion 4 (Checking Physical Security), Der- mal Deposits, Finesse, Honorbound (Protect the Principle), Muscles",
+    "contacts": "Corporate Wage-Slave (C4/L4), Ork Rocker (C3/L4), Veterinari- an (C2/L4), Bartender (C1/L3)",
+    "lifestyle": "Middle (1 month)",
+    "augmentations": "Commlink (Hermes Ikon) (alpha), cyberarm (obvious right, agility 5, strength 9, implanted Ares Predator VI), cybereyes 3 (w/ camera, flare compensation, image link, smartlink, thermographic vision)",
+    "gear": "Actioneer business clothes, fake SIN 3, medkit 6, survival kit, trau- ma patch",
+    "nuyen": "235¥",
+    "weapons": "",
+    "powers": "",
+    "adeptPowers": "",
+    "defenseRating": "",
+    "spells": "",
+    "conditionMonitors": "",
+    "initiative": "",
+    "complexForms": "",
+    "cyberware": "",
+    "defenserating": "",
+    "notes": "",
+    "genesisID": "cat28000_npcs_bodyguard",
+    "type": "NPC",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "smooth_operations",
+    "page": 100,
+    "sources": [
+      {
+        "book": "smooth_operations",
+        "page": 100
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "smooth_operations",
+    "originalName": "Bodyguard"
+  },
+  "img": "bodyguard_p100_x453.webp",
+  "domain": "npcs",
+  "category": "npc",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

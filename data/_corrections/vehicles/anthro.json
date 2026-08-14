@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "anthro",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "ANTHRO"
+    }
+  },
+  "ref": {
+    "name": "Anthro",
+    "book": "dealers_of_death",
+    "page": 17
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

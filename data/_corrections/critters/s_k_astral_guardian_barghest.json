@@ -1,0 +1,48 @@
+{
+  "id": "s_k_astral_guardian_barghest",
+  "name": "S-K Astral Guardian Barghest",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 7,
+      "agi": 4,
+      "rea": 5,
+      "str": 5,
+      "wil": 3,
+      "log": 2,
+      "int": 5,
+      "cha": 5,
+      "mag": 5,
+      "ess": 6
+    },
+    "skills": "Astral 4, Athletics 5, Close Combat 8, Influence 5 (Intimidation +2),",
+    "powers": "Armor 4, Dual Natured, Enhanced Senses (Hearing, Smell, So- nar), Fear, Immunity (Barghest Howls), Natural Weapon, Paralyzing Howl",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "defenserating": "",
+    "initiative": "",
+    "genesisID": "cat28000_critters_s_k_astral_guardian_barghest",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "body_shop",
+    "page": 163,
+    "sources": [
+      {
+        "book": "body_shop",
+        "page": 163
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "body_shop",
+    "originalName": "S-K Astral Guardian Barghest"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "vigilance_class_rescue_cutter",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "SPACECRAFT"
+    }
+  },
+  "ref": {
+    "name": "VIGILANCE-CLASS RESCUE CUTTER",
+    "book": "explosive_decompression",
+    "page": 93
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

@@ -1,0 +1,49 @@
+{
+  "id": "khamsin",
+  "name": "Khamsin",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 5,
+      "agi": 6,
+      "rea": 7,
+      "str": 2,
+      "wil": 4,
+      "log": 4,
+      "int": 5,
+      "cha": 4,
+      "mag": 4,
+      "ess": 4
+    },
+    "skills": "Astral, Athletics, Close Combat, Exotic Ranged Weapon, Outdoors,",
+    "powers": "Accident, Astral Form, Confusion, Elemental Attack (Fire), Energy",
+    "weaknesses": "Allergy (Cold, Severe), Vulnerability (fire extinguishers)",
+    "description": "(Fire, Force 4) The khamsin form wavers and flickers as a heat mirage. They are semi-translucent, like air elementals, but they radiate a great amount of heat. Their look is somewhat unnerving, as the reflected form feel shifts and bends into shapes less than humanoid. They use their wavering form to scare and intimi- as date any adversaries.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_khamsin",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 52,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 52
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Khamsin"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

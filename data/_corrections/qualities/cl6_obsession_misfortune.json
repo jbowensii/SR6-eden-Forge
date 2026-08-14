@@ -1,0 +1,12 @@
+{
+  "domain": "qualities",
+  "category": "qualities",
+  "id": "cl6_obsession_misfortune",
+  "deleted": true,
+  "ref": {
+    "name": "Momentous Misfortune",
+    "book": "companion",
+    "page": 140
+  },
+  "correctedAt": "2026-08-09T18:51:41.103Z"
+}

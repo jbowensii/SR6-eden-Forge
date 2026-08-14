@@ -1,0 +1,15 @@
+{
+  "domain": "gear",
+  "category": "weapons_firearms",
+  "id": "light_pistol_variant_3",
+  "deleted": true,
+  "ref": {
+    "name": "Light Pistol (Variant)",
+    "book": "firing_squad",
+    "page": 155
+  },
+  "correctedAt": "2026-08-09T18:51:40.868Z",
+  "system": {
+    "description": ""
+  }
+}

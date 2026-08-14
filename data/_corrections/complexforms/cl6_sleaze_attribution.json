@@ -1,0 +1,16 @@
+{
+  "domain": "complexforms",
+  "category": "complexforms",
+  "id": "cl6_sleaze_attribution",
+  "changed": {
+    "system": {
+      "category": "COMPLEX_FORM"
+    }
+  },
+  "ref": {
+    "name": "Sleaze Attribution",
+    "book": "hack_slash",
+    "page": 66
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

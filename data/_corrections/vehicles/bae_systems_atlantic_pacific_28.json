@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "bae_systems_atlantic_pacific_28",
+  "changed": {
+    "meta": {
+      "flagged": "vehicle type/subtype not merged yet"
+    }
+  },
+  "ref": {
+    "name": "BAE Systems Atlantic/Pacific 28",
+    "book": "double_clutch",
+    "page": 48
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

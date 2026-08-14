@@ -1,0 +1,47 @@
+{
+  "id": "asian_gargoyle",
+  "name": "Asian Gargoyle",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 8,
+      "agi": 8,
+      "rea": 5,
+      "str": 8,
+      "wil": 6,
+      "log": 4,
+      "int": 3,
+      "cha": 4,
+      "ess": 2
+    },
+    "skills": "Astral 4, Athletics 7, Close Combat 6, Influence 3, Outdoors ception 5, Stealth 6",
+    "powers": "Armor 10, Concealment (Self), Enhanced Senses (Low-Light sion), Natural Weapon (Bite/Claws), Venom (Bite), Toughness 1",
+    "notes": "Asian gargoyle's venom has a Vector: Injection; Speed; 1 round; Power: 4; E(cid:0)ect Dazed, Poisoned 4P.",
+    "movement": "",
+    "weaknesses": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_asian_gargoyle",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "wild_life",
+    "page": 169,
+    "sources": [
+      {
+        "book": "wild_life",
+        "page": 169
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "wild_life",
+    "originalName": "Asian Gargoyle"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

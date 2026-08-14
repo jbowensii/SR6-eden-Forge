@@ -1,0 +1,62 @@
+{
+  "id": "cl6_whispering_death",
+  "name": "Whispering Death",
+  "system": {
+    "type": "DRONE_SMALL",
+    "subtype": "AIR",
+    "price": 2000,
+    "priceDef": "2000",
+    "avail": 4,
+    "availDef": "4I",
+    "description": "+2 for all Stealth tests.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "whispering_death",
+      "category": "gear_drones",
+      "book": "double_clutch",
+      "attrs": {
+        "id": "whispering_death",
+        "lang": "de",
+        "avail": "4I",
+        "price": "2000",
+        "type": "DRONE_SMALL",
+        "subtype": "AIR"
+      },
+      "stats": {
+        "vehicle.han": "3",
+        "vehicle.acc": "6",
+        "vehicle.spdi": "8",
+        "vehicle.tspd": "12",
+        "vehicle.bod": "3",
+        "vehicle.arm": "0",
+        "vehicle.pil": "3",
+        "vehicle.sen": "1"
+      },
+      "page": "107"
+    },
+    "genesisID": "whispering_death",
+    "handling": "3",
+    "accel": "6",
+    "speedInterval": "8",
+    "topSpeed": "12",
+    "body": "3",
+    "armor": "0",
+    "pilot": "3",
+    "sensor": "1",
+    "seats": "—",
+    "availability": "4"
+  },
+  "meta": {
+    "book": "double_clutch",
+    "page": 107,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "whispering_death_p108_x1303.webp",
+  "domain": "vehicles",
+  "category": "vehicles",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

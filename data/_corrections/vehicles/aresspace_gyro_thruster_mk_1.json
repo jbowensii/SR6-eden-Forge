@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "aresspace_gyro_thruster_mk_1",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "SPECIAL_VEHICLES"
+    }
+  },
+  "ref": {
+    "name": "aresspace gyro-thruster mk 1",
+    "book": "explosive_decompression",
+    "page": 83
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

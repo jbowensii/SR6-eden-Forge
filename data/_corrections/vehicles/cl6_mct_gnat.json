@@ -1,0 +1,15 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_mct_gnat",
+  "deleted": true,
+  "ref": {
+    "name": "MCT Gnat",
+    "book": "corebook",
+    "page": 299
+  },
+  "correctedAt": "2026-08-09T18:51:41.302Z",
+  "system": {
+    "description": ""
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "domain": "critters",
+  "category": "critter",
+  "id": "devil_rat_demon_rat_glitch_rat",
+  "correctedAt": "2026-07-30T11:51:03.102Z",
+  "name": "Devil Rat/Demon Rat/Glitch Rat",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 1,
+      "agi": 4,
+      "rea": 5,
+      "str": 1,
+      "wil": 2,
+      "log": 1,
+      "int": 5,
+      "cha": 4,
+      "mag": 4,
+      "ess": 6
+    },
+    "metatype": "",
+    "rating": 0,
+    "initiative": "",
+    "defenserating": "",
+    "description": "The devil rat is completely hairless and measures approximately a meter in length, including its tail. A standard specimen weighs three to four kilograms. The demon rat is a subspecies and measures about one and a half times the length and double the weight of a devil rat, while the glitch rat, another subspecies, is about two-thirds the length and weight of its parent species. Devil rats nocturnal pack hunters, with hunting packs of thirty or more mature individuals a norm. Largpacks have been observed, especially under the 217 guidance of a demon rat or two, which are capable leading devil rats, glitch rats, and mundane rats. They are fearless and vicious, making them seem outright malicious. Typically seeking out small animals to feed on, they are not afraid to take on metahuman if they sense weakness. They breed prolifically, and that fact combined with their natimmunity to most poisons makes them all but impossible to exterminate.",
+    "notes": "",
+    "monitor": {
+      "physical": 0,
+      "stun": 0,
+      "overflow": 1,
+      "edge": 0
+    },
+    "movement": {
+      "walk": "",
+      "sprint": "",
+      "perHit": "",
+      "notes": ""
+    },
+    "powers": "Accident, Animal Control (ordinary rats), Immunity (toxins), Luck",
+    "skills": "Athletics 3 (Climbing +2), Close Combat 3, Perception 4, Stealth 3",
+    "weaknesses": "Allergy (sunlight, Mild)"
+  },
+  "qaStatus": "extracted"
+}

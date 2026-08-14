@@ -1,0 +1,17 @@
+{
+  "domain": "spells",
+  "category": "detection",
+  "id": "combat_sense",
+  "changed": {
+    "system": {
+      "category": "DETECTION",
+      "type": "MANA"
+    }
+  },
+  "ref": {
+    "name": "Combat Sense",
+    "book": "corebook_berlin",
+    "page": 136
+  },
+  "correctedAt": "2026-08-13T19:00:34.879Z"
+}

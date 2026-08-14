@@ -1,0 +1,28 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_hyundai_shin_hyung",
+  "correctedAt": "2026-07-30T12:04:05.429Z",
+  "name": "Hyundai Shin- hyung",
+  "system": {
+    "type": "VEHICLE",
+    "subtype": "CAR",
+    "handling": "3/5",
+    "accel": "12",
+    "speedInterval": "25",
+    "topSpeed": "200",
+    "body": "7",
+    "armor": "1",
+    "pilot": "1",
+    "sensor": "1",
+    "seats": "3",
+    "availability": "2",
+    "price": "20,000"
+  },
+  "qaStatus": "extracted",
+  "gapsOnly": true,
+  "ref": {
+    "name": "Hyundai Shin- hyung",
+    "wasId": "hyundai_shin_hyung"
+  }
+}

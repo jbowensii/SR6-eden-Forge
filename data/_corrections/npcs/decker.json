@@ -1,0 +1,70 @@
+{
+  "id": "decker",
+  "name": "Decker",
+  "system": {
+    "category": "NPC",
+    "metatype": "dwarf",
+    "attributes": {
+      "bod": 3,
+      "agi": 1,
+      "rea": 2,
+      "str": 1,
+      "wil": 4,
+      "log": 6,
+      "int": 5,
+      "cha": 2,
+      "edg": 4,
+      "ess": 2.4
+    },
+    "initiative": "7 + 1D6/1 Major, 2 Minor",
+    "conditionMonitors": "Condition Monitors (P/S): 10/10",
+    "defenseRating": "7",
+    "activeSkills": "Cracking 7 (Cybercombat +2), Electronics 5 (Computer +2),",
+    "knowledgeSkills": "Data Havens, Decker Bars, Hackers, Matrix Clubs,",
+    "languages": "English (Native), Japanese",
+    "qualities": "Allergy (moderate, Dairy), Analytical Mind, Aptitude",
+    "contacts": "Bartender (C1/L2), Info Broker (C2/L2), Matrix Ganger (C1/L2),",
+    "lifestyle": "Middle (1 month prepaid)",
+    "augmentations": "Cyberears (rating 2; w/ audio enhancement, damper, select sound filter 2, soundlink), cybereyes (rating 4; w/ flare compensation, image link, low-light vision, smartlink, thermographic vision, vision enhancement), cyberjack (rating 6, D/F 9/8)",
+    "gear": "Area jammer (rating 6), armor jacket, dataline tap, fake SIN (rating",
+    "nuyen": "3,925¥",
+    "weapons": "",
+    "powers": "",
+    "adeptPowers": "",
+    "spells": "",
+    "complexForms": "",
+    "cyberware": "",
+    "genesisID": "cat28000_npcs_decker",
+    "defenserating": "",
+    "notes": "",
+    "type": "NPC",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "corebook_berlin",
+    "page": 85,
+    "sources": [
+      {
+        "book": "corebook_berlin",
+        "page": 85
+      },
+      {
+        "book": "corebook_hongkong",
+        "page": 85
+      },
+      {
+        "book": "corebook",
+        "page": 85
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "corebook_berlin",
+    "originalName": "Decker"
+  },
+  "img": "decker_p085_x425.webp",
+  "domain": "npcs",
+  "category": "npc",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

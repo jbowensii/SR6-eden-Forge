@@ -1,0 +1,48 @@
+{
+  "id": "who_s_who",
+  "name": "Who's Who",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 3,
+      "agi": 4,
+      "rea": 5,
+      "str": 3,
+      "wil": 2,
+      "log": 1,
+      "int": 5,
+      "cha": 4,
+      "ess": 6
+    },
+    "skills": "Athletics 4 (Swimming +2), Close Combat 5 (Bite +2)*, Influence 2",
+    "powers": "Armor 4, Enhanced Senses (Smell), Natural Weapon (Bite/Slam)",
+    "description": "“Micro” Bull Shark 39 With a little genetweaking, the scientists at S Farms have developed a species of bull shark H A more adaptable to fresh and brackish wa- D O smaller than their progenitors, rapid growing, W with softer cartilage. Created as a protein al- R U ternative, some have escaped, and the researchers N realized their growth modification doesn't : R at adulthood. IS K In captivity, they are generally docile as they are S fed (cannibalism incidents do occur, though), & R in the wild their aggressive nature and insa- E W tiable appetites make them extremely dangerous. A Farms is known for contracting fish hunters R D kill escaped subjects on the few occasions it has S occurred.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_whos_who",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "risks_rewards",
+    "page": 40,
+    "sources": [
+      {
+        "book": "risks_rewards",
+        "page": 40
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "risks_rewards",
+    "originalName": "Who's Who"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

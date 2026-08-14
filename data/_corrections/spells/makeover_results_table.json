@@ -1,0 +1,16 @@
+{
+  "domain": "spells",
+  "category": "illusion",
+  "id": "makeover_results_table",
+  "changed": {
+    "meta": {
+      "flagged": "looks like page furniture, not an item — delete?"
+    }
+  },
+  "ref": {
+    "name": "Makeover Results Table",
+    "book": "street_wyrd",
+    "page": 43
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

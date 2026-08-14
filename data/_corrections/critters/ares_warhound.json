@@ -1,0 +1,49 @@
+{
+  "id": "ares_warhound",
+  "name": "Ares Warhound",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 6,
+      "agi": 4,
+      "rea": 5,
+      "str": 4,
+      "wil": 3,
+      "log": 2,
+      "int": 4,
+      "cha": 3,
+      "mag": 6,
+      "ess": 6
+    },
+    "skills": "Athletics 7, Close Combat 4, Influence 4 (Intimidation +2), Outdoors",
+    "powers": "Armor 4, Elemental Attack (Fire), Enhanced Sense (Hearing, Low-",
+    "description": "Exhibit A of their current efforts is the Ares Warhound: a genetically enhanced hellhound variant that is easily trained and more than eager to set your enemies alight with its improved flaming halitosis. This beastie is free from Essence-reducing augmentations that would dampen its fire, relying entirely on embryonic genetic engineering techniques that enhance its obedience, intelligence, and Awakened talents.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_ares_warhound",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "body_shop",
+    "page": 160,
+    "sources": [
+      {
+        "book": "body_shop",
+        "page": 160
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "body_shop",
+    "originalName": "Ares Warhound"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

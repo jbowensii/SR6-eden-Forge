@@ -1,0 +1,20 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_cannon_standard",
+  "movedTo": {
+    "domain": "vehicles",
+    "category": "vehicles"
+  },
+  "movedFrom": {
+    "domain": "gear",
+    "category": "weapons_firearms"
+  },
+  "why": "Commlink6 files this under gear_vehicles",
+  "ref": {
+    "name": "Cannon, Standard",
+    "book": "astral_ways",
+    "page": 128
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

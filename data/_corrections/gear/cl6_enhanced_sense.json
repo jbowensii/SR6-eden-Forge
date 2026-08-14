@@ -1,0 +1,20 @@
+{
+  "domain": "gear",
+  "category": "bioware",
+  "id": "cl6_enhanced_sense",
+  "movedTo": {
+    "domain": "gear",
+    "category": "bioware"
+  },
+  "movedFrom": {
+    "domain": "critter_powers",
+    "category": "critter_powers"
+  },
+  "why": "Commlink6 files this under gear_geneware",
+  "ref": {
+    "name": "Enhanced Senses",
+    "book": "corebook",
+    "page": 223
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

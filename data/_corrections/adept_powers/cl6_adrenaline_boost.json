@@ -1,0 +1,16 @@
+{
+  "domain": "adept_powers",
+  "category": "adept_powers",
+  "id": "cl6_adrenaline_boost",
+  "changed": {
+    "system": {
+      "category": "ADEPT_POWER"
+    }
+  },
+  "ref": {
+    "name": "Adrenaline Boost",
+    "book": "corebook",
+    "page": 156
+  },
+  "correctedAt": "2026-08-13T20:30:49.894Z"
+}

@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "cl6_camera_function",
+  "deleted": true,
+  "ref": {
+    "name": "Camera",
+    "book": "corebook",
+    "page": 274
+  },
+  "correctedAt": "2026-08-09T18:51:40.751Z"
+}

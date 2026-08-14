@@ -1,0 +1,17 @@
+{
+  "domain": "npcs",
+  "category": "npc",
+  "id": "cl6_lone_star_street_veteran",
+  "changed": {
+    "system": {
+      "category": "GRUNT"
+    }
+  },
+  "ref": {
+    "name": "Lone Star Street Veteran",
+    "book": "firing_squad",
+    "page": 136
+  },
+  "correctedAt": "2026-08-13T23:36:50.517Z",
+  "why": "Commlink6 types these GRUNT, a distinct thing from NPC"
+}

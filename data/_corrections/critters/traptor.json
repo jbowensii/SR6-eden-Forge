@@ -1,0 +1,48 @@
+{
+  "id": "traptor",
+  "name": "Traptor",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 4,
+      "agi": 7,
+      "rea": 6,
+      "str": 3,
+      "wil": 2,
+      "log": 2,
+      "int": 7,
+      "cha": 4,
+      "ess": 6
+    },
+    "skills": "Athletics 5 (Climb +2), Close Combat 6, Exotic Weapons (Quills) 4,",
+    "powers": "Armor 5, Binding (Touch), Concealment (Self), Natural Weapon",
+    "description": "(Araneae ctenizidae urbs ) A traptor is an Awakened nocturnal trapdoor spider that is commonly found in southwest North America, Africa, east Australia, and Asia. Traptors take five years to mature; once mature, they are approximately 1.8 meters long and weigh 12.5 kilograms. The younger version typically is about half the size and weight. They are very aggressive, but their diet normally consists of stray animals or other wildlife that makes the city their home. Though rare, it is not unheard of for a wounded or starving traptor to attack a metahuman. These urban hunters will use a combination of silk threads and special sensory pads on their front legs to track their prey. Unlike their mundane version, they are unable to burrow, but they have adapted all the nooks, crannies, and crevasses of the city to meet these needs. They will hide within dumpsters, abandoned vehicles, or buildings. Wherever they are hiding, they build a camouflaged hinged door made from its silk and material from the surrounding area. The hinged doors can look like just about anything, such as window air-conditioning units, vehicle doors or hoods, and building doors. Thus far, the traptor's crafting skill is very impressive. 173 Traptors have several tools at their disposal to dissuade any would-be attackers. First, it can modiS its borrow to provide additional shelter and proH tection. The extra protection can take the form of A D off surrounding vehicles or rubble from near- O W buildings. If threatened, it will rub its legs against R abdomen, which creates a loud hissing noise. As U N last defense, it will use its 0.4-meter-long fangs. : W Generally speaking, the effects of pollution IL animals can vary depending on the type and D amount of pollutants present, as well as the spe- L IF and its specific adaptation and tolerance levels. E traptor doesn't seem to follow this. No matter harsh the environment, a traptor will increase size and aggression. It will also start to grow quills or spikes from its body that secrete a sticky substance that causes low-weight items to adhere the critter. In addition, the substance also increases its ability to mystically hide itself, making less reliant on a burrow and more aggressive.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_traptor",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "wild_life",
+    "page": 174,
+    "sources": [
+      {
+        "book": "wild_life",
+        "page": 174
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "wild_life",
+    "originalName": "Traptor"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

@@ -1,0 +1,16 @@
+{
+  "domain": "complexforms",
+  "category": "complexforms",
+  "id": "cl6_static_veil",
+  "changed": {
+    "system": {
+      "category": "COMPLEX_FORM"
+    }
+  },
+  "ref": {
+    "name": "Static Veil",
+    "book": "corebook",
+    "page": 191
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

@@ -1,0 +1,48 @@
+{
+  "id": "jackalope",
+  "name": "Jackalope",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 1,
+      "agi": 3,
+      "rea": 3,
+      "str": 1,
+      "wil": 2,
+      "log": 2,
+      "int": 3,
+      "cha": 3,
+      "ess": 6
+    },
+    "skills": "Athletics 4, Close Combat 3, Outdoors 3, Perception 3, Stealth 2",
+    "powers": "Natural Weapon (Horns)",
+    "description": "The wolpertinger ( Crisensus bavaricus ) is one of the more recent new creatures that was first found on June 30, 2066. Originally thought to be caused by a virus that caused local rabbits to grow tumorous growths on its head, it has since been classified as one of the SURGE animals. The jackalope ( Crisensus townsendii ) is the North American cousin of the wolpertinger. Where the wolpertinger is located in the forests of the Allied German States, the jackalope is found in the grasslands of the CAS. Both species have many similarities including the presence of horns and their general size. The main difference between the two subspecies is the coloration. Both of these animals are typically seventy centimeters in length and can weigh up to four kilograms. The creatures are noted for their antlers, which can be as long as one-third the total body length (twenty centimeters). Where the wolpertinger has a very dark brown or black fur, the jackalope tends to have straw-colored fur. The coat helps the creatures hide in their natural environment. These creatures are related to hares and jackrabbits. They are herbivores. Their horns prevent them from living in burrows due to the constraints of moving, but they burrow for root vegetables. The jackalopes use their horns during breeding season, as the males fight over the right to mate. The resulting mating will result in six to eight kits that are born in mid-March and leave the grass mat nest in July. The jackalope and wolpertinger are an important part of the ecological system and are a key prey species for many predators. Their prolific breeding helps keep the population from shrinking too far. In fact, there have been problems in some towns where they have killed off local predators, allowing the jackalope population to explode. > A charging herd of jackalopes is terrifying. I've seen a stampede of hundreds of these varmints. > Slamm-0! > What a load of bollocks. > Chainmaker ESS > No, seriously. I have the ankle scars to prove it. > Slamm-0!",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_jackalope",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "wild_life",
+    "page": 29,
+    "sources": [
+      {
+        "book": "wild_life",
+        "page": 29
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "wild_life",
+    "originalName": "Jackalope"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

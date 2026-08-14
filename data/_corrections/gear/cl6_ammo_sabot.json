@@ -1,0 +1,46 @@
+{
+  "id": "cl6_ammo_sabot",
+  "name": "Ascalon Sabot",
+  "system": {
+    "type": "AMMUNITION",
+    "subtype": "AMMUNITION",
+    "price": 500,
+    "priceDef": "500",
+    "avail": 8,
+    "availDef": "8I",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "ammo_sabot",
+      "category": "gear_ammunition",
+      "book": "hack_slash",
+      "attrs": {
+        "id": "ammo_sabot",
+        "price": "500",
+        "avail": "8I",
+        "count": "y",
+        "units": "10",
+        "type": "AMMUNITION",
+        "subtype": "AMMUNITION_SPECIAL"
+      },
+      "stats": {
+        "attrdef.id": "DAMAGE",
+        "attrdef.value": "0"
+      },
+      "page": "168"
+    },
+    "genesisID": "ammo_sabot"
+  },
+  "meta": {
+    "book": "hack_slash",
+    "page": 168,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-11",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "p168_x1682.webp",
+  "domain": "gear",
+  "category": "ammo",
+  "correctedAt": "2026-08-11T14:26:56.000Z"
+}

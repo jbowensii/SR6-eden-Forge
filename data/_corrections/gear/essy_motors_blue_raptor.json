@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "vehicles",
+  "id": "essy_motors_blue_raptor",
+  "deleted": true,
+  "ref": {
+    "name": "ESSY Motors Blue Raptor",
+    "book": "double_clutch",
+    "page": 36
+  },
+  "correctedAt": "2026-08-13T00:42:05.563Z"
+}

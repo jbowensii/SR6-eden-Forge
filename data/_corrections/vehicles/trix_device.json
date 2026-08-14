@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "trix_device",
+  "changed": {
+    "meta": {
+      "flagged": "name recovered from the printed page — please confirm"
+    }
+  },
+  "ref": {
+    "name": "Dodge Vindicator",
+    "book": "tarnished_star",
+    "page": 154
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

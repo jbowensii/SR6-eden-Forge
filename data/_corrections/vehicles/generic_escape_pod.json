@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "generic_escape_pod",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "SPACECRAFT"
+    }
+  },
+  "ref": {
+    "name": "generic escape pod",
+    "book": "explosive_decompression",
+    "page": 81
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

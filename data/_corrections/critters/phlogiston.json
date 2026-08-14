@@ -1,0 +1,49 @@
+{
+  "id": "phlogiston",
+  "name": "Phlogiston",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 7,
+      "agi": 8,
+      "rea": 9,
+      "str": 4,
+      "wil": 6,
+      "log": 6,
+      "int": 7,
+      "cha": 6,
+      "mag": 6,
+      "ess": 6
+    },
+    "skills": "Astral, Athletics, Close Combat, Exotic Ranged Weapon, Perception",
+    "powers": "Accident, Astral Form, Confusion, Energy Aura (Fire), Guard, Ma- terialization, Noxious Breath, Search",
+    "weaknesses": "Allergy (Cold, Severe), Vulnerability (fire extinguishers)",
+    "description": "(Fire, Force 6) The phlogiston has a deer-like body with a proboscis, similar to a tapir or large anteater. It the appearance of soft lava, slowly cooling many wrinkles across its form. It lives in the wastes, using its trunk to grab fruit from the higher branches or reach deeper into the boiling muck other tidbits.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_phlogiston",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 53,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 53
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Phlogiston"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

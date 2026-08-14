@@ -1,0 +1,16 @@
+{
+  "domain": "martial_techniques",
+  "category": "martial_techniques",
+  "id": "cl6_kung_fu",
+  "changed": {
+    "system": {
+      "category": "MARTIAL_ART_TECH"
+    }
+  },
+  "ref": {
+    "name": "Kung Fu",
+    "book": "firing_squad",
+    "page": 100
+  },
+  "correctedAt": "2026-08-14T14:08:17.335Z"
+}

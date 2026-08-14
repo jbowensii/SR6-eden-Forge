@@ -1,0 +1,19 @@
+{
+  "domain": "gear",
+  "category": "cyberware",
+  "id": "flametosser",
+  "correctedAt": "2026-07-30T18:22:49.833Z",
+  "name": "Flametosser",
+  "system": {
+    "type": "CYBERWARE",
+    "essence": 1,
+    "capacity": 8,
+    "avail": 6,
+    "availDef": "6(I)",
+    "price": 4000,
+    "priceDef": "",
+    "subtype": "CYBER_IMPLANT_WEAPON",
+    "notes": ""
+  },
+  "qaStatus": "extracted"
+}

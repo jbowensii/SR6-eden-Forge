@@ -1,0 +1,85 @@
+{
+  "id": "street_shaman",
+  "name": "Street Shaman",
+  "system": {
+    "category": "NPC",
+    "metatype": "human",
+    "attributes": {
+      "bod": 2,
+      "agi": 3,
+      "rea": 2,
+      "str": 1,
+      "wil": 5,
+      "log": 2,
+      "int": 3,
+      "cha": 5,
+      "edg": 7,
+      "magres": 6,
+      "ess": 6
+    },
+    "initiative": "5 + 1D6/1 Major, 2 Minor",
+    "conditionMonitors": "",
+    "defenseRating": "",
+    "activeSkills": "Athletics 1, Close Combat 2, Conjuring 5 (Summoning +2), Perception 2, Sorcery 6 (Spellcasting +2)",
+    "knowledgeSkills": "Dive Bars, Seattle Shamans",
+    "languages": "English (Native)",
+    "qualities": "Allergy (Mild, Common, Insect Stings), Distinctive Style, Focused Concentration 1, Mentor Spirit (Cat), Spirit Affinity (Beast), Spirit Bane (Fire)",
+    "spells": "Animate Plastic, Burst, Chaos, Clairaudience, Darkness, Fireball, Heal, Increase Reflexes, Levitate, Overclock, Physical Barrier, Stunbolt, Trid Phantasm",
+    "contacts": "Beat Cop (C2/L3), Smuggler (C3/L3), Street Kid (C1/L4), Talismonger (C5/L4), Yakuza Soldier (C1/L4)",
+    "lifestyle": "Low (1 month prepaid)",
+    "gear": "Armor vest, Meta Link commlink (Device Rating 1, D/F 1/0, Programs 0, w/ trodes), Suzuki Mirage motorcycle",
+    "nuyen": "230¥",
+    "weapons": "Colt Government 2076 [Heavy Pistol, DV 3P, SA, Attack Ratings 10/8/6/—/—, 14(c), w/ 100 rounds regular ammo] Combat knife [Blade, DV 3P, 8/2*/—/—/—, *max range is 20 meters] ARCHETYPES // STREET SHAMAN DLROW HTXIS :NURWODAHS",
+    "description": "After hearing the call of Cat from a dark alley 88 in her youth, the street shaman has been digging her claws into other people's dirty laundry and protecting her life with a web of illusions. The shadows are a natural fit for her, but many find the ways of Cat all too direct. To that, the street shaman says, “pish posh.” The street shaman can certainly clear a room with a nasty furball … err … fireball, but she prefers to reshape the world to fit her needs through illusion and misdirection.",
+    "powers": "",
+    "adeptPowers": "",
+    "augmentations": "",
+    "complexForms": "",
+    "cyberware": "",
+    "rating": 0,
+    "defenserating": "5",
+    "notes": "",
+    "monitor": {
+      "physical": 9,
+      "stun": 11,
+      "overflow": 2,
+      "edge": 7
+    },
+    "movement": {
+      "walk": "",
+      "sprint": "",
+      "perHit": "",
+      "notes": ""
+    },
+    "genesisID": "cat28000_npcs_street_shaman",
+    "type": "NPC",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "corebook_berlin",
+    "page": 89,
+    "sources": [
+      {
+        "book": "corebook_berlin",
+        "page": 89
+      },
+      {
+        "book": "corebook_hongkong",
+        "page": 89
+      },
+      {
+        "book": "corebook",
+        "page": 89
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "corebook_berlin",
+    "originalName": "Street Shaman"
+  },
+  "img": "street_shaman_p089_x459.webp",
+  "domain": "npcs",
+  "category": "npc",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

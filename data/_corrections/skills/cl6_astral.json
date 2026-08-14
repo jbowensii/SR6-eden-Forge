@@ -1,0 +1,16 @@
+{
+  "domain": "skills",
+  "category": "skills",
+  "id": "cl6_astral",
+  "changed": {
+    "system": {
+      "category": "MAGIC"
+    }
+  },
+  "ref": {
+    "name": "Astral",
+    "book": "corebook",
+    "page": 93
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

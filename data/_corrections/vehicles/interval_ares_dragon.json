@@ -1,0 +1,16 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "interval_ares_dragon",
+  "changed": {
+    "meta": {
+      "flagged": "vehicle type/subtype not merged yet"
+    }
+  },
+  "ref": {
+    "name": "INTERVAL Ares Dragon",
+    "book": "corebook",
+    "page": 303
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

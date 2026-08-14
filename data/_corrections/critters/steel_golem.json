@@ -1,0 +1,49 @@
+{
+  "id": "steel_golem",
+  "name": "Steel Golem",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 12,
+      "agi": 8,
+      "rea": 8,
+      "str": 12,
+      "wil": 4,
+      "log": 4,
+      "int": 4,
+      "cha": 4,
+      "mag": 4,
+      "ess": 8
+    },
+    "skills": "Athletics 4, Close Combat 6, Perception 6",
+    "powers": "Hardened Armor 6, Immunity (Fear), Immunity (Mental Manipu- lation spells), Spell Resistance (Combat spells only)",
+    "weaknesses": "Vulnerability (Illusion Spells)",
+    "description": "look you While we call this type the steel golem, in truth has we don't really know what they are made of. We know it's the same metal that a lot of the doors and other metal fixtures are made of, but without are being able to bring a sample home for proper analble ysis, we cannot say with any degree of certainty. All we know is these golems are a light gunmetal color, similar to steel. Hence the name. What we do know is that this type are phys- cally ical beasts. Easily as tough and strong as a troll, they but with agility that appears to be on par with an augmented human, these things are no slouches in a physical fight. Combine that with the innate resilience that all golem types share, and you end as up with something that can stand toe to toe with the most capable fighters. They are not the most skillful of the golem types, relying more on brute strength than finesse when it comes to using their melee weapons. Don't let that fool you, though, as are still capable with their weapons. And as I 113 found out to my detriment, their strikes pack a hell a punch. Most steel golems that we've encountered use polearms, mainly spears that are at least as long as golem is tall. These are sometimes paired with small shield, but not always. The other common armament used by steel golems is a one-handed sword—the blade being two meters long—that is almost always paired with a medieval-style kite shield. This combination, due to the length of the blade and their size, means most metahumans not be able to get a reach advantage unless they're a troll or using a very long polearm of own.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_steel_golem",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 114,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 114
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Steel Golem"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

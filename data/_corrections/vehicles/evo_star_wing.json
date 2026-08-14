@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "evo_star_wing",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "SPACECRAFT"
+    }
+  },
+  "ref": {
+    "name": "evo star wing",
+    "book": "explosive_decompression",
+    "page": 82
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

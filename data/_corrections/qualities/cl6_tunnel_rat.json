@@ -1,0 +1,20 @@
+{
+  "domain": "qualities",
+  "category": "qualities",
+  "id": "cl6_tunnel_rat",
+  "movedTo": {
+    "domain": "qualities",
+    "category": "qualities"
+  },
+  "movedFrom": {
+    "domain": "vehicles",
+    "category": "vehicles"
+  },
+  "why": "Commlink6 files this under qualities_berlin",
+  "ref": {
+    "name": "Cyberspace Designs Tunnel Rat",
+    "book": "double_clutch",
+    "page": 92
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

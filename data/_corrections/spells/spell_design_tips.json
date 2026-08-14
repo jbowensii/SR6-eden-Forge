@@ -1,0 +1,16 @@
+{
+  "domain": "spells",
+  "category": "illusion",
+  "id": "spell_design_tips",
+  "changed": {
+    "meta": {
+      "flagged": "looks like page furniture, not an item — delete?"
+    }
+  },
+  "ref": {
+    "name": "Spell Design Tips",
+    "book": "street_wyrd",
+    "page": 53
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

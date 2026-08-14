@@ -1,0 +1,70 @@
+{
+  "id": "cl6_ynt_nashorn",
+  "name": "YNT Nashorn",
+  "system": {
+    "type": "WEAPON_FIREARMS",
+    "subtype": "ASSAULT_CANNON",
+    "price": 27400,
+    "priceDef": "27400",
+    "avail": 8,
+    "availDef": "8I",
+    "description": "In the past handful of years, YNT brought the first coilguns and chemrails to the market.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "ynt_nashorn",
+      "category": "gear_firearms",
+      "book": "deadly_arts",
+      "attrs": {
+        "id": "ynt_nashorn",
+        "avail": "8I",
+        "price": "27400",
+        "type": "WEAPON_FIREARMS",
+        "subtype": "ASSAULT_CANNON"
+      },
+      "stats": {
+        "weapon.dmg": "5P",
+        "weapon.mode": "BF",
+        "weapon.attack": "3,12,14,11,11",
+        "weapon.ammo": "40(d)",
+        "weapon.skill": "exotic_weapons",
+        "weapon.spec": "exotic_weapons/linear"
+      },
+      "page": "61"
+    },
+    "skill": "exotic_weapons",
+    "spec": "exotic_weapons/linear",
+    "dmg": 5,
+    "stun": false,
+    "dmgDef": "5P",
+    "dmgFlags": [],
+    "modes": {
+      "SS": false,
+      "SA": false,
+      "BF": true,
+      "FA": false
+    },
+    "attackRating": [
+      3,
+      12,
+      14,
+      11,
+      11
+    ],
+    "ammocap": 40,
+    "ammoType": "d",
+    "genesisID": "ynt_nashorn"
+  },
+  "meta": {
+    "book": "deadly_arts",
+    "page": 61,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "ynt_nashorn_p063_x287.webp",
+  "domain": "gear",
+  "category": "weapons_firearms",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

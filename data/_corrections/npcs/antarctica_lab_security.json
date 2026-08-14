@@ -1,0 +1,63 @@
+{
+  "id": "antarctica_lab_security",
+  "name": "Antarctica Lab Security",
+  "system": {
+    "category": "NPC",
+    "attributes": {
+      "bod": 6,
+      "agi": 4,
+      "rea": 5,
+      "str": 4,
+      "wil": 4,
+      "log": 4,
+      "int": 5,
+      "cha": 4,
+      "edg": 4,
+      "ess": 2.5
+    },
+    "augmentations": "Cybereyes (rating 2, w/ camera, flare compensation, image link, smartlink), dermal plating 2, muscle replacement 1, wired re- flexes 2",
+    "gear": "Armor jacket (+4), commlink (DR 4), flashlight",
+    "weapons": "",
+    "description": "(Agent of Dis) 133 Milton Dunberry was a typical example of your below-average security guard who had made enough mistakes to get himself assigned to an abandoned base in Antarctica. He was too expensive to fire, as the company had invested quite a bit into his cyberware and figured the assignment would give him time to think about what got him there and get his mind right. That’s not quite what happened. Instead, while he certainly thought about what got him there, the primary effect was to make him bitter. So many others got away with so much worse, and yet he was the one who was punished. His resentment and anger fed into the local manasphere, and the metaplanar gateway that had been quiet shimmered into activity one day. Or so he thinks. The gate was actually opened by Dr. Fields, who had been watching Milton slowly decline into anger and saw him as a perfect host for one touched by Dis. She has been apologetic for the accident and keeps to her lab studies rather than bothering the gateroom. In Antarctica, Milton felt a presence come through and speak to him. It offered power and peace of mind but required him to stay in Antarctica until it could gather enough power before they moved somewhere else and Milton could act as the physical officer of his metaplanar patron. With his agreement, Milton also inadvertently agreed to be connected to the being, and it has slowly infiltrated his mind. This isn’t possession, more of a powerful mental manipulation. The efforts have left only a change to his aura as a sign of the traveller’s work. Now, Milton operates as a protector of the gateway. He initially protects as any guard should, refusing access, but eventually resorts to clandestine murder and the assistance of a metaplanar creature to create terror and death.",
+    "powers": "",
+    "qualities": "",
+    "nuyen": "",
+    "activeSkills": "",
+    "languages": "",
+    "adeptPowers": "",
+    "defenseRating": "",
+    "lifestyle": "",
+    "spells": "",
+    "metatype": "",
+    "conditionMonitors": "",
+    "contacts": "",
+    "knowledgeSkills": "",
+    "initiative": "",
+    "complexForms": "",
+    "cyberware": "",
+    "genesisID": "cat28000_npcs_antarctica_lab_security",
+    "defenserating": "",
+    "notes": "",
+    "type": "NPC",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "slip_streams",
+    "page": 134,
+    "sources": [
+      {
+        "book": "slip_streams",
+        "page": 134
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "slip_streams",
+    "originalName": "Antarctica Lab Security"
+  },
+  "img": "antarctica_lab_security_p134_x876.webp",
+  "domain": "npcs",
+  "category": "npc",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

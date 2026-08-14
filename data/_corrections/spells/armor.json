@@ -1,0 +1,17 @@
+{
+  "domain": "spells",
+  "category": "manipulation",
+  "id": "armor",
+  "changed": {
+    "system": {
+      "category": "MANIPULATION",
+      "type": "PHYSICAL"
+    }
+  },
+  "ref": {
+    "name": "Armor",
+    "book": "corebook_berlin",
+    "page": 141
+  },
+  "correctedAt": "2026-08-13T19:00:34.879Z"
+}

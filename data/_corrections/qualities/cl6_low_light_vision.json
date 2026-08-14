@@ -1,0 +1,20 @@
+{
+  "domain": "qualities",
+  "category": "qualities",
+  "id": "cl6_low_light_vision",
+  "movedTo": {
+    "domain": "qualities",
+    "category": "qualities"
+  },
+  "movedFrom": {
+    "domain": "gear",
+    "category": "electronics"
+  },
+  "why": "Commlink6 files this under qualities-metagenetic",
+  "ref": {
+    "name": "Low-light vision",
+    "book": "corebook",
+    "page": 275
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

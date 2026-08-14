@@ -1,0 +1,15 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_ares_black_sky",
+  "deleted": true,
+  "ref": {
+    "name": "Ares Black Sky",
+    "book": "corebook",
+    "page": 301
+  },
+  "correctedAt": "2026-08-09T18:51:41.157Z",
+  "system": {
+    "description": ""
+  }
+}

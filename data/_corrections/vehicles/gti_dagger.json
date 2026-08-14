@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "gti_dagger",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "SPACECRAFT"
+    }
+  },
+  "ref": {
+    "name": "gti dagger",
+    "book": "explosive_decompression",
+    "page": 96
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

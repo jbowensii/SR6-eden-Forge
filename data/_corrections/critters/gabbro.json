@@ -1,0 +1,49 @@
+{
+  "id": "gabbro",
+  "name": "Gabbro",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 9,
+      "agi": 3,
+      "rea": 4,
+      "str": 9,
+      "wil": 5,
+      "log": 4,
+      "int": 5,
+      "cha": 5,
+      "mag": 5,
+      "ess": 5
+    },
+    "skills": "Astral Athletics, Close Combat, Exotic Ranged Weapon, Perception,",
+    "powers": "Astral Form, Concealment, Elemental Attack (Chemical), Guard,",
+    "weaknesses": "Allergy (Electricity, Severe)",
+    "description": "(Earth, Force 5) These multilimbed, simian-like creatures stone are opportunistic hunters and thieves. Coarse in texture and in nature, they will sneak into villages and towns, looking for easy pickings of food or shiny things. Gardens and fields are first targets, and if they find a stray midden grazing, they will carry it like a football out to territory for a feast. Their fingers are slightly longer, almost hensile, allowing them to crack mechanical locks and reach out from cover to pick multiple items. frightened, they can excrete a sludge-like material similar to lime sulfur and hurl it at the threat.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_gabbro",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 51,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 51
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Gabbro"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

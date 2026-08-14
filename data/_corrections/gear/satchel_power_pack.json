@@ -1,0 +1,17 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "satchel_power_pack",
+  "changed": {
+    "system": {
+      "type": "ELECTRONICS",
+      "subtype": "ELECTRONIC_ACCESSORIES"
+    }
+  },
+  "ref": {
+    "name": "Satchel Power Pack",
+    "book": "deadly_arts",
+    "page": 66
+  },
+  "correctedAt": "2026-08-13T16:04:22.960Z"
+}

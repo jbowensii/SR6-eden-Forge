@@ -1,0 +1,16 @@
+{
+  "domain": "complexforms",
+  "category": "complexforms",
+  "id": "cl6_mirrored_persona",
+  "changed": {
+    "system": {
+      "category": "COMPLEX_FORM"
+    }
+  },
+  "ref": {
+    "name": "Mirrored Persona",
+    "book": "corebook",
+    "page": 190
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

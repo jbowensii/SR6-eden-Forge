@@ -1,0 +1,11 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_tripod_powered_adapter",
+  "deleted": true,
+  "ref": {
+    "name": "Adapter (see drones for Powered Heavy Tripod)",
+    "book": "deadly_arts"
+  },
+  "correctedAt": "2026-08-09T11:37:35.067Z"
+}

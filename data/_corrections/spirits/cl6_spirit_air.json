@@ -1,0 +1,16 @@
+{
+  "domain": "spirits",
+  "category": "spirit",
+  "id": "cl6_spirit_air",
+  "changed": {
+    "system": {
+      "category": "SPIRIT"
+    }
+  },
+  "ref": {
+    "name": "Spirits of Air",
+    "book": "corebook",
+    "page": 147
+  },
+  "correctedAt": "2026-08-13T23:36:50.517Z"
+}

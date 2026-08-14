@@ -1,0 +1,62 @@
+{
+  "id": "impersonator",
+  "name": "Impersonator",
+  "system": {
+    "category": "NPC",
+    "metatype": "human",
+    "attributes": {
+      "bod": 3,
+      "agi": 5,
+      "rea": 4,
+      "str": 3,
+      "wil": 4,
+      "log": 4,
+      "int": 5,
+      "cha": 6,
+      "edg": 5,
+      "ess": 5.18
+    },
+    "activeSkills": "Athletics 4, Close Combat 2, Con 7 (Impersonation +3), Elec- tronics 2, Firearms 4, Influence 5 (Etiquette +2), Perception 4, Stealth 2.",
+    "knowledgeSkills": "Diplomacy, espionage, journalism, psychology",
+    "languages": "English (Native)",
+    "qualities": "Blandness, Stim Patch Allergy, Trust Issues, Weak Immune Sys- tem",
+    "contacts": "Bounty Hunter (C3/L3), Former Mage Detective (C4/L3), Media",
+    "lifestyle": "Low (1 month prepaid)",
+    "augmentations": "Hand razors (retractable, alpha), image link (alpha), low-light vision (alpha), reflex recorder (Close Combat & Firearms), retinal duplication (rating 3), voice modulator (rating 3, alpha)",
+    "gear": "Autopicker, bug scanner, climbing gear, fake SIN (rating 1; w/ driver's license), fake SIN (rating 4; w/ cyberware, firearm, and driver's license), gas mask",
+    "nuyen": "140¥",
+    "weapons": "",
+    "powers": "",
+    "adeptPowers": "",
+    "defenseRating": "",
+    "spells": "",
+    "conditionMonitors": "",
+    "initiative": "",
+    "complexForms": "",
+    "cyberware": "",
+    "defenserating": "",
+    "notes": "",
+    "genesisID": "cat28000_npcs_impersonator",
+    "type": "NPC",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "smooth_operations",
+    "page": 102,
+    "sources": [
+      {
+        "book": "smooth_operations",
+        "page": 102
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "smooth_operations",
+    "originalName": "Impersonator"
+  },
+  "img": "impersonator_p102_x483.webp",
+  "domain": "npcs",
+  "category": "npc",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

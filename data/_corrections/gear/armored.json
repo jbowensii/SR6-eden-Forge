@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "armor",
+  "id": "armored",
+  "deleted": true,
+  "ref": {
+    "name": "Armored Backpack",
+    "book": "deadly_arts",
+    "page": 177
+  },
+  "correctedAt": "2026-08-09T18:51:40.699Z"
+}

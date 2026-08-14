@@ -1,0 +1,29 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_ceramic_components",
+  "correctedAt": "2026-08-03T11:30:12.636Z",
+  "name": "Ceramic/Plasteel Components",
+  "system": {
+    "type": "ACCESSORY",
+    "subtype": "WEAPON_ACCESSORY",
+    "price": 0,
+    "priceDef": "",
+    "avail": 6,
+    "availDef": "6I",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "ceramic_components",
+      "category": "weapon_modifications",
+      "book": "dealers_of_death",
+      "attrs": {
+        "id": "ceramic_components",
+        "avail": "6I"
+      },
+      "stats": {},
+      "page": "14"
+    }
+  },
+  "qaStatus": "extracted"
+}

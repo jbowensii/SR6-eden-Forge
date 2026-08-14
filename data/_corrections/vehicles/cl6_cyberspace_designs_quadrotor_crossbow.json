@@ -1,0 +1,20 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_cyberspace_designs_quadrotor_crossbow",
+  "movedTo": {
+    "domain": "vehicles",
+    "category": "vehicles"
+  },
+  "movedFrom": {
+    "domain": "gear",
+    "category": "weapons_ranged"
+  },
+  "why": "Commlink6 files this under gear_drones",
+  "ref": {
+    "name": "Crossbow for Quadrotor",
+    "book": "corebook",
+    "page": 300
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

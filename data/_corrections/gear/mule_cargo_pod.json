@@ -1,0 +1,17 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "mule_cargo_pod",
+  "changed": {
+    "system": {
+      "type": "ACCESSORY",
+      "subtype": "VEHICLE_ACCESSORY"
+    }
+  },
+  "ref": {
+    "name": "Mule Cargo Pod*",
+    "book": "explosive_decompression",
+    "page": 85
+  },
+  "correctedAt": "2026-08-13T16:04:22.960Z"
+}

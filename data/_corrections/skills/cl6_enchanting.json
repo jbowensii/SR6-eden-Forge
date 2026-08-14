@@ -1,0 +1,16 @@
+{
+  "domain": "skills",
+  "category": "skills",
+  "id": "cl6_enchanting",
+  "changed": {
+    "system": {
+      "category": "MAGIC"
+    }
+  },
+  "ref": {
+    "name": "Enchanting",
+    "book": "corebook",
+    "page": 95
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

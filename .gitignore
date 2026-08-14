@@ -28,3 +28,9 @@ build/dist/
 build/work/
 *.manifest
 export/dist/*.exe
+
+# The corrections ARE the work and must be checked in. data/** above keeps the
+# library itself out (it is rebuilt from books the user owns); this carves out
+# the decisions we make about it, which carry no game content on their own.
+!data/_corrections/
+!data/_corrections/**

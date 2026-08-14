@@ -1,0 +1,62 @@
+{
+  "id": "cl6_esprit_scorpion",
+  "name": "Esprit Iron Scorpion",
+  "system": {
+    "type": "DRONE_LARGE",
+    "subtype": "GROUND",
+    "price": 30000,
+    "priceDef": "30000",
+    "avail": 4,
+    "availDef": "4L",
+    "description": "Tactile sensors grant +2 to all engineering tests. Claw/arm and tail strength rating 6",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "esprit_scorpion",
+      "category": "gear_drones",
+      "book": "double_clutch",
+      "attrs": {
+        "id": "esprit_scorpion",
+        "lang": "de",
+        "avail": "4L",
+        "price": "30000",
+        "type": "DRONE_LARGE",
+        "subtype": "GROUND"
+      },
+      "stats": {
+        "vehicle.han": "4/4",
+        "vehicle.acc": "12",
+        "vehicle.spdi": "12",
+        "vehicle.tspd": "60",
+        "vehicle.bod": "10",
+        "vehicle.arm": "10",
+        "vehicle.pil": "3",
+        "vehicle.sen": "4"
+      },
+      "page": "101"
+    },
+    "genesisID": "esprit_scorpion",
+    "handling": "4/4",
+    "accel": "12",
+    "speedInterval": "12",
+    "topSpeed": "60",
+    "body": "10",
+    "armor": "10",
+    "pilot": "3",
+    "sensor": "4",
+    "seats": "—",
+    "availability": "4"
+  },
+  "meta": {
+    "book": "double_clutch",
+    "page": 101,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "esprit_iron_scorpion_p103_x1284.webp",
+  "domain": "vehicles",
+  "category": "vehicles",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

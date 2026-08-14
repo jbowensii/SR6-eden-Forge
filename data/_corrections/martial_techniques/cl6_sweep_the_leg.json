@@ -1,0 +1,16 @@
+{
+  "domain": "martial_techniques",
+  "category": "martial_techniques",
+  "id": "cl6_sweep_the_leg",
+  "changed": {
+    "system": {
+      "category": "MARTIAL_ART_TECH"
+    }
+  },
+  "ref": {
+    "name": "Sweep the Leg",
+    "book": "firing_squad",
+    "page": 105
+  },
+  "correctedAt": "2026-08-14T14:08:17.335Z"
+}

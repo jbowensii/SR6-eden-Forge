@@ -1,0 +1,12 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_mitsubishi_nightsky",
+  "deleted": true,
+  "ref": {
+    "name": "Mitsubishi Nightsky",
+    "book": "double_clutch",
+    "page": 1
+  },
+  "correctedAt": "2026-08-09T18:51:41.336Z"
+}

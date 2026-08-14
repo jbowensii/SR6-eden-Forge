@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "vehicles",
+  "id": "dodge_rampart",
+  "deleted": true,
+  "ref": {
+    "name": "Dodge Rampart",
+    "book": "double_clutch",
+    "page": 29
+  },
+  "correctedAt": "2026-08-13T00:42:05.563Z"
+}

@@ -1,0 +1,72 @@
+{
+  "id": "cl6_ferrus_maximus",
+  "name": "Ferrus Maximus",
+  "system": {
+    "type": "WEAPON_FIREARMS",
+    "subtype": "RIFLE_SNIPER",
+    "price": 16850,
+    "priceDef": "16850",
+    "avail": 7,
+    "availDef": "7L",
+    "description": "The Ferrus Maximus is a sniper rifle, or anti-material rifle if you prefer. Using the same long penetrators as the Prime, the Maximus does away with the bullpup configuration for a more conventional rifle layout. The oddity with the Maximus is that the power clips do not fit flush, with all six of them sticking out the side of the rifle allowing for easy access without breaking your grip and coming off the rifle. This allows the Maximus to be operated more easily by a single shooter in a hide, thus maximizing the benefits of the range, power, and accuracy of this weapon. The Maximus is not a subtle weapon by any means, thanks to the extended barrel, rigid stock, and bipod. The stock also has a monopod to allow for maximum comfort for long stretches on the gun in a sniper’s hide.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "ferrus_maximus",
+      "category": "gear_firearms",
+      "book": "deadly_arts",
+      "attrs": {
+        "id": "ferrus_maximus",
+        "avail": "7L",
+        "price": "16850",
+        "type": "WEAPON_FIREARMS",
+        "subtype": "RIFLE_SNIPER"
+      },
+      "stats": {
+        "weapon.attack": ",11,15,22,19",
+        "weapon.ammo": "12(c)",
+        "weapon.dmg": "5P",
+        "weapon.mode": "SA",
+        "weapon.skill": "exotic_weapons",
+        "weapon.spec": "exotic_weapons/linear",
+        "attrdef.id": "AMMUNITION_CLASS",
+        "attrdef.value": "RAILGUN"
+      },
+      "page": "61"
+    },
+    "skill": "exotic_weapons",
+    "spec": "exotic_weapons/linear",
+    "dmg": 5,
+    "stun": false,
+    "dmgDef": "5P",
+    "dmgFlags": [],
+    "modes": {
+      "SS": false,
+      "SA": true,
+      "BF": false,
+      "FA": false
+    },
+    "attackRating": [
+      0,
+      11,
+      15,
+      22,
+      19
+    ],
+    "ammocap": 12,
+    "ammoType": "c",
+    "genesisID": "ferrus_maximus"
+  },
+  "meta": {
+    "book": "deadly_arts",
+    "page": 61,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "ferrus_maximus_p063_x285.webp",
+  "domain": "gear",
+  "category": "weapons_firearms",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

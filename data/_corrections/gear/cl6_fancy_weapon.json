@@ -1,0 +1,15 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_fancy_weapon",
+  "correctedAt": "2026-08-09T11:35:03.706Z",
+  "ref": {
+    "name": "Fancy Weapon",
+    "book": "smooth_operations"
+  },
+  "changed": {
+    "system": {
+      "subtype": "FIREARMS_ACCESSORY"
+    }
+  }
+}

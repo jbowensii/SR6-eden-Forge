@@ -1,0 +1,70 @@
+{
+  "id": "street_samurai",
+  "name": "Street Samurai",
+  "system": {
+    "category": "NPC",
+    "metatype": "troll",
+    "attributes": {
+      "bod": 7,
+      "agi": 3,
+      "rea": 3,
+      "str": 7,
+      "wil": 1,
+      "log": 2,
+      "int": 4,
+      "cha": 2,
+      "edg": 5,
+      "ess": 0.4
+    },
+    "initiative": "7(8) + 2D6/1 Major, 3 Minor",
+    "conditionMonitors": "Condition Monitors (P/S): 13/9",
+    "defenseRating": "16",
+    "activeSkills": "Close Combat 7(8) (Blades +2), Firearms 4(5) (Heavy Pistols",
+    "knowledgeSkills": "Urban Brawl, Japanese History, Bushido",
+    "languages": "English (Native), Or'zet, Japanese",
+    "qualities": "Ambidextrous, Aptitude (Close Combat), Built Tough 2",
+    "contacts": "Corporate Executive (C2/L1), Martial Arts Instructor (C1/L2),",
+    "lifestyle": "Middle (1 month prepaid)",
+    "augmentations": "Bone lacing (titanium), cyberarm (Agility 5, Strength",
+    "gear": "Ares Roadmaster van, armor jacket, contacts (rating 3; w/ image link, low-light vision, smartlink), fake SIN (rating 4; w/ concealed carry license, cyberware license, driver's license), Transys Avalon commlink",
+    "nuyen": "2,805¥",
+    "weapons": "",
+    "powers": "",
+    "adeptPowers": "",
+    "spells": "",
+    "complexForms": "",
+    "cyberware": "",
+    "genesisID": "cat28000_npcs_street_samurai",
+    "defenserating": "",
+    "notes": "",
+    "type": "NPC",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "corebook_berlin",
+    "page": 88,
+    "sources": [
+      {
+        "book": "corebook_berlin",
+        "page": 88
+      },
+      {
+        "book": "corebook_hongkong",
+        "page": 88
+      },
+      {
+        "book": "corebook",
+        "page": 88
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "corebook_berlin",
+    "originalName": "Street Samurai"
+  },
+  "img": "street_samurai_p088_x453.webp",
+  "domain": "npcs",
+  "category": "npc",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

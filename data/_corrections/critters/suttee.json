@@ -1,0 +1,49 @@
+{
+  "id": "suttee",
+  "name": "Suttee",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 6,
+      "agi": 7,
+      "rea": 8,
+      "str": 3,
+      "wil": 5,
+      "log": 5,
+      "int": 6,
+      "cha": 5,
+      "mag": 5,
+      "ess": 5
+    },
+    "skills": "Astral, Athletics, Close Combat, Exotic Ranged Weapon, Perception",
+    "powers": "Accident, Astral Form, Confusion, Elemental Attack (Fire), Energy",
+    "weaknesses": "Allergy (Cold, Severe), Vulnerability (fire extinguishers)",
+    "description": "(Fire, Force 5) Suttees are predatory, feline elementals. When hunting, their fur is coal black, blending into ash wastes. As they approach their prey, they sheathe glowing-hot, scythe-shaped claws fangs. Suttees then leap with ferocity, manifesting a great flaming mane.",
+    "movement": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_suttee",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 55,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 55
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Suttee"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

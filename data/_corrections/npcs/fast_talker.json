@@ -1,0 +1,62 @@
+{
+  "id": "fast_talker",
+  "name": "Fast-Talker",
+  "system": {
+    "category": "NPC",
+    "metatype": "dwarf",
+    "attributes": {
+      "bod": 5,
+      "agi": 4,
+      "rea": 4,
+      "str": 3,
+      "wil": 6,
+      "log": 4,
+      "int": 5,
+      "cha": 6,
+      "edg": 5,
+      "ess": 5.4
+    },
+    "activeSkills": "Biotech 1, Close Combat 2, Con 6 (Acting +3), Electronics",
+    "knowledgeSkills": "Banking, Blackmarket Goods Value, Paydata Value,",
+    "languages": "English (Native)",
+    "qualities": "All Business, Bounty, Façade, Toxin Resistance, Thermographic Vision",
+    "contacts": "Bank Manager (C4/L3), Chop Shop Mechanic (C3/L3), Construc- tion Foreman (C2/L3), Customs Officer (C2/L3), Fence (C2/L2), Paramedic",
+    "lifestyle": "Low (1 month prepaid)",
+    "augmentations": "Reaction enhancers (rating 2)",
+    "gear": "AV Rapid Transit (chemical protection, diamond), contacts (rating 3, im- age link, vision enhancement), earbuds (rating 3, audio enhancement, spatial recognizer), Erika Elite commlink, 2 x fake SIN (rating 1; w/ driver's license), fake",
+    "nuyen": "235¥",
+    "weapons": "",
+    "powers": "",
+    "adeptPowers": "",
+    "defenseRating": "",
+    "spells": "",
+    "conditionMonitors": "",
+    "initiative": "",
+    "complexForms": "",
+    "cyberware": "",
+    "defenserating": "",
+    "notes": "",
+    "genesisID": "cat28000_npcs_fast_talker",
+    "type": "NPC",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "smooth_operations",
+    "page": 101,
+    "sources": [
+      {
+        "book": "smooth_operations",
+        "page": 101
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "smooth_operations",
+    "originalName": "Fast-Talker"
+  },
+  "img": "fast_talker_p101_x468.webp",
+  "domain": "npcs",
+  "category": "npc",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

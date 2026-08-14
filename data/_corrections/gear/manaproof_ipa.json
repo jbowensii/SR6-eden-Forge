@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "chemicals",
+  "id": "manaproof_ipa",
+  "deleted": true,
+  "ref": {
+    "name": "Manaproof IPA",
+    "book": "body_shop",
+    "page": 124
+  },
+  "correctedAt": "2026-08-09T18:51:40.876Z"
+}

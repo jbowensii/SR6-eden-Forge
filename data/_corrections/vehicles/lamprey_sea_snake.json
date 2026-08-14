@@ -1,0 +1,12 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "lamprey_sea_snake",
+  "deleted": true,
+  "ref": {
+    "name": "Lamprey/Sea Snake",
+    "book": "corebook_berlin",
+    "page": 302
+  },
+  "correctedAt": "2026-08-12T10:36:55.860Z"
+}

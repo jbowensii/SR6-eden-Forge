@@ -1,0 +1,22 @@
+{
+  "domain": "gear",
+  "category": "ammo",
+  "id": "cl6_ammo_arrow",
+  "correctedAt": "2026-07-30T13:26:22.852Z",
+  "name": "Arrow",
+  "system": {
+    "type": "AMMUNITION",
+    "subtype": "AMMUNITION_ARROW",
+    "avail": 3,
+    "availDef": "(Rating/3)",
+    "price": 0,
+    "notes": "For bows; rating up to bow rating",
+    "priceDef": "Rating x 2¥"
+  },
+  "qaStatus": "extracted",
+  "gapsOnly": true,
+  "ref": {
+    "name": "Arrow",
+    "wasId": "arrow"
+  }
+}

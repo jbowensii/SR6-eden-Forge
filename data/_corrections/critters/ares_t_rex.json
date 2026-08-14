@@ -1,0 +1,48 @@
+{
+  "id": "ares_t_rex",
+  "name": "Ares T-Rex",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 18,
+      "agi": 4,
+      "rea": 4,
+      "str": 28,
+      "wil": 2,
+      "log": 1,
+      "int": 2,
+      "cha": 2,
+      "ess": 6
+    },
+    "skills": "Athletics 6, Close Combat 8, Influence 2 (Intimidation +2), Outdoors",
+    "powers": "Hardened Armor 6, Enhanced Senses (Smell), Natural Weapon",
+    "description": "King of the dinosaurs, the great Tyrannosaurus rex is a massive killing machine with huge filled with deadly teeth that more than makes for its comically tiny forelimbs. As iconic as it powerful, there's little reason to wonder why made this dinosaur their top priority for resurrection from extinction. Whether due to its tiny brain or aggressive nature, it is incredibly resistant to ing tamed or trained.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "defenserating": "",
+    "initiative": "",
+    "genesisID": "cat28000_critters_ares_t_rex",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "body_shop",
+    "page": 165,
+    "sources": [
+      {
+        "book": "body_shop",
+        "page": 165
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "body_shop",
+    "originalName": "Ares T-Rex"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

@@ -1,0 +1,15 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_flashing_blade",
+  "correctedAt": "2026-08-09T11:35:03.645Z",
+  "ref": {
+    "name": "Flashing Blade",
+    "book": "firing_squad"
+  },
+  "changed": {
+    "system": {
+      "subtype": "FIREARMS_ACCESSORY"
+    }
+  }
+}

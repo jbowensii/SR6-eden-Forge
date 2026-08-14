@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "chemicals",
+  "id": "deep_impact",
+  "deleted": true,
+  "ref": {
+    "name": "Deep Impact",
+    "book": "body_shop",
+    "page": 126
+  },
+  "correctedAt": "2026-08-09T18:51:40.765Z"
+}

@@ -1,0 +1,48 @@
+{
+  "id": "titanoboa",
+  "name": "Titanoboa",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 7,
+      "agi": 3,
+      "rea": 3,
+      "str": 6,
+      "wil": 3,
+      "log": 1,
+      "int": 3,
+      "cha": 2,
+      "ess": 6
+    },
+    "skills": "Athletics 4, Close Combat 5, Outdoors 4, Perception 4",
+    "powers": "Armor (4), Enhanced Senses (Smell), Natural Weapon (Fangs,",
+    "description": "In the coastal regions of Aztlan and Amazonia, there lives a monstrous snake that was long thought to be extinct. Many of the scientists originally believed this relative of the boa constrictor could only live in climates currently warmer than our equatorial temperatures. Turns out they were wrong. All they needed was a little magic. The titanoboa ( Titanoboa cerrejonensis ) the largest known mundane snake, reaching a maximum length of fourteen meters and weight over one metric ton. This snake has scales that are green and light brown forming patterns looking like the rippling sands of the coastal regions that are their home. The creature is fairly lethargic and will typically lie in wait for prey to come close to its enormous body. Once it senses a creature nearby, it begins to grasp their prey and crush it prior to consumption. The titanoboas are viviparous, which means that they perform a live birth of between eight and twenty-five snakelets. These offspring will mature over the next six years before reaching sexual SWAMPS // maturity. The key thing to remember is that when you step over a log, it might just be a snake that wants to squeeze all the blood out of you.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_titanoboa",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "wild_life",
+    "page": 83,
+    "sources": [
+      {
+        "book": "wild_life",
+        "page": 83
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "wild_life",
+    "originalName": "Titanoboa"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

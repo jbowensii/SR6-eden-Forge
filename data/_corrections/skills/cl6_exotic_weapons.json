@@ -1,0 +1,16 @@
+{
+  "domain": "skills",
+  "category": "skills",
+  "id": "cl6_exotic_weapons",
+  "changed": {
+    "system": {
+      "category": "COMBAT"
+    }
+  },
+  "ref": {
+    "name": "Exotic Weapons",
+    "book": "corebook",
+    "page": 95
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

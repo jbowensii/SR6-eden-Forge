@@ -1,0 +1,17 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "utility_magnet_disposable",
+  "changed": {
+    "system": {
+      "type": "TOOLS",
+      "subtype": "TOOLS"
+    }
+  },
+  "ref": {
+    "name": "Utility Magnet (Disposable)",
+    "book": "explosive_decompression",
+    "page": 85
+  },
+  "correctedAt": "2026-08-13T16:04:22.960Z"
+}

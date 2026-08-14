@@ -1,0 +1,15 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_weapon_commlink",
+  "correctedAt": "2026-08-09T11:35:03.638Z",
+  "ref": {
+    "name": "Weapon Commlink",
+    "book": "firing_squad"
+  },
+  "changed": {
+    "system": {
+      "subtype": "FIREARMS_ACCESSORY"
+    }
+  }
+}

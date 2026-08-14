@@ -1,0 +1,52 @@
+{
+  "id": "boobrie",
+  "name": "Boobrie",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 3,
+      "agi": 6,
+      "rea": 5,
+      "str": 3,
+      "wil": 3,
+      "log": 1,
+      "int": 6,
+      "cha": 2,
+      "ess": 6
+    },
+    "skills": "Athletics 4, Close Combat 8, Perception 5, Stealth 4",
+    "powers": "Infection (VITAS-III), Natural Weapon (Beak)",
+    "description": "The boobrie is a large wading bird named after a Scottish legend of an ill-omen bird. This bird stands nearly two meters tall with a wingspan of three meters. It is known to be a carrier of a mutated form of VITAS-III that appears to have developed due to the proximity of toxic waterways to its natural habitat. The boobrie isn't known to be aggressive unless someone gets too near to its nest. The waterways of the Mississippi are the home of thousands of boobrie.",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_boobrie",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "shadows_new_orleans",
+    "page": 25,
+    "sources": [
+      {
+        "book": "shadows_new_orleans",
+        "page": 25
+      },
+      {
+        "book": "wild_life",
+        "page": 76
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "shadows_new_orleans",
+    "originalName": "Boobrie"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

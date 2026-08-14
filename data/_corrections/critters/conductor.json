@@ -1,0 +1,48 @@
+{
+  "id": "conductor",
+  "name": "Conductor",
+  "system": {
+    "category": "CRITTER",
+    "attributes": {
+      "bod": 6,
+      "agi": 5,
+      "rea": 7,
+      "str": 3,
+      "wil": 5,
+      "log": 5,
+      "int": 6,
+      "cha": 5,
+      "mag": 5,
+      "ess": 5
+    },
+    "skills": "Astral 5, Close Combat 5, Influence 5, Perception 5, Sorcery 5",
+    "powers": "Accident, Concealment, Confusion, Enhanced Senses (low- light vision, thermographic vision), Fear, Guard, Influence, Innate Spell",
+    "movement": "",
+    "weaknesses": "",
+    "notes": "",
+    "metatype": "",
+    "initiative": "",
+    "defenserating": "",
+    "genesisID": "cat28000_critters_conductor",
+    "type": "CRITTER",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "astral_ways",
+    "page": 156,
+    "sources": [
+      {
+        "book": "astral_ways",
+        "page": 156
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "astral_ways",
+    "originalName": "Conductor"
+  },
+  "domain": "critters",
+  "category": "critter",
+  "correctedAt": "2026-08-10T19:38:29.000Z"
+}

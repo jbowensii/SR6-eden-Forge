@@ -1,0 +1,43 @@
+{
+  "id": "cl6_virtual_garage",
+  "name": "Virtual Garage",
+  "system": {
+    "type": "TOOLS",
+    "subtype": "TOOLS",
+    "price": 5000,
+    "priceDef": "5000",
+    "avail": 6,
+    "availDef": "6",
+    "description": "A virtual garage is a useful tool that can be added onto a facility workspace. By utilizing an AR model, you can experiment without fear of permanent failure. Using a virtual garage during the design process you gain a bonus Edge on each roll.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "virtual_garage",
+      "category": "gear_electronics",
+      "book": "double_clutch",
+      "attrs": {
+        "avail": "6",
+        "price": "5000",
+        "id": "virtual_garage",
+        "type": "TOOLS",
+        "subtype": "TOOLS"
+      },
+      "stats": {},
+      "page": "155"
+    },
+    "genesisID": "virtual_garage",
+    "dmgDef": ""
+  },
+  "meta": {
+    "book": "double_clutch",
+    "page": 155,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "virtual_garage_p155_x1497.webp",
+  "domain": "gear",
+  "category": "electronics",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

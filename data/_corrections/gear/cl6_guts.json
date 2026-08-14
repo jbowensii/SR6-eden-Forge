@@ -1,0 +1,20 @@
+{
+  "domain": "gear",
+  "category": "chemicals",
+  "id": "cl6_guts",
+  "movedTo": {
+    "domain": "gear",
+    "category": "chemicals"
+  },
+  "movedFrom": {
+    "domain": "qualities",
+    "category": "qualities"
+  },
+  "why": "Commlink6 files this under gear_drugs",
+  "ref": {
+    "name": "Guts",
+    "book": "corebook",
+    "page": 71
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

@@ -1,0 +1,16 @@
+{
+  "domain": "gear",
+  "category": "electronics",
+  "id": "head_and",
+  "changed": {
+    "meta": {
+      "flagged": "looks like page furniture, not an item — delete?"
+    }
+  },
+  "ref": {
+    "name": "Head and",
+    "book": "double_clutch",
+    "page": 121
+  },
+  "correctedAt": "2026-08-13T19:27:19.162Z"
+}

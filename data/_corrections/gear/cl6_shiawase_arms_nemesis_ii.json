@@ -1,0 +1,70 @@
+{
+  "id": "cl6_shiawase_arms_nemesis_ii",
+  "name": "Shiawase Arms Nemesis II",
+  "system": {
+    "type": "WEAPON_FIREARMS",
+    "subtype": "LMG",
+    "price": 4550,
+    "priceDef": "4550",
+    "avail": 4,
+    "availDef": "4L",
+    "description": "Named after the Greek goddess of divine justice and vengeance, the original Nemesis was designed to be a user-friendly, person-portable infantry squad support weapon. Built around a high-rated safe-targeting system, the idea was to help prevent friendly- fire incidents among lower-tier or less-experienced troops while still providing a solid weapon for higher- tier experienced ones. On many counts, the Nemesis was a success. Among the units it was designed for, reports indicated that friendly-fire incidents did in fact decline among those who used it. Although those same reports indicated that the safe-system was somewhat prone to hacking and that the ammo-feed system was extremely susceptible to foreign objects and debris. The new Nemesis II for the most part has corrected these problems but is now made of stronger, lighter-weight materials similar to those used in the proposed \"Mobile Warrior\" line of weapons. The result is a weapon system that is twenty-five percent lighter than its predecessor. While still a decent weapon system, these lightweight materials don't handle recoil like the previous model, making the Nemesis II slightly less accurate in combat. \\nNote: Includes safe firing IFF system and smartgun system.",
+    "notes": "",
+    "wifi": "",
+    "_cl6": {
+      "id": "shiawase_arms_nemesis_ii",
+      "category": "gear_firearms",
+      "book": "firing_squad",
+      "attrs": {
+        "id": "shiawase_arms_nemesis_ii",
+        "avail": "4L",
+        "price": "4550",
+        "type": "WEAPON_FIREARMS",
+        "subtype": "LMG"
+      },
+      "stats": {
+        "weapon.dmg": "4P",
+        "weapon.mode": "BF/FA",
+        "weapon.attack": "4,11,11,8,2",
+        "weapon.ammo": "50(c)/100(belt)",
+        "weapon.skill": "firearms",
+        "weapon.spec": "firearms/machine_guns"
+      },
+      "page": "30"
+    },
+    "skill": "firearms",
+    "spec": "firearms/machine_guns",
+    "dmg": 4,
+    "stun": false,
+    "dmgDef": "4P",
+    "dmgFlags": [],
+    "modes": {
+      "SS": false,
+      "SA": false,
+      "BF": true,
+      "FA": true
+    },
+    "attackRating": [
+      4,
+      11,
+      11,
+      8,
+      2
+    ],
+    "ammocap": 50,
+    "ammoType": "c",
+    "genesisID": "shiawase_arms_nemesis_ii"
+  },
+  "meta": {
+    "book": "firing_squad",
+    "page": 30,
+    "source": "commlink6",
+    "qaStatus": "extracted",
+    "extractedAt": "2026-08-10",
+    "extractorVersion": "commlink6-1.14.0"
+  },
+  "img": "shiawase_arms_nemesis_ii_p030_x789.webp",
+  "domain": "gear",
+  "category": "weapons_firearms",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

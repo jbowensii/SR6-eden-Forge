@@ -1,0 +1,84 @@
+{
+  "id": "rigger",
+  "name": "Rigger",
+  "system": {
+    "category": "NPC",
+    "metatype": "human",
+    "attributes": {
+      "bod": 2,
+      "agi": 3,
+      "rea": 4,
+      "str": 2,
+      "wil": 2,
+      "log": 4,
+      "int": 6,
+      "cha": 1,
+      "edg": 4,
+      "ess": 2.5
+    },
+    "initiative": "10 + 1D6/1 Major, 2 Minor",
+    "conditionMonitors": "",
+    "defenseRating": "",
+    "activeSkills": "Biotech 1 (First Aid +2), Engineering 4 (Aeronautics Mechanic +2), Firearms 3 (Automatics +2), Perception 3 (Urban +2), Piloting 7 (Aircraft +2), Electronics 2 (Hardware +2)",
+    "knowledgeSkills": "Australian Legends, Desert Wars, Drone Designers, Rigger Clubs",
+    "languages": "English (Native), German",
+    "qualities": "Aptitude (Piloting), Bad Rep, Dependents 1 (Estranged Child), Elf Poser, Gearhead, In Debt (Mafia, 25,000¥, 2,500¥/month interest), Juryrigger",
+    "contacts": "Drone Racer (C1/L1), Mechanic (C1/L1), Squatter (C1/L1)",
+    "lifestyle": "Middle (1 month prepaid)",
+    "augmentations": "Control rig 2, cybereyes (rating 5; w/ flare compensation, image link, low-light vision, smartlink, thermographic vision, vision enhancement, vision magnification), cyberarm (obvious left; Agility 2, Strength 2; cybergun SMG)",
+    "gear": "Aeronautical repair shop, armor jacket, fake SIN (rating 4; w/ cyberware license, RCC license), fake SIN (rating 2; w/ cyberware license, RCC license), Proteus Poseidon rigger command console (w/ biometric reader, Clearsight autosoft, electronic warfare program), Transys Avalon commlink (Device Rating 6, D/F 3/1, Programs 3, w/ biometric reader) Vehicles: Chrysler-Nissan Pursuit V drone (w/ Evasion Pursuit V autosoft, Maneuver Pursuit V autosoft), 2 x Cyberspace Designs Dalmation drone (w/ Evasion Dalmation autosoft, Maneuver Dalmation autosoft), 4 x Cyberspace Designs Quadrotor drone (w/ Evasion Quadrotor autosoft, Maneuver Quadrotor autosoft), GMC Bulldog stepvan, 5 x GMC Micromachine drone (w/ Maneuver Micromachine autosoft), 2 x GM-Nissan Doberman drone (w/ weapon mount (AK-97, 250 rounds regular ammo), Evasion Doberman autosoft, Maneuver Doberman autosoft, Targeting AK-97 autosoft), 2 x MCT Hornet drone (w/ Evasion Hornet autosoft, Maneuver Hornet autosoft), 2 x MCT-Nissan Rotodrone (w/ weapon mount (AK-97, 250 rounds regular ammo), Targeting AK-97 autosoft, Maneuver Rotodrone autosoft), 5 x Sikorsky-Bell Microskimmer XXS drone (w/ Maneuver Microskimmer XXS autosoft), Suzuki Mirage motorcycle",
+    "nuyen": "1,100¥",
+    "weapons": "Browning Ultra Power [Heavy Pistol, DV 3P, SA, 10/9/6/—/—, 14(c), w/ 100 rounds regular ammo] Uzi V (implanted) [Submachine Gun, DV 3P, SA/BF, 8/8/7/—/—, 24(c), w/ 100 rounds regular ammo] ARCHETYPES // RIGGER DLROW HTXIS :NURWODAHS",
+    "description": "Nothing beats the feel of jumping into a 86 1,000-horsepower machine or racing along at speeds that would make skin peel from bone, and that's the everyday life for the rigger. Controlling drones and vehicles with their minds sets riggers apart from every other driver on the road who has to rely on reflexes. They just think it, it happens, and they can instantly adjust without the pesky delay of an electronic remote control. Problem is, drones cost cash, and that's hard to come by, unless you're willing to do some work for certain people who may offer some upfront cash—as long as you pay it back with interest.",
+    "powers": "",
+    "adeptPowers": "",
+    "spells": "",
+    "complexForms": "",
+    "cyberware": "",
+    "rating": 0,
+    "defenserating": "6",
+    "notes": "",
+    "monitor": {
+      "physical": 9,
+      "stun": 9,
+      "overflow": 2,
+      "edge": 4
+    },
+    "movement": {
+      "walk": "",
+      "sprint": "",
+      "perHit": "",
+      "notes": ""
+    },
+    "genesisID": "cat28000_npcs_rigger",
+    "type": "NPC",
+    "subtype": ""
+  },
+  "meta": {
+    "book": "corebook_berlin",
+    "page": 87,
+    "sources": [
+      {
+        "book": "corebook_berlin",
+        "page": 87
+      },
+      {
+        "book": "corebook_hongkong",
+        "page": 87
+      },
+      {
+        "book": "corebook",
+        "page": 87
+      }
+    ],
+    "extractedAt": "2026-08-07",
+    "extractorVersion": "0.5.0",
+    "qaStatus": "extracted",
+    "descriptionFrom": "corebook_berlin",
+    "originalName": "Rigger"
+  },
+  "img": "rigger_p087_x443.webp",
+  "domain": "npcs",
+  "category": "npc",
+  "correctedAt": "2026-08-10T23:49:52.000Z"
+}

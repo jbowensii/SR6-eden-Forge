@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "software",
+  "id": "cl6_encryption_rcc",
+  "deleted": true,
+  "ref": {
+    "name": "Encryption",
+    "book": "corebook",
+    "page": 198
+  },
+  "correctedAt": "2026-08-09T18:51:40.786Z"
+}

@@ -1,0 +1,20 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_smart_firing_platform_drone",
+  "movedTo": {
+    "domain": "gear",
+    "category": "weapon_accessories"
+  },
+  "movedFrom": {
+    "domain": "vehicles",
+    "category": "vehicles"
+  },
+  "why": "Commlink6 files this under gear_firearms_accessories",
+  "ref": {
+    "name": "Smart firing platform",
+    "book": "corebook",
+    "page": 260
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

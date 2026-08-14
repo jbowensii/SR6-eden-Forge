@@ -1,0 +1,20 @@
+{
+  "domain": "qualities",
+  "category": "qualities",
+  "id": "cl6_thermographic_vision",
+  "movedTo": {
+    "domain": "qualities",
+    "category": "qualities"
+  },
+  "movedFrom": {
+    "domain": "gear",
+    "category": "electronics"
+  },
+  "why": "Commlink6 files this under qualities-metagenetic",
+  "ref": {
+    "name": "Thermographic vision",
+    "book": "corebook",
+    "page": 73
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

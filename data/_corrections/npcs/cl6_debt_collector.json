@@ -1,0 +1,17 @@
+{
+  "domain": "npcs",
+  "category": "npc",
+  "id": "cl6_debt_collector",
+  "changed": {
+    "system": {
+      "category": "GRUNT"
+    }
+  },
+  "ref": {
+    "name": "Debt Collector (Augmented)",
+    "book": "corebook",
+    "page": 206
+  },
+  "correctedAt": "2026-08-13T23:36:50.517Z",
+  "why": "Commlink6 types these GRUNT, a distinct thing from NPC"
+}

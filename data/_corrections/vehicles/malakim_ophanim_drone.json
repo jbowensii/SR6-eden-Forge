@@ -1,0 +1,18 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "malakim_ophanim_drone",
+  "changed": {
+    "system": {
+      "type": "VEHICLES",
+      "subtype": "AIR"
+    }
+  },
+  "ref": {
+    "name": "Malakim / Ophanim Drone",
+    "book": "hack_slash",
+    "page": 169
+  },
+  "correctedAt": "2026-08-12T11:02:07.129Z",
+  "system": {}
+}

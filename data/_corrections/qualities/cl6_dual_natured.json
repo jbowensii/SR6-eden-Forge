@@ -1,0 +1,20 @@
+{
+  "domain": "qualities",
+  "category": "qualities",
+  "id": "cl6_dual_natured",
+  "movedTo": {
+    "domain": "qualities",
+    "category": "qualities"
+  },
+  "movedFrom": {
+    "domain": "critter_powers",
+    "category": "critter_powers"
+  },
+  "why": "Commlink6 files this under qualities",
+  "ref": {
+    "name": "Dual Natured",
+    "book": "corebook",
+    "page": 223
+  },
+  "correctedAt": "2026-08-13T23:02:46.245Z"
+}

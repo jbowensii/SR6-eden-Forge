@@ -1,0 +1,15 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_gecko_grip_modification",
+  "correctedAt": "2026-08-09T11:35:03.693Z",
+  "ref": {
+    "name": "Gecko Grip Modification",
+    "book": "firing_squad"
+  },
+  "changed": {
+    "system": {
+      "subtype": "FIREARMS_ACCESSORY"
+    }
+  }
+}

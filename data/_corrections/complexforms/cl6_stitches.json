@@ -1,0 +1,16 @@
+{
+  "domain": "complexforms",
+  "category": "complexforms",
+  "id": "cl6_stitches",
+  "changed": {
+    "system": {
+      "category": "COMPLEX_FORM"
+    }
+  },
+  "ref": {
+    "name": "Stitches",
+    "book": "corebook",
+    "page": 191
+  },
+  "correctedAt": "2026-08-13T20:39:36.096Z"
+}

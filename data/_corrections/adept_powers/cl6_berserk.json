@@ -1,0 +1,16 @@
+{
+  "domain": "adept_powers",
+  "category": "adept_powers",
+  "id": "cl6_berserk",
+  "changed": {
+    "system": {
+      "category": "ADEPT_POWER"
+    }
+  },
+  "ref": {
+    "name": "Berserk",
+    "book": "street_wyrd",
+    "page": 77
+  },
+  "correctedAt": "2026-08-13T20:30:49.894Z"
+}

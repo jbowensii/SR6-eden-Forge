@@ -1,0 +1,28 @@
+{
+  "domain": "vehicles",
+  "category": "vehicles",
+  "id": "cl6_sea_ray_cottonmouth",
+  "correctedAt": "2026-07-30T12:06:11.528Z",
+  "name": "Sea Ray Cottonmouth",
+  "system": {
+    "type": "VEHICLE",
+    "subtype": "POWERBOAT",
+    "handling": "3",
+    "accel": "15",
+    "speedInterval": "15",
+    "topSpeed": "60",
+    "body": "8",
+    "armor": "5",
+    "pilot": "2",
+    "sensor": "3",
+    "seats": "8",
+    "availability": "3",
+    "price": "35,000"
+  },
+  "qaStatus": "extracted",
+  "gapsOnly": true,
+  "ref": {
+    "name": "Sea Ray Cottonmouth",
+    "wasId": "sea_ray_cottonmouth"
+  }
+}

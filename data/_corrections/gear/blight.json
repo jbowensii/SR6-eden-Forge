@@ -1,0 +1,12 @@
+{
+  "domain": "gear",
+  "category": "chemicals",
+  "id": "blight",
+  "deleted": true,
+  "ref": {
+    "name": "Blight",
+    "book": "body_shop",
+    "page": 120
+  },
+  "correctedAt": "2026-08-09T18:51:40.731Z"
+}

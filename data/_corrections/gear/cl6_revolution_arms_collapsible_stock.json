@@ -1,0 +1,15 @@
+{
+  "domain": "gear",
+  "category": "weapon_accessories",
+  "id": "cl6_revolution_arms_collapsible_stock",
+  "correctedAt": "2026-08-09T11:35:03.546Z",
+  "ref": {
+    "name": "rEVOlution Arms Collapsible Stock",
+    "book": "firing_squad"
+  },
+  "changed": {
+    "system": {
+      "subtype": "FIREARMS_ACCESSORY"
+    }
+  }
+}
