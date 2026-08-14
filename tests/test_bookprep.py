@@ -1047,3 +1047,38 @@ def test_a_correction_can_move_an_item_to_another_domain():
     # item is absent is skipped and the move never runs
     assert text.index('rec.get("movedTo")') < text.rindex("if not target:"), \
         "the move must run before the not-found skip"
+
+
+def test_the_bundled_corrections_reach_the_workspace(tmp_path):
+    """The build ships corrections to <app>/data/_corrections, but the import
+    reads the WORKSPACE. Without a seed the bundle sits in the program folder
+    and is never read — inert for exactly the fresh install it exists to serve.
+    Shipped and consumed are different questions, and only one of them was
+    checked."""
+    import importlib.util
+    from pathlib import Path
+    src = Path(__file__).resolve().parent.parent / "tools" / "import_library.py"
+    spec = importlib.util.spec_from_file_location("_il_seed", src)
+    il = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(il)
+
+    n = il.seed_bundled_corrections(tmp_path)
+    assert n > 0, "nothing seeded — the bundle is unreachable from a fresh workspace"
+    assert (tmp_path / "_corrections").is_dir()
+
+    # a decision the user already made outranks the shipped one, always
+    victim = next((tmp_path / "_corrections").rglob("*.json"))
+    victim.write_text('{"mine": true}', encoding="utf-8")
+    assert il.seed_bundled_corrections(tmp_path) == 0, "a second seed re-copied files"
+    assert victim.read_text(encoding="utf-8") == '{"mine": true}', "the user's own edit was overwritten"
+
+
+def test_import_library_uses_its_own_path_alias():
+    """`Path` is imported as `_P` here. A bare `Path(...)` raises NameError at
+    runtime — which is exactly how the orphaned-icon sweep failed silently for
+    two releases, caught by a try/except that printed the error and carried on."""
+    from pathlib import Path
+    text = (Path(__file__).resolve().parent.parent / "tools"
+            / "import_library.py").read_text(encoding="utf-8")
+    assert "Path(__file__)" not in text.replace("_P(__file__)", ""), \
+        "a bare Path(...) is back; this module only has _P"

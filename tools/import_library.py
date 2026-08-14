@@ -437,6 +437,10 @@ def run(data_root: _P, jar: _P | None, only: str | None, apply: bool,
         # outranks Commlink6 as well as everything derived. Skipped entirely
         # when there is nothing to apply, so a fresh workspace says so rather
         # than running a no-op and looking like it did something.
+        seeded = seed_bundled_corrections(data_root)
+        if seeded:
+            print(f"\nseeded {seeded} correction(s) shipped with the app "
+                  f"(your own are left alone)", flush=True)
         corrections = data_root / "_corrections"
         pending = (sorted(corrections.rglob("*.json"))
                    if corrections.is_dir() else [])
@@ -500,7 +504,7 @@ def run(data_root: _P, jar: _P | None, only: str | None, apply: bool,
     try:
         import importlib.util
         _spec = importlib.util.spec_from_file_location(
-            "_ici", Path(__file__).resolve().parent / "install_category_icons.py")
+            "_ici", _P(__file__).resolve().parent / "install_category_icons.py")
         _ici = importlib.util.module_from_spec(_spec)
         _spec.loader.exec_module(_ici)
         swept = _ici.sweep_orphans(data_root)
@@ -524,7 +528,7 @@ def run(data_root: _P, jar: _P | None, only: str | None, apply: bool,
     except ImportError:
         import importlib.util
         _spec = importlib.util.spec_from_file_location(
-            "_verify", Path(__file__).resolve().parent / "verify_library.py")
+            "_verify", _P(__file__).resolve().parent / "verify_library.py")
         _verify = importlib.util.module_from_spec(_spec)
         _spec.loader.exec_module(_verify)
     try:
@@ -577,6 +581,34 @@ def _utf8_console() -> None:
             stream.reconfigure(encoding="utf-8", errors="replace")
         except (AttributeError, OSError):
             pass
+
+
+
+def seed_bundled_corrections(data_root) -> int:
+    """Copy corrections shipped with the app into the user's workspace.
+
+    The build carries a corrections set — the cleanup work, as decisions about
+    items rather than the items themselves. It installs to <app>/data/_corrections,
+    but apply_corrections reads the WORKSPACE, so without this the bundle sits in
+    the program folder and is never read: inert for exactly the fresh install it
+    exists to serve.
+
+    Never overwrites. A correction the user has already made about an item beats
+    the shipped one every time — seeding fills gaps, it does not impose choices.
+    """
+    src = _P(__file__).resolve().parent.parent / "data" / "_corrections"
+    if not src.is_dir():
+        return 0
+    dest_root = _P(data_root) / "_corrections"
+    copied = 0
+    for f in src.rglob("*.json"):
+        dest = dest_root / f.relative_to(src)
+        if dest.exists():
+            continue                      # the user's own decision stands
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(f.read_bytes())
+        copied += 1
+    return copied
 
 
 def main() -> None:
