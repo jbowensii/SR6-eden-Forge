@@ -1134,3 +1134,54 @@ def test_the_real_workspace_has_no_stray_correction_folders():
         pytest.skip("no workspace on this machine")
     ok, msg, detail = _verify_mod().rule_corrections_hold_only_domains(data, [], [])
     assert ok, f"{msg}: {detail}"
+
+
+def _ratchet_on(tmp_path, rows):
+    """Run the backwards check over a made-up library, return (ok, detail)."""
+    m = _verify_mod()
+    items = [("gear/gear.json", r) for r in rows]
+    ok, _, detail = m.rule_nothing_went_backwards(tmp_path, items, [])
+    return ok, detail
+
+
+def _row(i, described=True):
+    return {"id": f"r{i}", "name": f"Row {i}", "img": "x.webp",
+            "system": {"description": "text here" if described else ""}}
+
+
+def test_deleting_rows_on_purpose_does_not_trip_the_backwards_check(tmp_path):
+    """Asking "is the number smaller?" is not asking "did we lose work?".
+
+    A run that deleted 169 junk rows and emptied 96 vehicle descriptions — every
+    one of them deliberate — failed this rule for doing exactly what it was
+    told. An alarm that fires on your own instructions is one you learn to
+    scroll past, which costs more than it saves on the run that matters.
+    """
+    ok, _ = _ratchet_on(tmp_path, [_row(i) for i in range(100)])   # baseline: 100% covered
+    assert ok
+
+    # delete a third of the library ON PURPOSE — every one tombstoned
+    tombstones = [{"id": f"r{i}", "deleted": True} for i in range(66, 100)]
+    m = _verify_mod()
+    items = [("gear/gear.json", _row(i)) for i in range(66)]
+    ok, _, detail = m.rule_nothing_went_backwards(tmp_path, items, tombstones)
+    assert ok, f"recorded deletions tripped the check: {detail}"
+
+    # the same loss with NOTHING to account for it is still caught, to the row
+    ok, _, detail = m.rule_nothing_went_backwards(tmp_path, items, [])
+    assert not ok, "34 rows vanished unexplained and nothing noticed"
+    assert any("items" in d for d in detail), detail
+
+
+def test_blanking_descriptions_still_trips_it(tmp_path):
+    """The bug this rule exists for: rebuild_descriptions wrote "" over 1,926
+    descriptions and only the Commlink6 guard putting most of them back kept the
+    loss small enough to hide for a fortnight."""
+    ok, _ = _ratchet_on(tmp_path, [_row(i) for i in range(100)])
+    assert ok
+
+    # same row count, a fifth of the text gone
+    rows = [_row(i, described=(i >= 20)) for i in range(100)]
+    ok, detail = _ratchet_on(tmp_path, rows)
+    assert not ok, "descriptions were blanked across the library and nothing noticed"
+    assert any("descriptionCoverage" in d for d in detail), detail

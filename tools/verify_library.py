@@ -238,22 +238,54 @@ def rule_nothing_went_backwards(data: _P, items, corrections):
     lowers the floor honestly: the file is rewritten whenever a number improves,
     and you can delete it to re-baseline after a deliberate cull.
     """
+    # COVERAGE, not counts, for the two that ride on the row count.
+    #
+    # Asking "is the number smaller?" is not the same as asking "did we lose
+    # work?". Deleting 169 junk rows on purpose makes descriptions smaller and
+    # loses nothing; so does phase 14 emptying 96 vehicle descriptions, which is
+    # what that phase is FOR. Both fired this rule on a run where every one of
+    # those was deliberate — and an alarm that goes off at your own instructions
+    # is one you learn to scroll past, which costs more than it saves on the one
+    # run that means something.
+    #
+    # As a share of the rows that exist, deleting rows cannot move the figure at
+    # all, while a phase blanking descriptions across the library still shows up
+    # at once — which is the bug this rule was written for, after
+    # rebuild_descriptions wrote "" over 1,926 of them.
+    #
+    # `items` stays an absolute count. The library losing rows outright is the
+    # one case where the raw number IS the question.
+    n = max(len(items), 1)
+    described = sum(1 for _, it in items
+                    if str((it.get("system") or {}).get("description") or "").strip())
+    illustrated = sum(1 for _, it in items if str(it.get("img") or "").strip())
     now = {
         "items": len(items),
-        "descriptions": sum(1 for _, it in items
-                            if str((it.get("system") or {}).get("description") or "").strip()),
-        "images": sum(1 for _, it in items if str(it.get("img") or "").strip()),
+        "descriptionCoverage": round(described * 1000 / n),   # per mille, integer
+        "imageCoverage": round(illustrated * 1000 / n),
     }
     path = data / "_assets" / "_health.json"
     try:
         floor = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         floor = {}
+    # Rows you deleted ON PURPOSE are not shrinkage. Every deliberate deletion
+    # leaves a tombstone, so the row count is allowed to fall by that many
+    # before anything is wrong — and not one row further. Unexplained loss is
+    # still caught to the row, which is the point: 169 recorded deletions are
+    # fine, 169 rows vanishing with nothing to account for them is not.
+    buried = sum(1 for r in corrections if r.get("deleted") and r.get("id"))
+    allowance = {"items": buried}
+
     dropped = []
     for key, value in now.items():
         was = floor.get(key)
-        if isinstance(was, int) and value < was * 0.98:
-            dropped.append(f"{key}: {was} -> {value} ({was - value} fewer)")
+        if isinstance(was, int) and value < was * 0.98 - allowance.get(key, 0):
+            if key.endswith("Coverage"):
+                dropped.append(f"{key}: {was/10:.1f}% -> {value/10:.1f}% of rows "
+                               f"({(was - value)/10:.1f} points lower)")
+            else:
+                dropped.append(f"{key}: {was} -> {value} ({was - value} fewer)")
     # remember the high-water mark, so the floor only ever rises
     merged = {k: max(v, floor.get(k, 0) if isinstance(floor.get(k), int) else 0)
               for k, v in now.items()}
