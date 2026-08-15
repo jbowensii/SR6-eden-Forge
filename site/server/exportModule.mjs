@@ -183,7 +183,16 @@ export async function exportModule(dataRoot, exportRoot, { book, domain, status 
     rmSync(moduleDir, { recursive: true, force: true });
     renameSync(stagingDir, moduleDir);
   } catch (err) {
-    rmSync(stagingDir, { recursive: true, force: true });
+    // Tidying up must never outrank the reason we are here. This rmSync threw
+    // EPERM on Windows — a handle still open under the staging directory — and
+    // because it sat bare in the catch, it REPLACED the original error and
+    // `throw err` never ran. Every run reported a permission problem on a temp
+    // folder while the actual failure went unseen.
+    try {
+      rmSync(stagingDir, { recursive: true, force: true });
+    } catch (cleanupErr) {
+      console.error(`could not remove ${stagingDir}: ${cleanupErr.message}`);
+    }
     throw err;
   }
 
@@ -246,7 +255,16 @@ export async function exportAll(dataRoot, exportRoot, { book, status = "all", ve
     rmSync(moduleDir, { recursive: true, force: true });
     renameSync(stagingDir, moduleDir);
   } catch (err) {
-    rmSync(stagingDir, { recursive: true, force: true });
+    // Tidying up must never outrank the reason we are here. This rmSync threw
+    // EPERM on Windows — a handle still open under the staging directory — and
+    // because it sat bare in the catch, it REPLACED the original error and
+    // `throw err` never ran. Every run reported a permission problem on a temp
+    // folder while the actual failure went unseen.
+    try {
+      rmSync(stagingDir, { recursive: true, force: true });
+    } catch (cleanupErr) {
+      console.error(`could not remove ${stagingDir}: ${cleanupErr.message}`);
+    }
     throw err;
   }
   return { moduleDir, packs: packs.length, perDomain };
