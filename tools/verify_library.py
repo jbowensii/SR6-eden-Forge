@@ -267,9 +267,34 @@ def rule_nothing_went_backwards(data: _P, items, corrections):
             dropped)
 
 
+def rule_corrections_hold_only_domains(data: _P, items, corrections):
+    """Every folder under _corrections/ must be a real domain.
+
+    Corrections that were RETIRED — cancelled by the user, or pulled because
+    they were overwriting Commlink6 — were "removed" by moving them into
+    _corrections/_removed_<date>/ and reported as gone. They were not gone. A
+    glob does not care what a folder is called: 194 retired records across three
+    such folders kept re-applying on every import, including the batch pulled
+    precisely BECAUSE it trampled on Commlink6.
+
+    "Retired" was a naming convention with nothing enforcing it. This is the
+    enforcement. Retired work belongs in data/_retired_corrections/, a sibling
+    that no scan walks.
+    """
+    corr = _P(data) / "_corrections"
+    known = {d.name for d in (_P(data) / "corebook").iterdir() if d.is_dir()}         if (_P(data) / "corebook").is_dir() else set()
+    strays = [d for d in sorted(corr.iterdir())
+              if d.is_dir() and d.name not in known] if corr.is_dir() else []
+    return (not strays,
+            f"{len(strays)} folder(s) under _corrections are not a domain — "
+            f"every record in them is still being applied",
+            [f"{d.name}  ({len(list(d.rglob('*.json')))} record(s))" for d in strays])
+
+
 RULES = [
     ("nothing went backwards", rule_nothing_went_backwards),
     ("deletions stick", rule_deletions_stick),
+    ("corrections hold only domains", rule_corrections_hold_only_domains),
     ("critters and NPCs await a portrait", rule_portraits_are_not_guessed),
     ("no remembered default for those types", rule_no_remembered_default_for_excluded_types),
     ("no art nobody references", rule_no_art_nobody_references),

@@ -1082,3 +1082,55 @@ def test_import_library_uses_its_own_path_alias():
             / "import_library.py").read_text(encoding="utf-8")
     assert "Path(__file__)" not in text.replace("_P(__file__)", ""), \
         "a bare Path(...) is back; this module only has _P"
+
+
+def _verify_mod():
+    import importlib.util
+    from pathlib import Path
+    src = Path(__file__).resolve().parent.parent / "tools" / "verify_library.py"
+    spec = importlib.util.spec_from_file_location("_vl", src)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
+def test_a_stray_folder_under_corrections_is_caught(tmp_path):
+    """Retired corrections were "removed" by moving them to
+    _corrections/_removed_<date>/ and reported as gone. A glob does not care
+    what a folder is called — 194 records across three such folders kept
+    re-applying, including the batch pulled BECAUSE it overwrote Commlink6.
+    "Retired" was a convention with nothing enforcing it; this is the
+    enforcement."""
+    import json
+    (tmp_path / "corebook" / "gear").mkdir(parents=True)
+    corr = tmp_path / "_corrections"
+    (corr / "gear").mkdir(parents=True)
+    (corr / "gear" / "ok.json").write_text(json.dumps({"id": "ok", "domain": "gear"}),
+                                           encoding="utf-8")
+    rule = _verify_mod().rule_corrections_hold_only_domains
+
+    ok, _, _ = rule(tmp_path, [], [])
+    assert ok, "a real domain folder must not trip the rule"
+
+    retired = corr / "_removed_2026-08-13"
+    retired.mkdir()
+    (retired / "cancelled.json").write_text(
+        json.dumps({"id": "ford_dasher_interceptor", "deleted": True}), encoding="utf-8")
+
+    ok, _, detail = rule(tmp_path, [], [])
+    assert not ok, "a retired folder inside _corrections went unnoticed"
+    assert "_removed_2026-08-13" in " ".join(detail)
+
+
+def test_the_real_workspace_has_no_stray_correction_folders():
+    """The live library, checked directly — the three retired folders were moved
+    to data/_retired_corrections/, a sibling no scan walks."""
+    import os
+    from pathlib import Path
+    data = Path(os.environ.get("SR6_DATA",
+                r"C:\Users\johnb\Documents\SR6 Catalog\data"))
+    if not (data / "_corrections").is_dir():
+        import pytest
+        pytest.skip("no workspace on this machine")
+    ok, msg, detail = _verify_mod().rule_corrections_hold_only_domains(data, [], [])
+    assert ok, f"{msg}: {detail}"
