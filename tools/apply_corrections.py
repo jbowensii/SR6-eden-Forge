@@ -77,6 +77,7 @@ def _domains_holding():
 
 
 applied = deleted = rematched = skipped_absent = 0
+missing_tombstones = []
 _MOVED = _domains_holding()   # id -> domains, so a correction can follow its item
 field_changes = Counter()
 if not CORR.is_dir():
@@ -141,6 +142,16 @@ else:
                 rematched += 1
 
         if rec.get("deleted"):
+            # A tombstone that finds nothing used to vanish here without a
+            # count or a word, so a deletion that silently stopped working
+            # looked exactly like one that worked. Seven rows sat in the
+            # library across several imports with their tombstones matching
+            # them perfectly when checked by hand — and the log had no way to
+            # say whether the phase never found them, or something put them
+            # back afterwards. Named out loud, the next run answers that.
+            if not target:
+                missing_tombstones.append(cid)
+                continue
             if target:
                 path, payload, it = target
                 gone = it["id"]
@@ -260,6 +271,10 @@ else:
     # skip would look identical to a correction that did its job.
     absent = f", {skipped_absent} skipped (not in this library)" if skipped_absent else ""
     print(f"applied {applied} correction(s), {deleted} deletion(s){note}{absent}")
+    if missing_tombstones:
+        print(f"  {len(missing_tombstones)} tombstone(s) found no row to delete:")
+        for cid in missing_tombstones[:12]:
+            print(f"    {cid}")
     if field_changes:
         print("most-corrected fields (extractor-improvement hints):")
         for k, n in field_changes.most_common(12):
