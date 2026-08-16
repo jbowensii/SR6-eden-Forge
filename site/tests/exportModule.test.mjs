@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 
 describe("which library the export reads", () => {
   it("prefers SR6_DATA over the repo's own copy", async () => {
