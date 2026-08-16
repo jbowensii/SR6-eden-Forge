@@ -64,6 +64,11 @@ Source: "..\extractor\*"; DestDir: "{app}\extractor"; \
     Flags: ignoreversion recursesubdirs; Excludes: "__pycache__"
 Source: "..\tools\*.py"; DestDir: "{app}\tools"; Flags: ignoreversion
 Source: "..\data\_corrections\*"; DestDir: "{app}\data\_corrections"; Flags: ignoreversion recursesubdirs createallsubdirs
+; The Foundry module skeleton. Step 2 of Publish to Foundry assembles the
+; module from it, and it was never shipped — the installed app compiled 20
+; packs and then failed with "missing foundry-module\sr6-forge".
+; Our own code, so it carries no book content.
+Source: "..\foundry-module\sr6-forge\*"; DestDir: "{app}\foundry-module\sr6-forge"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\schemas\*"; DestDir: "{app}\schemas"; Flags: ignoreversion recursesubdirs
 ; The review app: sources, the BUILT front end, and its runtime packages.
 ;

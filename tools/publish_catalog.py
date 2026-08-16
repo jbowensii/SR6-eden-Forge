@@ -69,6 +69,24 @@ def main() -> int:
         print("failed while compiling packs")
         return rc
 
+    # chargen-data.json is built from the user's own Commlink6 jar, never
+    # shipped. It carries priorities, metatypes, lifepaths and starting-gear
+    # packs — book content. Bundling it would put Commlink6's material inside an
+    # installer other people download, which is the one thing this pipeline
+    # exists to avoid. So it is generated here, on the machine that owns the jar.
+    chargen = REPO / "export" / "chargen-data.json"
+    if not chargen.is_file():
+        print("    building chargen data from your Commlink6 jar")
+        rc = subprocess.run([sys.executable, str(REPO / "tools" / "build_chargen_data.py")],
+                            cwd=str(REPO), text=True).returncode
+        if rc != 0:
+            print("failed while building chargen data")
+            return rc
+        if not chargen.is_file():
+            # The generator exiting 0 is not evidence it produced the file.
+            print(f"chargen data still missing after a successful run: {chargen}")
+            return 1
+
     print("[2/3] assembling the module")
     rc = _node("site/scripts/build_module.mjs", [])
     if rc != 0:
