@@ -34,6 +34,16 @@ export function statusAllows(filter, qaStatus) {
 // !actors!) rather than Items. Everything else is an Item.
 export const ACTOR_DOMAINS = new Set(["npcs", "critters", "spirits", "vehicles"]);
 
+// Domains that are CONFIGURATION, not content, and are never packaged.
+//
+// commlink6_extra holds 853 records that never fit an item domain: the
+// character-creation machinery (priorities, metatypes, lifepaths, starting-gear
+// packs) and the rules lookup tables the system reads. They are settings. The
+// chargen module reads them in code from chargen-data.json; a player never drags
+// one onto a sheet, and no Eden document type exists for them — which is exactly
+// why the first real export died here with an empty database key.
+export const CONFIG_DOMAINS = new Set(["commlink6_extra"]);
+
 /** Display name of the generated compendium module. The generator that reads
  *  it is SR6 Forge; this is the library it reads FROM, and naming it after the
  *  setting rather than the tool says what it holds. */
@@ -63,13 +73,24 @@ export function buildDocs(dataRoot, book, domain, status, { product } = {}) {
   const docs = [];
   const icons = new Map();
   const seen = new Map();
+  const skipped = [];
   for (const file of files) {
     const payload = JSON.parse(readFileSync(join(domainDir, file), "utf8"));
     for (const item of payload.items ?? []) {
       if (item.meta?.hidden) continue;
       if (!statusAllows(status, item.meta?.qaStatus)) continue;
+      // A repeated id is not a defect. Commlink6 carries every book, books
+      // reprint material, and two PDFs printing the same item legitimately
+      // produce two rows sharing one id — 93 ids in the library do. That is
+      // right for the library, which should keep every printing, and fatal for
+      // a compendium, where the id IS the primary key and the second row
+      // silently overwrites the first.
+      //
+      // So: keep one, skip the rest, and name every skip. A silent dedupe is
+      // how you lose a row that was never really a duplicate.
       if (seen.has(item.id)) {
-        throw new Error(`duplicate item id "${item.id}" in ${domain}/${file} (also in ${seen.get(item.id)})`);
+        skipped.push({ id: item.id, name: item.name, kept: seen.get(item.id), from: file });
+        continue;
       }
       seen.set(item.id, file);
       const _id = docId(book, domain, item.id);
@@ -95,7 +116,7 @@ export function buildDocs(dataRoot, book, domain, status, { product } = {}) {
       docs.push(doc);
     }
   }
-  return { docs, icons, isActor };
+  return { docs, icons, isActor, skipped };
 }
 
 export async function exportModule(dataRoot, exportRoot, { book, domain, status = "approved", version = "0.1.0" }) {
@@ -219,6 +240,10 @@ export async function exportAll(dataRoot, exportRoot, { book, status = "all", ve
   const perDomain = {};
   try {
     for (const domain of domains) {
+      if (CONFIG_DOMAINS.has(domain)) {
+        console.log(`  skipping ${domain} — configuration, not compendium content`);
+        continue;
+      }
       if (!EDEN[domain]) { perDomain[domain] = { skipped: "no Eden mapping (site-only)" }; continue; }
       let built;
       try {
@@ -238,6 +263,13 @@ export async function exportAll(dataRoot, exportRoot, { book, status = "all", ve
         rmSync(srcDir, { recursive: true, force: true });
       }
       for (const [rel, source] of built.icons) allIcons.set(rel, source);
+      if (built.skipped?.length) {
+        console.log(`  ${domain}: kept 1 of each repeated id, skipped ${built.skipped.length}`);
+        for (const s of built.skipped.slice(0, 5)) {
+          console.log(`      ${s.id}  "${s.name}"  (kept the copy in ${s.kept})`);
+        }
+        if (built.skipped.length > 5) console.log(`      ... and ${built.skipped.length - 5} more`);
+      }
       packs.push({ name: `${book}-${domain}`, label: `${product ?? book} — ${domain}`,
         path: `packs/${domain}`, type: built.isActor ? "Actor" : "Item" });
       perDomain[domain] = { count: built.docs.length, type: built.isActor ? "Actor" : "Item" };
