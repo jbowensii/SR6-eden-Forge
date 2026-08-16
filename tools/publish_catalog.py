@@ -23,6 +23,32 @@ REPO = _P(__file__).resolve().parent.parent
 MODULE_ID = "sr6-forge-corebook"
 
 
+def _py(module: str, args: list[str] | None = None) -> int:
+    """Run one of our Python tools, from source OR from the frozen build.
+
+    sys.executable is SR6CatalogBuilder.exe in a frozen build, not python.exe.
+    Handing it a script path does not run the script: the exe does not recognise
+    the argument, falls through to its entry point and OPENS ANOTHER COPY OF THE
+    WINDOW while the step silently does nothing. import_library learned this the
+    hard way — sixteen phases, sixteen windows — and dispatches through a marker
+    instead. This is the same dispatch; every new subprocess call has to use it.
+    """
+    args = args or []
+    if getattr(sys, "frozen", False):
+        argv = [sys.executable, "--run-pipeline", f"tools.{module}", *args]
+    else:
+        argv = [sys.executable, "-u", str(REPO / "tools" / f"{module}.py"), *args]
+    print(f"    $ {' '.join(argv[1:])}")
+    p = subprocess.run(argv, cwd=str(REPO), text=True, check=False,
+                       capture_output=True, encoding="utf-8", errors="replace")
+    for line in (p.stdout or "").splitlines():
+        print(f"      {line}")
+    if p.returncode != 0:
+        for line in (p.stderr or "").splitlines()[-12:]:
+            print(f"      ! {line}")
+    return p.returncode
+
+
 def _node(script: str, args: list[str]) -> int:
     """Run one of the Node build scripts, streaming its output."""
     argv = ["node", str(REPO / script), *args]
@@ -77,8 +103,7 @@ def main() -> int:
     chargen = REPO / "export" / "chargen-data.json"
     if not chargen.is_file():
         print("    building chargen data from your Commlink6 jar")
-        rc = subprocess.run([sys.executable, str(REPO / "tools" / "build_chargen_data.py")],
-                            cwd=str(REPO), text=True).returncode
+        rc = _py("build_chargen_data")
         if rc != 0:
             print("failed while building chargen data")
             return rc
