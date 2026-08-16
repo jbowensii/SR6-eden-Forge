@@ -113,6 +113,26 @@ export function buildDocs(dataRoot, book, domain, status, { product } = {}) {
           doc.img = isActor ? "icons/svg/mystery-man.svg" : "icons/svg/item-bag.svg";
         }
       }
+            // Embedded documents need a key of their own.
+      //
+      // compilePack walks the hierarchy — applyHierarchy recurses into `effects`
+      // — and reads doc._key on EVERY document it reaches, embedded ones
+      // included. We stamped the item and stopped there, so all 356 ActiveEffects
+      // imported from Commlink6 arrived with no key and compilePack rejected the
+      // first one it met: "Key cannot be null or undefined". Every domain built
+      // clean documents; the failure was one level down, which is why three
+      // theories about handles, unknown domains and duplicate ids all missed it.
+      //
+      // Foundry's pack convention is !<parent>.<embedded>!<parentId>.<childId>.
+      // The child id is derived from the parent and the effect's position, so it
+      // is stable across exports rather than random each time.
+      if (Array.isArray(doc.effects)) {
+        doc.effects.forEach((fx, n) => {
+          const fxId = docId(book, `${domain}.effect.${n}`, item.id);
+          fx._id = fxId;
+          fx._key = `${isActor ? "!actors" : "!items"}.effects!${_id}.${fxId}`;
+        });
+      }
       docs.push(doc);
     }
   }
