@@ -23,3 +23,26 @@ describe("which library the export reads", () => {
     }
   });
 });
+
+describe("a failed export reports failure", () => {
+  it("exits non-zero when the book does not exist", async () => {
+    const { execFileSync } = await import("node:child_process");
+    const { fileURLToPath } = await import("node:url");
+    const { dirname, join } = await import("node:path");
+    const here = dirname(fileURLToPath(import.meta.url));
+    let code = 0;
+    try {
+      execFileSync(process.execPath,
+        [join(here, "..", "scripts", "export.mjs"), "--all",
+         "--book", "no_such_book", "--status", "all"],
+        { stdio: "ignore" });
+    } catch (err) {
+      code = err.status;
+    }
+    // The CLI is correct today; this pins it. Note for anyone WRAPPING it:
+    // piping the output hands the exit status to the last command in the pipe,
+    // which is how a failed export once read as a clean success — an error of
+    // invocation, not of this script.
+    expect(code).toBe(1);
+  });
+});
