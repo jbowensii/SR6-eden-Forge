@@ -6,26 +6,27 @@ therefore has to come from our own copy of the Companion.
 
 The layout is regular enough to parse from font metrics rather than guesswork:
 
-    17.8pt LiberationSans    module name (may wrap over two spans)
-    13.0pt LiberationSerif   bullet label ("Choose one:", "Resources:", ...)
-    14.6pt LiberationSerif   body text — description, or a bullet's value
+    13.0pt Njord-Regular     module name (may wrap over several spans)
+    10.5pt SabonLTStd-Bold   bullet label ("Choose one:", "Resources:", ...)
+    10.5pt SabonLTStd-Roman  body text — description, or a bullet's value
 
-Every bullet is kept verbatim in ``bullets`` so nothing is lost; ``grants`` and
-``choices`` are the machine-readable projection the chargen engine consumes.
+Section headers and folios are also Njord but at 15/9-11pt, so size separates a
+module name from the furniture around it. Event modules drop the bold label and
+fold it into the roman text, which ``interpret`` recovers. Every bullet is kept
+verbatim in ``bullets`` so nothing is lost; ``grants`` and ``choices`` are the
+machine-readable projection the chargen engine consumes.
 """
 from __future__ import annotations
 
 import re
 import unicodedata
 
-HEADER_SIZE = 17.8
-LABEL_SIZE = 13.0
-BODY_SIZE = 14.6
+NAME_SIZE = 13.0          # module name, set in the Njord display face
 SIZE_EPS = 0.35
 BULLET = "•"
 
 #: Pages of the adult/event life-module catalogue (0-based, inclusive).
-MODULE_PAGES = range(33, 49)
+MODULE_PAGES = range(32, 49)
 
 ATTRIBUTES = {
     "body", "agility", "reaction", "strength", "willpower", "logic",
@@ -70,7 +71,7 @@ def parse_page(page, carry: dict | None = None) -> list[dict]:
     """Split one page into raw module records: {name, desc, bullets:[{label, value}]}.
 
     The bullet glyph is its own tiny span, which is what actually delimits a
-    module's grants — the 13pt label span is optional. Career modules use
+    module's grants — the bold label span is optional. Career modules use
     "Choose one:" labels; the Event modules write bare "+2 to Agility, ..."
     lines with no label at all, and both have to land in ``bullets``.
     """
@@ -88,18 +89,26 @@ def parse_page(page, carry: dict | None = None) -> list[dict]:
                 if not text.strip():
                     continue
                 size = span["size"]
+                font = span["font"]
                 stripped = text.strip()
 
-                if _near(size, HEADER_SIZE):
-                    if in_header and cur:            # module name wrapped
-                        cur["name"] += " " + stripped
+                # Module names are the 13pt runs of the Njord display face. The
+                # 15pt section headers and 9-11pt running heads/folios share the
+                # family but not the size, so they end any open name and are
+                # otherwise skipped.
+                if "Njord" in font:
+                    if _near(size, NAME_SIZE):
+                        if in_header and cur:        # module name wrapped
+                            cur["name"] += " " + stripped
+                            continue
+                        cur = {"name": stripped, "desc": "", "bullets": [],
+                               "page": page.number + 1}
+                        modules.append(cur)
+                        carry = None
+                        bullet = None
+                        in_header = True
                         continue
-                    cur = {"name": stripped, "desc": "", "bullets": [],
-                           "page": page.number + 1}
-                    modules.append(cur)
-                    carry = None
-                    bullet = None
-                    in_header = True
+                    in_header = False
                     continue
 
                 if stripped == BULLET:                # start of a new grant line
@@ -110,12 +119,13 @@ def parse_page(page, carry: dict | None = None) -> list[dict]:
                     continue
 
                 in_header = False
-                if "Sans" in span["font"]:
-                    continue      # running head / folio / spine — bodies are Serif
                 if cur is None:
                     continue                          # furniture before the first module
 
-                if _near(size, LABEL_SIZE) and bullet is not None:
+                # A bold Sabon run reading "...:" is the bullet's label; anything
+                # else is value text (adult modules) or the whole grant line
+                # (events, which fold the label into the roman text).
+                if "Bold" in font and bullet is not None:
                     m = _LABEL_RE.match(stripped)
                     if m:
                         bullet["label"] = m.group(1).strip()
