@@ -12,7 +12,7 @@ import pytest
 
 from tools.audit_item_coverage import ATTR_HOME, CHILD_HOME, EXCLUDED, survey
 
-JAR = pathlib.Path(r"C:\Users\johnb\CommLink6\app\stable\commlink6-1.14.0-complete.jar")
+JAR = pathlib.Path.home() / "CommLink6" / "app" / "stable" / "commlink6-1.14.0-complete.jar"
 CHARGEN = pathlib.Path("export/chargen-data.json")
 
 pytestmark = pytest.mark.skipif(not JAR.exists(), reason="Commlink6 jar not installed")

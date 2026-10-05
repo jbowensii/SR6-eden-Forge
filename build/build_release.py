@@ -33,7 +33,7 @@ BUILD = REPO / "build"
 DIST = BUILD / "dist"
 OUT = REPO / "export" / "dist"
 
-SIGN_TOOL = Path(r"C:\Users\johnb\Tools\CodeSignTool\sign.bat")
+SIGN_TOOL = Path.home() / "Tools" / "CodeSignTool" / "sign.bat"
 # A winget install of Inno Setup lands per-user under %LOCALAPPDATA%\Programs,
 # not in Program Files, so the machine-wide paths alone miss it.
 ISCC_CANDIDATES = [

@@ -13,7 +13,7 @@ import pytest
 from extractor.effects import (MODE_ADD, build_effects, modification_to_change,
                                targets)
 
-EDEN = Path(r"C:\Users\johnb\AppData\Local\FoundryVTT\Data\systems\shadowrun6-eden")
+EDEN = Path.home() / "AppData" / "Local" / "FoundryVTT" / "Data" / "systems" / "shadowrun6-eden"
 
 
 def mod(tag="valmod", **kw):

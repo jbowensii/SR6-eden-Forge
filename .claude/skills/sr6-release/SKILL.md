@@ -38,7 +38,7 @@ python build/build_release.py
 
 Five steps: build the review app (`npm run build` + `npm ci --omit=dev`),
 freeze with PyInstaller, sign the exe, compile the installer, sign the
-installer. Signing uses `C:\Users\johnb\Tools\CodeSignTool\sign.bat`.
+installer. Signing uses `%USERPROFILE%\Tools\CodeSignTool\sign.bat`.
 
 If it fails in step 0, check `shutil.which("npm")` is still used — a bare
 `"npm"` raises FileNotFoundError on Windows because `CreateProcess` ignores

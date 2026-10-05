@@ -28,7 +28,7 @@ import re
 import zipfile
 
 DEFAULT_JAR = pathlib.Path(
-    r"C:\Users\johnb\CommLink6\app\stable\commlink6-1.14.0-complete.jar")
+    pathlib.Path.home() / "CommLink6" / "app" / "stable" / "commlink6-1.14.0-complete.jar")
 
 #: Books published in German. Defined once in extractor.ownership, which is
 #: also where the Commlink6 import gate reads it.

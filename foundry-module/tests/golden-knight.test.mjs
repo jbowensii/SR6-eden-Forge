@@ -13,6 +13,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { homedir } from "node:os";
 import { describe, expect, it } from "vitest";
 
 import { ChargenEngine, blankState } from "../sr6-forge/scripts/engine/chargen-engine.mjs";
@@ -21,7 +22,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const data = JSON.parse(readFileSync(join(here, "..", "..", "export", "chargen-data.json"), "utf8"));
 const rules = JSON.parse(readFileSync(join(here, "..", "sr6-forge", "data", "creation-rules.json"), "utf8"));
 
-const CL6 = "C:/Users/johnb/CommLink6";
+const CL6 = process.env.COMMLINK6_DIR || join(homedir(), "CommLink6");
 const EXPORT = `${CL6}/pdfs/Knight.json`;
 const SOURCE = `${CL6}/player/myself/shadowrun6/4c0fc46b-9ca1-4e74-861a-20b912715278/Knight.xml`;
 const available = existsSync(EXPORT) && existsSync(SOURCE);

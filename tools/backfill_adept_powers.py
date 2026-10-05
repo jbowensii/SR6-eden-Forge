@@ -22,7 +22,7 @@ import re
 import zipfile
 
 DEFAULT_JAR = pathlib.Path(
-    r"C:\Users\johnb\CommLink6\app\stable\commlink6-1.14.0-complete.jar")
+    pathlib.Path.home() / "CommLink6" / "app" / "stable" / "commlink6-1.14.0-complete.jar")
 TARGET = pathlib.Path("data/corebook/adept_powers/adept_powers.json")
 CHARGEN = pathlib.Path("export/chargen-data.json")
 

@@ -18,7 +18,7 @@
 - Unicode normalization for all cached text: `’`→`'`, `—`/`–`/`−`→`—` (keep em-dash — it means "column empty"), ` `→space, `ﬁ`→`fi`, `ﬂ`→`fl`, strip `­`. Keep `¥` as-is.
 - Eden field mapping (fixed): DV `3P`→`dmg:3, stun:false, dmgDef:"3P"`; `2S`→`dmg:2, stun:true`; suffix like `(e)` stays in `dmgDef`. Attack rating `10/6/2/—/—` → `attackRating:[10,6,2,0,0]` (strip `*`, `—`→0). Modes `SA/BF` → `modes:{SS:false,SA:true,BF:true,FA:false}`. Ammo `15(c)` → `ammocap:15` (feed letter dropped). Avail `4(L)` → `avail:4, availDef:"4(L)"` (plain `4` → `avail:4, availDef:"4"`). Cost `2,100¥` → `price:2100`. Essence `0.2` → `essence:0.2`. Vehicles: HANDL `4/2`→`handlOn:4, handlOff:2` (single value → both), ACCEL→`accOn`, TOP SPEED→`tspd`, BODY→`bod`, ARMOR→`arm`, PILOT→`pil`, SENSOR→`sen`, SEATS→`sea`; `vtype` = subtype slug lowercased.
 - Commit trailer: `Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>`.
-- Working directory: `C:\Users\johnb\Documents\Projects\SR6-eden-Forge`; test runner `./.venv/Scripts/python -m pytest`.
+- Working directory: `%USERPROFILE%\Documents\Projects\SR6-eden-Forge`; test runner `./.venv/Scripts/python -m pytest`.
 
 ## File Structure
 

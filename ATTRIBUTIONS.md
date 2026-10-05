@@ -28,7 +28,7 @@ the required attribution text.
 | `iconsets/blue-generic-scifi/` | Local archive `Icons-Blue-GenericSciFi.zip` | Origin/license to be identified before redistribution |
 | `iconsets/red-cyberpunk/` | Local archive `Icons-Red-Cyberpunk.zip` | Origin/license to be identified before redistribution |
 | `iconsets/green-imperium-maledictum/` | Local archive `Green-ImperiumMaledictum.zip` | Origin/license to be identified before redistribution |
-| *(external)* `C:\Users\johnb\Downloads\icons` | Personal icon library (mixed sources, incl. game-icons.net-style SVGs) | game-icons.net assets are CC BY 3.0 — attribution required if published |
+| *(external)* `%USERPROFILE%\Downloads\icons` | Personal icon library (mixed sources, incl. game-icons.net-style SVGs) | game-icons.net assets are CC BY 3.0 — attribution required if published |
 
 When a set's provenance is confirmed, replace its status cell with the
 license name and the exact attribution line the license requires.

@@ -1128,7 +1128,7 @@ def test_the_real_workspace_has_no_stray_correction_folders():
     import os
     from pathlib import Path
     data = Path(os.environ.get("SR6_DATA",
-                r"C:\Users\johnb\Documents\SR6 Catalog\data"))
+                str(Path.home() / "Documents" / "SR6 Catalog" / "data")))
     if not (data / "_corrections").is_dir():
         import pytest
         pytest.skip("no workspace on this machine")

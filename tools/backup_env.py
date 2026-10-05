@@ -44,7 +44,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from extractor.paths import data_root          # noqa: E402
 
-BACKUP_ROOT = Path(r"C:\Users\johnb\SR6-Forge-Backups")
+BACKUP_ROOT = Path.home() / "SR6-Forge-Backups"
 ASSETS = "_assets"
 
 

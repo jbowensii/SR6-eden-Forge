@@ -69,7 +69,7 @@ antivirus. One-folder starts fast and lets Inno compress properly.
 `site/` with `node_modules` **pre-installed at build time**. The user must
 never see an `npm install`.
 
-**Signing.** `C:\Users\johnb\Tools\CodeSignTool\sign.bat` (SSL.com eSigner) —
+**Signing.** `%USERPROFILE%\Tools\CodeSignTool\sign.bat` (SSL.com eSigner) —
 already on this machine and proven. Sign both the launcher exe and the final
 installer; unsigned PyInstaller output draws SmartScreen warnings.
 

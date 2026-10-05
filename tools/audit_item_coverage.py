@@ -31,7 +31,7 @@ except Exception:
 from extractor.gear_meta import GERMAN_BOOKS
 
 DEFAULT_JAR = pathlib.Path(
-    r"C:\Users\johnb\CommLink6\app\stable\commlink6-1.14.0-complete.jar")
+    pathlib.Path.home() / "CommLink6" / "app" / "stable" / "commlink6-1.14.0-complete.jar")
 CHARGEN = pathlib.Path("export/chargen-data.json")
 
 #: item XML attribute -> where it ends up

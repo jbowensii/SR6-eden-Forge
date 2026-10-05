@@ -17,7 +17,7 @@
 - **No copyrighted content in the repo**: all test fixtures use invented items (e.g. "Example Autopistol"); real data stays under gitignored `data/`.
 - Data file envelope: `{book, domain, category, items[]}`; item: `{id, name, system{}, meta{}}`; `meta` = `{book, page, extractedAt, extractorVersion, qaStatus}` with `qaStatus ∈ extracted|reviewed|approved`.
 - Every commit message ends with `Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>`.
-- Working directory for all commands: `C:\Users\johnb\Documents\Projects\SR6-eden-Forge`.
+- Working directory for all commands: `%USERPROFILE%\Documents\Projects\SR6-eden-Forge`.
 
 ## File Structure
 
@@ -65,7 +65,7 @@ pytest.ini                        ← testpaths = tests
 - [ ] **Step 1: Environment + deps**
 
 ```bash
-cd "C:\Users\johnb\Documents\Projects\SR6-eden-Forge"
+cd "%USERPROFILE%\Documents\Projects\SR6-eden-Forge"
 python -m venv .venv
 .venv\Scripts\pip install jsonschema pytest
 ```

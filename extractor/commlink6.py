@@ -16,7 +16,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
 
-_DEFAULT_DIR = Path("C:/Users/johnb/CommLink6/app/stable")   # standard Commlink6 install
+_DEFAULT_DIR = Path.home() / "CommLink6" / "app" / "stable"   # standard Commlink6 install
 
 
 def _resolve_jar() -> Path:

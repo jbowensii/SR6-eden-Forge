@@ -33,7 +33,7 @@ sys.path.insert(0, str(_P(__file__).resolve().parent.parent))
 
 from extractor.paths import REPO, data_root       # noqa: E402
 
-BACKUP_ROOT = _P(r"C:\Users\johnb\SR6-Forge-Backups")
+BACKUP_ROOT = _P.home() / "SR6-Forge-Backups"
 
 
 def payloads(data: _P):
